@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T11:26:33.374Z",
+  "generatedAt": "2026-10-05T12:22:04.578Z",
   "engine": "ToolScout Editorial News Engine v1",
   "lookbackDays": 14,
   "maxPerRun": 4,
@@ -41,12 +41,12 @@
   "candidates": 1,
   "published": [
     {
-      "id": "github-repository-security-advisory-comments-api-in-public-preview",
+      "id": "github-confidential-comments-on-repository-security-advisories",
       "date": "2026-10-02",
       "toolSlug": "github",
-      "title": "Repository security advisory comments API in public preview",
-      "sourceUrl": "https://github.blog/changelog/2026-10-02-repository-security-advisory-comments-api-in-public-preview",
-      "score": 7
+      "title": "Confidential comments on repository security advisories",
+      "sourceUrl": "https://github.blog/changelog/2026-10-02-confidential-comments-on-repository-security-advisories",
+      "score": 4
     }
   ],
   "lastPublishedAt": "2026-10-05",

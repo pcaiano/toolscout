@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T11:26:40.574Z",
+  "generatedAt": "2026-10-05T12:22:13.338Z",
   "objective": "Detect competitor coverage gaps, deduplicate against ToolScout, verify first-party sources, publish evidence-backed coverage profiles, submit them through the normal sitemap surface and measure Search Console outcomes on subsequent cycles.",
   "guardrails": [
     "Competitor pages are used only to discover market signals and possible official-source links.",
@@ -8,64 +8,57 @@
     "Unverified or thin candidates are held and retried instead of being published."
   ],
   "summary": {
-    "scannedGaps": 25,
-    "activeProfiles": 15,
+    "scannedGaps": 22,
+    "activeProfiles": 18,
     "newProfiles": 3,
     "resolvedAsExistingCoverage": 1,
-    "held": 21,
+    "held": 18,
     "contentResearch": 0,
     "searchVisibleProfiles": 0,
     "trafficObservedProfiles": 0
   },
   "admitted": [
     {
-      "slug": "questie-ai",
-      "sourceUrl": "https://www.questie.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
-      "category": "ai-assistant",
+      "slug": "teachquill",
+      "sourceUrl": "https://teachquill.com/",
+      "category": "forms",
       "features": [
-        "AI assistant",
-        "chatbot",
-        "conversational AI",
-        "citations",
-        "analysis",
-        "multimodal",
-        "voice",
-        "integrations",
-        "forms",
-        "design"
-      ]
-    },
-    {
-      "slug": "resume-ai",
-      "sourceUrl": "https://resume-ai.com/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
-      "category": "developer",
-      "features": [
-        "AI assistant",
         "research",
         "citations",
         "analysis",
         "writing",
         "multimodal",
-        "transcription",
-        "summarization",
-        "voice",
+        "collaboration",
+        "automation",
+        "forms",
+        "design",
         "templates"
       ]
     },
     {
-      "slug": "talkpix-ai",
-      "sourceUrl": "https://www.talkpix.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
-      "category": "developer",
+      "slug": "typli-ai",
+      "sourceUrl": "https://typli.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+      "category": "ai-assistant",
       "features": [
-        "citations",
+        "conversational AI",
+        "writing",
         "image generation",
-        "video generation",
         "voice",
-        "API",
         "automation",
         "design",
-        "templates",
-        "ecommerce"
+        "social media"
+      ]
+    },
+    {
+      "slug": "vidflux-ai",
+      "sourceUrl": "https://vidflux.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+      "category": "content",
+      "features": [
+        "multimodal",
+        "video generation",
+        "forms",
+        "design",
+        "social media"
       ]
     }
   ],
@@ -155,23 +148,8 @@
       "retry": "next-cycle"
     },
     {
-      "slug": "teachquill",
-      "reason": "cycle-admission-cap",
-      "retry": "next-cycle"
-    },
-    {
-      "slug": "typli-ai",
-      "reason": "cycle-admission-cap",
-      "retry": "next-cycle"
-    },
-    {
       "slug": "video-editing",
-      "reason": "cycle-admission-cap",
-      "retry": "next-cycle"
-    },
-    {
-      "slug": "vidflux-ai",
-      "reason": "cycle-admission-cap",
+      "reason": "official-source-not-resolved",
       "retry": "next-cycle"
     },
     {
@@ -306,6 +284,30 @@
     },
     {
       "slug": "talkpix-ai",
+      "clicks": 0,
+      "impressions": 0,
+      "ctr": 0,
+      "position": 0,
+      "status": "not-observed"
+    },
+    {
+      "slug": "teachquill",
+      "clicks": 0,
+      "impressions": 0,
+      "ctr": 0,
+      "position": 0,
+      "status": "not-observed"
+    },
+    {
+      "slug": "typli-ai",
+      "clicks": 0,
+      "impressions": 0,
+      "ctr": 0,
+      "position": 0,
+      "status": "not-observed"
+    },
+    {
+      "slug": "vidflux-ai",
       "clicks": 0,
       "impressions": 0,
       "ctr": 0,

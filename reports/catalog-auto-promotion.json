@@ -1,39 +1,39 @@
 {
-  "generatedAt": "2026-10-05T11:26:58.077Z",
+  "generatedAt": "2026-10-05T12:22:29.291Z",
   "policy": "Broaden the indexable catalog using verified first-party product facts and repeated market signals, while keeping ranking and comparison eligibility separate until stronger tool-specific editorial evidence exists.",
   "summary": {
-    "catalogTools": 121,
+    "catalogTools": 124,
     "promoted": 3,
-    "held": 12,
+    "held": 15,
     "maxPromotionsPerCycle": 5
   },
   "promoted": [
     {
-      "slug": "questie-ai",
-      "name": "Questie AI",
+      "slug": "teachquill",
+      "name": "Teachquill",
+      "category": "forms",
+      "signals": 2,
+      "capabilities": 10,
+      "catalogTier": "coverage",
+      "rankingEligible": true,
+      "comparisonEligible": true
+    },
+    {
+      "slug": "typli-ai",
+      "name": "Typli AI",
       "category": "ai-assistant",
       "signals": 2,
-      "capabilities": 10,
+      "capabilities": 7,
       "catalogTier": "coverage",
       "rankingEligible": true,
       "comparisonEligible": true
     },
     {
-      "slug": "resume-ai",
-      "name": "Resume AI",
-      "category": "developer",
+      "slug": "vidflux-ai",
+      "name": "Vidflux AI",
+      "category": "content",
       "signals": 2,
-      "capabilities": 10,
-      "catalogTier": "coverage",
-      "rankingEligible": true,
-      "comparisonEligible": true
-    },
-    {
-      "slug": "talkpix-ai",
-      "name": "Talkpix AI",
-      "category": "developer",
-      "signals": 2,
-      "capabilities": 9,
+      "capabilities": 5,
       "catalogTier": "coverage",
       "rankingEligible": true,
       "comparisonEligible": true
@@ -86,6 +86,18 @@
     },
     {
       "slug": "pixmax-ai",
+      "reason": "entity_already_in_catalog"
+    },
+    {
+      "slug": "questie-ai",
+      "reason": "entity_already_in_catalog"
+    },
+    {
+      "slug": "resume-ai",
+      "reason": "entity_already_in_catalog"
+    },
+    {
+      "slug": "talkpix-ai",
       "reason": "entity_already_in_catalog"
     }
   ]

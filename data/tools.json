@@ -6453,5 +6453,204 @@
       },
       "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
     }
+  },
+  {
+    "affiliateUrl": "",
+    "slug": "teachquill",
+    "name": "Teachquill",
+    "category": "forms",
+    "description": "Create lesson plans, worksheets, quizzes, rubrics, feedback, and lesson goals faster with AI tools for teachers, from planning to student support.",
+    "pricing": "See vendor for current pricing",
+    "freePlan": true,
+    "freePlanKnown": false,
+    "features": [
+      "research",
+      "citations",
+      "analysis",
+      "writing",
+      "multimodal",
+      "collaboration",
+      "automation",
+      "forms",
+      "design",
+      "templates"
+    ],
+    "bestFor": [
+      "teams collecting structured data",
+      "businesses evaluating form software"
+    ],
+    "affiliateProgram": "Not evaluated for catalog admission",
+    "commission": "Commercial terms are separate from editorial selection",
+    "sourceUrl": "https://teachquill.com/",
+    "lastVerified": "2026-10-05",
+    "scores": {
+      "price": 5,
+      "ease": 5,
+      "automation": 5,
+      "integrations": 5,
+      "sales": 5,
+      "ai": 5,
+      "marketing": 5,
+      "seo": 5,
+      "research": 5,
+      "content": 5,
+      "agency": 5
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current ChatGPT, Claude, Gemini, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
+    },
+    "catalogTier": "coverage",
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "provenance": {
+      "mode": "verified_competitive_gap_coverage",
+      "admittedAt": "2026-10-05T12:22:29.291Z",
+      "source": "competitive-gap-loop",
+      "marketSignals": {
+        "count": 2,
+        "sources": [
+          "Aixploria",
+          "Dynamite AI"
+        ]
+      },
+      "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
+    }
+  },
+  {
+    "affiliateUrl": "",
+    "slug": "typli-ai",
+    "name": "Typli AI",
+    "category": "ai-assistant",
+    "description": "Boost your writing with Typli.ai&#x27;s AI writing tools - effortless, innovative, effective. Elevate your text now!",
+    "pricing": "See vendor for current pricing",
+    "freePlan": false,
+    "freePlanKnown": false,
+    "features": [
+      "conversational AI",
+      "writing",
+      "image generation",
+      "voice",
+      "automation",
+      "design",
+      "social media"
+    ],
+    "bestFor": [
+      "knowledge workers",
+      "teams evaluating general AI assistants"
+    ],
+    "affiliateProgram": "Not evaluated for catalog admission",
+    "commission": "Commercial terms are separate from editorial selection",
+    "sourceUrl": "https://typli.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+    "lastVerified": "2026-10-05",
+    "scores": {
+      "price": 5,
+      "ease": 5,
+      "automation": 5,
+      "integrations": 5,
+      "sales": 5,
+      "ai": 5,
+      "marketing": 5,
+      "seo": 5,
+      "research": 5,
+      "content": 5,
+      "agency": 5
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current ChatGPT, Claude, Gemini, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
+    },
+    "catalogTier": "coverage",
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "provenance": {
+      "mode": "verified_competitive_gap_coverage",
+      "admittedAt": "2026-10-05T12:22:29.291Z",
+      "source": "competitive-gap-loop",
+      "marketSignals": {
+        "count": 2,
+        "sources": [
+          "Futurepedia",
+          "Aixploria"
+        ]
+      },
+      "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
+    }
+  },
+  {
+    "affiliateUrl": "",
+    "slug": "vidflux-ai",
+    "name": "Vidflux AI",
+    "category": "content",
+    "description": "Create professional AI videos from text in 60 seconds. Transform your ideas into MP4 videos with Veo 3, Sora 2, Seedance, Kling, Wan 2.5, and more.",
+    "pricing": "See vendor for current pricing",
+    "freePlan": false,
+    "freePlanKnown": false,
+    "features": [
+      "multimodal",
+      "video generation",
+      "forms",
+      "design",
+      "social media"
+    ],
+    "bestFor": [
+      "content teams",
+      "creators evaluating content production software"
+    ],
+    "affiliateProgram": "Not evaluated for catalog admission",
+    "commission": "Commercial terms are separate from editorial selection",
+    "sourceUrl": "https://vidflux.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+    "lastVerified": "2026-10-05",
+    "scores": {
+      "price": 5,
+      "ease": 5,
+      "automation": 5,
+      "integrations": 5,
+      "sales": 5,
+      "ai": 5,
+      "marketing": 5,
+      "seo": 5,
+      "research": 5,
+      "content": 5,
+      "agency": 5
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current ChatGPT, Claude, Gemini, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
+    },
+    "catalogTier": "coverage",
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "provenance": {
+      "mode": "verified_competitive_gap_coverage",
+      "admittedAt": "2026-10-05T12:22:29.291Z",
+      "source": "competitive-gap-loop",
+      "marketSignals": {
+        "count": 2,
+        "sources": [
+          "Futurepedia",
+          "Aixploria"
+        ]
+      },
+      "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
+    }
   }
 ]

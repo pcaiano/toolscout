@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T11:28:05.276Z",
+  "generatedAt": "2026-10-05T12:23:52.789Z",
   "methodology": "Search impressions are visibility, not traffic. First-page visibility is always a strategic opportunity. Low-sample first-page signals are protected and measured; they are not discarded and they are not treated as high-confidence CTR evidence. Automatic ranking conclusions require at least 20 impressions unless a click is observed. Tool eligibility requires an allowed category, capability fit where defined, hard attribute constraints where defined, and semantic relevance. ToolScout 2.0 adds an editorial-authority gap signal so observed-demand pages with weak primary-source evidence, buyer analysis or information gain are deepened before new surface is created.",
   "gsc": {
     "available": true,
@@ -1259,6 +1259,56 @@
       "action": "watch"
     },
     {
+      "intent": "best-lead-capture-forms",
+      "title": "Best Lead Capture Forms",
+      "category": "forms",
+      "priorityScore": 41,
+      "topFit": 8.8,
+      "eligibleToolCount": 6,
+      "minimumEligibleTools": 2,
+      "catalogDepth": 12,
+      "commercialSignal": 20,
+      "affiliateSignal": 10,
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 17,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 51.8235,
+        "opportunity": "insufficient-sample",
+        "opportunityScore": 14,
+        "meaningfulSample": false,
+        "strategicOpportunity": false,
+        "evidenceConfidence": "low"
+      },
+      "signalBasis": "observed-gsc-low-sample",
+      "monetizationReadiness": "monetizable",
+      "topTools": [
+        "typeform",
+        "paperform",
+        "fillout"
+      ],
+      "requiredCapabilities": [
+        "lead capture",
+        "form builder",
+        "forms",
+        "form"
+      ],
+      "editorialEligibility": "eligible",
+      "editorialAuthority": {
+        "score": 100,
+        "target": 70,
+        "primarySourceLinks": 3,
+        "hasAnalysis": true,
+        "hasTradeoffs": true,
+        "hasVerification": true,
+        "freshUpdate": false,
+        "gapPriorityBoost": 0,
+        "intervention": "measure"
+      },
+      "action": "watch"
+    },
+    {
       "intent": "best-productivity-tools-for-teams",
       "title": "Best Productivity Tools for Teams",
       "category": "business",
@@ -1304,47 +1354,37 @@
       "action": "watch"
     },
     {
-      "intent": "best-lead-capture-forms",
-      "title": "Best Lead Capture Forms",
-      "category": "forms",
-      "priorityScore": 40,
-      "topFit": 8.8,
-      "eligibleToolCount": 5,
+      "intent": "best-video-content-tools",
+      "title": "Best Video Content Tools",
+      "category": "content",
+      "priorityScore": 37,
+      "topFit": 6.39,
+      "eligibleToolCount": 6,
       "minimumEligibleTools": 2,
-      "catalogDepth": 10,
-      "commercialSignal": 20,
-      "affiliateSignal": 10,
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 17,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 51.8235,
-        "opportunity": "insufficient-sample",
-        "opportunityScore": 14,
-        "meaningfulSample": false,
-        "strategicOpportunity": false,
-        "evidenceConfidence": "low"
-      },
-      "signalBasis": "observed-gsc-low-sample",
-      "monetizationReadiness": "monetizable",
+      "catalogDepth": 12,
+      "commercialSignal": 8,
+      "affiliateSignal": 0,
+      "searchSignal": null,
+      "signalBasis": "heuristic-only",
+      "monetizationReadiness": "needs-affiliate-activation",
       "topTools": [
-        "typeform",
-        "paperform",
-        "fillout"
+        "descript",
+        "davinci-ai",
+        "goenhance-ai"
       ],
       "requiredCapabilities": [
-        "lead capture",
-        "form builder",
-        "forms",
-        "form"
+        "video",
+        "videos",
+        "screen recording",
+        "video editing",
+        "podcast editing"
       ],
       "editorialEligibility": "eligible",
       "editorialAuthority": {
-        "score": 100,
+        "score": 83,
         "target": 70,
         "primarySourceLinks": 3,
-        "hasAnalysis": true,
+        "hasAnalysis": false,
         "hasTradeoffs": true,
         "hasVerification": true,
         "freshUpdate": false,
@@ -1489,54 +1529,14 @@
       "action": "watch"
     },
     {
-      "intent": "best-video-content-tools",
-      "title": "Best Video Content Tools",
-      "category": "content",
-      "priorityScore": 35,
-      "topFit": 6.39,
-      "eligibleToolCount": 5,
-      "minimumEligibleTools": 2,
-      "catalogDepth": 10,
-      "commercialSignal": 8,
-      "affiliateSignal": 0,
-      "searchSignal": null,
-      "signalBasis": "heuristic-only",
-      "monetizationReadiness": "needs-affiliate-activation",
-      "topTools": [
-        "descript",
-        "davinci-ai",
-        "goenhance-ai"
-      ],
-      "requiredCapabilities": [
-        "video",
-        "videos",
-        "screen recording",
-        "video editing",
-        "podcast editing"
-      ],
-      "editorialEligibility": "eligible",
-      "editorialAuthority": {
-        "score": 83,
-        "target": 70,
-        "primarySourceLinks": 3,
-        "hasAnalysis": false,
-        "hasTradeoffs": true,
-        "hasVerification": true,
-        "freshUpdate": false,
-        "gapPriorityBoost": 0,
-        "intervention": "measure"
-      },
-      "action": "watch"
-    },
-    {
       "intent": "best-forms-for-small-business",
       "title": "Best Forms for Small Business",
       "category": "forms",
-      "priorityScore": 34,
+      "priorityScore": 35,
       "topFit": 8.96,
-      "eligibleToolCount": 5,
+      "eligibleToolCount": 6,
       "minimumEligibleTools": 2,
-      "catalogDepth": 10,
+      "catalogDepth": 12,
       "commercialSignal": 20,
       "affiliateSignal": 10,
       "searchSignal": {

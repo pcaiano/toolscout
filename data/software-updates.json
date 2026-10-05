@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-10-05T11:26:33.372Z",
+  "updatedAt": "2026-10-05T12:22:04.576Z",
   "editorialPolicy": "Updates are selected for buyer relevance. Affiliate status, commission and partner relationships do not influence inclusion or placement.",
   "items": [
     {
@@ -15,6 +15,22 @@
       "sourceUrl": "https://openai.com/index/new-chatgpt-ads-format-and-measurement",
       "articleUrl": "/news/chatgpt-building-advertising-for-the-way-people-use-ai.html",
       "profileUrl": "/news/chatgpt-building-advertising-for-the-way-people-use-ai.html",
+      "outboundUrl": null,
+      "outboundLabel": null,
+      "partnerUpdate": false
+    },
+    {
+      "id": "github-confidential-comments-on-repository-security-advisories",
+      "publishedAt": "2026-10-02",
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "label": "Security update",
+      "title": "Confidential comments on repository security advisories",
+      "summary": "You can now post confidential comments on repository security advisories.",
+      "sourceName": "GitHub Changelog",
+      "sourceUrl": "https://github.blog/changelog/2026-10-02-confidential-comments-on-repository-security-advisories",
+      "articleUrl": "/news/github-confidential-comments-on-repository-security-advisories.html",
+      "profileUrl": "/news/github-confidential-comments-on-repository-security-advisories.html",
       "outboundUrl": null,
       "outboundLabel": null,
       "partnerUpdate": false

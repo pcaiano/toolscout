@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T11:28:05.411Z",
+  "generatedAt": "2026-10-05T12:23:52.918Z",
   "engine": "ToolScout Search and Answer Opportunity Engine v6",
   "objective": "Autonomously pursue sustainable search rankings and qualified clicks while separating indexing failures from content-performance failures.",
   "acquisitionTruth": {
@@ -45,7 +45,7 @@
     "strikingMeaningful": 0,
     "strikingLowSample": 1,
     "authorityDepthOpportunities": 13,
-    "competitorResearchCandidates": 25
+    "competitorResearchCandidates": 22
   },
   "opportunities": [
     {
@@ -1297,6 +1297,53 @@
       ]
     },
     {
+      "intent": "best-lead-capture-forms",
+      "priorityScore": 41,
+      "lane": "measure",
+      "action": "measure-and-recheck",
+      "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
+      "strategicOpportunity": false,
+      "evidenceConfidence": "low",
+      "indexingSignal": null,
+      "indexingBarrier": false,
+      "autonomy": "fully-autonomous",
+      "ownerActionRequired": false,
+      "executionPlan": [
+        "measure",
+        "recheck-automatically"
+      ],
+      "qualityGates": [
+        "indexing-safety",
+        "canonical-safety",
+        "non-duplication",
+        "strict-category-fit",
+        "capability-fit",
+        "semantic-tool-fit",
+        "factual-evidence",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ],
+      "monetizationReadiness": "monetizable",
+      "searchSignal": {
+        "source": "gsc",
+        "impressions": 17,
+        "clicks": 0,
+        "ctr": 0,
+        "position": 51.8235,
+        "opportunity": "insufficient-sample",
+        "opportunityScore": 14,
+        "meaningfulSample": false,
+        "strategicOpportunity": false,
+        "evidenceConfidence": "low"
+      },
+      "topTools": [
+        "typeform",
+        "paperform",
+        "fillout"
+      ]
+    },
+    {
       "intent": "best-productivity-tools-for-teams",
       "priorityScore": 41,
       "lane": "measure",
@@ -1344,13 +1391,13 @@
       ]
     },
     {
-      "intent": "best-lead-capture-forms",
-      "priorityScore": 40,
+      "intent": "best-video-content-tools",
+      "priorityScore": 37,
       "lane": "measure",
       "action": "measure-and-recheck",
       "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
       "strategicOpportunity": false,
-      "evidenceConfidence": "low",
+      "evidenceConfidence": "none",
       "indexingSignal": null,
       "indexingBarrier": false,
       "autonomy": "fully-autonomous",
@@ -1371,23 +1418,12 @@
         "useful-decision-context",
         "public-surface-validation"
       ],
-      "monetizationReadiness": "monetizable",
-      "searchSignal": {
-        "source": "gsc",
-        "impressions": 17,
-        "clicks": 0,
-        "ctr": 0,
-        "position": 51.8235,
-        "opportunity": "insufficient-sample",
-        "opportunityScore": 14,
-        "meaningfulSample": false,
-        "strategicOpportunity": false,
-        "evidenceConfidence": "low"
-      },
+      "monetizationReadiness": "needs-affiliate-activation",
+      "searchSignal": null,
       "topTools": [
-        "typeform",
-        "paperform",
-        "fillout"
+        "descript",
+        "davinci-ai",
+        "goenhance-ai"
       ]
     },
     {
@@ -1532,44 +1568,8 @@
       ]
     },
     {
-      "intent": "best-video-content-tools",
-      "priorityScore": 35,
-      "lane": "measure",
-      "action": "measure-and-recheck",
-      "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
-      "strategicOpportunity": false,
-      "evidenceConfidence": "none",
-      "indexingSignal": null,
-      "indexingBarrier": false,
-      "autonomy": "fully-autonomous",
-      "ownerActionRequired": false,
-      "executionPlan": [
-        "measure",
-        "recheck-automatically"
-      ],
-      "qualityGates": [
-        "indexing-safety",
-        "canonical-safety",
-        "non-duplication",
-        "strict-category-fit",
-        "capability-fit",
-        "semantic-tool-fit",
-        "factual-evidence",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ],
-      "monetizationReadiness": "needs-affiliate-activation",
-      "searchSignal": null,
-      "topTools": [
-        "descript",
-        "davinci-ai",
-        "goenhance-ai"
-      ]
-    },
-    {
       "intent": "best-forms-for-small-business",
-      "priorityScore": 34,
+      "priorityScore": 35,
       "lane": "measure",
       "action": "measure-and-recheck",
       "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
@@ -4116,6 +4116,30 @@
       ]
     },
     {
+      "intent": "best-lead-capture-forms",
+      "priorityScore": 41,
+      "lane": "measure",
+      "action": "measure-and-recheck",
+      "indexingSignal": null,
+      "ownerActionRequired": false,
+      "executionPlan": [
+        "measure",
+        "recheck-automatically"
+      ],
+      "qualityGates": [
+        "indexing-safety",
+        "canonical-safety",
+        "non-duplication",
+        "strict-category-fit",
+        "capability-fit",
+        "semantic-tool-fit",
+        "factual-evidence",
+        "editorial-neutrality",
+        "useful-decision-context",
+        "public-surface-validation"
+      ]
+    },
+    {
       "intent": "best-productivity-tools-for-teams",
       "priorityScore": 41,
       "lane": "measure",
@@ -4140,8 +4164,8 @@
       ]
     },
     {
-      "intent": "best-lead-capture-forms",
-      "priorityScore": 40,
+      "intent": "best-video-content-tools",
+      "priorityScore": 37,
       "lane": "measure",
       "action": "measure-and-recheck",
       "indexingSignal": null,
@@ -4236,32 +4260,8 @@
       ]
     },
     {
-      "intent": "best-video-content-tools",
-      "priorityScore": 35,
-      "lane": "measure",
-      "action": "measure-and-recheck",
-      "indexingSignal": null,
-      "ownerActionRequired": false,
-      "executionPlan": [
-        "measure",
-        "recheck-automatically"
-      ],
-      "qualityGates": [
-        "indexing-safety",
-        "canonical-safety",
-        "non-duplication",
-        "strict-category-fit",
-        "capability-fit",
-        "semantic-tool-fit",
-        "factual-evidence",
-        "editorial-neutrality",
-        "useful-decision-context",
-        "public-surface-validation"
-      ]
-    },
-    {
       "intent": "best-forms-for-small-business",
-      "priorityScore": 34,
+      "priorityScore": 35,
       "lane": "measure",
       "action": "measure-and-recheck",
       "indexingSignal": null,
@@ -4586,30 +4586,6 @@
       "reason": "Competitor patterns are research signals, not publication evidence."
     },
     {
-      "candidate": "questie-ai",
-      "competitorMentions": 2,
-      "sources": [
-        "Futurepedia",
-        "Aixploria"
-      ],
-      "action": "auto-research-only",
-      "ownerActionRequired": false,
-      "publishGate": "Require distinct observed intent, verified catalog evidence, non-duplication, semantic eligibility and useful decision context before autonomous publication.",
-      "reason": "Competitor patterns are research signals, not publication evidence."
-    },
-    {
-      "candidate": "resume-ai",
-      "competitorMentions": 2,
-      "sources": [
-        "Futurepedia",
-        "Toolify"
-      ],
-      "action": "auto-research-only",
-      "ownerActionRequired": false,
-      "publishGate": "Require distinct observed intent, verified catalog evidence, non-duplication, semantic eligibility and useful decision context before autonomous publication.",
-      "reason": "Competitor patterns are research signals, not publication evidence."
-    },
-    {
       "candidate": "search-engine",
       "competitorMentions": 2,
       "sources": [
@@ -4623,18 +4599,6 @@
     },
     {
       "candidate": "sketchbubble-ai",
-      "competitorMentions": 2,
-      "sources": [
-        "Futurepedia",
-        "Aixploria"
-      ],
-      "action": "auto-research-only",
-      "ownerActionRequired": false,
-      "publishGate": "Require distinct observed intent, verified catalog evidence, non-duplication, semantic eligibility and useful decision context before autonomous publication.",
-      "reason": "Competitor patterns are research signals, not publication evidence."
-    },
-    {
-      "candidate": "talkpix-ai",
       "competitorMentions": 2,
       "sources": [
         "Futurepedia",

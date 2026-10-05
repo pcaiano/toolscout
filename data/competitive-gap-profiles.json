@@ -545,5 +545,114 @@
       "categoryEvidenceScore": 3,
       "competitorContentUsedForEditorialFacts": false
     }
+  },
+  {
+    "slug": "teachquill",
+    "name": "Teachquill",
+    "category": "forms",
+    "description": "Create lesson plans, worksheets, quizzes, rubrics, feedback, and lesson goals faster with AI tools for teachers, from planning to student support.",
+    "sourceUrl": "https://teachquill.com/",
+    "features": [
+      "research",
+      "citations",
+      "analysis",
+      "writing",
+      "multimodal",
+      "collaboration",
+      "automation",
+      "forms",
+      "design",
+      "templates"
+    ],
+    "firstVerified": "2026-10-05",
+    "lastVerified": "2026-10-05",
+    "marketSignals": {
+      "count": 2,
+      "sources": [
+        "Aixploria",
+        "Dynamite AI"
+      ],
+      "exampleUrls": [
+        "https://www.aixploria.com/teachquill/",
+        "https://dynamite-ai.com/tools/teachquill"
+      ]
+    },
+    "verification": {
+      "mode": "competitive-gap-first-party",
+      "officialSourceDiscoveryScore": 14,
+      "officialSourceVotes": 2,
+      "categoryEvidenceScore": 2,
+      "competitorContentUsedForEditorialFacts": false
+    }
+  },
+  {
+    "slug": "typli-ai",
+    "name": "Typli AI",
+    "category": "ai-assistant",
+    "description": "Boost your writing with Typli.ai&#x27;s AI writing tools - effortless, innovative, effective. Elevate your text now!",
+    "sourceUrl": "https://typli.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+    "features": [
+      "conversational AI",
+      "writing",
+      "image generation",
+      "voice",
+      "automation",
+      "design",
+      "social media"
+    ],
+    "firstVerified": "2026-10-05",
+    "lastVerified": "2026-10-05",
+    "marketSignals": {
+      "count": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "exampleUrls": [
+        "https://www.futurepedia.io/tool/typli-ai",
+        "https://www.aixploria.com/typli-ai/"
+      ]
+    },
+    "verification": {
+      "mode": "competitive-gap-first-party",
+      "officialSourceDiscoveryScore": 14,
+      "officialSourceVotes": 2,
+      "categoryEvidenceScore": 1,
+      "competitorContentUsedForEditorialFacts": false
+    }
+  },
+  {
+    "slug": "vidflux-ai",
+    "name": "Vidflux AI",
+    "category": "content",
+    "description": "Create professional AI videos from text in 60 seconds. Transform your ideas into MP4 videos with Veo 3, Sora 2, Seedance, Kling, Wan 2.5, and more.",
+    "sourceUrl": "https://vidflux.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+    "features": [
+      "multimodal",
+      "video generation",
+      "forms",
+      "design",
+      "social media"
+    ],
+    "firstVerified": "2026-10-05",
+    "lastVerified": "2026-10-05",
+    "marketSignals": {
+      "count": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "exampleUrls": [
+        "https://www.futurepedia.io/tool/vidflux-ai",
+        "https://www.aixploria.com/vidflux-ai/"
+      ]
+    },
+    "verification": {
+      "mode": "competitive-gap-first-party",
+      "officialSourceDiscoveryScore": 14,
+      "officialSourceVotes": 2,
+      "categoryEvidenceScore": 3,
+      "competitorContentUsedForEditorialFacts": false
+    }
   }
 ]

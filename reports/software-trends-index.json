@@ -2,7 +2,7 @@
   "version": 4,
   "edition": "2026-10",
   "editionLabel": "October 2026",
-  "publishedAt": "2026-10-05T11:26:33.372Z",
+  "publishedAt": "2026-10-05T12:22:04.576Z",
   "scope": "ToolScout first-party editorial dataset of public software product changes selected for buyer relevance. It is not a measure of global market share.",
   "updatedThrough": "2026-10-05",
   "sourceMethod": "Primary vendor documentation, changelogs, release notes and official product announcements. ToolScout classifies buyer impact independently of affiliate status.",
@@ -22,16 +22,7 @@
       "summary": "Recent product releases point toward reusable skills, shared AI behaviour and repeatable agent workflows instead of isolated prompting.",
       "evidence": [
         "github-selected-models-in-github-copilot-deprecated",
-        "github-copilot-sandboxing-observability",
-        "notion-mail-shuts-down"
-      ]
-    },
-    {
-      "id": "connected-software",
-      "title": "Business software is opening up to agent connections",
-      "summary": "MCP and related integration layers are making software easier for AI tools to read from and act on with explicit permissions.",
-      "evidence": [
-        "notion-mail-shuts-down"
+        "github-copilot-sandboxing-observability"
       ]
     },
     {
@@ -39,8 +30,7 @@
       "title": "Analysis and execution are moving closer together",
       "summary": "More software updates are designed to reduce the handoff between understanding what happened and taking the next operational action.",
       "evidence": [
-        "github-proof-of-presence-enterprise",
-        "notion-mail-shuts-down"
+        "github-proof-of-presence-enterprise"
       ]
     }
   ],
@@ -65,6 +55,37 @@
       "articleUrl": "/news/chatgpt-building-advertising-for-the-way-people-use-ai.html",
       "sourceName": "OpenAI",
       "sourceUrl": "https://openai.com/index/new-chatgpt-ads-format-and-measurement"
+    },
+    {
+      "id": "github-confidential-comments-on-repository-security-advisories",
+      "publishedAt": "2026-10-02",
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "label": "Security update",
+      "title": "Confidential comments on repository security advisories",
+      "summary": "You can now post confidential comments on repository security advisories.",
+      "changeType": "security_governance",
+      "buyerImpact": "GitHub buyers should verify whether the new controls change authentication, administration or security requirements for their team.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/github",
+          "label": "GitHub profile"
+        },
+        {
+          "type": "guide",
+          "url": "/best-developer-tools",
+          "label": "Best Developer Tools"
+        },
+        {
+          "type": "guide",
+          "url": "/best-ai-coding-tools",
+          "label": "Best AI Coding Tools"
+        }
+      ],
+      "articleUrl": "/news/github-confidential-comments-on-repository-security-advisories.html",
+      "sourceName": "GitHub Changelog",
+      "sourceUrl": "https://github.blog/changelog/2026-10-02-confidential-comments-on-repository-security-advisories"
     },
     {
       "id": "github-repository-security-advisory-comments-api-in-public-preview",
@@ -345,37 +366,6 @@
       "articleUrl": "/news/chatgpt-introducing-gpt-6-sol-and-luna.html",
       "sourceName": "OpenAI",
       "sourceUrl": "https://openai.com/index/introducing-gpt-6-sol-and-luna"
-    },
-    {
-      "id": "notion-mail-shuts-down",
-      "publishedAt": "2026-09-22",
-      "toolSlug": "notion",
-      "toolName": "Notion",
-      "label": "Product retirement",
-      "title": "Notion Mail shuts down as Notion shifts email workflows to AI",
-      "summary": "Notion Mail shuts down across all plans on 22 September while Gmail-connected AI features and agent email tools remain available.",
-      "changeType": "product_retirement",
-      "buyerImpact": "Notion buyers should review migration, continuity and replacement requirements before relying on the affected workflow.",
-      "decisionPages": [
-        {
-          "type": "profile",
-          "url": "/tools/notion",
-          "label": "Notion profile"
-        },
-        {
-          "type": "comparison",
-          "url": "/notion-vs-clickup",
-          "label": "notion vs clickup"
-        },
-        {
-          "type": "comparison",
-          "url": "/airtable-vs-notion",
-          "label": "airtable vs notion"
-        }
-      ],
-      "articleUrl": "/news/notion-mail-shuts-down.html",
-      "sourceName": "Notion Help Center",
-      "sourceUrl": "https://www.notion.com/help/notion-mail-inbox-is-going-away-what-to-do-next"
     }
   ],
   "pageUrl": "https://trytoolscout.org/software-trends-index.html",

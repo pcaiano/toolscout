@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T11:26:40.518Z",
+  "generatedAt": "2026-10-05T12:22:13.281Z",
   "methodology": "Public sitemap URL patterns only, with robots.txt sitemap discovery, bounded recursive sitemap-index expansion and entity-level deduplication against the ToolScout catalog. Competitor content is not copied or used for editorial conclusions. Repeated URL themes are market-coverage signals and must pass first-party verification and ToolScout quality gates before publication.",
   "sources": [
     {
@@ -69,8 +69,8 @@
       "sampledUrls": 750
     }
   ],
-  "suppressedCovered": 51,
-  "count": 25,
+  "suppressedCovered": 66,
+  "count": 22,
   "gaps": [
     {
       "slug": "ai-background-remover",
@@ -259,35 +259,6 @@
       ]
     },
     {
-      "slug": "questie-ai",
-      "candidateType": "software-entity",
-      "entityKey": "questie",
-      "mentions": 2,
-      "sources": [
-        "Futurepedia",
-        "Aixploria"
-      ],
-      "exampleUrls": [
-        "https://www.futurepedia.io/tool/questie-ai",
-        "https://www.aixploria.com/questie-ai/"
-      ]
-    },
-    {
-      "slug": "resume-ai",
-      "candidateType": "software-entity",
-      "entityKey": "resume",
-      "mentions": 2,
-      "sources": [
-        "Futurepedia",
-        "Toolify"
-      ],
-      "exampleUrls": [
-        "https://www.futurepedia.io/tool/resume-ai",
-        "https://www.toolify.ai/category/resume-ai",
-        "https://www.toolify.ai/zh/category/resume-ai"
-      ]
-    },
-    {
       "slug": "search-engine",
       "candidateType": "software-entity",
       "entityKey": "search-engine",
@@ -313,20 +284,6 @@
       "exampleUrls": [
         "https://www.futurepedia.io/tool/sketchbubble-ai",
         "https://www.aixploria.com/sketchbubble-ai/"
-      ]
-    },
-    {
-      "slug": "talkpix-ai",
-      "candidateType": "software-entity",
-      "entityKey": "talkpix",
-      "mentions": 2,
-      "sources": [
-        "Futurepedia",
-        "Aixploria"
-      ],
-      "exampleUrls": [
-        "https://www.futurepedia.io/tool/talkpix-ai",
-        "https://www.aixploria.com/talkpix-ai/"
       ]
     },
     {
