@@ -22,11 +22,10 @@ function publicSurface(pathname){
 }
 function stripCommercialVendorSourceLinks(html){
   let out=String(html||'');
-  out=out.replace(/<section\b[^>]*data-toolscout-editorial-evidence=["']1["'][^>]*>[\s\S]*?<\/section>/gi,'');
+  out=out.replace(/(<section\b[^>]*data-toolscout-editorial-evidence=["']1["'][^>]*>)([\s\S]*?)(<\/section>)/gi,(match,open,body,close)=>open+body.replace(/<a\b[^>]*href=["']https?:\/\/[^"']+["'][^>]*>([\s\S]*?)<\/a>/gi,'$1')+close);
   out=out.replace(/<p\b[^>]*class=["'][^"']*source-note[^"']*["'][^>]*>[\s\S]*?<\/p>/gi,'');
   out=out.replace(/\s*(?:·\s*)?<a\b[^>]*href=["']https?:\/\/[^"']+["'][^>]*>\s*Official(?:\s+product)?\s+source\s*<\/a>/gi,'');
   out=out.replace(/\s*(?:·\s*)?<a\b[^>]*href=["']https?:\/\/[^"']+["'][^>]*>\s*[^<]{0,120}\s+official(?:\s+product)?\s+source\s*<\/a>/gi,'');
-  out=out.replace(/<strong>\s*Editorial evidence:\s*<\/strong>\s*/gi,'');
   out=out.replace(/<strong>\s*Primary sources:\s*<\/strong>\s*/gi,'');
   out=out.replace(/>\s*[.·]\s*Source data last checked\s*/gi,'>Information last checked ');
   out=out.replace(/\bSource data last checked\b/gi,'Information last checked');
