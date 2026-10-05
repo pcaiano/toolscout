@@ -1,0 +1,67 @@
+name: ToolScout Editorial Authority 95 Audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/editorial-authority-95-audit.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: toolscout-editorial-authority-95-audit
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate authority model and Command Center code
+        run: |
+          set -euo pipefail
+          node --check scripts/editorial-authority-model.mjs
+          node --check scripts/build-editorial-authority-portfolio.mjs
+          node --check command-center-business-truth-runtime.js
+          node --check command-center-simplified-view.js
+          node --test tests/toolscout-v2-editorial-authority.test.mjs
+
+      - name: Rebuild full-surface editorial authority report
+        run: |
+          set -euo pipefail
+          node scripts/build-editorial-authority-portfolio.mjs
+          node - <<'NODE'
+          const fs=require('fs');
+          const r=JSON.parse(fs.readFileSync('reports/editorial-authority-portfolio.json','utf8'));
+          if(r.hardFloorScore!==90)throw new Error('hard_floor_not_90');
+          if(r.targetScore!==95)throw new Error('target_not_95');
+          if(r.excellenceScore!==98)throw new Error('excellence_not_98');
+          if(!Number.isFinite(Number(r.summary?.averageScore)))throw new Error('average_missing');
+          console.log(JSON.stringify(r.summary,null,2));
+          NODE
+
+      - name: Commit refreshed authority report
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- reports/editorial-authority-portfolio.json; then
+            echo "Authority report already current."
+            exit 0
+          fi
+          git config user.name "toolscout-seo-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/editorial-authority-portfolio.json
+          git commit -m "Refresh editorial authority portfolio at 95 target"
+          git pull --rebase origin main
+          git push origin HEAD:main
