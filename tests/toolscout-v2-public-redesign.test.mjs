@@ -185,7 +185,8 @@ test('shared public navigation is isolated from legacy nav CSS and matches homep
   assert.doesNotMatch(runtime,/backdrop-filter/);
   assert.match(runtime,/min-height:72px;padding:14px 20px 11px/);
   assert.doesNotMatch(runtime,/min-height:62px/);
-  assert.match(runtime,/font-size:12px;color:#BAC0BA/);
+  assert.match(runtime,/justify-content:space-between!important;gap:0;overflow-x:visible/);
+  assert.match(runtime,/font-size:clamp\(10px,2\.8vw,11px\);line-height:1\.1;color:#BAC0BA/);
 });
 
 
