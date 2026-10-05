@@ -96,7 +96,8 @@ jobs:
 
           SELECT COUNT(*) architecture_incidents_open
           FROM growth_architecture_incidents
-          WHERE status='open';
+          WHERE status='open'
+            AND COALESCE(engine,'')<>'integrity_audit';
 
           SELECT
             SUM(CASE WHEN status='leased' AND updated_at<datetime('now','-30 minutes') THEN 1 ELSE 0 END) stale_compute_leases,
