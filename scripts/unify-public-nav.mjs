@@ -4,12 +4,12 @@ import path from 'node:path';
 const ROOT=process.cwd();
 const GA_MEASUREMENT_ID='G-9VR80SYYH7';
 const SKIP=new Set(['analytics.html','analytics-v2.html','affiliate-workflow.html','distribution-workflow.html','admin.html','click.html']);
-const NAV='<nav class="ts-global-nav" aria-label="Primary"><a href="/guides">Guides</a><a href="/blog/">Blog</a><a href="/tools">Tools</a><a href="/compare">Compare</a><a href="/methodology">Methodology</a></nav>';
-const LINKS='<div class="links"><a href="/guides">Guides</a><a href="/blog/">Blog</a><a href="/tools">Tools</a><a href="/compare">Compare</a><a href="/methodology">Methodology</a></div>';
+const NAV='<nav class="ts-global-nav" aria-label="Primary"><a href="/tools">Tools</a><a href="/guides">Guides</a><a href="/compare">Compare</a><a href="/whats-new">What&#39;s new</a><a href="/software-trends-index">Trends</a><a href="/distribution/publisher-kit">Publisher Kit</a><a href="/methodology">Methodology</a></nav>';
+const LINKS='<div class="links"><a href="/tools">Tools</a><a href="/guides">Guides</a><a href="/compare">Compare</a><a href="/whats-new">What&#39;s new</a><a href="/software-trends-index">Trends</a><a href="/distribution/publisher-kit">Publisher Kit</a><a href="/methodology">Methodology</a></div>';
 const CSS='<style id="ts-global-nav-style">.ts-global-nav{display:flex;justify-content:flex-end;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 32px}.ts-global-nav a{color:#667085;text-decoration:none;padding:9px 12px;border-radius:10px;font-size:13px;font-weight:500}.ts-global-nav a:hover{background:#fff;color:#101828;box-shadow:0 5px 18px rgba(16,24,40,.06)}@media(max-width:700px){.ts-global-nav{justify-content:flex-start;gap:2px;margin-bottom:24px}.ts-global-nav a{padding:8px 9px}}</style>';
 const TOOL_INDEX_CSS='<style id="ts-tool-profile-index-style">.tool-profile-index{margin-top:44px;padding:28px;background:rgba(255,255,255,.82);border:1px solid #e2e7ed;border-radius:22px}.tool-profile-index h2{margin:0 0 8px;font-size:28px;letter-spacing:-.03em}.tool-profile-index>p{margin:0 0 22px;color:#667085}.tool-profile-groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:22px}.tool-profile-group h3{margin:0 0 10px;font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:#667085}.tool-profile-links{display:flex;flex-wrap:wrap;gap:8px 12px}.tool-profile-links a{font-size:13px;color:#344054;text-decoration:none}.tool-profile-links a:hover{text-decoration:underline}</style>';
 const FAVICON_LINK='<link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="alternate icon" href="/favicon.svg">';
-const CANONICAL_LABELS=['Guides','Blog','Tools','Compare','Methodology'];
+const CANONICAL_LABELS=['Tools','Guides','Compare','Trends','Publisher Kit','Methodology'];
 const BROKEN_LOCAL_SLUGS=['best-ai-ad-creative-tools','best-no-code-automation-tools'];
 const PUBLIC_HTML_URL_RE=/(["'])((?:https:\/\/trytoolscout\.org)?\/[^"'<>?#\s]+)\.html([?#][^"']*)?\1/g;
 

@@ -13,7 +13,9 @@ test('homepage keeps canonical, structured data, recommendation ids and editoria
   for(const id of ['need','go','guidedStart','guided','progress','question','choices','back','results','softwarePulse'])assert.match(html,new RegExp('id="'+id+'"'));
   assert.match(html,/Independent\. No sponsored rankings\./);
   assert.match(html,/What's new · live/);
-  assert.match(html,/href="\/guides\.html">Guides<\/a>/);
+  assert.match(html,/href="\/guides">Guides<\/a>/);
+  assert.match(html,/href="\/software-trends-index">Trends<\/a>/);
+  assert.match(html,/href="\/distribution\/publisher-kit">Publisher Kit<\/a>/);
   assert.match(html,/id="homeCompareA"/);
   assert.match(html,/id="homeCompareB"/);
   assert.match(html,/class="doorTag">Comparator<\/span>/);
@@ -79,7 +81,8 @@ test('public hubs receive ToolScout 2.0 surface styling and active navigation',a
     ['/tools.html','tools','>Tools<'],
     ['/guides.html','guides','>Guides<'],
     ['/compare.html','compare','>Compare<'],
-    ['/whats-new.html','whats-new',">What's new<"]
+    ['/whats-new.html','whats-new',">What's new<"],
+    ['/software-trends-index','trends','>Trends<']
   ]){
     const [path,surface,label]=item;
     const response=new Response(source,{status:200,headers:{'content-type':'text/html; charset=UTF-8'}});
@@ -175,6 +178,8 @@ test('shared public navigation is isolated from legacy nav CSS and matches homep
   assert.match(runtime,/height:84px;max-width:1440px/);
   assert.match(runtime,/\.ts2-global-nav\{position:sticky;top:0;z-index:1000/);
   assert.match(runtime,/data-toolscout-sticky-nav="2"/);
+  assert.match(runtime,/href="\/software-trends-index"\$\{current\('trends'\)\}>Trends<\/a>/);
+  assert.match(runtime,/href="\/distribution\/publisher-kit"\$\{current\('publisher-kit'\)\}>Publisher Kit<\/a>/);
   assert.match(runtime,/classList\.toggle\('is-scrolled',window\.scrollY>8\)/);
   assert.doesNotMatch(runtime,/is-compact/);
   assert.doesNotMatch(runtime,/backdrop-filter/);
@@ -275,4 +280,14 @@ test('live redesign acceptance audits the complete public sitemap rather than a 
   assert.match(verify,/await pool\(publicPages,12/);
   assert.match(verify,/methodology_v2_content_missing/);
   assert.match(verify,/checkedPublicPages:publicPages\.length\+1/);
+});
+
+
+test('Software Trends source has no second local navigation and relies on the shared sticky header',()=>{
+  const html=read('software-trends-index.html');
+  assert.doesNotMatch(html,/<nav><a class="brand"/);
+  assert.match(html,/rel="canonical" href="https:\/\/trytoolscout\.org\/software-trends-index\.html"/);
+  const runtime=read('public-redesign-runtime.js');
+  assert.match(runtime,/data-toolscout-surface="trends"/);
+  assert.match(runtime,/\.darkBand \.shell>nav:first-child\{display:none!important\}/);
 });

@@ -25,6 +25,7 @@ function publicSurface(pathname){
   if(new Set(['/crm-tools','/seo-tools','/marketing-tools','/automation-tools','/forms-tools','/productivity-tools','/agency-tools']).has(p))return'category';
   if(/^\/news\/[a-z0-9][a-z0-9-]*$/i.test(p))return'news';
   if(p==='/software-trends-index')return'trends';
+  if(p==='/distribution/publisher-kit')return'publisher-kit';
   return'public';
 }
 function stripCommercialVendorSourceLinks(html){
@@ -61,9 +62,10 @@ html[data-toolscout-redesign="2"] body *{box-sizing:border-box}
 .ts2-global-nav.is-scrolled{box-shadow:0 8px 24px rgba(11,13,12,.12)}
 .ts2-global-nav-inner{height:84px;max-width:1440px;margin:auto;padding:0 72px;display:flex;align-items:center;justify-content:space-between;gap:24px}
 .ts2-brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--ts-o);font-size:22px;font-weight:850;letter-spacing:-.045em}.ts2-brand img{width:24px;height:24px;border-radius:5px}
-.ts2-actions{display:flex;align-items:center;gap:25px}.ts2-links{display:flex;align-items:center;justify-content:flex-start!important;flex-wrap:nowrap!important;gap:25px;height:auto!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;background:transparent!important}.ts2-links a{position:relative;display:inline-flex!important;flex:0 0 auto!important;margin:0!important;padding:0!important;color:#CDD2CC;text-decoration:none;font-size:13px;font-weight:650;transition:color var(--ts-fast) var(--ts-ease)}.ts2-links a:hover{color:#fff}.ts2-links a[aria-current="page"]{color:#fff}.ts2-links a[aria-current="page"]::after{content:"";position:absolute;left:0;right:0;bottom:-12px;height:2px;background:var(--ts-l)}
+.ts2-actions{display:flex;align-items:center;gap:22px}.ts2-links{display:flex;align-items:center;justify-content:flex-start!important;flex-wrap:nowrap!important;gap:20px;height:auto!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;background:transparent!important}.ts2-links a{position:relative;display:inline-flex!important;flex:0 0 auto!important;margin:0!important;padding:0!important;color:#CDD2CC;text-decoration:none;font-size:13px;font-weight:650;transition:color var(--ts-fast) var(--ts-ease)}.ts2-links a:hover{color:#fff}.ts2-links a[aria-current="page"]{color:#fff}.ts2-links a[aria-current="page"]::after{content:"";position:absolute;left:0;right:0;bottom:-12px;height:2px;background:var(--ts-l)}
 .ts2-cta{background:var(--ts-l);color:var(--ts-g);padding:12px 17px;border-radius:7px;font-weight:800;text-decoration:none;white-space:nowrap}
 html[data-toolscout-redesign="2"] .ts-global-nav{display:none!important}
+html[data-toolscout-surface="trends"] .darkBand .shell>nav:first-child{display:none!important}
 .ts2-global-nav + .wrap > nav:first-child,.ts2-global-nav + .wrap > .brand,.ts2-global-nav + .wrap > .top:first-child{display:none!important}
 html[data-toolscout-redesign="2"] body>.wrap,html[data-toolscout-redesign="2"] body .wrap{max-width:1180px!important;margin:auto!important;padding-left:24px!important;padding-right:24px!important}
 html[data-toolscout-redesign="2"] body main,html[data-toolscout-redesign="2"] body .hero{animation:ts2Enter var(--ts-base) var(--ts-out) both}
@@ -243,7 +245,7 @@ function stickyNavScript(){
 function navHtml(pathname){
   const active=publicSurface(pathname);
   const current=name=>active===name?' aria-current="page"':'';
-  return `<header class="ts2-global-nav"><div class="ts2-global-nav-inner"><a class="ts2-brand" href="/" aria-label="ToolScout home"><img src="/favicon.svg" alt="" width="24" height="24">ToolScout</a><div class="ts2-actions"><div class="ts2-links" role="navigation" aria-label="Primary"><a href="/tools.html"${current('tools')}>Tools</a><a href="/guides.html"${current('guides')}>Guides</a><a href="/compare.html"${current('compare')}>Compare</a><a href="/whats-new.html"${current('whats-new')}>What's new</a></div><a class="ts2-cta" href="/#finder">Find my tools →</a></div></div></header>`+stickyNavScript();
+  return `<header class="ts2-global-nav"><div class="ts2-global-nav-inner"><a class="ts2-brand" href="/" aria-label="ToolScout home"><img src="/favicon.svg" alt="" width="24" height="24">ToolScout</a><div class="ts2-actions"><div class="ts2-links" role="navigation" aria-label="Primary"><a href="/tools"${current('tools')}>Tools</a><a href="/guides"${current('guides')}>Guides</a><a href="/compare"${current('compare')}>Compare</a><a href="/whats-new"${current('whats-new')}>What's new</a><a href="/software-trends-index"${current('trends')}>Trends</a><a href="/distribution/publisher-kit"${current('publisher-kit')}>Publisher Kit</a></div><a class="ts2-cta" href="/#finder">Find my tools →</a></div></div></header>`+stickyNavScript();
 }
 export async function transformPublicRedesignResponse(request,response){
   if(request.method!=='GET'||!isHtml(response))return response;

@@ -44,6 +44,25 @@ test('public redesign transform gives internal pages the shared ToolScout 2.0 sh
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2)).toBeTruthy();
 });
 
+test('Trends uses one shared global header and exposes publisher navigation',async({page})=>{
+  await page.goto(base+'/.browser-fixtures/trends-public.html',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('.ts2-global-nav')).toHaveCount(1);
+  await expect(page.locator('.darkBand .shell > nav')).toHaveCount(0);
+  await expect(page.getByRole('link',{name:'Trends'}).first()).toHaveAttribute('aria-current','page');
+  await expect(page.getByRole('link',{name:'Publisher Kit'}).first()).toBeVisible();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2)).toBeTruthy();
+});
+
+test('Publisher Kit uses the shared sticky navigation and is indexable',async({page})=>{
+  await page.goto(base+'/.browser-fixtures/publisher-kit.html',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('.ts2-global-nav')).toHaveCount(1);
+  await expect(page.getByRole('link',{name:'Publisher Kit'}).first()).toHaveAttribute('aria-current','page');
+  await expect(page.getByRole('link',{name:'Trends'}).first()).toBeVisible();
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content','index,follow');
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href','https://trytoolscout.org/distribution/publisher-kit');
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2)).toBeTruthy();
+});
+
 test('generated comparison includes AI decision dimensions',async({page})=>{
   await page.goto(base+'/make-vs-zapier.html',{waitUntil:'domcontentloaded'});
   await expect(page.locator('body')).toContainText('AI interoperability');
@@ -73,7 +92,7 @@ test('Command Center redesign fixture exposes GA4 and GSC explorers',async({page
 test.describe('mobile release smoke',()=>{
   test.use({viewport:{width:390,height:844}});
   test('public redesign and Command Center avoid page-level horizontal overflow',async({page})=>{
-    for(const path of ['/index.html','/tools.html','/make-vs-zapier.html','/.browser-fixtures/figma-public.html','/.browser-fixtures/comparison-public.html','/.browser-fixtures/analytics.html']){
+    for(const path of ['/index.html','/tools.html','/make-vs-zapier.html','/.browser-fixtures/figma-public.html','/.browser-fixtures/comparison-public.html','/.browser-fixtures/trends-public.html','/.browser-fixtures/publisher-kit.html','/.browser-fixtures/analytics.html']){
       await page.goto(base+path,{waitUntil:'domcontentloaded'});
       await page.waitForTimeout(120);
       const overflow=await page.evaluate(()=>{
