@@ -12,6 +12,13 @@ test('homepage keeps canonical, structured data, recommendation ids and editoria
   for(const id of ['need','go','guidedStart','guided','progress','question','choices','back','results','softwarePulse'])assert.match(html,new RegExp('id="'+id+'"'));
   assert.match(html,/Independent\. No sponsored rankings\./);
   assert.match(html,/What's new · live/);
+  assert.match(html,/href="\/guides\.html">Guides<\/a>/);
+  assert.match(html,/id="homeCompareA"/);
+  assert.match(html,/id="homeCompareB"/);
+  assert.match(html,/class="doorTag">Comparator<\/span>/);
+  assert.doesNotMatch(html,/class="comparisonRow"/);
+  assert.match(html,/id="pulseCycle"/);
+  assert.match(html,/scheduleRotation\(\)/);
   assert.match(html,/prefers-reduced-motion:reduce/);
 });
 
