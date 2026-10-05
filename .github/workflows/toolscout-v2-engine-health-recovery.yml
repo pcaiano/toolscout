@@ -46,12 +46,9 @@ jobs:
 
       - name: Run repo-scoped engine health recovery
         id: recover
-        env:
-          OIDC_URL: ${{ env.ACTIONS_ID_TOKEN_REQUEST_URL }}
-          OIDC_REQUEST_TOKEN: ${{ env.ACTIONS_ID_TOKEN_REQUEST_TOKEN }}
         run: |
           set -euo pipefail
-          TOKEN_RESPONSE="$(curl -fsSL -H "Authorization: bearer ${OIDC_REQUEST_TOKEN}" "${OIDC_URL}&audience=toolscout-execution")"
+          TOKEN_RESPONSE="$(curl -fsSL -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=toolscout-execution")"
           TOKEN="$(printf '%s' "$TOKEN_RESPONSE" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const j=JSON.parse(s);if(!j.value)process.exit(2);process.stdout.write(j.value)})")"
           curl -fsSL --retry 3 --retry-delay 2 \
             -X POST \
