@@ -243,3 +243,36 @@ test('sticky headers keep constant geometry while scrolling to prevent mobile ji
   assert.match(home,/\.homeGlobalNav\{position:sticky;top:0;z-index:1000;background:var\(--graphite\);isolation:isolate/);
   assert.match(runtime,/\.ts2-global-nav\{position:sticky;top:0;z-index:1000;background:var\(--ts-g\);border-bottom:[^\n]+isolation:isolate/);
 });
+
+
+test('methodology is a native ToolScout 2.0 surface with clean canonical routing',()=>{
+  const html=read('methodology.html');
+  assert.match(html,/<html[^>]*data-toolscout-redesign="2"[^>]*data-toolscout-surface="methodology"/);
+  assert.match(html,/data-toolscout-public-redesign="2"/);
+  assert.match(html,/class="ts2-global-nav"/);
+  assert.match(html,/Recommendations start with the job\./);
+  assert.match(html,/rel="canonical" href="https:\/\/trytoolscout\.org\/methodology"/);
+  assert.doesNotMatch(html,/class="ts-global-nav"/);
+  assert.doesNotMatch(html,/canonical" href="https:\/\/trytoolscout\.org\/methodology\.html"/);
+});
+
+test('legacy category hubs cannot retain old body geometry or navigation after the shared redesign transform',async()=>{
+  const source='<!doctype html><html><head></head><body style="font-family:system-ui,sans-serif;max-width:900px;margin:auto;padding:40px 20px"><nav class="ts-global-nav"><a href="/guides">Guides</a></nav><a href="/">ToolScout</a><h1>CRM Software Buying Guides</h1><p>Choose a job.</p><ul><li><a href="/best-free-crm">Best Free CRM</a></li></ul></body></html>';
+  const response=new Response(source,{status:200,headers:{'content-type':'text/html; charset=UTF-8'}});
+  const out=await transformPublicRedesignResponse(new Request('https://trytoolscout.org/crm-tools'),response);
+  const html=await out.text();
+  assert.match(html,/data-toolscout-surface="category"/);
+  assert.match(html,/max-width:none!important;padding:0!important/);
+  assert.match(html,/html\[data-toolscout-redesign="2"\] \.ts-global-nav\{display:none!important\}/);
+  assert.match(html,/html\[data-toolscout-surface="category"\] body>ul\{/);
+  assert.match(html,/class="ts2-global-nav"/);
+});
+
+test('live redesign acceptance audits the complete public sitemap rather than a hand-picked page sample',()=>{
+  const verify=read('scripts/verify-redesign-2-live.mjs');
+  assert.match(verify,/get\('\/sitemap\.xml'\)/);
+  assert.match(verify,/matchAll\(\/<loc>/);
+  assert.match(verify,/await pool\(publicPages,12/);
+  assert.match(verify,/methodology_v2_content_missing/);
+  assert.match(verify,/checkedPublicPages:publicPages\.length\+1/);
+});
