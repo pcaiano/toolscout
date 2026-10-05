@@ -132,3 +132,8 @@ The redesigned homepage is not complete unless:
 5. Desktop and mobile remain readable without auto-rotation.
 6. Vendor identity is visible but never visually dominant over ToolScout.
 7. The full What's New surface remains one click away.
+
+
+## Motion reference
+
+All homepage interactions, recommendation transitions and Software Pulse changes must follow `docs/MOTION-SYSTEM-2.0.md`.
