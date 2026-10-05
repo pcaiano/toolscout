@@ -1,0 +1,102 @@
+name: Deploy Global Navigation Production
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/nav-publisher-production-deploy.yml'
+      - 'docs/OPERATING-CONTRACT.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nav-publisher-production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: contains(github.event.head_commit.message, 'Deploy global navigation production')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Verify ToolScout resource identity
+        run: |
+          set -euo pipefail
+          grep -q '^name = "toolscout"$' wrangler.toml
+          grep -q 'database_name = "toolscout"' wrangler.toml
+          grep -q 'database_id = "cac6bc3c-d838-4edd-ba29-597030afb397"' wrangler.toml
+          grep -q '^main = "compute-router-worker.js"$' wrangler.toml
+
+      - name: Validate navigation release contract
+        run: |
+          set -euo pipefail
+          node --check public-redesign-runtime.js
+          node --check distribution-embed-worker.js
+          node --check scripts/generate-software-trends-index.mjs
+          node --test tests/toolscout-v2-public-redesign.test.mjs tests/toolscout-v2-software-trends.test.mjs tests/toolscout-v2-finder-embed-product.test.mjs
+          grep -q 'https://trytoolscout.org/software-trends-index' sitemap.xml
+          grep -q 'https://trytoolscout.org/distribution/publisher-kit' sitemap.xml
+
+      - name: Deploy ToolScout Worker and assets
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: npx wrangler deploy --config wrangler.toml --latest
+
+      - name: Verify navigation live
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          async function get(url){
+            let last;
+            for(let i=0;i<12;i++){
+              try{
+                const r=await fetch(url,{headers:{'user-agent':'ToolScout navigation production verifier'}});
+                const body=await r.text();
+                if(r.ok)return {status:r.status,headers:r.headers,body};
+                last=new Error(`${url} returned ${r.status}: ${body.slice(0,250)}`);
+              }catch(e){last=e}
+              await sleep(5000);
+            }
+            throw last||new Error('request_failed');
+          }
+          const count=(haystack,needle)=>haystack.split(needle).length-1;
+
+          const trends=await get('https://trytoolscout.org/software-trends-index');
+          if(count(trends.body,'class="ts2-global-nav"')!==1)throw new Error('trends_global_header_count_failed');
+          if(/<nav><a class="brand"/i.test(trends.body))throw new Error('trends_legacy_local_header_present');
+          if(!trends.body.includes('href="/software-trends-index"')||!trends.body.includes('>Trends</a>'))throw new Error('trends_nav_link_missing');
+          if(!trends.body.includes('href="/distribution/publisher-kit"')||!trends.body.includes('>Publisher Kit</a>'))throw new Error('publisher_nav_link_missing_on_trends');
+          if(!trends.body.includes('data-toolscout-sticky-nav="2"'))throw new Error('trends_sticky_header_missing');
+
+          const kit=await get('https://trytoolscout.org/distribution/publisher-kit');
+          if(count(kit.body,'class="ts2-global-nav"')!==1)throw new Error('publisher_global_header_count_failed');
+          if(!kit.body.includes('href="/software-trends-index">Trends</a>'))throw new Error('trends_nav_link_missing_on_publisher');
+          if(!kit.body.includes('href="/distribution/publisher-kit" aria-current="page">Publisher Kit</a>'))throw new Error('publisher_current_nav_missing');
+          if(!kit.body.includes('name="robots" content="index,follow"'))throw new Error('publisher_index_follow_missing');
+          if(!kit.body.includes('data-toolscout-sticky-nav="2"'))throw new Error('publisher_sticky_header_missing');
+          if(!kit.body.includes('class="nav-cta" href="/#finder">Find my tools'))throw new Error('publisher_finder_cta_missing');
+
+          const sitemap=await get('https://trytoolscout.org/sitemap.xml');
+          if(!sitemap.body.includes('<loc>https://trytoolscout.org/software-trends-index</loc>'))throw new Error('trends_sitemap_missing');
+          if(!sitemap.body.includes('<loc>https://trytoolscout.org/distribution/publisher-kit</loc>'))throw new Error('publisher_sitemap_missing');
+          const sitemapUrls=[...sitemap.body.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>m[1]);
+
+          console.log(JSON.stringify({
+            ok:true,
+            trends:{status:trends.status,globalHeaders:1,legacyLocalHeader:false,globalNav:true,sticky:true},
+            publisherKit:{status:kit.status,globalHeaders:1,indexFollow:true,globalNav:true,sticky:true},
+            sitemap:{status:sitemap.status,urls:sitemapUrls.length,trends:true,publisherKit:true}
+          },null,2));
+          NODE
