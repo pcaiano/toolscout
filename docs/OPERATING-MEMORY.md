@@ -179,5 +179,5 @@ When the operating architecture changes, update this file and the JSON contract 
 58. `public-visual-integrity.yml` is a daily CI and telemetry workflow for public redesign coverage. It is not a production scheduler and must remain declared in the operating contract while it exists on `main`.
 
 59. The global public navigation includes Tools, Guides, Compare, What's new, Trends and Publisher Kit. Software Trends must not render a second local navigation beneath the shared sticky header.
-60. The canonical sitemap must include both /software-trends-index and /distribution/publisher-kit. Software Trends uses the clean extensionless canonical. Publisher Kit is index,follow. Sitemap changes trigger the first-party Google Search Reality workflow, which includes sitemap URLs in URL Inspection coverage.
+60. The canonical sitemap must include both /software-trends-index and /distribution/publisher-kit. The historical Software Trends asset canonical is preserved by the migration guard while the public sitemap route remains extensionless. Publisher Kit is index,follow. Sitemap changes trigger the first-party Google Search Reality workflow, which includes sitemap URLs in URL Inspection coverage.
 
