@@ -134,3 +134,14 @@ test('commercial source cleanup leaves readable verification wording',async()=>{
   assert.doesNotMatch(html,/Official product source|Source data last checked|>\s*\./);
   assert.match(html,/Information last checked 2026-09-01/);
 });
+
+
+test('tools directory keeps the intro concise, shows catalog count and spaces AI editorial copy',()=>{
+  const html=read('tools.html');
+  assert.match(html,/Use the directory to narrow the decision\./);
+  assert.doesNotMatch(html,/A larger feature list is not automatically better/);
+  assert.match(html,/id="catalogCount"/);
+  assert.match(html,/catalogTotal=catalog\.length/);
+  assert.match(html,/tools? in catalog/);
+  assert.match(html,/\.ai-badge\+\.tool-view\{margin-top:16px\}/);
+});
