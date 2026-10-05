@@ -2,10 +2,6 @@ name: ToolScout 2.0 Production Acceptance
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'releases/redesign-2.0-2026-10-05.flag'
 
 permissions:
   contents: read
