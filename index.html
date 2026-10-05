@@ -247,8 +247,8 @@
     setTimeout(()=>{current=index;hydrate(stories[index]);renderSecondary();if(story)story.classList.remove('swap');scheduleRotation()},170);
   }
   Promise.all([
-    fetch('/data/software-updates.json',{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()),
-    fetch('/data/tools.json',{cache:'no-store'}).then(r=>r.ok?r.json():[])
+    fetch('/data/software-updates.json',{cache:'no-store'}).then(r=>r.ok?r.json():{items:[]}).catch(()=>({items:[]})),
+    fetch('/data/tools.json',{cache:'no-store'}).then(r=>r.ok?r.json():[]).catch(()=>[])
   ]).then(([updates,tools])=>{
     toolsBySlug=new Map((Array.isArray(tools)?tools:[]).map(t=>[t.slug,t]));comparatorOptions(tools);
     const items=Array.isArray(updates.items)?updates.items.slice().sort((a,b)=>String(b.publishedAt||'').localeCompare(String(a.publishedAt||''))).slice(0,3):[];
