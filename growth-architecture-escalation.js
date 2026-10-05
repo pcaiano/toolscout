@@ -5,6 +5,36 @@ const CORE_MISSIONS=new Set([
   'network_cycle','autonomous_cycle','economic_learning',
   'social_intelligence','runtime_quality','coverage_cycle'
 ]);
+export const RUNTIME_INTEGRITY_MISSION_LIMITS=Object.freeze({
+  'growth:execution_contract':45,
+  'growth:opportunity_coordination':45,
+  'growth:self_audit':90,
+  'distribution:autonomous_cycle':45,
+  'distribution:economic_learning':45,
+  'distribution:network_cycle':150,
+  'distribution:authority_execution_recovery':120,
+  'seo_geo_aio:execution_batch_v2':45,
+  'affiliate:coverage_cycle':780,
+  'catalog:runtime_quality':480,
+  'catalog:runtime_coverage':1560
+});
+export function classifyRuntimeIntegrityMission(row,{runningGraceMinutes=30}={}){
+  const key=`${String(row?.engine||'')}:${String(row?.mission||'')}`;
+  const limit=RUNTIME_INTEGRITY_MISSION_LIMITS[key];
+  if(limit===undefined)return null;
+  const numberOrNull=value=>value===null||value===undefined||value===''?null:Number(value);
+  const age=numberOrNull(row?.age_minutes),completedAge=numberOrNull(row?.completed_age_minutes);
+  const status=String(row?.status||'');
+  if(status==='running'){
+    if(age===null||!Number.isFinite(age)||age>runningGraceMinutes)return{kind:'stuck',severity:'P1',key,limit,age,completedAge};
+    if(completedAge===null||!Number.isFinite(completedAge))return{kind:'no_completed_baseline',severity:'P1',key,limit,age,completedAge};
+    if(completedAge>limit+runningGraceMinutes)return{kind:'previous_completion_outside_cadence',severity:'P2',key,limit,age,completedAge};
+    return null;
+  }
+  if(status!=='completed')return{kind:'not_completed',severity:'P1',key,limit,age,completedAge,status};
+  if(age===null||!Number.isFinite(age)||age>limit)return{kind:'outside_cadence',severity:age!==null&&age>limit*2?'P1':'P2',key,limit,age,completedAge};
+  return null;
+}
 const n=v=>{const x=Number(v);return Number.isFinite(x)?x:0};
 const safe=(v,m=4000)=>String(v??'').slice(0,m);
 const html=v=>safe(v,12000).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -78,6 +108,89 @@ export async function auditArchitectureEscalations(env){
   await env.DB.prepare(`UPDATE growth_architecture_incidents SET email_status=CASE WHEN email_status='sending_resolved' THEN 'pending_resolved' ELSE 'pending' END,updated_at=datetime('now') WHERE email_status IN ('sending','sending_resolved') AND updated_at<datetime('now','-30 minutes')`).run().catch(()=>{});
   const activeKeys=new Set();
   let opened=0;
+
+  const missingContracts=await env.DB.prepare(`WITH active_actions AS (
+      SELECT g.opportunity_key,g.subject_type,g.subject_key,j.value action
+      FROM growth_opportunity_state g,json_each(g.action_json) j
+      WHERE g.status='active'
+        AND j.value NOT IN ('distribution_measurement','search_measurement')
+    )
+    SELECT a.subject_type,a.action,COUNT(*) n,GROUP_CONCAT(DISTINCT substr(a.subject_key,1,120)) sample_subjects
+    FROM active_actions a
+    LEFT JOIN growth_execution_contract c
+      ON c.source_kind='opportunity'
+     AND c.source_id=a.opportunity_key
+     AND c.action=a.action
+    WHERE c.task_id IS NULL
+    GROUP BY a.subject_type,a.action
+    ORDER BY n DESC
+    LIMIT 100`).all().catch(()=>({results:[]}));
+  for(const row of missingContracts.results||[]){
+    const key=`runtime_integrity:missing_contract:${row.subject_type||'unknown'}:${row.action||'unknown'}`;activeKeys.add(key);
+    await upsertIncident(env,{
+      key,severity:'P1',engine:'growth',executor:null,action:row.action,
+      title:`Active Growth action missing execution contract: ${row.action}`,
+      summary:`${n(row.n)} active action(s) exist without a corresponding execution contract.`,
+      evidence:{subject_type:row.subject_type,action:row.action,count:n(row.n),sample_subjects:safe(row.sample_subjects,1200)},
+      selfCorrections:['Opportunity coordination is expected to synchronize execution contracts in the same cycle.','The hourly architecture audit rechecked canonical D1 state before escalating.'],
+      whyCodeRequired:'An active action without an execution contract breaks the closed-loop ownership invariant and can silently strand work.',
+      recommendedIntervention:'Inspect opportunity coordination and syncExecutionContracts ordering, repair the ownership race, run execution dispatch, and verify the D1 missing-contract count returns to zero.'
+    });opened++;
+  }
+
+  let missionHealth={results:[]};
+  try{
+    missionHealth=await env.DB.prepare(`SELECT engine,mission,status,started_at,completed_at,
+      CAST((julianday('now')-julianday(COALESCE(completed_at,started_at)))*24*60 AS INTEGER) age_minutes,
+      CAST((julianday('now')-julianday((
+        SELECT MAX(x.completed_at) FROM engine_runs x
+        WHERE x.engine=r.engine AND x.mission=r.mission AND x.status='completed' AND x.completed_at IS NOT NULL
+      )))*24*60 AS INTEGER) completed_age_minutes
+      FROM engine_runs r
+      WHERE r.run_id IN (
+        SELECT run_id FROM engine_runs x
+        WHERE x.engine=r.engine AND x.mission=r.mission
+        ORDER BY started_at DESC LIMIT 1
+      )
+        AND (
+          (engine='growth' AND mission IN ('execution_contract','opportunity_coordination','self_audit'))
+          OR (engine='distribution' AND mission IN ('autonomous_cycle','economic_learning','network_cycle','authority_execution_recovery'))
+          OR (engine='seo_geo_aio' AND mission='execution_batch_v2')
+          OR (engine='affiliate' AND mission='coverage_cycle')
+          OR (engine='catalog' AND mission IN ('runtime_quality','runtime_coverage'))
+        )
+      ORDER BY engine,mission`).all();
+  }catch{}
+  const seenMissionKeys=new Set();
+  for(const row of missionHealth.results||[]){
+    const missionKey=`${row.engine}:${row.mission}`;seenMissionKeys.add(missionKey);
+    const issue=classifyRuntimeIntegrityMission(row);
+    if(!issue)continue;
+    const key=`runtime_integrity:mission:${issue.kind}:${missionKey}`;activeKeys.add(key);
+    await upsertIncident(env,{
+      key,severity:issue.severity,engine:row.engine,executor:null,action:row.mission,
+      title:`Critical mission integrity failure: ${row.engine}/${row.mission}`,
+      summary:`Critical mission ${missionKey} is ${issue.kind.replaceAll('_',' ')}. Latest status: ${row.status}; age: ${row.age_minutes??'unknown'} minutes.`,
+      evidence:{...row,limit_minutes:issue.limit,running_grace_minutes:30,kind:issue.kind},
+      selfCorrections:['The runtime ledger and prior successful completion were checked before escalation.','Normal single-flight recovery remains allowed, but stale health is not treated as success.'],
+      whyCodeRequired:'A critical mission outside its bounded execution/cadence contract can stop the closed loop even when no queue item visibly fails.',
+      recommendedIntervention:'Inspect the latest engine run, lease/cycle ownership and scheduler path; recover the mission and verify a new completed run falls inside the Integrity Audit cadence.'
+    });opened++;
+  }
+  for(const missionKey of Object.keys(RUNTIME_INTEGRITY_MISSION_LIMITS)){
+    if(seenMissionKeys.has(missionKey))continue;
+    const [engine,mission]=missionKey.split(':');
+    const key=`runtime_integrity:mission:missing:${missionKey}`;activeKeys.add(key);
+    await upsertIncident(env,{
+      key,severity:'P1',engine,executor:null,action:mission,
+      title:`Critical mission missing from runtime ledger: ${missionKey}`,
+      summary:`No latest engine-run row is available for required mission ${missionKey}.`,
+      evidence:{engine,mission,limit_minutes:RUNTIME_INTEGRITY_MISSION_LIMITS[missionKey]},
+      selfCorrections:['The hourly architecture audit queried the canonical engine ledger before escalating.'],
+      whyCodeRequired:'A required mission missing from the ledger means scheduler ownership or execution observability is broken.',
+      recommendedIntervention:'Inspect scheduler ownership and runWithLedger wiring for this mission, restore execution, and verify the ledger records a completed run.'
+    });opened++;
+  }
 
   const missing=await env.DB.prepare(`SELECT action,subject_type,subject_key,executor,last_result,COUNT(*) n
     FROM growth_execution_contract
