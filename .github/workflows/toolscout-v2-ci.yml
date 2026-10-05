@@ -47,6 +47,7 @@ on:
       - 'human-action-entry-worker.js'
       - 'command-center-direct-runtime.js'
       - 'command-center-business-truth-runtime.js'
+      - 'command-center-redesign-runtime.js'
       - 'data/authority-truth.json'
       - 'reports/growth-sprint-1.json'
       - 'tests/toolscout-growth-sprint-1.test.mjs'
@@ -59,7 +60,7 @@ on:
       - 'command-center-ga4-worker.js'
       - 'data/se-ranking-backlink-truth.json'
       - 'scripts/probe-growth-truth-live.mjs'
-      - 'tests/toolscout-growth-truth-observability.test.mjs'
+      - 'tests/toolscout-growth-truth-observability.test.mjs tests/toolscout-v2-ai-interoperability.test.mjs tests/toolscout-v2-command-center-redesign.test.mjs'
       - '.github/workflows/growth-truth-production-repair.yml'
       - 'gsc-command-center-visible-worker.js'
       - 'growth-runtime-authority-drain-worker.js'
@@ -115,6 +116,8 @@ on:
       - 'scripts/generate-software-trends-index.mjs'
       - 'catalog-runtime-ranking.js'
       - 'catalog-autonomy-worker.js'
+      - 'catalog-gap-runtime-worker.js'
+      - 'data/catalog-engine.json'
       - 'data/organic-growth-engine.json'
       - 'docs/OPERATING-CONTRACT.json'
       - 'migrations/0085_toolscout_v2_external_value.sql'
@@ -217,6 +220,7 @@ jobs:
           node --check human-action-entry-worker.js
           node --check command-center-direct-runtime.js
           node --check command-center-business-truth-runtime.js
+          node --check command-center-redesign-runtime.js
           node --check ga4-owner-context.js
           node --check ga4-owner-exclusion-runtime.js
           node --check ga4-attribution-24h-worker.js
@@ -244,6 +248,7 @@ jobs:
           node --check scripts/generate-software-trends-index.mjs
           node --check catalog-runtime-ranking.js
           node --check catalog-autonomy-worker.js
+          node --check catalog-gap-runtime-worker.js
       - name: Wrangler dry-run build
         run: npx wrangler deploy --config wrangler.toml --dry-run --outdir /tmp/toolscout-wrangler-dry-run
 
