@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "policy": "Official first-party sources only. Publish only material product changes with buyer relevance. Skip rumours, marketing-only posts, events, customer stories and routine integration roundups.",
+  "sources": [
+    {
+      "id": "github-changelog",
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "sourceName": "GitHub Changelog",
+      "url": "https://github.blog/changelog/feed/",
+      "parser": "feed",
+      "allowedHosts": [
+        "github.blog"
+      ],
+      "maxPerRun": 1,
+      "excludePattern": "technical talks|universe|customer story|case study"
+    },
+    {
+      "id": "openai-news",
+      "toolSlug": "chatgpt",
+      "toolName": "ChatGPT",
+      "sourceName": "OpenAI",
+      "url": "https://openai.com/news/rss.xml",
+      "parser": "feed",
+      "allowedHosts": [
+        "openai.com"
+      ],
+      "maxPerRun": 1,
+      "includePattern": "chatgpt|gpt[- ]?6|images|model",
+      "excludePattern": "customer story|case study|grant|funding|government|research"
+    },
+    {
+      "id": "hubspot-releases",
+      "toolSlug": "hubspot",
+      "toolName": "HubSpot",
+      "sourceName": "HubSpot Releases and Updates",
+      "url": "https://community.hubspot.com/c/resources/releases-and-updates/134.rss",
+      "parser": "feed",
+      "allowedHosts": [
+        "community.hubspot.com"
+      ],
+      "maxPerRun": 1,
+      "excludePattern": "webinar|event|industry edit|roundup"
+    },
+    {
+      "id": "notion-releases",
+      "toolSlug": "notion",
+      "toolName": "Notion",
+      "sourceName": "Notion Releases",
+      "url": "https://www.notion.com/releases",
+      "parser": "html-linked",
+      "allowedHosts": [
+        "notion.com"
+      ],
+      "linkPattern": "^/releases/20\\\\d{2}-\\\\d{2}-\\\\d{2}",
+      "maxPerRun": 1
+    },
+    {
+      "id": "zapier-product-updates",
+      "toolSlug": "zapier",
+      "toolName": "Zapier",
+      "sourceName": "Zapier Product Updates",
+      "url": "https://community.zapier.com/product-updates",
+      "parser": "html-linked",
+      "allowedHosts": [
+        "community.zapier.com"
+      ],
+      "linkPattern": "/product-updates/",
+      "maxPerRun": 1,
+      "excludePattern": "updated integrations|community update|event|webinar"
+    }
+  ]
+}
