@@ -187,16 +187,8 @@ async function closeAuthorityExecutionLoop(request,env,ctx){
   }
 
   const network=await internalJson(request,env,ctx,'/api/distribution/network/refresh');
-
-  // A sender handoff endpoint can only expose work after make_sender has claimed it.
-  // If externally runnable work exists but nothing is claimed yet, run the bounded
-  // execution contract before observing public candidates. This closes the race where
-  // authority recovery saw runnable=1 and incorrectly failed with no_claimed_make_sender_task.
-  const beforeSenderDispatch=await authoritySnapshot(env);
-  const executionDispatch=beforeSenderDispatch.runnableQueue>0&&beforeSenderDispatch.senderClaimed<=0
-    ?await internalJson(request,env,ctx,'/api/growth/execution/dispatch')
-    :{ok:true,httpStatus:0,payload:{status:'not_required',reason:beforeSenderDispatch.senderClaimed>0?'sender_already_claimed':'no_runnable_external_sender_work'}};
   const coordination={ok:true,httpStatus:0,payload:{status:'delegated_to_distribution_orchestrator',owner:'distribution_orchestrator'}};
+  const execution={ok:true,httpStatus:0,payload:{status:'delegated_to_distribution_orchestrator',owner:'distribution_orchestrator'}};
   const senderHandoff=await internalJson(request,env,ctx,'/api/distribution/vendor-amplification/public-candidates?limit=8',{method:'GET'});
 
   const after=await authoritySnapshot(env);
@@ -205,7 +197,7 @@ async function closeAuthorityExecutionLoop(request,env,ctx){
   const handoffReady=handoffItems.length>0||after.senderFreshClaim;
   const stages={
     submissionPackage:submissionPackage.ok,submissionExecute:submissionExecute.ok,submissionVerify:submissionVerify.ok,
-    autonomous:autonomous.ok,network:network.ok,coordination:coordination.ok,execution:executionDispatch.ok,senderHandoff:senderHandoff.ok
+    autonomous:autonomous.ok,network:network.ok,coordination:coordination.ok,execution:execution.ok,senderHandoff:senderHandoff.ok
   };
   const coreStagesOk=stages.submissionPackage&&stages.submissionExecute&&stages.submissionVerify&&stages.autonomous&&stages.network&&stages.coordination&&stages.execution&&stages.senderHandoff;
 
@@ -229,7 +221,7 @@ async function closeAuthorityExecutionLoop(request,env,ctx){
     pendingExternalConfirmation:!externalAttemptObserved&&handoffReady,
     pipelineClosed:coreStagesOk||qualifyingBacklog,externalAttemptObserved,handoffReady,handoffCandidateCount:handoffItems.length,stages,before,after,
     submissionPackage:submissionPackage.payload||submissionPackage.error||null,submissionExecute:submissionExecute.payload||submissionExecute.error||null,submissionVerify:submissionVerify.payload||submissionVerify.error||null,
-    network:network.payload||network.error||null,autonomous:autonomous.payload||autonomous.error||null,coordination:coordination.payload||coordination.error||null,execution:executionDispatch.payload||executionDispatch.error||null,
+    network:network.payload||network.error||null,autonomous:autonomous.payload||autonomous.error||null,coordination:coordination.payload||coordination.error||null,execution:execution.payload||execution.error||null,
     senderHandoff:{ok:senderHandoff.ok,httpStatus:senderHandoff.httpStatus,status:senderHandoff?.payload?.status||null,reason:senderHandoff?.payload?.reason||null,items:handoffItems.map(x=>({kind:x.kind||null,task_id:x.task_id||null,task_action:x.task_action||null,tool_slug:x.tool_slug||null,asset_url:x.asset_url||null,vendor_domain:x.vendor_domain||null}))},
     executor:'cloudflare'
   };
