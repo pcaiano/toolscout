@@ -2371,6 +2371,9 @@ async function earlyOwnedRoute(request,env,ctx){
   else if(ownership.owner==='public_navigation')response=await renderPublicNavigationPage(request,env);
   else if(ownership.owner==='affiliate_redirect')response=await handleAffiliateRedirectRoute(request,env,ctx);
   if(!response)return null;
+  if(request.method==='GET'&&(ownership.owner==='public_decision'||ownership.owner==='public_navigation')){
+    response=await transformPublicRedesignResponse(request,response);
+  }
   const headers=new Headers(response.headers);
   headers.set('X-ToolScout-Route-Owner',ownership.owner);
   headers.set('X-ToolScout-Route-Contract','v2');

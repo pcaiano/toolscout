@@ -35,3 +35,10 @@ test('public redesign skips private Command Center and homepage',async()=>{
     assert.equal(await out.text(),source);
   }
 });
+
+
+test('compute router applies redesign to direct public decision and navigation owners',()=>{
+  const router=read('compute-router-worker.js');
+  assert.match(router,/ownership\.owner==='public_decision'\|\|ownership\.owner==='public_navigation'/);
+  assert.match(router,/response=await transformPublicRedesignResponse\(request,response\)/);
+});
