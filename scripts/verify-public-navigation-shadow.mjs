@@ -3,6 +3,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {renderPublicNavigationCandidate} from '../public-navigation-runtime.js';
 import {comparePublicParity,publicPageFingerprint} from '../public-page-parity-contract.js';
+import {transformPublicRedesignResponse} from '../public-redesign-runtime.js';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const BASE='https://trytoolscout.org';
@@ -90,7 +91,8 @@ let failed=false;
 for(const row of CASES){
   const target=BASE+row.pathname+(row.query||'');
   const baseline=await live(target);
-  const candidate=await renderPublicNavigationCandidate(new Request(target),env());
+  let candidate=await renderPublicNavigationCandidate(new Request(target),env());
+  if(candidate?.ok)candidate=await transformPublicRedesignResponse(new Request(target),candidate);
   if(!candidate?.ok){
     failed=true;
     report.push({pathname:row.pathname,ok:false,errors:['candidate_unavailable'],status:candidate?.status||0});
