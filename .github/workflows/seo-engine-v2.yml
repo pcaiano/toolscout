@@ -34,7 +34,9 @@ jobs:
           GSC_LOOKBACK_DAYS: '28'
         run: node scripts/sync-gsc-signals.mjs
       - name: Discover and publish material software news
-        run: node scripts/discover-software-news.mjs
+        run: |
+          node --check scripts/discover-software-news.mjs
+          node scripts/discover-software-news.mjs
       - name: Validate software news editorial contract
         run: node scripts/validate-software-news-ctas.mjs
       - name: Build ToolScout 2.0 editorial authority portfolio
