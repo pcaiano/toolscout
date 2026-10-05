@@ -111,6 +111,7 @@ on:
       - 'scripts/verify-public-navigation-shadow.mjs'
       - 'scripts/validate-v2-preservation.mjs'
       - 'scripts/evaluate-v2-integrity-audit.mjs'
+      - 'scripts/persist-v2-integrity-report.mjs'
       - 'scripts/evaluate-v2-production-acceptance.mjs'
       - 'scripts/generate-tool-pages.mjs'
       - 'scripts/generate-seo-pages.mjs'
@@ -242,6 +243,7 @@ jobs:
           node --check scripts/audit-runtime-architecture.mjs
           node --check scripts/validate-v2-preservation.mjs
           node --check scripts/evaluate-v2-integrity-audit.mjs
+          node --check scripts/persist-v2-integrity-report.mjs
           node --check scripts/evaluate-v2-production-acceptance.mjs
           node --check scripts/verify-v2-live-smoke.mjs
           node --check scripts/probe-v2-operational-health.mjs
