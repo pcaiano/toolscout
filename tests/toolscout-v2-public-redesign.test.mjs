@@ -19,6 +19,15 @@ test('homepage keeps canonical, structured data, recommendation ids and editoria
   assert.doesNotMatch(html,/class="comparisonRow"/);
   assert.match(html,/id="pulseCycle"/);
   assert.match(html,/scheduleRotation\(\)/);
+  assert.match(html,/class="decisionDoors"/);
+  assert.match(html,/class="doorTag">Guides<\/span>/);
+  assert.doesNotMatch(html,/doorLogos/);
+  const compare=html.indexOf('id="compare"');
+  const updates=html.indexOf('id="updates"');
+  const picks=html.indexOf('id="picks"');
+  const editorial=html.indexOf('class="section editorialProof"');
+  const trust=html.indexOf('class="trust"');
+  assert.ok(compare<updates&&updates<picks&&picks<editorial&&editorial<trust);
   assert.match(html,/prefers-reduced-motion:reduce/);
 });
 
