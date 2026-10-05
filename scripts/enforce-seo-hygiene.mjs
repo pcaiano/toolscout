@@ -6,6 +6,40 @@ const fix=process.argv.includes('--fix');
 const tools=JSON.parse(fs.readFileSync(path.join(ROOT,'data','tools.json'),'utf8'));
 const bySlug=new Map(tools.map(tool=>[tool.slug,tool]));
 const categoryHubs=['crm-tools','seo-tools','marketing-tools','automation-tools','forms-tools','productivity-tools','agency-tools'];
+const categoryHubAnalysis={
+  'crm-tools':{
+    title:'How to choose CRM software',
+    body:'ToolScout starts with the sales workflow rather than a generic CRM leaderboard. Small teams often benefit from fast setup, clear pipeline visibility and straightforward follow-up, while more complex sales operations may need deeper automation, reporting and integrations. The main trade-off is usually simplicity versus workflow depth: a broader platform can replace more tools, but it can also require more setup and administration. Use the guides on this page to narrow the decision by team, budget and job to be done before comparing individual CRM products.'
+  },
+  'seo-tools':{
+    title:'How to choose SEO software',
+    body:'SEO software is not one job. Keyword research, technical auditing, rank tracking, backlink analysis and competitive research place different demands on a tool. ToolScout separates those jobs before ranking products so a broad SEO suite is not automatically treated as the best choice for every buyer. The main trade-off is breadth versus specialist depth and price: an all-in-one platform can simplify the stack, while a focused tool may deliver a stronger workflow for one task. Start with the SEO problem you need to solve, then compare evidence, coverage and fit.'
+  },
+  'marketing-tools':{
+    title:'How to choose marketing software',
+    body:'ToolScout evaluates marketing software around the channel and workflow that actually need support. Email, automation, advertising, content and lifecycle marketing can overlap, but they do not require identical capabilities. The key trade-off is often platform breadth versus specialist depth: a larger suite may consolidate data and workflows, while a focused product may be easier to adopt or stronger in one channel. Use the guides on this page to define the job, required integrations and operating complexity before comparing tools.'
+  },
+  'automation-tools':{
+    title:'How to choose automation software',
+    body:'Automation tools should be judged by the workflows they can run reliably, not by the largest template count. ToolScout looks at integration coverage, automation depth, ease of use and the practical fit of each product for the job. The central trade-off is flexibility versus simplicity: powerful builders can support more complex logic, while simpler products can be faster to deploy and maintain. Start with the systems that must connect and the level of control you need, then compare the relevant automation guides and tools.'
+  },
+  'forms-tools':{
+    title:'How to choose form and lead capture software',
+    body:'Form software ranges from simple contact capture to conditional workflows, payments, qualification and automated routing. ToolScout separates those needs before recommending products. The main trade-off is speed and simplicity versus workflow depth: a lightweight form can be easier for visitors and teams, while more advanced logic may be necessary for qualification or operational handoffs. Use the guides here to define the information you need to collect, the systems it must reach and the level of automation required.'
+  },
+  'productivity-tools':{
+    title:'How to choose productivity software',
+    body:'Productivity software works best when it matches how the team already plans, communicates and hands work over. ToolScout looks beyond feature volume to workflow fit, collaboration, automation and ease of use. The main trade-off is flexibility versus structure: highly configurable products can support many processes but may require more governance, while opinionated tools can be faster to adopt. Start with the coordination problem you need to solve, then compare the guides and products that fit that working style.'
+  },
+  'agency-tools':{
+    title:'How to choose software for agency workflows',
+    body:'Agency software has to support repeated work across clients without creating unnecessary operational overhead. ToolScout considers collaboration, reporting, automation, integrations and the ability to keep client work organised. The main trade-off is a broad all-in-one stack versus specialist products with deeper capability in one part of the workflow. Use the agency guides to identify the bottleneck first, such as SEO, delivery, reporting or automation, then compare tools against that specific requirement.'
+  }
+};
+const masterCategoriesAnalysis={
+  title:'How to use ToolScout categories',
+  body:'Choose the job before the product. ToolScout categories are navigation layers, not universal rankings, and a single product can be relevant to more than one workflow. Start with the business problem you need to solve, move into the most specific buying guide available, and then compare the shortlisted tools on fit, constraints and current evidence. The important trade-off is breadth versus specificity: a broad category helps you orient the search, while an intent-specific guide gives the recommendation engine enough context to make a more defensible choice.'
+};
 const profileTools=tools.filter(tool=>tool?.slug&&fs.existsSync(path.join(ROOT,'tools',`${tool.slug}.html`)));
 const relatedBySlug=new Map(profileTools.map(tool=>[tool.slug,[]]));
 
@@ -117,14 +151,26 @@ function enrichToolProfile(html,rel){
   return html.replace(/<\/body>/i,`${section}</body>`);
 }
 
+function decisionAnalysisSection(def){
+  if(!def)return'';
+  return `<!-- TOOLSCOUT_CATEGORY_ANALYSIS_START --><section data-toolscout-analysis="1" style="margin-top:36px;padding:28px;border:1px solid #e4e7ec;border-radius:18px;background:#fff"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.12em;font-weight:800;color:#667085">ToolScout analysis</div><h2 style="margin:8px 0 10px">${esc(def.title)}</h2><p style="margin:0;color:#475467;line-height:1.7">${esc(def.body)}</p></section><!-- TOOLSCOUT_CATEGORY_ANALYSIS_END -->`;
+}
 function enrichCategoryHub(html,rel){
   const base=rel.replace(/\.html$/i,'');
-  if(!categoryHubs.includes(base))return html;
+  const isCategoryHub=categoryHubs.includes(base);
+  const analysisDef=isCategoryHub?categoryHubAnalysis[base]:base==='categories'?masterCategoriesAnalysis:null;
+  if(!analysisDef)return html;
+  let next=html;
+  const analysis=decisionAnalysisSection(analysisDef);
+  const analysisMarker=/<!-- TOOLSCOUT_CATEGORY_ANALYSIS_START -->[\s\S]*?<!-- TOOLSCOUT_CATEGORY_ANALYSIS_END -->/i;
+  if(analysisMarker.test(next))next=next.replace(analysisMarker,analysis);
+  else next=next.replace(/<\/body>/i,`${analysis}</body>`);
+  if(!isCategoryHub)return next;
   const links=categoryHubs.filter(slug=>slug!==base).map(slug=>`<a href="/${slug}" style="display:inline-block;margin:4px 8px 4px 0;padding:8px 10px;border:1px solid #e4e7ec;border-radius:10px;text-decoration:none;color:#344054">${esc(slug.replace(/-tools$/,'').replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase()))}</a>`).join('');
   const section=`<!-- TOOLSCOUT_CATEGORY_CROSSLINKS_START --><section style="margin-top:36px;padding-top:24px;border-top:1px solid #e4e7ec"><h2>Browse software categories</h2><div>${links}</div></section><!-- TOOLSCOUT_CATEGORY_CROSSLINKS_END -->`;
   const marker=/<!-- TOOLSCOUT_CATEGORY_CROSSLINKS_START -->[\s\S]*?<!-- TOOLSCOUT_CATEGORY_CROSSLINKS_END -->/i;
-  if(marker.test(html))return html.replace(marker,section);
-  return html.replace(/<\/body>/i,`${section}</body>`);
+  if(marker.test(next))return next.replace(marker,section);
+  return next.replace(/<\/body>/i,`${section}</body>`);
 }
 
 const files=collectHtml(ROOT);
