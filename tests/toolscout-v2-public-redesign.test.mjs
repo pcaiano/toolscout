@@ -122,7 +122,8 @@ test('public social footer stays compact in ToolScout 2.0',()=>{
 test('tool profiles do not expose preliminary generic decision-depth blocks',()=>{
   const seo=read('seo-cloudflare-runtime-worker.js');
   assert.match(seo,/stripGenericToolDecisionDepth\(html,pathname\)/);
-  assert.match(seo,/data-og-variant=\["'\]cloudflare-decision-depth-v1/);
+  assert.match(seo,/cloudflare-decision-depth-v1/);
+  assert.match(seo,/const bestPageDepth=state&&pathname\.startsWith\('\/best-'\)/);
   assert.match(seo,/if\(bestPageDepth&&!html\.includes\('organic-growth:runtime-start'\)/);
 });
 
@@ -142,7 +143,8 @@ test('tools directory keeps the intro concise, shows catalog count and spaces AI
   assert.doesNotMatch(html,/A larger feature list is not automatically better/);
   assert.match(html,/id="catalogCount"/);
   assert.match(html,/catalogTotal=catalog\.length/);
-  assert.match(html,/tools? in catalog/);
+  assert.match(html,/catalogTotal===1\?'tool':'tools'/);
+  assert.match(html,/in catalog/);
   assert.match(html,/\.ai-badge\+\.tool-view\{margin-top:16px\}/);
 });
 
