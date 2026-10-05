@@ -26,6 +26,19 @@ ToolScout development uses project-scoped MCP tooling to reduce stale API usage 
 7. Context7 is a documentation aid, not an infrastructure source of truth. Cloudflare resource names, IDs, bindings, secrets, deployment state, and ToolScout production ownership must still be verified against repository and live infrastructure sources.
 8. Keep MCP configuration credential-free in git. API keys, tokens, browser credentials, and other secrets must never be committed to the repository.
 
+## External browser automation policy
+
+ToolScout should use browser interaction to remove mechanical owner work whenever the browser capability is available in the active ChatGPT, Work, Codex, or MCP session.
+
+1. For a known external submission, listing, affiliate application, directory profile, verification form, or other exact user-directed web workflow, prefer live browser automation over giving the owner field-by-field manual instructions.
+2. Browser automation may navigate, click, select options, upload prepared public assets, populate ordinary form fields, and verify the resulting page state when those actions are within the owner's authorized ToolScout workflow.
+3. Keep the owner handoff as small as possible. Stop for CAPTCHA, MFA, password entry when credentials are not already available through an authorized session, payment, legally consequential attestations, identity verification, or another action that genuinely requires the owner's judgment or secret.
+4. Authentication alone is not a reason to abandon the browser path. If an authorized authenticated browser session is available, continue the workflow until a true owner-only boundary is reached.
+5. Do not turn browser automation into an unbounded crawler or bulk-spam executor. The target must be a specific, verified ToolScout workflow or an exact submission route already admitted by Distribution policy.
+6. A browser-completed form is not a verified placement by itself. Record the submission outcome and continue the existing verification contract before calling the external surface live.
+7. If browser automation is unavailable in the current session, preserve a browser-ready task with the exact URL, prepared field values, assets, and remaining owner-only boundary. Do not downgrade immediately to generic manual instructions.
+8. Chrome DevTools MCP remains the default for ToolScout's own browser QA. A general live-browser connector is for external site interaction and authenticated user-directed workflows; use each tool for the role it is best suited to.
+
 ## Project Isolation Guardrails
 
 These rules are permanent safety constraints for every agent, automation, migration, deployment, and infrastructure change performed from this repository.
