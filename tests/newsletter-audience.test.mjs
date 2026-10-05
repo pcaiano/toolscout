@@ -34,7 +34,7 @@ test('newsletter runtime persists explicit consent in a first-party ledger',()=>
   assert.match(runtime,/\/api\/newsletter\/subscribe/);
   assert.match(migration,/CREATE TABLE IF NOT EXISTS newsletter_subscribers/);
   assert.match(migration,/CREATE TABLE IF NOT EXISTS newsletter_events/);
-  assert.match(router,/handleNewsletterRoute\(request,env\)/);
+  assert.match(router,/handleNewsletterRoute\(request,env,ctx\)/);
 });
 
 test('newsletter client records conversion only after confirmed subscription',()=>{
@@ -42,4 +42,19 @@ test('newsletter client records conversion only after confirmed subscription',()
   assert.match(client,/newsletter_signup/);
   assert.match(client,/data\.already_subscribed/);
   assert.match(client,/fetch\('\/api\/newsletter\/subscribe'/);
+});
+
+
+test('newsletter sync upserts contacts and applies the HubSpot subscription type',()=>{
+  const runtime=read('newsletter-runtime-worker.js');
+  const migration=read('migrations/0117_newsletter_hubspot_sync.sql');
+  const router=read('compute-router-worker.js');
+  assert.match(runtime,/HUBSPOT_SUBSCRIPTION_TYPE_ID='3781890361'/);
+  assert.match(runtime,/crm\/v3\/objects\/contacts\/batch\/upsert/);
+  assert.match(runtime,/communication-preferences\/v4\/statuses\//);
+  assert.match(runtime,/CONSENT_WITH_NOTICE/);
+  assert.match(runtime,/runNewsletterHubSpotSync/);
+  assert.match(runtime,/hubspot_access_token_missing/);
+  assert.match(migration,/hubspot_sync_error/);
+  assert.match(router,/newsletter_hubspot_sync_failed/);
 });
