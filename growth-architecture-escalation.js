@@ -73,58 +73,6 @@ async function resolvedIncidentCoversEvidence(env,key,evidenceAt){
   return Number.isFinite(resolved)&&Number.isFinite(evidence)&&resolved>=evidence;
 }
 
-
-function integrityAuditIncidentCode(value){
-  const code=String(value||'integrity_failure').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,120);
-  return code||'integrity_failure';
-}
-
-export async function recordIntegrityAuditResult(env,report={}){
-  await ensureSchema(env);
-  if(report?.ok===true){
-    const open=await env.DB.prepare(`SELECT incident_id,email_sent_at FROM growth_architecture_incidents WHERE status='open' AND incident_key LIKE 'integrity_audit:%'`).all();
-    let resolved=0;
-    for(const row of open.results||[]){
-      const w=await env.DB.prepare(`UPDATE growth_architecture_incidents
-        SET status='resolved',resolved_at=datetime('now'),resolution_note='Integrity Audit returned healthy after the reported failure.',
-            email_status=CASE WHEN email_sent_at IS NOT NULL THEN 'pending_resolved' ELSE 'resolved_without_email' END,
-            updated_at=datetime('now')
-        WHERE incident_id=? AND status='open'`).bind(row.incident_id).run();
-      resolved+=Number(w?.meta?.changes||w?.changes||0);
-    }
-    return{ok:true,status:'healthy',resolved};
-  }
-
-  const code=integrityAuditIncidentCode(report?.code||report?.message);
-  const key=`integrity_audit:${code}`;
-  const evidence={
-    code,
-    message:safe(report?.message||'Integrity Audit failed',1200),
-    evidence:report?.evidence||null,
-    github_run_id:report?.github_run_id||null,
-    github_run_url:report?.github_run_url||null,
-    github_sha:report?.github_sha||null,
-    checked_at:report?.checked_at||new Date().toISOString()
-  };
-  const incidentId=await upsertIncident(env,{
-    key,
-    severity:'P1',
-    engine:'integrity_audit',
-    executor:'github_actions',
-    action:code,
-    title:`Integrity Audit failure: ${safe(report?.title||report?.message||code,180)}`,
-    summary:safe(report?.message||'ToolScout 2.0 Integrity Audit detected a production invariant failure.',1200),
-    evidence,
-    selfCorrections:[
-      'The Integrity Audit captured the production evidence and failed closed.',
-      'The incident was persisted into the Growth Brain architecture incident queue automatically.'
-    ],
-    whyCodeRequired:'A failed production invariant must be investigated rather than hidden or converted to a healthy state.',
-    recommendedIntervention:'Inspect the attached integrity evidence, repair the underlying invariant, then rerun the Integrity Audit until it reports healthy.'
-  });
-  return{ok:true,status:'reported',incidentId,incidentKey:key};
-}
-
 export async function auditArchitectureEscalations(env){
   await ensureSchema(env);
   await env.DB.prepare(`UPDATE growth_architecture_incidents SET email_status=CASE WHEN email_status='sending_resolved' THEN 'pending_resolved' ELSE 'pending' END,updated_at=datetime('now') WHERE email_status IN ('sending','sending_resolved') AND updated_at<datetime('now','-30 minutes')`).run().catch(()=>{});
