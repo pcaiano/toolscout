@@ -34,8 +34,8 @@ test('Software Trends keeps affiliate status out of editorial selection',()=>{
   assert.doesNotMatch(src,/commission.*sort|affiliate.*ranking|payout.*priority/i);
 });
 
-test('Software Trends preserves the existing canonical URL contract',()=>{
-  assert.ok(src.includes("const PAGE_URL=BASE+'/software-trends-index.html'"));
+test('Software Trends uses the clean canonical URL contract',()=>{
+  assert.ok(src.includes("const PAGE_URL=BASE+'/software-trends-index'"));
   assert.ok(src.includes("const DATA_URL=BASE+'/software-trends-index.json'"));
 });
 
@@ -46,4 +46,5 @@ test('Software Trends uses the ToolScout 2.0 visual system and reduced motion su
   assert.match(src,/a:focus-visible/);
   assert.match(src,/class=\"skipLink\"/);
   assert.match(src,/role=\"progressbar\"/);
+  assert.doesNotMatch(src,/<nav><a class=\"brand\"/);
 });
