@@ -1,5 +1,5 @@
 {
-  "version": 7,
+  "version": 8,
   "principles": {
     "catalogMustStayMarketRelevant": true,
     "officialSourcesRequired": true,
@@ -15,7 +15,8 @@
     "catalogToolsUseSameRankingEligibilityRules": true,
     "aiInteroperabilityIsEditoriallyRelevant": true,
     "aiIntegrationClaimsRequireFirstPartyEvidence": true,
-    "unknownAiIntegrationMustNeverBePresentedAsNoIntegration": true
+    "unknownAiIntegrationMustNeverBePresentedAsNoIntegration": true,
+    "affiliateProgramsMayPrioritizeCatalogResearch": true
   },
   "cadence": {
     "run": "daily",
@@ -184,7 +185,20 @@
       "useAsEditorialComparisonDimension": true,
       "canAffectFitWhenVerified": true,
       "affiliateNeutral": true,
-      "neverInferNamedAssistantSupportWithoutFirstPartyEvidence": true
+      "neverInferNamedAssistantSupportWithoutFirstPartyEvidence": true,
+      "preferMcpAndNamedAssistantConnectivity": true
+    },
+    "affiliateProgramMayIncreaseResearchQueuePriority": true,
+    "affiliateCommissionRateCannotAffectResearchPriority": true,
+    "researchPriority": {
+      "activeAffiliateProgram": 70,
+      "knownAffiliateProgram": 45,
+      "verifiedMcp": 60,
+      "verifiedAiInteroperability": 40,
+      "aiOrAgentResearchHint": 20,
+      "combinedAiAndAffiliateBonus": 35,
+      "marketSignalPerSource": 6,
+      "marketSignalCap": 24
     }
   }
 }
