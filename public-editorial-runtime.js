@@ -1,6 +1,7 @@
 import {transformSeoPublicPage} from './seo-cloudflare-runtime-worker.js';
 import {injectToolScoutSocialFooter} from './social-profiles.js';
 import {canonicalizePublicHtmlResponse} from './public-canonical-contract.js';
+import {injectNewsletterSignup} from './newsletter-public-runtime.js';
 
 function editorialRoute(pathname){
   const p=String(pathname||'');
@@ -48,7 +49,8 @@ export async function handlePublicEditorialRoute(request,env){
   // Preserve the two useful public transformations while bypassing the legacy
   // control/observability decorator chain.
   const seo=await transformSeoPublicPage(request,asset,env);
-  const social=await injectToolScoutSocialFooter(seo);
+  const newsletter=route.surface==='news'?await injectNewsletterSignup(seo,{source:'news-article'}):seo;
+  const social=await injectToolScoutSocialFooter(newsletter);
   const finalResponse=await canonicalizePublicHtmlResponse(social,url.pathname);
   const headers=new Headers(finalResponse.headers);
   headers.set('X-ToolScout-Public-Plane','editorial-v1');
