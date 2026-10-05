@@ -26,14 +26,20 @@ async function fetchText(pathname,{redirect='follow',headers={},method='GET',bod
 // Live sitemap must contain every URL in the deployed repository sitemap.
 const repoSitemap=fs.readFileSync('sitemap.xml','utf8');
 const expectedSitemap=sitemapUrls(repoSitemap);
-const liveSitemapResponse=await fetchText('/sitemap.xml?toolscout_v2_smoke='+Date.now(),{
-  headers:{'Cache-Control':'no-cache','Pragma':'no-cache'}
-});
-if(!liveSitemapResponse.ok)errors.push({code:'live_sitemap_unavailable',status:liveSitemapResponse.status});
-else{
-  const live=sitemapUrls(liveSitemapResponse.text);
-  for(const url of expectedSitemap)if(!live.has(url))errors.push({code:'live_sitemap_missing_url',url});
+let liveSitemapResponse=null,liveSitemap=new Set(),missingSitemapUrls=[];
+for(let attempt=1;attempt<=6;attempt++){
+  liveSitemapResponse=await fetchText('/sitemap.xml?toolscout_v2_smoke='+Date.now()+'&attempt='+attempt,{
+    headers:{'Cache-Control':'no-cache','Pragma':'no-cache'}
+  });
+  if(liveSitemapResponse.ok){
+    liveSitemap=sitemapUrls(liveSitemapResponse.text);
+    missingSitemapUrls=[...expectedSitemap].filter(url=>!liveSitemap.has(url));
+    if(!missingSitemapUrls.length)break;
+  }
+  if(attempt<6)await new Promise(resolve=>setTimeout(resolve,3000));
 }
+if(!liveSitemapResponse?.ok)errors.push({code:'live_sitemap_unavailable',status:liveSitemapResponse?.status||0});
+else for(const url of missingSitemapUrls)errors.push({code:'live_sitemap_missing_url',url});
 
 // Check the highest-value demand pages plus core navigation surfaces.
 const portfolio=readJson('reports/editorial-authority-portfolio.json',{portfolio:[]});
