@@ -36,14 +36,15 @@ export function scoreEditorialPage(html,{pageType='other',hasFreshUpdate=false}=
   const wc=words(html);
   const hasAnalysis=/(ToolScout analysis|what this means|in practice|buyer impact|why it matters|decision)/i.test(html);
   const hasTradeoffs=/(trade[- ]?off|limitation|not ideal|best for|before choosing|compare the depth|who should)/i.test(html);
-  const hasVerification=/(last verified|verified on|source|official|methodology)/i.test(html);
+  const hasVerification=/(last verified|verified on|last checked|checked\s+20\d{2}|methodology)/i.test(html);
   const hasDisclosure=/(affiliate compensation|affiliate commission|sponsored|affiliate disclosure)/i.test(html);
   const hasCanonical=/<link[^>]+rel=["']canonical["']/i.test(html);
   const dated=countMatches(html,/\b20\d{2}-\d{2}-\d{2}\b/g)>0||countMatches(html,/\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{1,2},\s+20\d{2}\b/gi)>0;
   const hasStructuredData=/<script[^>]+application\/ld\+json/i.test(html);
 
+  const commercialDecisionPage=['tool_profile','comparison','guide'].includes(pageType);
   let score=20;
-  score+=Math.min(20,sourceLinks*10);
+  if(!commercialDecisionPage)score+=Math.min(20,sourceLinks*10);
   if(hasAnalysis)score+=15;
   if(hasTradeoffs)score+=10;
   if(hasVerification)score+=10;
