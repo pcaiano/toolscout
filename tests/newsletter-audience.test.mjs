@@ -68,3 +68,14 @@ test('portal-specific subscription IDs are not hardcoded into newsletter sync',(
   assert.match(runtime,/Marketing Information/);
   assert.match(runtime,/communication-preferences\/v4\/definitions/);
 });
+
+
+test('newsletter health reports whether the production CRM credential is ready',()=>{
+  const runtime=read('newsletter-runtime-worker.js');
+  const wrangler=read('wrangler.toml');
+  assert.match(runtime,/\/api\/newsletter\/health/);
+  assert.match(runtime,/status:'configuration_required'/);
+  assert.match(runtime,/status:'ready'/);
+  assert.match(runtime,/status:'provider_unavailable'/);
+  assert.match(wrangler,/\/api\/newsletter\*/);
+});
