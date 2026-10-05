@@ -113,16 +113,25 @@ test('core public hubs do not append SEO link farms beneath the product UI',()=>
   assert.match(seo,/Do not append search-demand link farms to the visible page/);
 });
 
-test('public social footer is suppressed under the outbound policy',async()=>{
+test('public social footer is integrated, responsive and isolated from legacy nav CSS',async()=>{
   const social=read('social-profiles.js');
-  assert.match(social,/TOOLSCOUT_SOCIAL_PROFILES/);
-  assert.match(social,/are not rendered/);
-  assert.doesNotMatch(social,/ToolScout elsewhere|data-toolscout-social-footer|ts-social-links/);
+  assert.match(social,/ToolScout elsewhere/);
+  assert.match(social,/Follow product updates, launches and editorial picks\./);
+  assert.match(social,/data-toolscout-social-footer="2"/);
+  assert.match(social,/data-toolscout-social-link="1"/);
+  assert.match(social,/class="ts-social-follow-links" role="navigation"/);
+  assert.doesNotMatch(social,/<nav[^>]*ToolScout social profiles/);
+  assert.match(social,/grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important/);
+  assert.match(social,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)!important/);
 
   const source='<!doctype html><html><head></head><body><main>Page</main><section class="trust"><p>Trust copy</p><div class="badgeRow">Badges</div></section></body></html>';
   const response=new Response(source,{status:200,headers:{'content-type':'text/html; charset=UTF-8'}});
   const out=await injectToolScoutSocialFooter(response);
-  assert.equal(await out.text(),source);
+  const html=await out.text();
+  assert.equal((html.match(/data-toolscout-social-footer="2"/g)||[]).length,1);
+  assert.match(html,/class="badgeRow">Badges<\/div><div data-toolscout-social-footer="2"/);
+  assert.doesNotMatch(html,/<footer class="ts-social-footer-shell"/);
+  assert.match(html,/href="https:\/\/x\.com\/trytoolscout"/);
 });
 
 
@@ -199,8 +208,8 @@ test('software news receives the ToolScout 2.0 news surface',async()=>{
   assert.match(html,/\.ts2-global-nav \+ \.wrap > \.top:first-child\{display:none!important\}/);
 });
 
-test('public outbound policy removes direct external anchors but preserves internal profile and monetizable CTA routes',async()=>{
-  const source='<!doctype html><html><head></head><body><a href="https://vendor.example/source">Source</a><a href="/tools/example">Profile</a><a href="/go/example?source=software-news">Visit example</a></body></html>';
+test('public outbound policy removes direct external anchors but preserves internal profile, monetizable CTA routes and marked official social profiles',async()=>{
+  const source='<!doctype html><html><head></head><body><a href="https://vendor.example/source">Source</a><a href="/tools/example">Profile</a><a href="/go/example?source=software-news">Visit example</a><a href="https://x.com/trytoolscout" data-toolscout-social-link="1" data-social-network="x">Follow on X</a><a href="https://x.com/someone-else">Unmarked X</a><a href="https://evil.example/fake" data-toolscout-social-link="1">Fake social</a></body></html>';
   const response=new Response(source,{status:200,headers:{'content-type':'text/html; charset=UTF-8'}});
   const out=await transformPublicOutboundPolicyResponse(new Request('https://trytoolscout.org/news/example-story'),response);
   const html=await out.text();
@@ -208,6 +217,9 @@ test('public outbound policy removes direct external anchors but preserves inter
   assert.match(html,/>Source</);
   assert.match(html,/href="\/tools\/example"/);
   assert.match(html,/href="\/go\/example\?source=software-news"/);
+  assert.match(html,/href="https:\/\/x\.com\/trytoolscout"[^>]*data-toolscout-social-link="1"/);
+  assert.doesNotMatch(html,/href="https:\/\/x\.com\/someone-else"/);
+  assert.doesNotMatch(html,/href="https:\/\/evil\.example\/fake"/);
   const sameOrigin=await transformPublicOutboundPolicyResponse(new Request('https://trytoolscout.org/news/example-story'),new Response('<html><body><a href="https://trytoolscout.org/tools/example">Same origin</a></body></html>',{status:200,headers:{'content-type':'text/html'}}));
   assert.match(await sameOrigin.text(),/href="https:\/\/trytoolscout\.org\/tools\/example"/);
 });
