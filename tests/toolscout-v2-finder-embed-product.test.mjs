@@ -93,6 +93,17 @@ test('publisher kit leads with Finder Full and Mini plus a non-tracking live dem
   assert.match(html,/data-track="false"/);
   assert.match(html,/one script tag/i);
   assert.match(html,/raw Finder query/i);
+  assert.match(html,/name="robots" content="index,follow"/);
+  assert.match(html,/href="\/software-trends-index">Trends<\/a>/);
+  assert.match(html,/href="\/distribution\/publisher-kit" aria-current="page">Publisher Kit<\/a>/);
+  assert.match(html,/data-toolscout-sticky-nav="2"/);
+  assert.match(html,/class="nav-cta" href="\/#finder">Find my tools/);
+  const sitemap=read('sitemap.xml');
+  assert.match(sitemap,/https:\/\/trytoolscout\.org\/software-trends-index/);
+  assert.match(sitemap,/https:\/\/trytoolscout\.org\/distribution\/publisher-kit/);
+  const sitemapGenerator=read('scripts/generate-sitemap.mjs');
+  assert.match(sitemapGenerator,/RUNTIME_CORE_URLS/);
+  assert.match(sitemapGenerator,/publisherKitIncluded/);
 });
 
 test('Distribution Network outreach leads with the free Finder offer',()=>{
