@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: '17 5 * * *'
   workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/seo-engine-v2.yml'
 
 permissions:
   contents: write
