@@ -172,3 +172,18 @@ ToolScout 2.0 redesign scope includes both public and owner-only surfaces.
 5. Unavailable or stale sources must remain visibly unavailable or stale. Never substitute zeros.
 6. Private-surface motion follows `docs/MOTION-SYSTEM-2.0.md`.
 7. Command Center implementation contract: `docs/COMMAND-CENTER-REDESIGN-2.0.md` when present on the active redesign branch.
+
+
+## AI interoperability editorial policy
+
+AI interoperability is a first-class ToolScout catalog and editorial dimension.
+
+1. Every catalog tool must carry an explicit AI interoperability state.
+2. Positive claims about ChatGPT, Claude, Gemini, MCP, agent connectivity, connectors or public APIs require first-party vendor evidence.
+3. Unknown evidence is never presented as "no integration" and must not be scored as a negative.
+4. Tool profiles should explain verified AI interoperability, named assistant clients, MCP or agent connectivity, API availability, evidence source and verification date.
+5. Comparisons should include AI interoperability when it is decision-relevant, while keeping product capability, price and workflow fit independent.
+6. Catalog expansion should research AI interoperability as part of first-party verification for every new tool.
+7. Tool cards and buyer guides may surface concise AI-connectivity signals only when verified.
+8. Affiliate status or payout must never affect AI interoperability scoring, catalog admission, ranking or editorial conclusions.
+9. AI-specific SEO assets must not be published from thin or unverified coverage. Prefer evidence-rich profiles and comparisons until the catalog has enough verified breadth for a useful standalone guide.
