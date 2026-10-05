@@ -33,6 +33,10 @@ jobs:
           GSC_PROPERTY: sc-domain:trytoolscout.org
           GSC_LOOKBACK_DAYS: '28'
         run: node scripts/sync-gsc-signals.mjs
+      - name: Discover and publish material software news
+        run: node scripts/discover-software-news.mjs
+      - name: Validate software news editorial contract
+        run: node scripts/validate-software-news-ctas.mjs
       - name: Build ToolScout 2.0 editorial authority portfolio
         run: node scripts/build-editorial-authority-portfolio.mjs
       - name: Validate ToolScout 2.0 editorial authority model
@@ -165,19 +169,21 @@ jobs:
           const exact=new Set([
             'data/tools.json','data/competitive-gap-profiles.json','data/seo-longtail.json',
             'data/catalog-quality-state.json','data/tool-assets.json','data/comparisons.json',
-            'data/search-commercial-routing.json','data/gsc-search-reality.json','data/gsc-daily-trend.json',
+            'data/search-commercial-routing.json','data/gsc-search-reality.json','data/gsc-daily-trend.json','data/software-updates.json',
             'sitemap.xml','robots.txt','feed.xml','llms.txt','software-trends-index.json'
           ]);
-          const allowed=p=>exact.has(p)||/^[^/]+\.html$/.test(p)||/^tools\/.*\.html$/.test(p)||/^blog\/.*\.html$/.test(p)||/^reports\/.*\.json$/.test(p);
+          const allowed=p=>exact.has(p)||/^[^/]+\.html$/.test(p)||/^tools\/.*\.html$/.test(p)||/^news\/.*\.html$/.test(p)||/^blog\/.*\.html$/.test(p)||/^reports\/.*\.json$/.test(p);
           const forbidden=paths.filter(p=>!allowed(p));
           console.log(JSON.stringify({changed:paths.length,forbidden,paths},null,2));
           if(forbidden.length)process.exit(1);
           NODE
       - name: Commit generated SEO assets
+        id: commit_assets
         if: github.ref == 'refs/heads/main'
         run: |
-          if [ -z "$(git status --porcelain -- data/tools.json data/competitive-gap-profiles.json data/seo-longtail.json data/catalog-quality-state.json data/tool-assets.json data/comparisons.json data/search-commercial-routing.json data/gsc-search-reality.json data/gsc-daily-trend.json '*.html' 'tools/*.html' 'sitemap.xml' 'robots.txt' 'feed.xml' 'llms.txt' 'blog/*.html' 'reports/*.json' 'software-trends-index.json')" ]; then
+          if [ -z "$(git status --porcelain -- data/tools.json data/competitive-gap-profiles.json data/seo-longtail.json data/catalog-quality-state.json data/tool-assets.json data/comparisons.json data/search-commercial-routing.json data/gsc-search-reality.json data/gsc-daily-trend.json data/software-updates.json '*.html' 'tools/*.html' 'news/*.html' 'sitemap.xml' 'robots.txt' 'feed.xml' 'llms.txt' 'blog/*.html' 'reports/*.json' 'software-trends-index.json')" ]; then
             echo "No SEO/distribution asset changes to commit."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git config user.name "toolscout-seo-bot"
@@ -191,3 +197,12 @@ jobs:
           fi
           git pull --rebase origin main
           git push origin HEAD:main
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+      - name: Deploy generated editorial and SEO assets
+        if: github.ref == 'refs/heads/main' && steps.commit_assets.outputs.changed == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: npx wrangler deploy --config wrangler.toml --latest
+      - name: Verify generated editorial and SEO assets live
+        if: github.ref == 'refs/heads/main' && steps.commit_assets.outputs.changed == 'true'
+        run: node scripts/verify-v2-live-smoke.mjs
