@@ -39,6 +39,7 @@ async function manifest(env){
       widget_script:'https://trytoolscout.org/embed/toolscout.js',
       pick_script:'https://trytoolscout.org/embed/toolscout-pick.js',
       finder_script:'https://trytoolscout.org/embed/toolscout-finder.js',
+      finder_modes:['full','mini'],
       compare_script:'https://trytoolscout.org/embed/toolscout-compare.js',
       badge_svg:'https://trytoolscout.org/embed/badge.svg',
       json_feed:'https://trytoolscout.org/api/distribution/feed.json',
@@ -46,7 +47,8 @@ async function manifest(env){
     },
     embed_examples:{
       generic:'<div data-toolscout-embed="card"></div><script async src="https://trytoolscout.org/embed/toolscout.js"></script>',
-      finder:'<script async src="https://trytoolscout.org/embed/toolscout-finder.js"></script>',
+      finder:'<script async src="https://trytoolscout.org/embed/toolscout-finder.js" data-publisher="YOUR-SITE" data-mode="full"></script>',
+      finder_mini:'<script async src="https://trytoolscout.org/embed/toolscout-finder.js" data-publisher="YOUR-SITE" data-mode="mini"></script>',
       pick:'<script async src="https://trytoolscout.org/embed/toolscout-pick.js" data-tool="TOOL-SLUG"></script>',
       compare:'<script async src="https://trytoolscout.org/embed/toolscout-compare.js" data-a="TOOL-A" data-b="TOOL-B"></script>',
       badge:'<a href="https://trytoolscout.org/go/embed?type=badge&placement=badge"><img src="https://trytoolscout.org/embed/badge.svg" alt="Powered by ToolScout"></a>'
@@ -54,7 +56,9 @@ async function manifest(env){
     tracking:{
       medium:'distribution',
       campaign_family:'embedded_distribution',
-      event_endpoint:'https://trytoolscout.org/api/distribution/embed-event'
+      event_endpoint:'https://trytoolscout.org/api/distribution/embed-event',
+      publisher_attribution:'data-publisher',
+      raw_finder_query_stored:false
     },
     recent_assets:items.map(x=>x.asset_url)
   },{headers:JSON_H});
