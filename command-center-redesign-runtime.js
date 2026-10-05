@@ -48,8 +48,8 @@ const rangeBar=(kind,active,items)=>'<div class="ts-toolbar"><span class="ts-too
 function setupCards(){
   const gaBody=document.getElementById('trafficProgressBody'),gscBody=document.getElementById('gscProgressBody'),authority=document.getElementById('authorityProgressBody');
   const ga=gaBody&&gaBody.closest('.card'),gsc=gscBody&&gscBody.closest('.card'),au=authority&&authority.closest('.card');
-  if(ga){ga.dataset.tsExplorer='1';ga.querySelector('.kicker').textContent='Traffic intelligence';ga.querySelector('.title').textContent='Google Analytics';if(!document.getElementById('tsGaTabs')){const n=document.createElement('div');n.id='tsGaTabs';n.className='ts-explorer-tabs';ga.insertBefore(n,gaBody.parentElement)}}
-  if(gsc){gsc.dataset.tsExplorer='1';gsc.querySelector('.kicker').textContent='Search demand';gsc.querySelector('.title').textContent='Google Search Console';if(!document.getElementById('tsGscTabs')){const n=document.createElement('div');n.id='tsGscTabs';n.className='ts-explorer-tabs';gsc.insertBefore(n,gscBody.parentElement)}}
+  if(ga){ga.dataset.tsExplorer='1';ga.querySelector('.kicker').textContent='Traffic intelligence';ga.querySelector('.title').textContent='Google Analytics';if(!document.getElementById('tsGaTabs')){const n=document.createElement('div');n.id='tsGaTabs';n.className='ts-explorer-tabs';ga.insertBefore(n,gaBody)}}
+  if(gsc){gsc.dataset.tsExplorer='1';gsc.querySelector('.kicker').textContent='Search demand';gsc.querySelector('.title').textContent='Google Search Console';if(!document.getElementById('tsGscTabs')){const n=document.createElement('div');n.id='tsGscTabs';n.className='ts-explorer-tabs';gsc.insertBefore(n,gscBody)}}
   if(au)au.dataset.tsAuthority='1';
 }
 
