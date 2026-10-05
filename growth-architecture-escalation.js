@@ -159,6 +159,7 @@ export async function auditArchitectureEscalations(env){
   let resolved=0;
   for(const row of open.results||[]){
     if(activeKeys.has(row.incident_key))continue;
+    if(String(row.incident_key||'').startsWith('integrity_audit:'))continue;
     await env.DB.prepare(`UPDATE growth_architecture_incidents SET status='resolved',resolved_at=datetime('now'),resolution_note='Condition cleared by Growth Brain/runtime correction.',email_status=CASE WHEN email_sent_at IS NOT NULL THEN 'pending_resolved' ELSE 'resolved_without_email' END,updated_at=datetime('now') WHERE incident_id=?`).bind(row.incident_id).run();
     resolved++;
   }
