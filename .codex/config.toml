@@ -15,3 +15,5 @@ args = [
   "--isolated=true",
 ]
 startup_timeout_ms = 20_000
+tool_timeout_sec = 120
+required = true
