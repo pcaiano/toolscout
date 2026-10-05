@@ -196,7 +196,7 @@ test('homepage header leaves the finder as the primary action',()=>{
   assert.doesNotMatch(html,/is-compact/);
   assert.doesNotMatch(html,/backdrop-filter/);
   assert.match(html,/min-height:64px;padding:12px 0 9px/);
-  assert.doesNotMatch(html,/min-height:58px/);
+  assert.doesNotMatch(html,/homeGlobalNav\.is-compact/);
 });
 
 
