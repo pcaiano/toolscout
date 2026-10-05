@@ -17,11 +17,16 @@ function canonicalPath(pathname){
 }
 
 export function injectSeoDiscoveryLinks(body,pathname){
-  const path=canonicalPath(pathname),items=SEO_DISCOVERY_LINKS[path];
-  if(!items?.length||String(body).includes('data-ts-search-discovery="1"'))return String(body||'');
+  const path=canonicalPath(pathname),html=String(body||'');
+  // Tools, Guides and Compare already contain deliberate crawlable internal
+  // navigation. A second visible link farm harms the product experience and
+  // duplicates links already present in the primary interface.
+  if(['/tools','/guides','/compare'].includes(path))return html;
+  const items=SEO_DISCOVERY_LINKS[path];
+  if(!items?.length||html.includes('data-ts-search-discovery="1"'))return html;
   const links=items.map(([href,label])=>`<a href="${href}">${label}</a>`).join('');
   const section=`<section data-ts-search-discovery="1" aria-label="Explore more ToolScout resources" style="max-width:1100px;margin:44px auto 24px;padding:20px 22px;border-top:1px solid #e4e7ec"><h2 style="font-size:16px;margin:0 0 12px">Explore more ToolScout resources</h2><div style="display:flex;flex-wrap:wrap;gap:9px 14px">${links}</div></section>`;
-  return String(body||'').replace(/<\/body>/i,section+'</body>');
+  return html.replace(/<\/body>/i,section+'</body>');
 }
 
 export {SEO_DISCOVERY_LINKS};
