@@ -1,4 +1,5 @@
 name: ToolScout Command Center GSC Repair Deploy V2
+# SEO/editorial publish marker: current main assets are deployed only after preservation checks.
 
 on:
   push:
