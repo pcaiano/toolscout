@@ -2,13 +2,30 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {commandCenterHtml} from '../command-center-simplified-view.js';
 import {transformCommandCenterRedesignResponse} from '../command-center-redesign-runtime.js';
+import {transformPublicRedesignResponse} from '../public-redesign-runtime.js';
 
 const root=process.cwd();
-const source=commandCenterHtml();
-const request=new Request('https://trytoolscout.org/analytics',{method:'GET'});
-const response=new Response(source,{status:200,headers:{'Content-Type':'text/html; charset=UTF-8'}});
-const transformed=await transformCommandCenterRedesignResponse(request,response);
 const out=path.join(root,'.browser-fixtures');
 fs.mkdirSync(out,{recursive:true});
-fs.writeFileSync(path.join(out,'analytics.html'),await transformed.text());
-console.log(JSON.stringify({ok:true,file:'.browser-fixtures/analytics.html',source:'commandCenterHtml'}));
+
+async function writeTransformed(name,url,source,transform){
+  const request=new Request(url,{method:'GET'});
+  const response=new Response(source,{status:200,headers:{'Content-Type':'text/html; charset=UTF-8'}});
+  const transformed=await transform(request,response);
+  fs.writeFileSync(path.join(out,name),await transformed.text());
+}
+
+await writeTransformed(
+  'analytics.html',
+  'https://trytoolscout.org/analytics',
+  commandCenterHtml(),
+  transformCommandCenterRedesignResponse
+);
+
+for(const [name,pathname] of [['figma-public.html','tools/figma.html'],['comparison-public.html','make-vs-zapier.html']]){
+  const file=path.join(root,pathname);
+  if(!fs.existsSync(file))throw new Error('Missing browser fixture source: '+pathname);
+  await writeTransformed(name,'https://trytoolscout.org/'+pathname,fs.readFileSync(file,'utf8'),transformPublicRedesignResponse);
+}
+
+console.log(JSON.stringify({ok:true,files:['.browser-fixtures/analytics.html','.browser-fixtures/figma-public.html','.browser-fixtures/comparison-public.html']}));

@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
-<head><link rel="icon" href="/favicon.ico" type="image/x-icon">
+<head>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="impact-site-verification" value="b1abac60-064d-4b6a-9f1b-93c25326c9eb">
@@ -15,99 +16,223 @@
   <meta name="twitter:card" content="summary">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","@id":"https://trytoolscout.org/#website","url":"https://trytoolscout.org/","name":"ToolScout","alternateName":"ToolScout by trytoolscout.org","description":"Independent software discovery and recommendation platform that helps buyers compare tools, browse focused shortlists and find software for a specific job without pay-to-rank recommendations.","publisher":{"@type":"Organization","@id":"https://trytoolscout.org/#organization","name":"ToolScout","url":"https://trytoolscout.org/","sameAs":["https://www.linkedin.com/company/146229906/","https://x.com/trytoolscout","https://bsky.app/profile/trytoolscout.bsky.social","https://dev.to/trytoolscout","https://www.pinterest.com/trytoolscout/","https://www.threads.com/@trytoolscout"]}}</script>
   <style>
-    :root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#101828;background:#f5f7fb;line-height:1.45}
-    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 8% 0,rgba(109,94,252,.11),transparent 31%),radial-gradient(circle at 92% 7%,rgba(42,174,255,.10),transparent 25%),#f5f7fb}.wrap{max-width:1180px;margin:auto;padding:24px 22px 84px}
-    nav{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:72px}.brand{font-weight:850;font-size:23px;letter-spacing:-.045em;color:#101828;text-decoration:none}.navlinks{display:flex;gap:8px;font-size:13px;flex-wrap:wrap}.navlinks a{color:#667085;text-decoration:none;padding:9px 11px;border-radius:10px}.navlinks a:hover{background:#fff;color:#101828;box-shadow:0 5px 18px rgba(16,24,40,.06)}
-    .hero{max-width:980px;margin:0 auto 78px;text-align:center}.eyebrow{text-transform:uppercase;letter-spacing:.15em;font-size:11px;font-weight:800;color:#667085}.hero h1{font-size:clamp(52px,8vw,88px);line-height:.95;letter-spacing:-.075em;margin:16px auto 22px;max-width:920px}.hero>p{font-size:19px;line-height:1.65;color:#667085;max-width:730px;margin:0 auto 28px}.heroActions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;background:#101828;color:#fff!important;padding:12px 17px;border-radius:12px;font-weight:750;cursor:pointer;text-decoration:none;transition:transform .18s ease,box-shadow .18s ease,background .18s ease;box-shadow:0 8px 24px rgba(16,24,40,.14)}.btn:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(16,24,40,.18)}.btn.secondary{background:#fff;color:#101828!important;border:1px solid #e3e7ed;box-shadow:0 7px 20px rgba(16,24,40,.05)}.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
-    .section{margin:0 auto 64px}.sectionHead{display:flex;justify-content:space-between;align-items:end;gap:22px;margin-bottom:19px}.sectionHead h2{font-size:clamp(30px,4vw,43px);letter-spacing:-.05em;margin:4px 0 0}.sectionHead p{color:#667085;max-width:530px;margin:0;line-height:1.6}.textLink{color:#344054;text-decoration:none;font-size:13px;font-weight:750}.textLink:hover{text-decoration:underline}
-    .cardGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}.discoveryCard{display:flex;flex-direction:column;min-height:188px;background:rgba(255,255,255,.92);border:1px solid #e4e8ee;border-radius:20px;padding:20px;text-decoration:none;color:#101828;box-shadow:0 9px 26px rgba(16,24,40,.045);transition:.18s}.discoveryCard:hover{transform:translateY(-2px);box-shadow:0 15px 34px rgba(16,24,40,.08);border-color:#d4dae4}.kicker{font-size:10px;text-transform:uppercase;letter-spacing:.11em;color:#98a2b3;font-weight:800}.discoveryCard h3{font-size:21px;letter-spacing:-.035em;margin:10px 0 8px}.discoveryCard p{font-size:13px;color:#667085;line-height:1.55;margin:0 0 18px}.discoveryCard .goLabel{margin-top:auto;font-size:12px;font-weight:800;color:#344054}
-    .pickGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.pick{display:flex;justify-content:space-between;align-items:center;gap:14px;background:#fff;border:1px solid #e4e8ee;border-radius:17px;padding:17px 18px;text-decoration:none;color:#101828}.pick:hover{border-color:#cfd6e2;box-shadow:0 10px 26px rgba(16,24,40,.06)}.pick strong{font-size:15px}.pick span{color:#98a2b3;font-size:18px}
-    .updatesGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.updateCard{background:#101828;color:#fff;border-radius:21px;padding:21px;min-height:235px;display:flex;flex-direction:column}.updateMeta{display:flex;justify-content:space-between;gap:10px;color:#98a2b3;font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-weight:800}.updateCard h3{font-size:22px;letter-spacing:-.035em;margin:15px 0 9px}.updateCard p{color:#c7ced8;font-size:14px;line-height:1.6;margin:0 0 18px}.updateActions{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:auto}.updateActions a{font-size:12px;font-weight:800;text-decoration:none}.updateActions .profileLink{color:#d9dfe7}.updateActions .vendorLink{background:#fff;color:#101828;padding:9px 11px;border-radius:10px}.updatesEmpty{grid-column:1/-1;color:#667085;background:#fff;border:1px solid #e4e8ee;border-radius:18px;padding:20px}
-    .finderShell{background:rgba(255,255,255,.68);border:1px solid #e2e6ec;border-radius:28px;padding:28px;box-shadow:0 20px 60px rgba(16,24,40,.06)}.finderIntro{text-align:center;max-width:680px;margin:0 auto 22px}.finderIntro h2{font-size:clamp(31px,4vw,45px);letter-spacing:-.05em;margin:7px 0 10px}.finderIntro p{color:#667085;margin:0;line-height:1.6}.search-card{margin:0 auto;background:#fff;border:1px solid rgba(16,24,40,.08);border-radius:22px;padding:10px;box-shadow:0 18px 44px rgba(16,24,40,.07);text-align:left;max-width:900px}.search-inner{padding:16px 18px 10px}textarea{width:100%;min-height:94px;border:0;outline:0;resize:vertical;background:transparent;font:inherit;font-size:18px;color:#101828}textarea::placeholder{color:#98a2b3}.search-actions{display:flex;justify-content:space-between;align-items:center;gap:15px;border-top:1px solid #edf0f4;padding:14px 10px 4px}.hint{font-size:13px;color:#98a2b3}
-    #guided{display:none;margin:22px auto 0;background:#fff;border:1px solid #e6eaf0;border-radius:24px;padding:26px;max-width:900px;text-align:left;box-shadow:0 18px 50px rgba(16,24,40,.07)}.progress{font-size:12px;color:#98a2b3;margin-bottom:16px;font-weight:700}.question{font-size:27px;font-weight:800;letter-spacing:-.035em;margin-bottom:18px}.choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.choice{padding:16px;border:1px solid #e1e5ea;background:#fff;border-radius:15px;text-align:left;font:inherit;cursor:pointer;transition:.18s}.choice:hover,.choice.selected{border-color:#101828;background:#f7f8fa;transform:translateY(-1px)}.back{margin-top:16px;border:0;background:none;padding:0;cursor:pointer;color:#667085}
-    #results{margin:34px auto 0;display:grid;gap:16px;max-width:900px;text-align:left}.profile-card{display:flex;justify-content:space-between;gap:24px;align-items:end;padding:24px 25px;background:#101828;color:#fff;border-radius:22px;box-shadow:0 20px 50px rgba(16,24,40,.16)}.profile-card .eyebrow{color:#98a2b3}.profile-card h2{margin:7px 0 0;font-size:25px;letter-spacing:-.03em}.profile-card .chips{justify-content:flex-end}.result-card{position:relative;background:rgba(255,255,255,.96);border:1px solid #e4e8ee;border-radius:22px;padding:23px 24px;box-shadow:0 12px 34px rgba(16,24,40,.06);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}.result-card:hover{transform:translateY(-2px);box-shadow:0 18px 42px rgba(16,24,40,.10);border-color:#d8dee7}.result-card.featured{border-color:#cfd6e2;box-shadow:0 16px 42px rgba(16,24,40,.09)}.featured-badge{position:absolute;top:14px;right:18px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;background:#101828;color:#fff;border-radius:999px;padding:6px 9px}.result-top{display:flex;justify-content:space-between;gap:18px;align-items:center}.brand-row{display:flex;align-items:center;gap:13px}.tool-logo{width:48px;height:48px;border-radius:15px;background:#f2f4f7;border:1px solid #e5e9ef;display:grid;place-items:center;overflow:hidden;flex:0 0 48px}.tool-logo img{display:block;width:35px;height:35px;object-fit:contain}.logo-fallback{width:100%;height:100%;display:grid;place-items:center;font-weight:850;font-size:13px;color:#344054}.result-card h3{margin:2px 0 0;font-size:22px;letter-spacing:-.03em}.meta{color:#7a8494;font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:750}.match-score{text-align:right;min-width:68px}.match-score span{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#98a2b3}.match-score strong{font-size:26px;letter-spacing:-.04em}.tool-proof{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 2px}.tool-proof span{font-size:11px;font-weight:750;color:#475467;background:#f8fafc;border:1px solid #eaecf0;border-radius:999px;padding:6px 9px}.result-card p{color:#667085;line-height:1.58;font-size:15px}.reason-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:17px 0 13px}.reason{display:flex;gap:7px;align-items:flex-start;font-size:12px;color:#475467;background:#fafbfc;border:1px solid #eef1f4;border-radius:12px;padding:10px}.reason span{font-weight:900;color:#101828}.chips{display:flex;flex-wrap:wrap;gap:7px}.chip{font-size:12px;background:#f2f4f7;border:1px solid #eaecf0;border-radius:999px;padding:6px 9px;color:#475467}.result-bottom{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-top:18px;padding-top:16px;border-top:1px solid #eef1f4}.fit-note{font-size:12px;color:#98a2b3}.empty-state{display:grid;gap:4px;padding:22px 24px;border-radius:20px;background:#fff;border:1px solid #e4e8ee}.empty-state strong{font-size:18px}.empty-state span{color:#667085}
-    .trust{max-width:850px;margin:74px auto 0;text-align:center}.trust p{font-size:12px;color:#98a2b3;line-height:1.6}.trust-links{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:14px}.trust-links a{font-size:12px;color:#667085;text-decoration:none}.trust-links a:hover{text-decoration:underline}
-    @media(max-width:900px){.cardGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.pickGrid,.updatesGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.updateCard:last-child{grid-column:1/-1}}
-    @media(max-width:700px){nav{margin-bottom:54px}.navlinks{gap:2px}.hero{margin-bottom:58px}.hero h1{font-size:52px}.sectionHead{align-items:flex-start;flex-direction:column}.cardGrid,.pickGrid,.updatesGrid{grid-template-columns:1fr}.updateCard:last-child{grid-column:auto}.finderShell{padding:20px 14px}.search-actions{align-items:flex-start;flex-direction:column}.search-actions>div{width:100%;display:grid;gap:9px}.search-actions .btn{width:100%}.choices{grid-template-columns:1fr}.profile-card{align-items:flex-start;flex-direction:column}.profile-card .chips{justify-content:flex-start}.result-top{align-items:flex-start}.match-score{min-width:58px}.reason-grid{grid-template-columns:1fr}.result-bottom{align-items:flex-start;flex-direction:column}.result-bottom .btn{width:100%}.featured-badge{position:static;display:inline-block;margin-bottom:12px}}
+    :root{
+      --graphite:#0B0D0C;--carbon:#141715;--off:#F3F5F1;--soft:#F8F9F6;--muted:#90978F;--muted-dark:#646B64;
+      --lime:#B7FF3C;--line:#DDE2DC;--dark-line:rgba(243,245,241,.10);
+      --fast:140ms;--base:180ms;--deliberate:260ms;--ease:cubic-bezier(.2,.7,.2,1);--out:cubic-bezier(.16,1,.3,1);
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--graphite);background:var(--off);line-height:1.45
+    }
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--off);color:var(--graphite)}
+    a{color:inherit}button,input{font:inherit}.shell{max-width:1440px;margin:auto;padding-left:72px;padding-right:72px}
+    .darkBand{background:var(--graphite);color:var(--off)}.lightBand{background:var(--off)}
+    nav{height:84px;display:flex;align-items:center;justify-content:space-between;gap:24px;border-bottom:1px solid var(--dark-line)}
+    .brand{display:inline-flex;align-items:center;gap:11px;color:var(--off);font-size:22px;font-weight:850;letter-spacing:-.045em;text-decoration:none}
+    .brand img{width:24px;height:24px;border-radius:5px}.navlinks{display:flex;align-items:center;gap:27px;font-size:13px}
+    .navlinks a{color:#CDD2CC;text-decoration:none;transition:color var(--fast) var(--ease)}.navlinks a:hover{color:#fff}
+    .navCta{background:var(--lime);color:var(--graphite)!important;padding:12px 17px;border-radius:7px;font-weight:800}
+    .hero{min-height:610px;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);border-bottom:1px solid var(--dark-line)}
+    .heroCopy{padding:76px 0 76px;max-width:590px}.heroStage{min-height:100%;position:relative}
+    .heroStage::after{content:"";position:absolute;width:1px;height:160px;background:linear-gradient(transparent,rgba(183,255,60,.34),transparent);left:52%;top:29%;opacity:.65}
+    .eyebrow,.kicker{font-size:11px;text-transform:uppercase;letter-spacing:.12em;font-weight:850}.hero .eyebrow{color:var(--lime)}
+    .hero h1{font-size:clamp(58px,6.2vw,88px);line-height:.92;letter-spacing:-.067em;margin:16px 0 27px;max-width:660px}
+    .hero h1 span{color:var(--lime)}.heroLead{font-size:18px;line-height:1.55;color:#C8CDC7;max-width:470px;margin:0 0 28px}
+    .intentBox{display:flex;align-items:center;background:var(--carbon);border:1px solid rgba(243,245,241,.17);border-radius:9px;padding:5px 5px 5px 17px;min-height:58px;max-width:560px;transition:border-color var(--fast) var(--ease),transform var(--fast) var(--ease)}
+    .intentBox:focus-within{border-color:rgba(183,255,60,.64)}.intentBox input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--off);font-size:15px}
+    .intentBox input::placeholder{color:#7F877F}.goBtn{width:48px;height:48px;border:0;border-radius:7px;background:var(--lime);color:var(--graphite);font-size:22px;font-weight:900;cursor:pointer;transition:transform 90ms var(--ease)}
+    .goBtn:active{transform:scale(.96)}.goBtn:disabled{opacity:.55;cursor:wait}.heroProof{display:flex;align-items:center;gap:9px;margin-top:16px;color:#A8AEA8;font-size:12px}
+    .proofDot{width:16px;height:16px;border:1px solid var(--lime);border-radius:50%;display:grid;place-items:center;color:var(--lime);font-size:10px;font-weight:900}.guidedLink{border:0;background:none;color:#8D958D;padding:13px 0 0;font-size:12px;font-weight:700;cursor:pointer}
+    #guided{display:none;margin:0 0 56px;max-width:700px;border:1px solid var(--dark-line);border-radius:10px;padding:22px;background:var(--carbon)}
+    #guided .progress{color:#90978F;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:13px}
+    #guided .question{font-size:25px;font-weight:800;letter-spacing:-.035em;margin-bottom:16px}.choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    .choice{padding:14px;text-align:left;border:1px solid rgba(243,245,241,.12);border-radius:8px;background:transparent;color:var(--off);cursor:pointer;transition:background var(--fast) var(--ease),border-color var(--fast) var(--ease)}
+    .choice:hover,.choice.selected{background:#1D211E;border-color:rgba(183,255,60,.48)}.back{margin-top:15px;border:0;background:none;color:#9BA29B;padding:0;cursor:pointer}
+    .contentShell{padding-top:68px;padding-bottom:86px}.resultsWrap{max-width:1000px;margin:0 auto 64px}#results{display:grid;gap:12px}
+    .profile-card{display:flex;justify-content:space-between;gap:24px;align-items:end;padding:23px 0;border-top:1px solid var(--graphite);border-bottom:1px solid var(--line)}
+    .profile-card .eyebrow{color:var(--muted-dark)}.profile-card h2{margin:7px 0 0;font-size:28px;letter-spacing:-.04em}.profile-card .chips{justify-content:flex-end}
+    .result-card{position:relative;padding:25px 0;border-bottom:1px solid var(--line);transition:transform var(--fast) var(--ease)}.result-card:hover{transform:translateY(-1px)}
+    .featured-badge{position:absolute;right:0;top:25px;font-size:9px;font-weight:850;text-transform:uppercase;letter-spacing:.09em;background:var(--graphite);color:var(--lime);padding:6px 8px;border-radius:6px}
+    .result-top{display:flex;justify-content:space-between;gap:18px;align-items:center}.brand-row{display:flex;align-items:center;gap:13px}.tool-logo{width:48px;height:48px;border-radius:9px;background:#fff;border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;flex:0 0 48px}
+    .tool-logo img{display:block;width:34px;height:34px;object-fit:contain}.logo-fallback{width:100%;height:100%;display:grid;place-items:center;font-weight:850;font-size:12px}.result-card h3{margin:2px 0 0;font-size:23px;letter-spacing:-.035em}.meta{color:#747B74;font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-weight:800}
+    .match-score{text-align:right;min-width:68px}.match-score span{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.09em;color:#858D85}.match-score strong{font-size:25px}
+    .tool-proof,.chips{display:flex;flex-wrap:wrap;gap:7px}.tool-proof{margin:13px 0 0}.tool-proof span,.chip{font-size:11px;border:1px solid var(--line);border-radius:7px;padding:6px 8px;color:#555D55;background:var(--soft)}
+    .result-card p{color:#646B64;line-height:1.6;font-size:15px;max-width:850px}.reason-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}.reason{font-size:12px;color:#515851;border-top:1px solid var(--line);padding:9px 0}.reason span{font-weight:900;margin-right:6px}
+    .result-bottom{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-top:18px}.fit-note{font-size:12px;color:#7E867E}.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--graphite);color:#fff!important;padding:11px 15px;border:1px solid var(--graphite);border-radius:7px;font-weight:800;text-decoration:none;cursor:pointer;transition:transform var(--fast) var(--ease),background var(--fast) var(--ease)}
+    .btn:hover{transform:translateY(-1px)}.btn.secondary{background:transparent;color:var(--graphite)!important;border-color:var(--line)}.empty-state{padding:20px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);display:grid;gap:4px}.empty-state span{color:#646B64}
+    .section{margin:0 auto 82px}.sectionHead{display:flex;justify-content:space-between;gap:30px;align-items:end;margin-bottom:27px}.sectionHead .eyebrow{color:#6F766F}.sectionHead h2{font-size:clamp(36px,4.5vw,52px);line-height:1;letter-spacing:-.055em;margin:7px 0 0}.sectionHead p{max-width:440px;color:#646B64;line-height:1.6;margin:0}
+    .decisionDoors{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.door{min-height:282px;border:1px solid var(--line);border-radius:10px;padding:25px;display:flex;flex-direction:column;color:var(--graphite);text-decoration:none;background:var(--soft);transition:transform var(--fast) var(--ease),border-color var(--fast) var(--ease)}
+    .door:hover{transform:translateY(-2px);border-color:#BFC6BE}.doorLabel{font-size:10px;text-transform:uppercase;letter-spacing:.11em;color:#717971;font-weight:850}.doorLogos{display:flex;align-items:center;gap:7px;margin:18px 0 13px}.doorLogos img{width:38px;height:38px;object-fit:contain;border:1px solid var(--line);border-radius:8px;background:#fff;padding:5px}
+    .door h3{font-size:28px;line-height:1.05;letter-spacing:-.045em;margin:0 0 10px}.door p{color:#646B64;font-size:14px;line-height:1.55;margin:0 0 22px}.doorAction{margin-top:auto;font-size:10px;font-weight:850;letter-spacing:.09em}.liveDot{display:inline-block;width:7px;height:7px;background:var(--lime);border-radius:50%;margin-right:7px}
+    .editorialProof{display:grid;grid-template-columns:5fr 7fr;gap:56px;border-top:1px solid var(--graphite);padding-top:54px}.editorialProof h2{font-size:39px;line-height:1.08;letter-spacing:-.05em;margin:8px 0}.editorialProof .statement{color:#646B64;font-size:17px;line-height:1.65;max-width:760px}.editorialProof .textLink{display:inline-block;margin-top:13px}
+    .textLink{font-size:11px;letter-spacing:.07em;font-weight:850;text-decoration:none}.textLink:hover{text-decoration:underline}
+    .comparisonList,.pickGrid{border-top:1px solid var(--graphite)}.comparisonRow,.pick{display:grid;align-items:center;color:var(--graphite);text-decoration:none;border-bottom:1px solid var(--line);transition:padding-left var(--fast) var(--ease)}
+    .comparisonRow{grid-template-columns:80px 1fr 220px auto;gap:18px;padding:18px 0}.comparisonRow:hover,.pick:hover{padding-left:5px}.comparisonIcons{display:flex}.comparisonIcons img{width:34px;height:34px;border-radius:8px;border:1px solid var(--line);background:#fff;padding:4px}.comparisonIcons img+img{margin-left:-7px}
+    .comparisonRow strong{font-size:20px;letter-spacing:-.03em}.comparisonRow span{color:#707770;font-size:13px}.rowArrow{font-size:20px!important;color:var(--graphite)!important}
+    .pickGrid{display:grid;grid-template-columns:1fr 1fr}.pick{grid-template-columns:1fr auto;padding:18px 0}.pick:nth-child(odd){padding-right:28px}.pick:nth-child(even){padding-left:28px;border-left:1px solid var(--line)}.pick strong{font-size:16px}.pick span{font-size:19px}
+    .pulse{display:grid;grid-template-columns:1.4fr 1fr;border-top:1px solid var(--graphite)}.pulseLead{padding:29px 34px 32px 0;border-right:1px solid var(--line);min-height:310px}.pulseTop{display:flex;align-items:center;gap:8px;font-size:10px;text-transform:uppercase;letter-spacing:.11em;font-weight:850}
+    .pulseStory{transition:opacity var(--base) var(--ease),transform var(--base) var(--ease)}.pulseStory.swap{opacity:0;transform:translateY(6px)}.pulseBrand{display:flex;align-items:center;gap:11px;margin-top:29px}.pulseBrand img{width:34px;height:34px;border-radius:8px;border:1px solid var(--line);background:#fff;padding:4px}.pulseBrand strong{font-size:15px}.pulseMeta{font-size:10px;text-transform:uppercase;letter-spacing:.075em;color:#767D76;margin-top:2px}
+    .pulseLead h3{font-size:32px;line-height:1.08;letter-spacing:-.045em;margin:15px 0 11px;max-width:680px}.pulseLead p{font-size:15px;line-height:1.62;color:#5F665F;max-width:690px}.pulseLinks{display:flex;gap:18px;flex-wrap:wrap;margin-top:24px}
+    .pulseSecondary{padding-left:34px}.pulseItem{width:100%;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;padding:24px 0;cursor:pointer;color:var(--graphite);transition:padding-left var(--fast) var(--ease)}.pulseItem:hover{padding-left:6px}.pulseItem small{display:block;color:#777E77;font-size:9px;text-transform:uppercase;letter-spacing:.09em;font-weight:850}.pulseItem strong{display:block;font-size:17px;line-height:1.35;margin-top:7px}
+    .trust{border-top:1px solid var(--line);padding-top:30px;text-align:left}.trust p{font-size:12px;line-height:1.6;color:#717871;max-width:740px}.trust-links{display:flex;gap:18px;flex-wrap:wrap;margin-top:13px}.trust-links a{font-size:12px;color:#555D55;text-decoration:none}.badgeRow{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:24px;filter:grayscale(1);opacity:.58}.badgeRow img{max-height:44px;width:auto}
+    .pageEnter{animation:pageEnter var(--base) var(--out) both}@keyframes pageEnter{from{opacity:.35;transform:translateY(7px)}to{opacity:1;transform:none}}
+    @media(max-width:960px){.shell{padding-left:30px;padding-right:30px}.navlinks{gap:16px}.hero{grid-template-columns:1fr}.heroStage{display:none}.decisionDoors{grid-template-columns:1fr}.door{min-height:auto}.editorialProof{grid-template-columns:1fr}.comparisonRow{grid-template-columns:70px 1fr auto}.comparisonRow>span:not(.rowArrow){display:none}.pulse{grid-template-columns:1fr}.pulseLead{border-right:0;border-bottom:1px solid var(--line);padding-right:0}.pulseSecondary{padding-left:0}}
+    @media(max-width:700px){.shell{padding-left:20px;padding-right:20px}nav{height:72px}.navlinks a:not(.navCta){display:none}.navCta{padding:10px 12px}.hero{min-height:560px}.heroCopy{padding:55px 0 58px}.hero h1{font-size:52px}.heroLead{font-size:16px}.intentBox{min-height:56px}.choices{grid-template-columns:1fr}.contentShell{padding-top:48px}.section{margin-bottom:64px}.sectionHead{align-items:flex-start;flex-direction:column}.sectionHead h2{font-size:36px}.editorialProof{gap:20px}.editorialProof h2{font-size:31px}.comparisonRow{grid-template-columns:58px 1fr auto}.pickGrid{grid-template-columns:1fr}.pick:nth-child(odd),.pick:nth-child(even){padding:17px 0;border-left:0}.pulseLead h3{font-size:27px}.profile-card,.result-bottom{align-items:flex-start;flex-direction:column}.profile-card .chips{justify-content:flex-start}.reason-grid{grid-template-columns:1fr}.featured-badge{position:static;display:inline-block;margin-bottom:10px}.badgeRow{gap:10px}.badgeRow img{max-height:36px}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
   </style>
 </head>
-<body>
-<div class="wrap">
-  <nav>
-    <a class="brand" href="./">ToolScout</a>
-    <div class="navlinks"><a href="#compare">Compare</a><a href="#picks">Best picks</a><a href="#updates">What's new</a><a href="#finder">Recommend</a><a href="./tools.html">Tools</a><a href="./guides.html">Guides</a></div>
-  </nav>
+<body class="ts-home">
+<div class="darkBand">
+  <div class="shell">
+    <nav>
+      <a class="brand" href="/" aria-label="ToolScout home"><img src="/favicon.svg" alt="" width="24" height="24">ToolScout</a>
+      <div class="navlinks"><a href="#compare">Compare</a><a href="#picks">Best picks</a><a href="#updates">What's new</a><a href="/tools.html">Tools</a><a class="navCta" href="#finder">Find my tools →</a></div>
+    </nav>
+    <main class="pageEnter">
+      <section class="hero" id="finder">
+        <div class="heroCopy">
+          <div class="eyebrow">Independent software decisions</div>
+          <h1>Find the<br>right software.<br><span>Faster.</span></h1>
+          <p class="heroLead">Independent software decisions, without the noise.</p>
+          <div class="intentBox">
+            <input id="need" type="text" aria-label="What are you trying to do?" placeholder="What are you trying to do?" autocomplete="off">
+            <button class="goBtn" type="button" id="go" aria-label="Find my tools" disabled>→</button>
+          </div>
+          <div class="heroProof"><span class="proofDot">✓</span><span>Independent. No sponsored rankings.</span></div>
+          <button type="button" class="guidedLink" id="guidedStart">Prefer a guided choice? 4 quick questions →</button>
+        </div>
+        <div class="heroStage" aria-hidden="true"></div>
+      </section>
+      <section id="guided"><div class="progress" id="progress"></div><div class="question" id="question"></div><div class="choices" id="choices"></div><button type="button" class="back" id="back">← Back</button></section>
+    </main>
+  </div>
+</div>
 
-  <main>
-    <section class="hero">
-      <div class="eyebrow">Independent software discovery · trytoolscout.org</div>
-      <h1>Find the right software, faster.</h1>
-      <p>Compare tools, jump into focused buying guides, follow useful product updates or get a shortlist built around the job you need to do.</p>
-      <div class="heroActions"><a class="btn" href="#compare">Compare software</a><a class="btn secondary" href="#finder">Get a recommendation</a></div>
+<div class="lightBand">
+  <div class="shell contentShell">
+    <div class="resultsWrap"><div id="results"></div></div>
+
+    <section class="section" aria-labelledby="ways-title">
+      <div class="sectionHead"><div><div class="eyebrow">Three ways in</div><h2 id="ways-title">Choose how you want to decide.</h2></div><p>Start with a close choice, a job to solve, or a software change worth following.</p></div>
+      <div class="decisionDoors">
+        <a class="door" href="/make-vs-zapier.html">
+          <span class="doorLabel">01 / Decide</span>
+          <span class="doorLogos"><img src="https://www.google.com/s2/favicons?domain=make.com&sz=128" alt="Make logo"><img src="https://www.google.com/s2/favicons?domain=zapier.com&sz=128" alt="Zapier logo"></span>
+          <h3>Make or Zapier?</h3><p>Control versus simplicity. Start with the tradeoff, then inspect the evidence.</p><span class="doorAction">Compare →</span>
+        </a>
+        <a class="door" href="/best-crm-for-small-business.html">
+          <span class="doorLabel">02 / Discover</span>
+          <span class="doorLogos"><img src="https://www.google.com/s2/favicons?domain=pipedrive.com&sz=128" alt="Pipedrive logo"><img src="https://www.google.com/s2/favicons?domain=hubspot.com&sz=128" alt="HubSpot logo"><img src="https://www.google.com/s2/favicons?domain=monday.com&sz=128" alt="monday.com logo"></span>
+          <h3>CRM for a small business</h3><p>A focused shortlist built around the job, not the loudest vendor.</p><span class="doorAction">See the shortlist →</span>
+        </a>
+        <a class="door" href="#updates">
+          <span class="doorLabel"><i class="liveDot"></i>03 / What's new · live</span>
+          <span class="doorLogos" id="doorUpdateLogos"><img src="https://www.google.com/s2/favicons?domain=github.com&sz=128" alt="GitHub logo"></span>
+          <h3 id="doorUpdateTitle">Copilot code review now works through the API</h3><p>Fresh product changes selected for buyer relevance, not volume.</p><span class="doorAction">See what's new →</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="section editorialProof">
+      <div><div class="eyebrow">ToolScout view</div><h2>Evidence first.<br>Interpretation second.<br>Recommendation last.</h2></div>
+      <div><p class="statement">Software pages should help you make a decision, not make you process another database. ToolScout starts with the tradeoff, shows the evidence that matters, and keeps affiliate relationships out of ranking logic.</p><a class="textLink" href="/methodology.html">HOW TOOLSCOUT DECIDES →</a></div>
     </section>
 
     <section class="section" id="compare">
-      <div class="sectionHead"><div><div class="eyebrow">Fast decisions</div><h2>Compare software directly.</h2></div><p>Skip the quiz when you already know the names. Start with a popular comparison or build your own.</p></div>
-      <div class="cardGrid">
-        <a class="discoveryCard" href="./make-vs-zapier.html"><span data-comparison-favicons="1" aria-hidden="true" style="display:inline-flex;align-items:center;vertical-align:middle;margin-right:8px"><img src="https://www.google.com/s2/favicons?domain=www.make.com&amp;sz=128" alt="" width="22" height="22" loading="lazy" decoding="async" style="width:22px;height:22px;object-fit:contain;border-radius:6px;background:#fff;border:1px solid #e4e7ec"><img src="https://www.google.com/s2/favicons?domain=zapier.com&amp;sz=128" alt="" width="22" height="22" loading="lazy" decoding="async" style="width:22px;height:22px;object-fit:contain;border-radius:6px;background:#fff;border:1px solid #e4e7ec;margin-left:-5px"></span><span class="kicker">Automation</span><h3>Make vs Zapier</h3><p>Compare workflow fit, capabilities, pricing context and decision criteria.</p><span class="goLabel">Compare now →</span></a>
-        <a class="discoveryCard" href="./hubspot-vs-pipedrive.html"><span data-comparison-favicons="1" aria-hidden="true" style="display:inline-flex;align-items:center;vertical-align:middle;margin-right:8px"><img src="https://www.google.com/s2/favicons?domain=www.hubspot.com&amp;sz=128" alt="" width="22" height="22" loading="lazy" decoding="async" style="width:22px;height:22px;object-fit:contain;border-radius:6px;background:#fff;border:1px solid #e4e7ec"><img src="https://www.google.com/s2/favicons?domain=www.pipedrive.com&amp;sz=128" alt="" width="22" height="22" loading="lazy" decoding="async" style="width:22px;height:22px;object-fit:contain;border-radius:6px;background:#fff;border:1px solid #e4e7ec;margin-left:-5px"></span><span class="kicker">CRM</span><h3>HubSpot vs Pipedrive</h3><p>See the practical differences before opening either vendor.</p><span class="goLabel">Compare now →</span></a>
-        <a class="discoveryCard" href="./notion-vs-clickup.html"><span data-comparison-favicons="1" aria-hidden="true" style="display:inline-flex;align-items:center;vertical-align:middle;margin-right:8px"><img src="https://www.google.com/s2/favicons?domain=www.notion.com&amp;sz=128" alt="" width="22" height="22" loading="lazy" decoding="async" style="width:22px;height:22px;object-fit:contain;border-radius:6px;background:#fff;border:1px solid #e4e7ec"><img src="https://www.google.com/s2/favicons?domain=clickup.com&amp;sz=128" alt="" width="22" height="22" loading="lazy" decoding="async" style="width:22px;height:22px;object-fit:contain;border-radius:6px;background:#fff;border:1px solid #e4e7ec;margin-left:-5px"></span><span class="kicker">Productivity</span><h3>Notion vs ClickUp</h3><p>Compare two broad work platforms against the job you need to do.</p><span class="goLabel">Compare now →</span></a>
-        <a class="discoveryCard" href="./semrush-vs-ahrefs.html"><span data-comparison-favicons="1" aria-hidden="true" style="display:inline-flex;align-items:center;vertical-align:middle;margin-right:8px"><img src="https://www.google.com/s2/favicons?domain=www.semrush.com&amp;sz=128" alt="" width="22" height="22" loading="lazy" decoding="async" style="width:22px;height:22px;object-fit:contain;border-radius:6px;background:#fff;border:1px solid #e4e7ec"><img src="https://www.google.com/s2/favicons?domain=ahrefs.com&amp;sz=128" alt="" width="22" height="22" loading="lazy" decoding="async" style="width:22px;height:22px;object-fit:contain;border-radius:6px;background:#fff;border:1px solid #e4e7ec;margin-left:-5px"></span><span class="kicker">SEO</span><h3>Semrush vs Ahrefs</h3><p>Review current catalog fit and the criteria that separate the shortlist.</p><span class="goLabel">Compare now →</span></a>
+      <div class="sectionHead"><div><div class="eyebrow">Decision briefs</div><h2>Compare when the choice is close.</h2></div><p>Each comparison leads with the decision and the tradeoff before the feature table.</p></div>
+      <div class="comparisonList">
+        <a class="comparisonRow" href="/make-vs-zapier.html"><span class="comparisonIcons"><img src="https://www.google.com/s2/favicons?domain=make.com&sz=128" alt=""><img src="https://www.google.com/s2/favicons?domain=zapier.com&sz=128" alt=""></span><strong>Make vs Zapier</strong><span>Control or simplicity?</span><span class="rowArrow">→</span></a>
+        <a class="comparisonRow" href="/hubspot-vs-pipedrive.html"><span class="comparisonIcons"><img src="https://www.google.com/s2/favicons?domain=hubspot.com&sz=128" alt=""><img src="https://www.google.com/s2/favicons?domain=pipedrive.com&sz=128" alt=""></span><strong>HubSpot vs Pipedrive</strong><span>Platform breadth or sales focus?</span><span class="rowArrow">→</span></a>
+        <a class="comparisonRow" href="/notion-vs-clickup.html"><span class="comparisonIcons"><img src="https://www.google.com/s2/favicons?domain=notion.com&sz=128" alt=""><img src="https://www.google.com/s2/favicons?domain=clickup.com&sz=128" alt=""></span><strong>Notion vs ClickUp</strong><span>Flexible workspace or execution system?</span><span class="rowArrow">→</span></a>
+        <a class="comparisonRow" href="/semrush-vs-ahrefs.html"><span class="comparisonIcons"><img src="https://www.google.com/s2/favicons?domain=semrush.com&sz=128" alt=""><img src="https://www.google.com/s2/favicons?domain=ahrefs.com&sz=128" alt=""></span><strong>Semrush vs Ahrefs</strong><span>Broad marketing suite or focused SEO depth?</span><span class="rowArrow">→</span></a>
       </div>
-      <div style="margin-top:14px;text-align:right"><a class="textLink" href="./compare.html">Build another comparison →</a></div>
+      <div style="margin-top:17px;text-align:right"><a class="textLink" href="/compare.html">BUILD ANOTHER COMPARISON →</a></div>
     </section>
 
     <section class="section" id="picks">
-      <div class="sectionHead"><div><div class="eyebrow">High intent shortlists</div><h2>Start with the job, not the brand.</h2></div><p>Focused guides give you a faster route to a relevant shortlist and a vendor when you are ready.</p></div>
+      <div class="sectionHead"><div><div class="eyebrow">Best picks</div><h2>Start with the job, not the brand.</h2></div><p>Shortlists are built around the task, constraints and current catalog evidence.</p></div>
       <div class="pickGrid">
-        <a class="pick" href="./best-crm-for-small-business.html"><strong>Best CRM for small business</strong><span>→</span></a>
-        <a class="pick" href="./best-free-crm.html"><strong>Best free CRM tools</strong><span>→</span></a>
-        <a class="pick" href="./best-project-management-tools.html"><strong>Best project management tools</strong><span>→</span></a>
-        <a class="pick" href="./best-ai-coding-tools.html"><strong>Best AI coding tools</strong><span>→</span></a>
-        <a class="pick" href="./best-email-marketing-tools.html"><strong>Best email marketing tools</strong><span>→</span></a>
-        <a class="pick" href="./best-seo-tools.html"><strong>Best SEO tools</strong><span>→</span></a>
+        <a class="pick" href="/best-crm-for-small-business.html"><strong>Best CRM for small business</strong><span>→</span></a>
+        <a class="pick" href="/best-free-crm.html"><strong>Best free CRM tools</strong><span>→</span></a>
+        <a class="pick" href="/best-project-management-tools.html"><strong>Best project management tools</strong><span>→</span></a>
+        <a class="pick" href="/best-ai-coding-tools.html"><strong>Best AI coding tools</strong><span>→</span></a>
+        <a class="pick" href="/best-email-marketing-tools.html"><strong>Best email marketing tools</strong><span>→</span></a>
+        <a class="pick" href="/best-seo-tools.html"><strong>Best SEO tools</strong><span>→</span></a>
       </div>
     </section>
 
     <section class="section" id="updates">
-      <div class="sectionHead"><div><div class="eyebrow">Fresh product signals</div><h2>What's new in software.</h2></div><p>Relevant releases, product changes and ToolScout research. Partner relationships never determine inclusion or placement.</p></div>
-      <div class="updatesGrid" id="softwareUpdates"><div class="updatesEmpty">Loading the latest curated updates...</div></div>
-      <div style="margin-top:14px;text-align:right"><a class="textLink" href="./software-trends-index.html">Open the Software Trends Index →</a></div>
-    </section>
-
-    <section class="section finderShell" id="finder">
-      <div class="finderIntro"><div class="eyebrow">Personalized recommendation</div><h2>Not sure where to start?</h2><p>Describe the job in plain English or answer four quick questions. ToolScout will build a focused shortlist around your budget, team and workflow.</p></div>
-      <section class="search-card">
-        <div class="search-inner"><textarea id="need" aria-label="Describe what you need" placeholder="Example: I need an affordable CRM for a small sales team with automation and a free plan."></textarea></div>
-        <div class="search-actions"><span class="hint">No account required.</span><div><button type="button" class="btn secondary" id="guidedStart">4 quick questions</button> <button type="button" class="btn" id="go">Find my tools →</button></div></div>
-      </section>
-      <section id="guided"><div class="progress" id="progress"></div><div class="question" id="question"></div><div class="choices" id="choices"></div><button type="button" class="back" id="back">← Back</button></section>
-      <div id="results"></div>
+      <div class="sectionHead"><div><div class="eyebrow">Editorial pulse</div><h2>What's new in software.</h2></div><p>Fresh product changes selected for buyer relevance. Partner relationships never determine inclusion or placement.</p></div>
+      <div class="pulse" id="softwarePulse">
+        <article class="pulseLead">
+          <div class="pulseTop"><i class="liveDot"></i>What's new · live</div>
+          <div class="pulseStory" id="pulseStory">
+            <div class="pulseBrand"><img id="pulseLogo" src="https://www.google.com/s2/favicons?domain=github.com&sz=128" alt=""><div><strong id="pulseTool">GitHub</strong><div class="pulseMeta" id="pulseMeta">Integration update · 2 Oct 2026</div></div></div>
+            <h3 id="pulseTitle">Copilot code review now works through the API</h3>
+            <p id="pulseSummary">Teams can request Copilot code review through the REST and GraphQL APIs, making review automation more relevant to connected developer workflows.</p>
+          </div>
+          <div class="pulseLinks"><a class="textLink" id="pulseArticle" href="/news/github-copilot-code-review-api-support-and-new-default-effort-level.html">READ THE UPDATE →</a><a class="textLink" href="/whats-new.html">VIEW ALL WHAT'S NEW →</a><a class="textLink" href="/software-trends-index.html">SOFTWARE TRENDS INDEX →</a></div>
+        </article>
+        <div class="pulseSecondary" id="pulseSecondary">
+          <button type="button" class="pulseItem"><small>ChatGPT · 29 Sep 2026</small><strong>GPT-6.1 Sol changes the price performance equation</strong></button>
+          <button type="button" class="pulseItem"><small>GitHub · 28 Sep 2026</small><strong>Copilot adds sandboxing and agent observability</strong></button>
+        </div>
+      </div>
     </section>
 
     <section class="trust">
       <p>ToolScout is an independent software discovery and recommendation platform. Affiliate relationships are disclosed where applicable and never influence recommendation ranking.</p>
-      <div class="trust-links"><a href="./methodology.html">How recommendations work</a><a href="./affiliate-disclosure.html">Affiliate disclosure</a><a href="./privacy.html">Privacy</a></div>
-      <div style="margin-top:18px;display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap"><a href="https://tools.launchllama.co?utm_source=badge&amp;utm_medium=referral" target="_blank" rel="noopener noreferrer"><img src="https://tools.launchllama.co/featured-badge-white.jpg?v=5" alt="Featured on Launch Llama Tools" width="200" height="52" loading="lazy" decoding="async" /></a><a href="https://stremit.io" target="_blank" rel="noopener"><img src="https://stremit.io/static/img/badges/featured-on-stremit.png" alt="Featured on Stremit" width="240" height="89" loading="lazy" decoding="async" /></a><a href="https://startupfa.me/s/trytoolscout.org-853" target="_blank"><img src="https://startupfa.me/badges/featured-badge.webp" alt="ToolScout - Featured on Startup Fame" width="171" height="54" /></a><a href="https://smollaunch.com" target="_blank" rel="noopener"><img src="https://smollaunch.com/badges/featured.svg" alt="ToolScout — Featured on Smol Launch" loading="lazy" width="250" height="60" /></a></div>
+      <div class="trust-links"><a href="/methodology.html">How recommendations work</a><a href="/affiliate-disclosure.html">Affiliate disclosure</a><a href="/privacy.html">Privacy</a></div>
+      <div class="badgeRow"><a href="https://tools.launchllama.co?utm_source=badge&amp;utm_medium=referral" target="_blank" rel="noopener noreferrer"><img src="https://tools.launchllama.co/featured-badge-white.jpg?v=5" alt="Featured on Launch Llama Tools" width="200" height="52" loading="lazy"></a><a href="https://stremit.io" target="_blank" rel="noopener"><img src="https://stremit.io/static/img/badges/featured-on-stremit.png" alt="Featured on Stremit" width="240" height="89" loading="lazy"></a><a href="https://startupfa.me/s/trytoolscout.org-853" target="_blank" rel="noopener"><img src="https://startupfa.me/badges/featured-badge.webp" alt="ToolScout Featured on Startup Fame" width="171" height="54" loading="lazy"></a><a href="https://smollaunch.com" target="_blank" rel="noopener"><img src="https://smollaunch.com/badges/featured.svg" alt="ToolScout Featured on Smol Launch" width="250" height="60" loading="lazy"></a></div>
     </section>
-  </main>
+  </div>
 </div>
-<script src="./app.js?v=20260916-home-v2" defer></script>
+
+<script src="/app.js?v=20261005-redesign2" defer></script>
 <script>
 (function(){
-  const root=document.getElementById('softwareUpdates');
-  if(!root)return;
   const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-  fetch('./data/software-updates.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('updates');return r.json()}).then(data=>{
-    const items=Array.isArray(data.items)?data.items.slice(0,3):[];
-    if(!items.length)throw new Error('empty');
-    root.innerHTML=items.map(item=>{
-      const label=item.partnerUpdate?'Partner update':item.label;
-      const profile=item.profileUrl?`<a class="profileLink" href="${esc(item.profileUrl)}">Read more →</a>`:'';
-      const outbound=item.outboundUrl&&item.outboundLabel?`<a class="vendorLink" href="${esc(item.outboundUrl)}" target="_blank" rel="nofollow sponsored noopener">${esc(item.outboundLabel)} ↗</a>`:'';
-      return `<article class="updateCard"><div class="updateMeta"><span>${esc(label||'Update')}</span><span>${esc(item.publishedAt||'')}</span></div><h3>${esc(item.title||'Software update')}</h3><p>${esc(item.summary||'')}</p><div class="updateActions">${profile}${outbound}</div></article>`;
-    }).join('');
-  }).catch(()=>{root.innerHTML='<div class="updatesEmpty">Software updates are being curated. Browse the current Software Trends Index in the meantime.</div>'});
+  const fmtDate=value=>{try{return new Intl.DateTimeFormat('en',{day:'numeric',month:'short',year:'numeric'}).format(new Date(value+'T12:00:00Z'))}catch{return value||''}};
+  const domainOf=url=>{try{return new URL(url).hostname.replace(/^www\./,'')}catch{return''}};
+  const favicon=domain=>domain?'https://www.google.com/s2/favicons?domain='+encodeURIComponent(domain)+'&sz=128':'/favicon.svg';
+  const fallback=[
+    {toolName:'GitHub',toolSlug:'github',label:'Integration update',publishedAt:'2026-10-02',title:'Copilot code review now works through the API',summary:'Teams can request Copilot code review through REST and GraphQL APIs, making review automation more relevant to connected developer workflows.',articleUrl:'/news/github-copilot-code-review-api-support-and-new-default-effort-level.html',sourceUrl:'https://github.com/'},
+    {toolName:'ChatGPT',toolSlug:'chatgpt',label:'Pricing and packaging update',publishedAt:'2026-09-29',title:'GPT-6.1 Sol changes the price performance equation',summary:'A lower cost model tier can alter which AI assistant or coding stack makes economic sense for teams with sustained usage.',articleUrl:'/news/chatgpt-introducing-gpt-6-1-sol.html',sourceUrl:'https://openai.com/'},
+    {toolName:'GitHub',toolSlug:'github',label:'Official product update',publishedAt:'2026-09-28',title:'Copilot adds sandboxing and agent observability',summary:'Local sandboxing and agent monitoring give software teams more control over AI assisted development.',articleUrl:'/news/github-copilot-sandboxing-observability.html',sourceUrl:'https://github.com/'}
+  ];
+  let stories=fallback,current=0,toolsBySlug=new Map();
+  const story=document.getElementById('pulseStory'),secondary=document.getElementById('pulseSecondary');
+  function hydrate(item){
+    const tool=toolsBySlug.get(item.toolSlug)||{},domain=domainOf(tool.sourceUrl||item.sourceUrl);
+    document.getElementById('pulseLogo').src=favicon(domain);
+    document.getElementById('pulseLogo').alt=(item.toolName||'Software')+' logo';
+    document.getElementById('pulseTool').textContent=item.toolName||'Software';
+    document.getElementById('pulseMeta').textContent=(item.label||'Update')+' · '+fmtDate(item.publishedAt);
+    document.getElementById('pulseTitle').textContent=item.title||'Software update';
+    document.getElementById('pulseSummary').textContent=item.summary||'';
+    document.getElementById('pulseArticle').href=item.articleUrl||item.profileUrl||'/whats-new.html';
+    const doorTitle=document.getElementById('doorUpdateTitle'),doorLogos=document.getElementById('doorUpdateLogos');
+    if(current===0&&doorTitle)doorTitle.textContent=item.title||'Latest software changes';
+    if(current===0&&doorLogos)doorLogos.innerHTML='<img src="'+esc(favicon(domain))+'" alt="'+esc((item.toolName||'Software')+' logo')+'">';
+  }
+  function renderSecondary(){
+    if(!secondary)return;
+    secondary.innerHTML=stories.map((item,index)=>index===current?'':('<button type="button" class="pulseItem" data-pulse-index="'+index+'"><small>'+esc(item.toolName||'Software')+' · '+esc(fmtDate(item.publishedAt))+'</small><strong>'+esc(item.title||'Software update')+'</strong></button>')).join('');
+    secondary.querySelectorAll('[data-pulse-index]').forEach(btn=>btn.addEventListener('click',()=>select(Number(btn.dataset.pulseIndex))));
+  }
+  function select(index){
+    if(index===current||!stories[index])return;
+    if(story)story.classList.add('swap');
+    setTimeout(()=>{current=index;hydrate(stories[index]);renderSecondary();if(story)story.classList.remove('swap')},170);
+  }
+  Promise.all([
+    fetch('/data/software-updates.json',{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()),
+    fetch('/data/tools.json',{cache:'no-store'}).then(r=>r.ok?r.json():[])
+  ]).then(([updates,tools])=>{
+    toolsBySlug=new Map((Array.isArray(tools)?tools:[]).map(t=>[t.slug,t]));
+    const items=Array.isArray(updates.items)?updates.items.slice().sort((a,b)=>String(b.publishedAt||'').localeCompare(String(a.publishedAt||''))).slice(0,3):[];
+    if(items.length)stories=items;
+    current=0;hydrate(stories[0]);renderSecondary();
+  }).catch(()=>{hydrate(stories[0]);renderSecondary()});
 })();
 </script>
 </body>

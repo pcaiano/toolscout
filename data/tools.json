@@ -5903,6 +5903,16 @@
         ]
       },
       "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current ChatGPT, Claude, Gemini, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -5957,6 +5967,16 @@
         ]
       },
       "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current ChatGPT, Claude, Gemini, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -6016,6 +6036,16 @@
         ]
       },
       "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current ChatGPT, Claude, Gemini, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   }
 ]
