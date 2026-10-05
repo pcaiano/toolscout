@@ -82,3 +82,11 @@ test('workflow persists audit outcome before enforcing failure',()=>{
   assert.match(workflow,/wrangler d1 execute toolscout --remote --config wrangler\.toml --file integrity-incident\.sql/);
   assert.match(workflow,/if: steps\.production_audit\.outcome != 'success'/);
 });
+
+
+test('Integrity Audit incidents cannot poison the next audit or be resolved by the generic architecture sweeper',()=>{
+  const workflow=fs.readFileSync(new URL('../.github/workflows/toolscout-v2-integrity-audit.yml',import.meta.url),'utf8');
+  const architecture=fs.readFileSync(new URL('../growth-architecture-escalation.js',import.meta.url),'utf8');
+  assert.match(workflow,/COALESCE\(engine,''\)<>'integrity_audit'/);
+  assert.match(architecture,/startsWith\('integrity_audit:'\)\)continue/);
+});
