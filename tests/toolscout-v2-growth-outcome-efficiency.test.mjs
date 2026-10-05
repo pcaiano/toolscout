@@ -39,3 +39,19 @@ test('Command Center labels source work and retry cadence as outcome-aware truth
   assert.match(commandCenter,/zero-yield cooldown/);
   assert.match(commandCenter,/adapter revalidation remains immediate/);
 });
+
+
+test('Growth Brain stays focused on public consolidation, distributable assets and measurable audience growth',()=>{
+  const playbook=JSON.parse(fs.readFileSync(new URL('../data/growth-acquisition-playbook.json',import.meta.url),'utf8'));
+  assert.match(supervisor,/GROWTH_FOCUS=\['public_surface_completion','finder_publisher_editorial_distribution','audience_growth'\]/);
+  assert.match(supervisor,/GROWTH_OUTCOMES=\['strict_verified_human_sessions','new_verified_referring_domains','newsletter_subscribers'\]/);
+  assert.match(supervisor,/DISTRIBUTION_ASSETS=\['finder_embed','publisher_kit','editorial_content'\]/);
+  assert.match(supervisor,/architecture_change_policy:\{mode:'freeze_by_default',allow_only:ARCHITECTURE_CHANGE_EXCEPTIONS\}/);
+  assert.equal(playbook.rules.architectureFreezeByDefault,true);
+  assert.deepEqual(playbook.rules.architectureChangeExceptions,['production_incident','integrity_failure','public_regression','growth_blocker']);
+  assert.deepEqual(playbook.strategy.primaryAssets,['finder_embed','publisher_kit','editorial_content']);
+  assert.deepEqual(playbook.strategy.primaryOutcomes,['strict_verified_human_sessions','new_verified_referring_domains','newsletter_subscribers']);
+  assert.equal(playbook.strategy.publicSurfaceTarget,'100_percent_toolscout_2');
+  assert.ok(playbook.strategy.successChain.includes('new_verified_referring_domains'));
+  assert.ok(playbook.strategy.successChain.includes('newsletter_subscribers'));
+});
