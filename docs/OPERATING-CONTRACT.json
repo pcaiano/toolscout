@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "effective_date": "2026-09-29",
+  "effective_date": "2026-10-05",
   "purpose": "Machine-checkable ToolScout operating contract and anti-drift invariants.",
   "project": {
     "repository": "pcaiano/toolscout",
@@ -42,6 +42,16 @@
       "role": "non_blocking_human_assisted_auth_sidecar",
       "must_not_block_autonomous_throughput": true,
       "live_provider_verification_required_when_relevant": true
+    },
+    "postgres_runtime": {
+      "service_name": "toolscout-runtime",
+      "database_name": "toolscout_runtime",
+      "status": "residual_pending_retirement",
+      "expires_at": "2026-10-25T23:50:50Z",
+      "canonical_business_state": false,
+      "current_code_dependency_observed": false,
+      "upgrade_required": false,
+      "disposition": "retire_before_expiry_unless_new_machine_evidence_proves_dependency"
     }
   },
   "execution": {
@@ -135,7 +145,11 @@
     "public_canonical_contract_is_extensionless",
     "existing_static_guides_cannot_be_replaced_by_runtime_rankings",
     "observability_get_routes_do_not_mutate_canonical_state",
-    "scheduled_missions_must_use_registered_runtime_crons"
+    "scheduled_missions_must_use_registered_runtime_crons",
+    "github_actions_never_own_primary_production_scheduler",
+    "only_operating_contract_listed_github_workflows_may_exist_on_main",
+    "render_postgres_runtime_is_not_canonical_business_state",
+    "dated_or_snapshot_bound_repair_workflows_cannot_reenter_main_without_contract_change"
   ],
   "mission": {
     "starts_on": "2026-09-29",
@@ -179,5 +193,28 @@
     "static_guide_sovereignty": true,
     "observability_gets_are_read_only": true,
     "scheduled_missions_require_registered_cron": true
+  },
+  "github_actions": {
+    "role": "ci_telemetry_and_manual_recovery_only",
+    "primary_scheduler_forbidden": true,
+    "active_workflows": [
+      "deploy-worker.yml",
+      "growth-brain-seo-executor.yml",
+      "gsc-growth-bridge.yml",
+      "gsc-search-reality.yml",
+      "search-evidence-watchdog.yml",
+      "seo-engine-v2.yml",
+      "toolscout-v2-ci.yml",
+      "toolscout-v2-integrity-audit.yml",
+      "toolscout-v2-production-acceptance.yml"
+    ],
+    "scheduled_workflows": {
+      "gsc-search-reality.yml": "23 6 * * *",
+      "search-evidence-watchdog.yml": "47 6 * * *",
+      "seo-engine-v2.yml": "17 5 * * *"
+    },
+    "legacy_conservation_branch": "pre-conservation-2026-09-13",
+    "conservation_stubs_removed": 53,
+    "historical_one_shots_removed": 45
   }
 }
