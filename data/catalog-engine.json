@@ -57,8 +57,7 @@
       "features",
       "bestFor",
       "sourceUrl",
-      "scores",
-      "aiIntegration"
+      "scores"
     ],
     "scoreKeys": [
       "price",
@@ -102,7 +101,9 @@
     "autoAdmitTrustedCandidates": true,
     "autoAdmitGeneratedCandidates": false,
     "rejectGenericSyntheticEditorialProfiles": true,
-    "maximumFactualReviewAgeDays": 45
+    "maximumFactualReviewAgeDays": 45,
+    "aiInteroperabilityProfileRequiredOnAdmission": true,
+    "aiInteroperabilityCanBeUnknown": true
   },
   "coverageAdmission": {
     "autoPromoteVerifiedCompetitiveGapProfiles": true,
