@@ -49,7 +49,9 @@ test('newsletter sync upserts contacts and applies the HubSpot subscription type
   const runtime=read('newsletter-runtime-worker.js');
   const migration=read('migrations/0117_newsletter_hubspot_sync.sql');
   const router=read('compute-router-worker.js');
-  assert.match(runtime,/HUBSPOT_SUBSCRIPTION_TYPE_ID='3781890361'/);
+  assert.match(runtime,/resolveHubSpotSubscriptionType/);
+  assert.match(runtime,/communication-preferences\/v4\/definitions/);
+  assert.match(runtime,/HUBSPOT_SUBSCRIPTION_TYPE_ID\|\|''/);
   assert.match(runtime,/crm\/v3\/objects\/contacts\/batch\/upsert/);
   assert.match(runtime,/communication-preferences\/v4\/statuses\//);
   assert.match(runtime,/CONSENT_WITH_NOTICE/);
@@ -57,4 +59,12 @@ test('newsletter sync upserts contacts and applies the HubSpot subscription type
   assert.match(runtime,/hubspot_access_token_missing/);
   assert.match(migration,/hubspot_sync_error/);
   assert.match(router,/newsletter_hubspot_sync_failed/);
+});
+
+
+test('portal-specific subscription IDs are not hardcoded into newsletter sync',()=>{
+  const runtime=read('newsletter-runtime-worker.js');
+  assert.doesNotMatch(runtime,/3781890361/);
+  assert.match(runtime,/Marketing Information/);
+  assert.match(runtime,/communication-preferences\/v4\/definitions/);
 });
