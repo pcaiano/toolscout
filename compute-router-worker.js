@@ -2530,12 +2530,16 @@ export default{
       });
       const combined=(async()=>{
         await Promise.allSettled([growth,authority,primary,seo]);
-        await runGrowthClosedLoopScheduled(scheduledEvent,env,ctx).catch(async error=>{
-          await event(env,'authority_closed_loop_scheduler_failed','failed',safe(error?.message||error,800)).catch(()=>{});
-          return null;
-        });
+        // The named sender-drain owner must claim/dispatch executable make_sender
+        // work before the closed loop observes handoff state. Otherwise a pending,
+        // ready task can appear runnable while public-candidates correctly sees no
+        // claimed task and the authority recovery reports a false failure.
         await runAuthorityDrainScheduled(scheduledEvent,env,ctx).catch(async error=>{
           await event(env,'authority_drain_scheduler_failed','failed',safe(error?.message||error,800)).catch(()=>{});
+          return null;
+        });
+        await runGrowthClosedLoopScheduled(scheduledEvent,env,ctx).catch(async error=>{
+          await event(env,'authority_closed_loop_scheduler_failed','failed',safe(error?.message||error,800)).catch(()=>{});
           return null;
         });
       })();
