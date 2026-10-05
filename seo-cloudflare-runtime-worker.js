@@ -169,8 +169,7 @@ async function transformPage(request,response,env){
     const state=await activeState(env,pathname);
     const taskSpecificClickCapture=state&&String(state.reason||'')==='execution_contract:improve_click_capture';
     if(taskSpecificClickCapture)html=improveClickCapture(html,pathname);
-    const taskSpecificDepth=state&&String(state.reason||'')==='execution_contract:deepen_existing_search_asset';
-    const bestPageDepth=pathname.startsWith('/best-')&&!cfg.consolidations?.[pathname.slice(1)];
+    const bestPageDepth=state&&pathname.startsWith('/best-')&&!cfg.consolidations?.[pathname.slice(1)];
     if(bestPageDepth&&!html.includes('organic-growth:runtime-start')&&!html.includes('organic-growth:start')){
       const depthSlug=pathname.replace(/^\//,'');
       const block=decisionBlock(depthSlug,criteriaFor(cfg,depthSlug));
