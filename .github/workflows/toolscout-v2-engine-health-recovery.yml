@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/toolscout-v2-engine-health-recovery.yml'
+      - 'growth-architecture-escalation.js'
 
 permissions:
   contents: read
