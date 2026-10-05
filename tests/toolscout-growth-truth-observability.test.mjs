@@ -25,16 +25,10 @@ test('canonical external authority snapshot reflects the latest SE Ranking obser
   assert.ok(authority.referringDomains.some(x=>x.domain==='www.uneed.best'&&x.dofollowBacklinks===1));
 });
 
-test('growth truth production repair proves GSC, authority and final release after deployment',()=>{
-  const workflow=read('.github/workflows/growth-truth-production-repair.yml');
+test('growth truth probe remains available while redundant repair workflow is retired',()=>{
+  const workflowPath=new URL('../.github/workflows/growth-truth-production-repair.yml',import.meta.url);
   const probe=read('scripts/probe-growth-truth-live.mjs');
-  assert.match(workflow,/name: ToolScout Growth Truth Production Repair/);
-  assert.match(workflow,/workflow_dispatch:/);
-  assert.doesNotMatch(workflow,/\n\s*push:/);
-  assert.doesNotMatch(workflow,/github\.event\.head_commit/);
-  assert.match(workflow,/wrangler deploy --config wrangler\.toml --latest/);
-  assert.match(workflow,/verify-v2-live-smoke\.mjs/);
-  assert.match(workflow,/probe-growth-truth-live\.mjs/);
+  assert.equal(fs.existsSync(workflowPath),false);
   assert.match(probe,/authority_backlinks_not_refreshed/);
   assert.match(probe,/gsc_reality_stale/);
   assert.match(probe,/gsc_daily_trend_stale/);
