@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 7,
   "principles": {
     "catalogMustStayMarketRelevant": true,
     "officialSourcesRequired": true,
@@ -12,7 +12,10 @@
     "catalogEntryDoesNotImplyRecommendation": true,
     "volatileFactsRequireFieldLevelFreshness": true,
     "visualAssetsArePartOfCatalogQuality": true,
-    "catalogToolsUseSameRankingEligibilityRules": true
+    "catalogToolsUseSameRankingEligibilityRules": true,
+    "aiInteroperabilityIsEditoriallyRelevant": true,
+    "aiIntegrationClaimsRequireFirstPartyEvidence": true,
+    "unknownAiIntegrationMustNeverBePresentedAsNoIntegration": true
   },
   "cadence": {
     "run": "daily",
@@ -54,7 +57,8 @@
       "features",
       "bestFor",
       "sourceUrl",
-      "scores"
+      "scores",
+      "aiIntegration"
     ],
     "scoreKeys": [
       "price",
@@ -124,7 +128,8 @@
       "pricing",
       "freePlan",
       "trial",
-      "features"
+      "features",
+      "aiIntegration"
     ],
     "preferFirstPartyVisualAssets": true,
     "validateVisualAssets": true,
@@ -141,7 +146,22 @@
     "requireResolvedVisualAssetBeforePublication": true,
     "auditAllPublishedTools": true,
     "runtimeQualityBatchSize": 12,
-    "automaticQualityHoldForRuntimeFailures": true
+    "automaticQualityHoldForRuntimeFailures": true,
+    "aiInteroperability": {
+      "enabled": true,
+      "evidencePolicy": "first_party_only",
+      "trackedSignals": [
+        "ChatGPT",
+        "Claude",
+        "Gemini",
+        "MCP",
+        "AI agents",
+        "public API"
+      ],
+      "verifiedStatusRequiredForPublicClaims": true,
+      "unknownIsNotNegative": true,
+      "reviewDays": 30
+    }
   },
   "trustedCandidateFiles": [
     "data/catalog-wave1-enrichment.json",
@@ -157,6 +177,13 @@
     "maxCompetitiveGapProfilesPerCycle": 3,
     "minimumVerifiedCapabilitiesForGapProfile": 2,
     "competitiveGapProfilesAreNonRanking": false,
-    "competitiveGapEditorialFactsRequireFirstPartySource": true
+    "competitiveGapEditorialFactsRequireFirstPartySource": true,
+    "aiInteroperability": {
+      "useAsCatalogResearchSignal": true,
+      "useAsEditorialComparisonDimension": true,
+      "canAffectFitWhenVerified": true,
+      "affiliateNeutral": true,
+      "neverInferNamedAssistantSupportWithoutFirstPartyEvidence": true
+    }
   }
 }
