@@ -81,7 +81,7 @@ import {handleFunnelRuntimeRoute} from './funnel-worker.js';
 import {handleDynamicRuntimeRoute} from './dynamic-worker.js';
 import {transformComparisonAiResponse} from './comparison-ai-runtime.js';
 import {transformPublicRedesignResponse} from './public-redesign-runtime.js';
-import {handleNewsletterRoute} from './newsletter-runtime-worker.js';
+import {handleNewsletterRoute,runNewsletterHubSpotSync} from './newsletter-runtime-worker.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 
@@ -2385,7 +2385,7 @@ export default{
   async fetch(request,env,ctx){
     const early=await earlyOwnedRoute(request,env,ctx);
     if(early)return early;
-    const newsletter=await handleNewsletterRoute(request,env);
+    const newsletter=await handleNewsletterRoute(request,env,ctx);
     if(newsletter)return newsletter;
     const u=new URL(request.url);
     if(request.method==='GET'&&u.pathname==='/api/compute/health'){
@@ -2538,8 +2538,12 @@ export default{
         await event(env,'authority_acquisition_scheduler_failed','failed',safe(error?.message||error,800)).catch(()=>{});
         return null;
       });
+      const newsletterSync=Promise.resolve(runNewsletterHubSpotSync(env,{limit:25})).catch(async error=>{
+        await event(env,'newsletter_hubspot_sync_failed','failed',safe(error?.message||error,800)).catch(()=>{});
+        return null;
+      });
       const combined=(async()=>{
-        await Promise.allSettled([growth,authority,primary,seo]);
+        await Promise.allSettled([growth,authority,primary,seo,newsletterSync]);
         // The named sender-drain owner must claim/dispatch executable make_sender
         // work before the closed loop observes handoff state. Otherwise a pending,
         // ready task can appear runnable while public-candidates correctly sees no
