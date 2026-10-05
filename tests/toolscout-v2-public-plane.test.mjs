@@ -23,7 +23,7 @@ test('direct news response uses ToolScout 2.0 and removes non-monetizable extern
   assert.doesNotMatch(html,/href="https:\/\/zapier\.com\//);
   assert.match(html,/>Official source</);
   assert.doesNotMatch(html,/href="https:\/\/(?:www\.)?(?:linkedin\.com|x\.com|bsky\.app|dev\.to|pinterest\.com|threads\.com)/);
-  assert.match(html,/data-toolscout-social-footer="1"/);
+  assert.doesNotMatch(html,/data-toolscout-social-footer="1"|ToolScout elsewhere/);
 });
 
 test('legacy .html news URL redirects to the existing canonical path',async()=>{
