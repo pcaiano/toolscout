@@ -592,6 +592,12 @@ async function canonicalizeSitemapResponse(response){
 
 export async function handlePublicCanonicalSurfaceRoute(request,env,ctx){
   const url=new URL(request.url);
+  const legacySeoPath=url.pathname.replace(/\.html$/i,'').replace(/\/$/,'')||'/';
+  if((request.method==='GET'||request.method==='HEAD')&&legacySeoPath==='/best-seo-keyword-research-tools'){
+    const target=new URL(url.toString());
+    target.pathname='/best-keyword-research-tools';
+    return Response.redirect(target.toString(),308);
+  }
   if((request.method==='GET'||request.method==='HEAD')&&/\.html$/i.test(url.pathname)){
     const target=new URL(url.toString());
     target.pathname=canonicalSeoPath(url.pathname);
