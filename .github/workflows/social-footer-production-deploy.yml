@@ -54,3 +54,5 @@ jobs:
           grep -q 'ToolScout elsewhere' /tmp/news.html
           grep -q 'href="https://x.com/trytoolscout"' /tmp/news.html
           if grep -q 'href="https://openai.com' /tmp/news.html; then echo 'Non-social external source link escaped outbound policy'; exit 1; fi
+
+# production trigger
