@@ -1,11 +1,11 @@
 {
-  "version": 4,
+  "version": 5,
   "edition": "2026-10",
   "editionLabel": "October 2026",
   "publishedAt": "2026-10-05T15:53:54.130Z",
   "scope": "ToolScout first-party editorial dataset of public software product changes selected for buyer relevance. It is not a measure of global market share.",
   "updatedThrough": "2026-10-05",
-  "sourceMethod": "Primary vendor documentation, changelogs, release notes and official product announcements. ToolScout classifies buyer impact independently of affiliate status.",
+  "sourceMethod": "Primary vendor documentation, changelogs, release notes and official product announcements. ToolScout aggregates observed changes into trend categories and keeps affiliate status out of selection.",
   "primarySourceCount": 12,
   "searchVisibility": {
     "source": "Google Search Console",
@@ -23,6 +23,9 @@
       "evidence": [
         "github-selected-models-in-github-copilot-deprecated",
         "github-copilot-sandboxing-observability"
+      ],
+      "vendors": [
+        "GitHub"
       ]
     },
     {
@@ -31,6 +34,9 @@
       "summary": "More software updates are designed to reduce the handoff between understanding what happened and taking the next operational action.",
       "evidence": [
         "github-proof-of-presence-enterprise"
+      ],
+      "vendors": [
+        "GitHub"
       ]
     }
   ],
@@ -379,5 +385,261 @@
     }
   ],
   "pageUrl": "https://trytoolscout.org/software-trends-index.html",
-  "dataUrl": "https://trytoolscout.org/software-trends-index.json"
+  "dataUrl": "https://trytoolscout.org/software-trends-index.json",
+  "metrics": {
+    "observedUpdates": 12,
+    "vendors": 2,
+    "trendCategories": 6,
+    "primarySources": 12
+  },
+  "trendBreakdown": [
+    {
+      "id": "security_governance",
+      "label": "Security and governance",
+      "note": "Authentication, access, vulnerability and administrative controls.",
+      "count": 6,
+      "share": 50,
+      "vendors": [
+        "GitHub"
+      ],
+      "latestPublishedAt": "2026-10-02",
+      "evidence": [
+        "github-confidential-comments-on-repository-security-advisories",
+        "github-repository-security-advisory-comments-api-in-public-preview",
+        "github-new-fields-for-securityadvisory-graphql-api",
+        "github-rate-limits-for-private-vulnerability-reports",
+        "github-proof-of-presence-enterprise",
+        "github-ssh-security-changes-2026"
+      ]
+    },
+    {
+      "id": "ai_automation",
+      "label": "AI and automation",
+      "note": "Agent, model and workflow capability changes.",
+      "count": 2,
+      "share": 16.7,
+      "vendors": [
+        "ChatGPT",
+        "GitHub"
+      ],
+      "latestPublishedAt": "2026-10-05",
+      "evidence": [
+        "chatgpt-building-advertising-for-the-way-people-use-ai",
+        "github-copilot-sandboxing-observability"
+      ]
+    },
+    {
+      "id": "integrations_connectivity",
+      "label": "Integrations and connectivity",
+      "note": "APIs, MCP, connectors and connected workflow changes.",
+      "count": 1,
+      "share": 8.3,
+      "vendors": [
+        "GitHub"
+      ],
+      "latestPublishedAt": "2026-10-02",
+      "evidence": [
+        "github-copilot-code-review-api-support-and-new-default-effort-level"
+      ]
+    },
+    {
+      "id": "pricing_packaging",
+      "label": "Pricing and packaging",
+      "note": "Plan, billing and commercial packaging changes.",
+      "count": 1,
+      "share": 8.3,
+      "vendors": [
+        "ChatGPT"
+      ],
+      "latestPublishedAt": "2026-09-29",
+      "evidence": [
+        "chatgpt-introducing-gpt-6-1-sol"
+      ]
+    },
+    {
+      "id": "product_capability",
+      "label": "Product capability",
+      "note": "Material product changes outside the categories above.",
+      "count": 1,
+      "share": 8.3,
+      "vendors": [
+        "ChatGPT"
+      ],
+      "latestPublishedAt": "2026-09-26",
+      "evidence": [
+        "chatgpt-images-2-5"
+      ]
+    },
+    {
+      "id": "product_retirement",
+      "label": "Retirements and migrations",
+      "note": "Shutdowns, deprecations and continuity changes.",
+      "count": 1,
+      "share": 8.3,
+      "vendors": [
+        "GitHub"
+      ],
+      "latestPublishedAt": "2026-10-02",
+      "evidence": [
+        "github-selected-models-in-github-copilot-deprecated"
+      ]
+    }
+  ],
+  "vendorActivity": [
+    {
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "count": 9,
+      "latestPublishedAt": "2026-10-02",
+      "changeTypes": [
+        "security_governance",
+        "product_retirement",
+        "integrations_connectivity",
+        "ai_automation"
+      ],
+      "evidence": [
+        "github-confidential-comments-on-repository-security-advisories",
+        "github-repository-security-advisory-comments-api-in-public-preview",
+        "github-new-fields-for-securityadvisory-graphql-api",
+        "github-selected-models-in-github-copilot-deprecated",
+        "github-copilot-code-review-api-support-and-new-default-effort-level",
+        "github-rate-limits-for-private-vulnerability-reports",
+        "github-copilot-sandboxing-observability",
+        "github-proof-of-presence-enterprise",
+        "github-ssh-security-changes-2026"
+      ]
+    },
+    {
+      "toolSlug": "chatgpt",
+      "toolName": "ChatGPT",
+      "count": 3,
+      "latestPublishedAt": "2026-10-05",
+      "changeTypes": [
+        "ai_automation",
+        "pricing_packaging",
+        "product_capability"
+      ],
+      "evidence": [
+        "chatgpt-building-advertising-for-the-way-people-use-ai",
+        "chatgpt-introducing-gpt-6-1-sol",
+        "chatgpt-images-2-5"
+      ]
+    }
+  ],
+  "evidenceHighlights": [
+    {
+      "id": "chatgpt-building-advertising-for-the-way-people-use-ai",
+      "publishedAt": "2026-10-05",
+      "toolSlug": "chatgpt",
+      "toolName": "ChatGPT",
+      "label": "AI and automation update",
+      "title": "Building advertising for the way people use AI",
+      "summary": "OpenAI introduces a new visual ad format in ChatGPT and expands measurement tools, attribution partnerships, and brand suitability for advertisers.",
+      "changeType": "ai_automation",
+      "buyerImpact": "ChatGPT buyers should verify how the new AI or automation capability changes workflow scope, governance and implementation effort.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/chatgpt",
+          "label": "ChatGPT profile"
+        }
+      ],
+      "articleUrl": "/news/chatgpt-building-advertising-for-the-way-people-use-ai.html",
+      "sourceName": "OpenAI",
+      "sourceUrl": "https://openai.com/index/new-chatgpt-ads-format-and-measurement"
+    },
+    {
+      "id": "github-confidential-comments-on-repository-security-advisories",
+      "publishedAt": "2026-10-02",
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "label": "Security update",
+      "title": "Confidential comments on repository security advisories",
+      "summary": "You can now post confidential comments on repository security advisories.",
+      "changeType": "security_governance",
+      "buyerImpact": "GitHub buyers should verify whether the new controls change authentication, administration or security requirements for their team.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/github",
+          "label": "GitHub profile"
+        },
+        {
+          "type": "guide",
+          "url": "/best-developer-tools",
+          "label": "Best Developer Tools"
+        },
+        {
+          "type": "guide",
+          "url": "/best-ai-coding-tools",
+          "label": "Best AI Coding Tools"
+        }
+      ],
+      "articleUrl": "/news/github-confidential-comments-on-repository-security-advisories.html",
+      "sourceName": "GitHub Changelog",
+      "sourceUrl": "https://github.blog/changelog/2026-10-02-confidential-comments-on-repository-security-advisories"
+    },
+    {
+      "id": "github-selected-models-in-github-copilot-deprecated",
+      "publishedAt": "2026-10-02",
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "label": "Product retirement",
+      "title": "Selected models in GitHub Copilot deprecated",
+      "summary": "As of today, October 2, 2026, we have deprecated the following models across all GitHub Copilot experiences (including Copilot Chat, inline edits, ask and agent modes, and code completions).",
+      "changeType": "product_retirement",
+      "buyerImpact": "GitHub buyers should review migration, continuity and replacement requirements before relying on the affected workflow.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/github",
+          "label": "GitHub profile"
+        },
+        {
+          "type": "guide",
+          "url": "/best-developer-tools",
+          "label": "Best Developer Tools"
+        },
+        {
+          "type": "guide",
+          "url": "/best-ai-coding-tools",
+          "label": "Best AI Coding Tools"
+        }
+      ],
+      "articleUrl": "/news/github-selected-models-in-github-copilot-deprecated.html",
+      "sourceName": "GitHub Changelog",
+      "sourceUrl": "https://github.blog/changelog/2026-10-02-selected-models-in-github-copilot-deprecated"
+    },
+    {
+      "id": "github-copilot-code-review-api-support-and-new-default-effort-level",
+      "publishedAt": "2026-10-02",
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "label": "Integration update",
+      "title": "Copilot code review: API support and new default effort level",
+      "summary": "You can now request a GitHub Copilot code review through the REST and GraphQL APIs and set the review effort level for each request.",
+      "changeType": "integrations_connectivity",
+      "buyerImpact": "GitHub buyers should reassess integration depth and automation architecture if connected workflows are central to the purchase decision.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/github",
+          "label": "GitHub profile"
+        },
+        {
+          "type": "guide",
+          "url": "/best-developer-tools",
+          "label": "Best Developer Tools"
+        },
+        {
+          "type": "guide",
+          "url": "/best-ai-coding-tools",
+          "label": "Best AI Coding Tools"
+        }
+      ],
+      "articleUrl": "/news/github-copilot-code-review-api-support-and-new-default-effort-level.html",
+      "sourceName": "GitHub Changelog",
+      "sourceUrl": "https://github.blog/changelog/2026-10-02-copilot-code-review-api-support-and-new-default-effort-level"
+    }
+  ]
 }
