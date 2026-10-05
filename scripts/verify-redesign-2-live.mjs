@@ -68,6 +68,10 @@ await pool(publicPages,12,async value=>{
   need(!/class=["'][^"']*\bts-global-nav\b[^"']*["']/.test(r.text),label+'_legacy_global_nav_present',value);
   need(!/<nav\b[^>]*>[\s\S]*?<a\b[^>]*class=["']brand["'][^>]*>\s*ToolScout\s*<\/a>[\s\S]*?<\/nav>/i.test(r.text),label+'_legacy_branded_nav_present',value);
   need(!/<div\b[^>]*class=["'][^"']*\btop\b[^"']*["'][^>]*>[\s\S]*?<a\b[^>]*class=["']brand["'][^>]*>\s*ToolScout\s*<\/a>/i.test(r.text),label+'_legacy_top_nav_present',value);
+  if(/^\/tools\/[a-z0-9][a-z0-9-]*$/i.test(new URL(value).pathname)){
+    need(!/<a\b[^>]*class=["'][^"']*\bbrand\b[^"']*["'][^>]*>\s*ToolScout\s*<\/a>/i.test(r.text),label+'_legacy_tool_profile_brand_present',value);
+    need(/data-toolscout-surface=["']tool-profile["']/.test(r.text),label+'_tool_profile_surface_missing',value);
+  }
 });
 
 const methodology=await get('/methodology');
@@ -78,6 +82,8 @@ need(!/class=["'][^"']*ts-global-nav(?:\s|["'])/.test(methodology.text),'methodo
 
 const profile=await get('/tools/figma');
 need(/AI interoperability/i.test(profile.text),'figma_ai_interoperability_missing');
+need(/data-toolscout-surface=["']tool-profile["']/.test(profile.text),'figma_tool_profile_surface_missing');
+need(!/<a\b[^>]*class=["'][^"']*\bbrand\b[^"']*["'][^>]*>\s*ToolScout\s*<\/a>/i.test(profile.text),'figma_legacy_tool_profile_brand_present');
 
 const comparison=await get('/make-vs-zapier');
 need(/AI interoperability/i.test(comparison.text),'comparison_ai_interoperability_missing');
