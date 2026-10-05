@@ -137,8 +137,8 @@ test('tool profiles do not expose preliminary generic decision-depth blocks',()=
   const seo=read('seo-cloudflare-runtime-worker.js');
   assert.match(seo,/stripGenericToolDecisionDepth\(html,pathname\)/);
   assert.match(seo,/cloudflare-decision-depth-v1/);
-  assert.match(seo,/const bestPageDepth=state&&pathname\.startsWith\('\/best-'\)/);
-  assert.match(seo,/if\(bestPageDepth&&!html\.includes\('organic-growth:runtime-start'\)/);
+  assert.match(seo,/const observedBestPageDepth=state&&String\(state\.reason\|\|''\)==='observed_search_demand'&&pathname\.startsWith\('\/best-'\)/);
+  assert.match(seo,/if\(\(taskSpecificDepth\|\|observedBestPageDepth\)&&!html\.includes\('organic-growth:runtime-start'\)/);
 });
 
 test('commercial source cleanup leaves readable verification wording',async()=>{
