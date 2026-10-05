@@ -12,7 +12,7 @@ import {verifyBatch as contractVerifyCatalogBatch,admitTrustedCandidates as cont
 import {runContentSocialIntelligenceCycle,issueGrowthContentBrief} from './content-engine-intelligence-worker.js';
 import {runSeoExecutionBatch} from './seo-execution-batch.js';
 import {runVendorContactDiscovery} from './distribution-contact-worker.js';
-import {auditArchitectureEscalations,publicEscalationCandidates,markEscalationEmailStatus,architectureEscalationSnapshot,recordIntegrityAuditResult} from './growth-architecture-escalation.js';
+import {auditArchitectureEscalations,publicEscalationCandidates,markEscalationEmailStatus,architectureEscalationSnapshot} from './growth-architecture-escalation.js';
 import {TOOLSCOUT_CRONS} from './runtime-schedule-contract.js';
 import {senderCapacitySnapshot} from './sender-capacity-policy.js';
 import {classifySearchPageAction,executableIntentSearchActions} from './search-action-policy.js';
@@ -1633,11 +1633,6 @@ if(u.pathname==='/api/growth/execution/dispatch'&&request.method==='POST'){
   return Response.json(execution,{headers:H});
 }
 if(u.pathname==='/api/growth/execution'&&request.method==='GET'){if(!(await auth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});return Response.json(await executionContractSnapshot(env),{headers:H});}
-if(u.pathname==='/api/growth/integrity-audit/report'&&request.method==='POST'){
-  if(!(await executionAuth(request,env)))return Response.json({error:'unauthorized'},{status:401,headers:H});
-  let body={};try{body=await request.json()}catch{return Response.json({error:'invalid_json'},{status:400,headers:H})}
-  return Response.json(await recordIntegrityAuditResult(env,body),{headers:H});
-}
 if(u.pathname==='/api/growth/architecture-escalations/public-candidates'&&request.method==='GET'){
   if(!(await growthEscalationHandoffOk(request)))return Response.json({error:'unauthorized'},{status:401,headers:H});
   return Response.json(await publicEscalationCandidates(env,u.searchParams.get('limit')),{headers:H});
