@@ -42,8 +42,16 @@ test('public redesign injects the shared shell without changing canonical conten
   assert.match(html,/data-toolscout-public-redesign="2"/);
   assert.match(html,/<html[^>]*data-toolscout-redesign="2"/);
   assert.match(html,/class="ts2-global-nav"/);
+  assert.match(html,/data-toolscout-surface="tool-profile"/);
+  assert.doesNotMatch(html,/<a\b[^>]*class=["'][^"']*\bbrand\b[^"']*["'][^>]*>\s*ToolScout\s*<\/a>/i);
   assert.match(html,/rel="canonical" href="https:\/\/trytoolscout\.org\/tools\/figma"/);
   assert.match(html,/>Figma</);
+});
+
+test('tool profile generator no longer emits the pre-2.0 standalone ToolScout header',()=>{
+  const generator=read('scripts/generate-tool-pages.mjs');
+  assert.doesNotMatch(generator,/<div class="wrap"><a class="brand" href="\/">ToolScout<\/a>/);
+  assert.doesNotMatch(generator,/\.brand\{font-size:22px/);
 });
 
 test('public redesign skips private Command Center and homepage',async()=>{
