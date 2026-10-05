@@ -75,7 +75,7 @@ export async function runGrowthScheduler(event,env,ctx,{delegate=null}={}){
     const contentRecovery=await missionNeedsRecovery(env,'content','social_intelligence',7*60);
     if(twoHourly){
       const networkCycle=missionCycleContext('distribution','network_cycle',Number(event?.scheduledTime)||Date.now());
-      scheduleTask(ctx,runWithLedger(env,{engine:'distribution',mission:'network_cycle',triggerName:trigger,cycleContext:networkCycle,cycleOwner:'growth_scheduler'},()=>runDistributionNetworkCycle(env)));
+      scheduleTask(ctx,runWithLedger(env,{engine:'distribution',mission:'network_cycle',triggerName:trigger,singleFlightMinutes:20,cycleContext:networkCycle,cycleOwner:'growth_scheduler'},()=>runDistributionNetworkCycle(env)));
       const affiliateRecovery=await missionNeedsRecovery(env,'affiliate','coverage_cycle');
       if(!affiliateMaintenance||twelveHourly||affiliateRecovery){
         scheduleTask(ctx,runAuditedAffiliateCoverageCycle(env,affiliateRecovery?trigger+':recovery':trigger));
