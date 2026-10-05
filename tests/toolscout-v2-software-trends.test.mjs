@@ -25,7 +25,7 @@ test('Software Trends is analysis rather than a duplicate chronological feed',()
   assert.match(src,/rolling 30 day/i);
   assert.match(src,/Observed activity/);
   assert.match(src,/Enough proof\. No duplicate feed/);
-  assert.match(src,/VIEW ALL WHAT\\'S NEW/);
+  assert.match(src,/VIEW ALL WHAT&#39;S NEW/);
   assert.doesNotMatch(src,/const updateCards=updates\.map/);
 });
 
@@ -43,4 +43,7 @@ test('Software Trends uses the ToolScout 2.0 visual system and reduced motion su
   assert.match(src,/--graphite:#0B0D0C/);
   assert.match(src,/--lime:#B7FF3C/);
   assert.match(src,/prefers-reduced-motion/);
+  assert.match(src,/a:focus-visible/);
+  assert.match(src,/class=\"skipLink\"/);
+  assert.match(src,/role=\"progressbar\"/);
 });
