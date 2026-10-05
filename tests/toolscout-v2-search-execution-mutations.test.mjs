@@ -29,3 +29,13 @@ test('indexing repair requires a public self canonical page without noindex',()=
   assert.match(executor,/public_indexability_verified/);
   assert.match(executor,/indexability_not_yet_public/);
 });
+
+
+test('deepening execution materializes task-specific editorial depth on tool and comparison pages',()=>{
+  assert.match(runtime,/execution_contract:deepen_existing_search_asset/);
+  assert.match(runtime,/function toolDecisionDepthBlock/);
+  assert.match(runtime,/cloudflare-tool-editorial-depth-v2/);
+  assert.match(runtime,/function comparisonDecisionDepthBlock/);
+  assert.match(runtime,/cloudflare-comparison-editorial-depth-v2/);
+  assert.match(runtime,/taskSpecificDepthBlock\(html,pathname,cfg\)/);
+});
