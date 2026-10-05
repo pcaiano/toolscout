@@ -109,6 +109,17 @@ For every external source, measure:
 
 Never fabricate revenue. An outbound click is not a sale.
 
+## Browser-first execution
+
+For exact external submission and listing workflows, the default interactive path is browser automation when the active ChatGPT or Work session exposes a live browser capability.
+
+- Use the prepared ToolScout listing profile and canonical assets to populate ordinary form fields directly.
+- Continue through normal navigation, field entry, selects, uploads and non-sensitive confirmations without handing mechanical work to the owner.
+- Pause only for CAPTCHA, MFA, credentials unavailable to the authorized session, payment, identity verification, legal attestations or another genuinely consequential confirmation.
+- After the owner completes that boundary, resume browser execution when possible instead of returning the rest of the form to the owner.
+- If no live browser is available, create a browser-ready handoff containing the exact URL, prepared values, assets and the specific blocking step. Do not collapse back to generic instructions.
+- A completed browser form is submitted evidence, not public-placement proof. Preserve the existing external verification rules before marking the route verified or live.
+
 ## Rules
 
 - No purchased votes or fake engagement.
