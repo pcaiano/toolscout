@@ -3,6 +3,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {renderPublicDecisionCandidate} from '../public-decision-runtime.js';
 import {comparePublicParity,publicPageFingerprint} from '../public-page-parity-contract.js';
+import {transformPublicRedesignResponse} from '../public-redesign-runtime.js';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const BASE='https://trytoolscout.org';
@@ -82,7 +83,8 @@ let failed=false;
 
 for(const pathname of PATHS){
   const baseline=await live(pathname);
-  const candidate=await renderPublicDecisionCandidate(new Request(BASE+pathname),env());
+  let candidate=await renderPublicDecisionCandidate(new Request(BASE+pathname),env());
+  if(candidate?.ok)candidate=await transformPublicRedesignResponse(new Request(BASE+pathname),candidate);
   if(!candidate?.ok){
     failed=true;
     report.push({pathname,ok:false,errors:['candidate_unavailable'],status:candidate?.status||0});
