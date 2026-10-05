@@ -1,7 +1,8 @@
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
-const HUBSPOT_SUBSCRIPTION_TYPE_ID='3781890361';
 const HUBSPOT_SUBSCRIPTION_NAME='Marketing Information';
 const HUBSPOT_SYNC_BATCH=25;
+let hubspotSubscriptionCache={at:0,id:null,name:null};
+const HUBSPOT_SUBSCRIPTION_CACHE_MS=15*60*1000;
 
 function normalizeEmail(value){
   const email=String(value||'').trim().toLowerCase();
@@ -58,11 +59,26 @@ async function upsertHubSpotContact(env,email){
   if(!id)throw new Error('hubspot_contact_id_missing');
   return id;
 }
-async function subscribeHubSpotContact(env,email){
+async function resolveHubSpotSubscriptionType(env){
+  const configured=safeText(env.HUBSPOT_SUBSCRIPTION_TYPE_ID||'',40);
+  if(configured)return{id:configured,name:HUBSPOT_SUBSCRIPTION_NAME,source:'env'};
+  if(hubspotSubscriptionCache.id&&Date.now()-hubspotSubscriptionCache.at<HUBSPOT_SUBSCRIPTION_CACHE_MS){
+    return{id:hubspotSubscriptionCache.id,name:hubspotSubscriptionCache.name||HUBSPOT_SUBSCRIPTION_NAME,source:'cache'};
+  }
+  const data=await hubspotJson(env,'https://api.hubapi.com/communication-preferences/v4/definitions',{method:'GET'});
+  const rows=Array.isArray(data?.results)?data.results:[];
+  const preferred=rows.find(row=>String(row?.name||'').trim().toLowerCase()===HUBSPOT_SUBSCRIPTION_NAME.toLowerCase()&&row?.isActive!==false)
+    ||rows.find(row=>String(row?.purpose||'').toLowerCase()==='marketing'&&String(row?.communicationMethod||'').toLowerCase()==='email'&&row?.isActive!==false);
+  const id=String(preferred?.id||'').trim();
+  if(!id)throw new Error('hubspot_marketing_subscription_type_missing');
+  hubspotSubscriptionCache={at:Date.now(),id,name:String(preferred?.name||HUBSPOT_SUBSCRIPTION_NAME)};
+  return{id,name:hubspotSubscriptionCache.name,source:'definitions'};
+}
+async function subscribeHubSpotContact(env,email,subscription){
   return hubspotJson(env,'https://api.hubapi.com/communication-preferences/v4/statuses/'+encodeURIComponent(email),{
     method:'POST',
     body:JSON.stringify({
-      subscriptionId:Number(HUBSPOT_SUBSCRIPTION_TYPE_ID),
+      subscriptionId:Number(subscription.id),
       statusState:'SUBSCRIBED',
       legalBasis:'CONSENT_WITH_NOTICE',
       legalBasisExplanation:'Contact explicitly subscribed to ToolScout software updates on trytoolscout.org.',
@@ -70,37 +86,38 @@ async function subscribeHubSpotContact(env,email){
     })
   });
 }
-async function markHubSpotSync(env,email,status,{contactId=null,error=null}={}){
+async function markHubSpotSync(env,email,status,{contactId=null,error=null,subscriptionId=null}={}){
   await env.DB.prepare(`UPDATE newsletter_subscribers
     SET hubspot_sync_status=?,
         hubspot_contact_id=COALESCE(?,hubspot_contact_id),
         hubspot_synced_at=CASE WHEN ?='synced' THEN datetime('now') ELSE hubspot_synced_at END,
         hubspot_sync_error=?,
         hubspot_sync_attempts=COALESCE(hubspot_sync_attempts,0)+1,
-        hubspot_subscription_type_id=?,
+        hubspot_subscription_type_id=COALESCE(?,hubspot_subscription_type_id),
         updated_at=datetime('now')
     WHERE email=?`)
-    .bind(status,contactId,status,error?String(error).slice(0,700):null,HUBSPOT_SUBSCRIPTION_TYPE_ID,email).run();
+    .bind(status,contactId,status,error?String(error).slice(0,700):null,subscriptionId,email).run();
 }
 export async function syncNewsletterSubscriberToHubSpot(env,email){
   if(!env.HUBSPOT_ACCESS_TOKEN)return{ok:false,status:'configuration_required',error:'hubspot_access_token_missing'};
   const normalized=normalizeEmail(email);
   if(!normalized)return{ok:false,status:'invalid_email'};
   try{
+    const subscription=await resolveHubSpotSubscriptionType(env);
     const contactId=await upsertHubSpotContact(env,normalized);
-    await subscribeHubSpotContact(env,normalized);
-    await markHubSpotSync(env,normalized,'synced',{contactId});
+    await subscribeHubSpotContact(env,normalized,subscription);
+    await markHubSpotSync(env,normalized,'synced',{contactId,subscriptionId:subscription.id});
     await env.DB.prepare(`INSERT INTO newsletter_events(event_id,email,event_type,source,source_path,created_at)
       SELECT ?,email,'hubspot_synced',source,source_path,datetime('now') FROM newsletter_subscribers WHERE email=?`)
       .bind('nl_'+crypto.randomUUID(),normalized).run().catch(()=>null);
-    return{ok:true,status:'synced',contact_id:contactId,subscription_type_id:HUBSPOT_SUBSCRIPTION_TYPE_ID};
+    return{ok:true,status:'synced',contact_id:contactId,subscription_type_id:subscription.id,subscription_name:subscription.name};
   }catch(error){
     await markHubSpotSync(env,normalized,'failed',{error:error?.message||error}).catch(()=>null);
     return{ok:false,status:'failed',error:String(error?.message||error).slice(0,700)};
   }
 }
 export async function runNewsletterHubSpotSync(env,{limit=HUBSPOT_SYNC_BATCH}={}){
-  if(!env.HUBSPOT_ACCESS_TOKEN)return{ok:false,status:'configuration_required',error:'hubspot_access_token_missing',subscription_type_id:HUBSPOT_SUBSCRIPTION_TYPE_ID};
+  if(!env.HUBSPOT_ACCESS_TOKEN)return{ok:false,status:'configuration_required',error:'hubspot_access_token_missing'};
   const rows=await env.DB.prepare(`SELECT email FROM newsletter_subscribers
     WHERE status='subscribed'
       AND hubspot_sync_status IN ('pending','failed')
@@ -112,7 +129,8 @@ export async function runNewsletterHubSpotSync(env,{limit=HUBSPOT_SYNC_BATCH}={}
     const result=await syncNewsletterSubscriberToHubSpot(env,row.email);
     if(result.ok)synced++;else failed++;
   }
-  return{ok:true,status:'completed',processed:(rows.results||[]).length,synced,failed,subscription_type_id:HUBSPOT_SUBSCRIPTION_TYPE_ID,subscription_name:HUBSPOT_SUBSCRIPTION_NAME};
+  const subscription=await resolveHubSpotSubscriptionType(env).catch(()=>null);
+  return{ok:true,status:'completed',processed:(rows.results||[]).length,synced,failed,subscription_type_id:subscription?.id||null,subscription_name:subscription?.name||HUBSPOT_SUBSCRIPTION_NAME};
 }
 async function subscriberMetrics(env){
   const row=await env.DB.prepare(`SELECT
@@ -131,7 +149,7 @@ async function subscriberMetrics(env){
     hubspot_failed:Number(row?.hubspot_failed||0),
     hubspot_synced:Number(row?.hubspot_synced||0),
     hubspot_configured:Boolean(env.HUBSPOT_ACCESS_TOKEN),
-    hubspot_subscription_type_id:HUBSPOT_SUBSCRIPTION_TYPE_ID,
+    hubspot_subscription_type_id:safeText(env.HUBSPOT_SUBSCRIPTION_TYPE_ID||'',40)||null,
     hubspot_subscription_name:HUBSPOT_SUBSCRIPTION_NAME
   };
 }
@@ -147,7 +165,7 @@ async function subscribe(request,env,ctx){
   const prior=await env.DB.prepare(`SELECT status FROM newsletter_subscribers WHERE email=? LIMIT 1`).bind(email).first().catch(()=>null);
   await env.DB.prepare(`INSERT INTO newsletter_subscribers(
       email,status,source,source_path,consent_version,first_subscribed_at,last_subscribed_at,unsubscribed_at,hubspot_sync_status,hubspot_sync_error,hubspot_sync_attempts,hubspot_subscription_type_id,updated_at
-    ) VALUES(?,'subscribed',?,?,'toolscout-updates-v1',datetime('now'),datetime('now'),NULL,'pending',NULL,0,?,datetime('now'))
+    ) VALUES(?,'subscribed',?,?,'toolscout-updates-v1',datetime('now'),datetime('now'),NULL,'pending',NULL,0,NULL,datetime('now'))
     ON CONFLICT(email) DO UPDATE SET
       status='subscribed',
       source=excluded.source,
@@ -157,9 +175,8 @@ async function subscribe(request,env,ctx){
       unsubscribed_at=NULL,
       hubspot_sync_status=CASE WHEN newsletter_subscribers.hubspot_sync_status='synced' THEN 'synced' ELSE 'pending' END,
       hubspot_sync_error=NULL,
-      hubspot_subscription_type_id=excluded.hubspot_subscription_type_id,
       updated_at=datetime('now')`)
-    .bind(email,source,sourcePath,HUBSPOT_SUBSCRIPTION_TYPE_ID).run();
+    .bind(email,source,sourcePath).run();
   const eventType=prior?.status==='subscribed'?'subscribe_repeat':'subscribed';
   await env.DB.prepare(`INSERT INTO newsletter_events(event_id,email,event_type,source,source_path,created_at)
       VALUES(?,?,?,?,?,datetime('now'))`)
