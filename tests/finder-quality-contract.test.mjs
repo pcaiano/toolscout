@@ -21,3 +21,20 @@ test('Finder implements the approved interpretation and result reveal motion',()
   assert.match(home,/@keyframes resultReveal/);
   assert.match(home,/prefers-reduced-motion:reduce/);
 });
+
+
+test('broad category searches avoid fake personalized percentages',()=>{
+  assert.match(app,/function broadCategoryQuery\(/);
+  assert.match(app,/This is a broad category search/);
+  assert.match(app,/Category fit/);
+  assert.match(app,/Refine for personalized ranking/);
+  assert.match(app,/const raw=42\+/);
+});
+
+test('Finder motion exposes three visible decision stages',()=>{
+  assert.match(app,/data-stage="1"/);
+  assert.match(app,/Matching the decision criteria/);
+  assert.match(app,/Building your shortlist/);
+  assert.match(home,/\.search-stages/);
+  assert.match(home,/\.search-stage\.active/);
+});
