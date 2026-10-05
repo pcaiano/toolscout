@@ -30,3 +30,23 @@ test('page types distinguish the authority wedge from money pages',()=>{
   assert.equal(pageTypeForPath('/best-project-management-tools'),'guide');
   assert.equal(pageTypeForPath('/software-trends-index'),'proprietary_dataset');
 });
+
+
+test('current ToolScout editorial view with recent verification can meet the 95 quality target',()=>{
+  const html='<html><head><link rel="canonical" href="https://trytoolscout.org/tools/example"><script type="application/ld+json">{}</script></head><body>'+
+    '<a href="https://vendor.example/docs">Official source</a>'+
+    '<section><h2>ToolScout view</h2><p>In practice this tool is best for teams that value workflow fit. The main trade-off is limited flexibility for edge cases, so compare alternatives before choosing.</p></section>'+
+    '<p>Information last checked 2026-10-01. ToolScout may earn affiliate compensation.</p>'+
+    ('<p>Verified capability and buyer decision context.</p>'.repeat(55))+
+    '</body></html>';
+  const out=scoreEditorialPage(html,{pageType:'tool_profile'});
+  assert.equal(out.hasAnalysis,true);
+  assert.equal(out.hasRecentVerification,true);
+  assert.ok(out.score>=95);
+});
+
+test('authority gap closes at the 95 target instead of rewarding endless on-page expansion',()=>{
+  const healthy=authorityGapPriority({impressions:300,position:55,authorityScore:95,targetScore:95,hardFloorScore:90,weight:0.2});
+  const weak=authorityGapPriority({impressions:300,position:55,authorityScore:80,targetScore:95,hardFloorScore:90,weight:0.2});
+  assert.ok(weak>healthy);
+});
