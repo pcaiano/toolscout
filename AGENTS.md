@@ -145,3 +145,17 @@ For the ToolScout 2.0 homepage redesign, What's New is a first-class editorial s
 6. Vendor logos may identify stories but must remain subordinate to ToolScout editorial hierarchy.
 7. Preserve affiliate neutrality: partner status must not affect inclusion, ordering or visual prominence.
 8. Detailed design contract: `docs/HOMEPAGE-REDESIGN-2.0.md`.
+
+
+## Redesign motion requirement
+
+ToolScout 2.0 motion is functional, not decorative.
+
+1. Every animation must make the interface feel faster, clearer or more responsive. Otherwise remove it.
+2. Use the timing and accessibility contract in `docs/MOTION-SYSTEM-2.0.md`.
+3. Prefer 140-220 ms transitions, small transforms and opacity changes.
+4. Recommendation motion should communicate input -> response -> resolution, never fake AI processing.
+5. Comparisons may use scan -> focus -> decision emphasis to highlight decisive criteria.
+6. What's New should prioritize content freshness over auto-rotation.
+7. Respect `prefers-reduced-motion` and preserve full meaning without motion.
+8. Avoid continuous decorative motion, large parallax, bouncing, spinning vendor logos, animated gradients and AI-style particle effects.
