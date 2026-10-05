@@ -3,7 +3,6 @@ import { prioritizedDistributionFeed } from './distribution-feed-priority.js';
 import {recentDistributionAssets,handleMachineDiscoveryCatalogRoute} from './machine-discovery-catalog-runtime.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'public, max-age=120','Access-Control-Allow-Origin':'*'};
-const EVENT_H={'Cache-Control':'no-store','Access-Control-Allow-Origin':'*','Access-Control-Allow-Methods':'POST, OPTIONS','Access-Control-Allow-Headers':'Content-Type'};
 const JS_H={'Content-Type':'application/javascript; charset=UTF-8','Cache-Control':'public, max-age=3600','Access-Control-Allow-Origin':'*'};
 const SVG_H={'Content-Type':'image/svg+xml; charset=UTF-8','Cache-Control':'public, max-age=86400'};
 const XML_H={'Content-Type':'application/rss+xml; charset=UTF-8','Cache-Control':'public, max-age=900'};
@@ -12,11 +11,8 @@ const normalize=v=>String(v||'').toLowerCase();
 const tokenize=v=>normalize(v).split(/[^a-z0-9]+/).filter(x=>x.length>2);
 const escXml=v=>String(v??'').replace(/[<>&'\"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;',"'":'&apos;','\"':'&quot;'}[c]));
 const OBSERVED_STOPWORDS=new Set(['what','are','you','looking','for','the','a','an','and','or','with','to','of','in','on','how','can','i','my','me','need','want','please','find','best','good']);
-const EMBED_EVENTS=new Set(['impression','interaction','click','search','results','unresolved','profile_click','vendor_click','error']);
-const EMBED_TYPES=new Set(['finder','compare','pick']);
 
 function hostOf(v){try{return new URL(v).hostname.toLowerCase().replace(/^www\./,'')}catch{return''}}
-function safeToken(v,n=120){return String(v||'').replace(/[^A-Za-z0-9._:-]/g,'').slice(0,n)}
 function toolscoutTarget(sourceHost,placement='widget'){
   const u=new URL('https://trytoolscout.org/');
   u.searchParams.set('utm_source',sourceHost||'embedded');
@@ -211,33 +207,6 @@ async function recommend(request,env){
   }
 }
 
-async function embedEvent(request,env){
-  if(request.method==='OPTIONS')return new Response(null,{status:204,headers:EVENT_H});
-  if(request.method!=='POST')return null;
-  let payload;
-  try{payload=JSON.parse(await request.text())}catch{return Response.json({error:'invalid_json'},{status:400,headers:{...EVENT_H,'Content-Type':'application/json; charset=UTF-8'}})}
-  const embedType=safeToken(payload?.embed_type,30),eventType=safeToken(payload?.event,40);
-  if(!EMBED_TYPES.has(embedType)||!EMBED_EVENTS.has(eventType)){
-    return Response.json({error:'invalid_event'},{status:400,headers:{...EVENT_H,'Content-Type':'application/json; charset=UTF-8'}});
-  }
-  const originHost=hostOf(request.headers.get('Origin')||''),refererHost=hostOf(request.headers.get('Referer')||'');
-  const sourceHost=safeToken(originHost||refererHost||payload?.publisher_host||'',120)||null;
-  const publisherId=safeToken(payload?.publisher_id||sourceHost||'embedded',120)||'embedded';
-  const assetId=safeToken(payload?.asset_id||embedType,120)||embedType;
-  const intentSlug=safeToken(payload?.intent_slug||'',100)||null;
-  const resultSlug=safeToken(payload?.result_slug||'',100)||null;
-  const mode=['mini','full'].includes(String(payload?.mode||''))?String(payload.mode):null;
-  const resultCount=Number.isFinite(Number(payload?.result_count))?Math.max(0,Math.min(20,Number(payload.result_count))):null;
-  try{
-    await env.DB.prepare(`INSERT INTO distribution_embed_events(event_id,embed_type,event_type,publisher_id,source_host,asset_id,intent_slug,result_slug,result_count,mode,created_at)
-      VALUES(?,?,?,?,?,?,?,?,?,?,datetime('now'))`)
-      .bind(`embevt_${crypto.randomUUID()}`,embedType,eventType,publisherId,sourceHost,assetId,intentSlug,resultSlug,resultCount,mode).run();
-  }catch(error){
-    return Response.json({error:'embed_telemetry_unavailable',detail:safe(error?.message||error,160)},{status:503,headers:{...EVENT_H,'Content-Type':'application/json; charset=UTF-8'}});
-  }
-  return new Response(null,{status:204,headers:EVENT_H});
-}
-
 async function embedAsset(request,env){
   if(!env.ASSETS)return new Response('Not found',{status:404,headers:JS_H});
   const response=await env.ASSETS.fetch(request);
@@ -292,7 +261,6 @@ export async function handleDistributionEmbedRoute(request,env){
   const u=new URL(request.url);
   if(u.pathname==='/distribution/publisher-kit'&&request.method==='GET')return publisherKit();
   if(u.pathname==='/api/recommend'&&request.method==='GET')return recommend(request,env);
-  if(u.pathname==='/api/distribution/embed-event'&&(request.method==='POST'||request.method==='OPTIONS'))return embedEvent(request,env);
   if(['/embed/toolscout-finder.js','/embed/toolscout-compare.js','/embed/toolscout-pick.js'].includes(u.pathname)&&request.method==='GET')return embedAsset(request,env);
   if(u.pathname==='/embed/toolscout.js'&&request.method==='GET')return new Response(widgetScript(),{headers:JS_H});
   if(u.pathname==='/embed/badge.svg'&&request.method==='GET')return new Response(badgeSvg(),{headers:SVG_H});
