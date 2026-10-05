@@ -133,6 +133,18 @@ ToolScout vendor amplification is autonomous and does not require owner approval
 6. Vendor outreach must remain informational and independent. Affiliate status or outreach must never change ToolScout rankings, scores, comparison outcomes, or recommendation eligibility.
 
 
+## ToolScout outbound email visual contract
+
+Every email sent under the ToolScout brand must use the ToolScout 2.0 visual system without weakening deliverability.
+
+1. Use the central ToolScout email shell for automated vendor and publisher outreach rather than ad hoc HTML.
+2. Preserve the public brand palette: graphite `#0B0D0C`, off-white `#F3F5F1`, soft neutral `#F8F9F6`, line `#DDE2DC`, muted `#90978F`, and lime `#B7FF3C` as the primary accent.
+3. Email HTML must be table-based and predominantly inline-styled for Gmail and Outlook compatibility. Do not rely on external stylesheets, JavaScript, web fonts, animation, or remote decorative images.
+4. Use a restrained graphite header, clear ToolScout wordmark, lime accent, editorial body hierarchy, one primary CTA where relevant, and a quiet independence footer.
+5. Visual styling must never remove required reputation checks, tracked URLs, sender identity, publisher-kit context, vendor-profile context, unsubscribe requirements, or other delivery/compliance contracts.
+6. Future ToolScout newsletters and transactional emails must reuse this visual language rather than introducing a separate brand system.
+
+
 ## Redesign tooling policy
 
 For ToolScout visual or UX redesign work, use the project-scoped redesign stack documented in `docs/REDESIGN-TOOLING.md`.
