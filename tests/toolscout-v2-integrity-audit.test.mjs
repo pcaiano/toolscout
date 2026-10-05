@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {evaluateIntegrityPayload,MISSION_CADENCE_LIMITS} from '../scripts/evaluate-v2-integrity-audit.mjs';
 import {buildIntegrityIncidentSql} from '../scripts/persist-v2-integrity-report.mjs';
 import fs from 'node:fs';
+import {classifyRuntimeIntegrityMission,RUNTIME_INTEGRITY_MISSION_LIMITS} from '../growth-architecture-escalation.js';
 
 const missionRows=()=>Object.keys(MISSION_CADENCE_LIMITS).map(key=>{
   const [engine,mission]=key.split(':');
@@ -89,4 +90,21 @@ test('Integrity Audit incidents cannot poison the next audit or be resolved by t
   const architecture=fs.readFileSync(new URL('../growth-architecture-escalation.js',import.meta.url),'utf8');
   assert.match(workflow,/COALESCE\(engine,''\)<>'integrity_audit'/);
   assert.match(architecture,/startsWith\('integrity_audit:'\)\)continue/);
+});
+
+
+test('hourly runtime escalation mirrors the stuck mission boundary used by the deploy audit',()=>{
+  assert.deepEqual(RUNTIME_INTEGRITY_MISSION_LIMITS,MISSION_CADENCE_LIMITS);
+  assert.equal(classifyRuntimeIntegrityMission({engine:'distribution',mission:'network_cycle',status:'running',age_minutes:29,completed_age_minutes:20}),null);
+  const stuck=classifyRuntimeIntegrityMission({engine:'distribution',mission:'network_cycle',status:'running',age_minutes:31,completed_age_minutes:20});
+  assert.equal(stuck?.kind,'stuck');
+  assert.equal(stuck?.severity,'P1');
+});
+
+test('hourly runtime escalation detects active actions without execution contracts',()=>{
+  const architecture=fs.readFileSync(new URL('../growth-architecture-escalation.js',import.meta.url),'utf8');
+  assert.match(architecture,/runtime_integrity:missing_contract/);
+  assert.match(architecture,/LEFT JOIN growth_execution_contract c/);
+  assert.match(architecture,/WHERE c\.task_id IS NULL/);
+  assert.match(architecture,/runtime_integrity:mission:/);
 });
