@@ -248,18 +248,23 @@ function gscProgress(){
 
 function editorialAuthority(){
  const ed=data?.truth?.editorial||{},items=Array.isArray(ed.priority)?ed.priority:[];
- const target=Number(ed.targetScore||70),below=Number(ed.belowTarget||0),evaluated=Number(ed.evaluated||0),avg=ed.averagePriorityScore;
- document.getElementById('editorialMeta').textContent=ed.generatedAt?'Portfolio refreshed '+dt(ed.generatedAt):'ToolScout 2.0 priority portfolio';
- const top=items.slice(0,8);
- const status=below===0&&evaluated>0?'Priority portfolio meets the editorial target.':below>0?'Observed-demand pages need deeper evidence before surface expansion.':'Editorial portfolio unavailable.';
+ const floor=Number(ed.hardFloorScore||90),target=Number(ed.targetScore||95),excellence=Number(ed.excellenceScore||98),evaluated=Number(ed.existing??ed.evaluated??0),avg=ed.averageScore??ed.averagePriorityScore;
+ const belowFloor=Number(ed.belowHardFloor||0),improvement=Number(ed.improvement||0),healthy=Number(ed.healthy95Plus||0),excellent=Number(ed.excellent98Plus||0),diagnose=Number(ed.searchFitDiagnosis||0);
+ document.getElementById('editorialMeta').textContent=ed.generatedAt?'Full indexable surface · refreshed '+dt(ed.generatedAt):'Full indexable ToolScout surface';
+ const top=items.slice(0,10);
+ const status=evaluated>0&&belowFloor===0&&improvement===0?'Editorial surface meets the 95 target.':belowFloor>0?belowFloor+' pages are below the 90 hard floor.':improvement>0?improvement+' pages are between 90 and 94 and remain in the improvement loop.':'Editorial portfolio unavailable.';
  const metrics='<div class="progressStats">'+
-   '<div class="progressStat"><small>Target score</small><b>'+n(target)+'</b></div>'+
-   '<div class="progressStat"><small>Portfolio average</small><b>'+(avg==null?'Unavailable':dec(avg,1))+'</b></div>'+
-   '<div class="progressStat"><small>Below target</small><b>'+n(below)+'</b></div>'+
-   '<div class="progressStat"><small>Evaluated</small><b>'+n(evaluated)+'</b></div>'+
+   '<div class="progressStat"><small>Hard floor</small><b>'+n(floor)+'</b></div>'+
+   '<div class="progressStat"><small>Target</small><b>'+n(target)+'</b></div>'+
+   '<div class="progressStat"><small>Site average</small><b>'+(avg==null?'Unavailable':dec(avg,1))+'</b></div>'+
+   '<div class="progressStat"><small>Below 90</small><b>'+n(belowFloor)+'</b></div>'+
+   '<div class="progressStat"><small>90 to 94</small><b>'+n(improvement)+'</b></div>'+
+   '<div class="progressStat"><small>95+</small><b>'+n(healthy)+'</b></div>'+
+   '<div class="progressStat"><small>98+</small><b>'+n(excellent)+'</b></div>'+
+   '<div class="progressStat"><small>Search fit diagnosis</small><b>'+n(diagnose)+'</b></div>'+
   '</div>';
- const rowsHtml=top.length?'<div class="section"><div class="sectionTitle">Highest-priority authority gaps</div>'+top.map(x=>row(x.page,dec(x.score,0)+' / '+n(x.target),n(x.impressions)+' impressions · '+(x.position==null?'position unavailable':'position '+dec(x.position,1))+' · '+human(x.action||'observe')+' · '+n(x.primarySourceLinks)+' primary-source links')).join('')+'</div>':'<div class="empty">No editorial priority rows available.</div>';
- document.getElementById('editorialBody').innerHTML='<div class="headline"><b>'+esc(status)+'</b><span>ToolScout 2.0 deepens pages with observed demand, weak primary-source evidence or insufficient buyer analysis before creating more SEO surface.</span></div>'+metrics+rowsHtml+'<div class="sourceLine">Editorial Authority is a ToolScout internal quality model. It is not a Google ranking score. The portfolio is prioritized using observed Search Console demand plus evidence depth.</div>';
+ const rowsHtml=top.length?'<div class="section"><div class="sectionTitle">Highest-priority authority work</div>'+top.map(x=>row(x.page,dec(x.score,0)+' / '+n(x.target),human(x.qualityBand||'')+' · gap '+n(x.gapToTarget)+' · '+n(x.impressions)+' impressions · '+(x.position==null||Number(x.position)===0?'position unavailable':'position '+dec(x.position,1))+' · '+human(x.action||'observe')+(x.diagnosis?' · '+human(x.diagnosis):''))).join('')+'</div>':'<div class="empty">No editorial priority rows available.</div>';
+ document.getElementById('editorialBody').innerHTML='<div class="headline"><b>'+esc(status)+'</b><span>Every sitemap-indexable page is audited. Search Console determines priority. A score below 95 remains quality work; once a page reaches 95, weak ranking is diagnosed as search fit, internal authority or off-page authority instead of triggering endless copy expansion.</span></div>'+metrics+rowsHtml+'<div class="sourceLine">Editorial Authority is ToolScout\'s internal quality model, not a Google ranking score. Policy: 90 hard floor, 95 normal target, 98+ excellence.</div>';
 }
 
 function brain(){
