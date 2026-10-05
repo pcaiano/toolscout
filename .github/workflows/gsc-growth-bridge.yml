@@ -1,8 +1,6 @@
-name: ToolScout GSC Growth Bridge
+name: ToolScout GSC Growth Bridge - Manual Recovery
 
 on:
-  schedule:
-    - cron: '5 6 * 9 *'
   workflow_dispatch:
 
 permissions:

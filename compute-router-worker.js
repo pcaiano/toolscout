@@ -993,7 +993,7 @@ async function health(env){
     activeBatches:num(live?.canonical_active_batches),completedBatchesToday:num(m?.completed_batches_today),lastSchedulerTickAt:live?.last_scheduler_tick_at||null,lastAutonomousSchedulerAt:live?.last_autonomous_scheduler_at||null,lastDispatchedAt:m?.last_dispatched_at||null,lastCompletedAt:m?.last_completed_at||null,
     contactSupply,distributionFunnel,qualificationSamples:[],
     d1ReadModel:'incremental_funnel_plus_indexed_queue_v2',
-    githubActionsRole:'disabled_until_october',
+    githubActionsRole:'fallback_only',
     writeAmplificationGuard:'d1-write-guard-v2',
     healthReadModel:'incremental_cached_120s_read_only',
     qualificationMode:'render_primary_with_bounded_cloudflare_fallback',
@@ -2285,7 +2285,7 @@ async function augmentRuntime(response,env){
   let data;try{data=await response.json()}catch{return response}
   data.computeOverflow=await health(env);
   if(data.primary)data.primary.researchCompute=env.OVERFLOW_COMPUTE_URL?'external_overflow':'cloudflare_only_until_external_runtime_connected';
-  if(data.githubActions)data.githubActions={...data.githubActions,role:'disabled_until_october',scheduledPrimary:false};
+  if(data.githubActions)data.githubActions={...data.githubActions,role:'fallback_only',scheduledPrimary:false};
   return Response.json(data,{status:response.status,headers:JSON_H});
 }
 
@@ -2431,24 +2431,46 @@ export default{
     const trafficGuardCleanup=Promise.resolve(runTrafficIntegrityGuardScheduled(env)).catch(async error=>{await event(env,'traffic_guard_cleanup_failed','failed',safe(error?.message||error,800)).catch(()=>{});return null;});
     if(ctx?.waitUntil)ctx.waitUntil(trafficGuardCleanup);
     if(trigger===RENDER_KEEPALIVE_CRON){
-      const keepalive=Promise.allSettled([
-        (async()=>{
-          if(!env.OVERFLOW_COMPUTE_URL)return null;
+      const [overflowDemand,authDemand]=await Promise.all([
+        env.DB.prepare(`SELECT 1 AS n FROM compute_overflow_jobs
+          WHERE status='leased' OR (status='queued' AND available_at<=datetime('now'))
+          LIMIT 1`).first().catch(()=>null),
+        env.DB.prepare(`SELECT 1 AS n
+          WHERE EXISTS (
+            SELECT 1 FROM auth_handoff
+            WHERE status IN ('starting','open') AND expires_at>datetime('now')
+          )
+          OR EXISTS (
+            SELECT 1
+            FROM auth_surface_capability a
+            JOIN distribution_opportunities o ON o.surface_slug=a.surface_slug
+            WHERE a.auth_mode IN ('human_bootstrap_session','reusable_session_candidate')
+              AND o.status IN ('auth_required','human_action_required')
+          )
+          LIMIT 1`).first().catch(()=>null)
+      ]);
+      const keepaliveTasks=[];
+      if(overflowDemand&&env.OVERFLOW_COMPUTE_URL){
+        keepaliveTasks.push((async()=>{
           try{
             const endpoint=new URL('/health',env.OVERFLOW_COMPUTE_URL).toString();
-            const response=await fetch(endpoint,{method:'GET',headers:{'User-Agent':'ToolScout-Render-Keepalive/1.0'},signal:AbortSignal.timeout(RENDER_TRIGGER_TIMEOUT_MS)});
+            const response=await fetch(endpoint,{method:'GET',headers:{'User-Agent':'ToolScout-Render-Keepalive/2.0'},signal:AbortSignal.timeout(RENDER_TRIGGER_TIMEOUT_MS)});
             if(!response.ok)await event(env,'render_keepalive_failed','failed',`HTTP ${response.status}`).catch(()=>{});
             return response.ok;
           }catch(error){
             await event(env,'render_keepalive_failed','failed',safe(error?.message||error,500)).catch(()=>{});
             return false;
           }
-        })(),
-        warmAuthBrokerService(env,{timeoutMs:RENDER_TRIGGER_TIMEOUT_MS}).catch(async error=>{
+        })());
+      }
+      if(authDemand){
+        keepaliveTasks.push(warmAuthBrokerService(env,{timeoutMs:RENDER_TRIGGER_TIMEOUT_MS}).catch(async error=>{
           await event(env,'auth_broker_keepalive_failed','failed',safe(error?.message||error,500)).catch(()=>{});
           return null;
-        })
-      ]);
+        }));
+      }
+      if(!keepaliveTasks.length)return;
+      const keepalive=Promise.allSettled(keepaliveTasks);
       if(ctx?.waitUntil){ctx.waitUntil(keepalive);return;}
       await keepalive;return;
     }

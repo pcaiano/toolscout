@@ -19,7 +19,7 @@
       "*/15 * * * *",
       "4,19,34,49 * * * *",
       "7,22,37,52 * * * *",
-      "15 * * * *",
+      "20 * * * *",
       "35 3 * * *"
     ],
     "auxiliary_worker_names": [
@@ -58,13 +58,13 @@
     "completion_callbacks_dispatch_followup": false,
     "autonomous_control_cron": "4,19,34,49 * * * *",
     "autonomous_control_single_flight_minutes": 12,
-    "hourly_audit_cron": "15 * * * *",
+    "hourly_audit_cron": "20 * * * *",
     "primary_growth_cron": "*/15 * * * *",
     "overlapping_core_work_forbidden": true,
     "autonomous_control_cycle_minutes": 15,
     "autonomous_control_cycle_anchor_minute": 4,
     "autonomous_stale_takeover_minutes": 12,
-    "distribution_classifier_version": 7,
+    "distribution_classifier_version": 17,
     "human_gate_exact_submission_intent_required": true,
     "captcha_routes_open_human_gate_same_cycle": true,
     "human_gate_queue_limit": 24,
@@ -81,7 +81,8 @@
     "engine_health_recovers_affiliate_coverage": true,
     "engine_health_reconciles_fresh_research_human_gates": true,
     "cancelled_classifier_gate_reopens_only_from_fresher_classifier_proof": true,
-    "source_unreachable_backoff_is_deferred_not_runnable": true
+    "source_unreachable_backoff_is_deferred_not_runnable": true,
+    "render_keepalive_policy": "demand_aware_overflow_and_auth_only"
   },
   "truth_order": [
     "live_provider_and_production_observation",

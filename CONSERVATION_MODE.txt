@@ -1,6 +1,6 @@
-GitHub Actions conservation mode active until 2026-10-01.
-Original workflows are preserved on branch pre-conservation-2026-09-13.
-Do not restore scheduled workflows before the monthly Actions minutes reset unless required for a production emergency.
+GitHub Actions conservation mode ended on 2026-10-01.
+Original pre-conservation workflows remain preserved on branch pre-conservation-2026-09-13.
 
-Traffic integrity note, 2026-09-16:
-Canonical browser-confirmed visitor truth and Worker-native D1 heartbeat are deployed in production via traffic-integrity-worker.js and migration 0071. Production verification of https://trytoolscout.org/api/traffic-integrity-health returned HTTP 200 and live D1 traffic data after deploy. The first Worker heartbeat may remain unavailable until the newly deployed cron executes. GitHub Actions conservation mode was restored immediately after the one-off production deploy.
+ToolScout 2.0 does not restore the old scheduled workflow topology. Cloudflare Workers own scheduled production execution and Render is an execution sidecar. GitHub Actions are limited to CI, explicit recovery, telemetry refreshes, and bounded manual fallbacks so they cannot become a second scheduler or deployment authority.
+
+Frozen conservation stubs remain temporarily for auditability and will be removed or selectively replaced after compatibility review.
