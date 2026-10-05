@@ -92,7 +92,7 @@ test('public hubs receive ToolScout 2.0 surface styling and active navigation',a
   const runtime=read('public-redesign-runtime.js');
   assert.match(runtime,/ToolScout 2\.0 hub surfaces/);
   assert.match(runtime,/data-toolscout-surface="whats-new"/);
-  assert.match(runtime,/\.ts2-global-nav\{position:sticky;top:0;z-index:1000;background:rgba\(11,13,12,\.96\)/);
+  assert.match(runtime,/\.ts2-global-nav\{position:sticky;top:0;z-index:1000;background:var\(--ts-g\)/);
 });
 
 
@@ -174,11 +174,12 @@ test('shared public navigation is isolated from legacy nav CSS and matches homep
   assert.match(runtime,/flex:0 0 auto!important/);
   assert.match(runtime,/height:84px;max-width:1440px/);
   assert.match(runtime,/\.ts2-global-nav\{position:sticky;top:0;z-index:1000/);
-  assert.match(runtime,/\.ts2-global-nav\.is-compact \.ts2-global-nav-inner\{height:64px\}/);
   assert.match(runtime,/data-toolscout-sticky-nav="2"/);
-  assert.match(runtime,/classList\.toggle\('is-compact',delta>0\)/);
+  assert.match(runtime,/classList\.toggle\('is-scrolled',window\.scrollY>8\)/);
+  assert.doesNotMatch(runtime,/is-compact/);
+  assert.doesNotMatch(runtime,/backdrop-filter/);
   assert.match(runtime,/min-height:72px;padding:14px 20px 11px/);
-  assert.match(runtime,/min-height:62px;padding:8px 20px 7px/);
+  assert.doesNotMatch(runtime,/min-height:62px/);
   assert.match(runtime,/font-size:12px;color:#BAC0BA/);
 });
 
@@ -190,11 +191,12 @@ test('homepage header leaves the finder as the primary action',()=>{
   assert.match(html,/id="need"/);
   assert.match(html,/class="homeGlobalNav darkBand"/);
   assert.match(html,/\.homeGlobalNav\{position:sticky;top:0;z-index:1000/);
-  assert.match(html,/\.homeGlobalNav\.is-compact nav\{height:64px\}/);
   assert.match(html,/data-toolscout-sticky-nav="home"/);
-  assert.match(html,/classList\.toggle\('is-compact',delta>0\)/);
+  assert.match(html,/classList\.toggle\('is-scrolled',window\.scrollY>8\)/);
+  assert.doesNotMatch(html,/is-compact/);
+  assert.doesNotMatch(html,/backdrop-filter/);
   assert.match(html,/min-height:64px;padding:12px 0 9px/);
-  assert.match(html,/min-height:58px;padding:7px 0 6px/);
+  assert.doesNotMatch(html,/min-height:58px/);
 });
 
 
@@ -230,4 +232,14 @@ test('public outbound policy also applies to the homepage while private surfaces
   assert.doesNotMatch(await home.text(),/href="https:\/\/external\.example\//);
   const privateResponse=await transformPublicOutboundPolicyResponse(new Request('https://trytoolscout.org/analytics'),new Response(source,{status:200,headers:{'content-type':'text/html'}}));
   assert.equal(await privateResponse.text(),source);
+});
+
+
+test('sticky headers keep constant geometry while scrolling to prevent mobile jitter',()=>{
+  const home=read('index.html');
+  const runtime=read('public-redesign-runtime.js');
+  assert.doesNotMatch(home,/lastY=window\.scrollY|delta=y-lastY|classList\.toggle\('is-compact'/);
+  assert.doesNotMatch(runtime,/lastY=window\.scrollY|delta=y-lastY|classList\.toggle\('is-compact'/);
+  assert.match(home,/\.homeGlobalNav\{position:sticky;top:0;z-index:1000;background:var\(--graphite\);isolation:isolate/);
+  assert.match(runtime,/\.ts2-global-nav\{position:sticky;top:0;z-index:1000;background:var\(--ts-g\);border-bottom:[^\n]+isolation:isolate/);
 });
