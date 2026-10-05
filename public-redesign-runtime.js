@@ -8,6 +8,20 @@ function isPublicVisualPath(pathname){
   if(HOME_PATHS.has(pathname))return false;
   return !PRIVATE_PREFIXES.some(prefix=>pathname===prefix||pathname.startsWith(prefix));
 }
+function isCommercialDecisionPath(pathname){
+  const p=String(pathname||'').replace(/\.html\/?$/i,'').replace(/\/$/,'');
+  return /^\/tools\/[a-z0-9][a-z0-9-]*$/i.test(p)||/^\/best-[a-z0-9-]+$/i.test(p)||/^\/[a-z0-9-]+-vs-[a-z0-9-]+$/i.test(p);
+}
+function stripCommercialVendorSourceLinks(html){
+  let out=String(html||'');
+  out=out.replace(/<section\b[^>]*data-toolscout-editorial-evidence=["']1["'][^>]*>[\s\S]*?<\/section>/gi,'');
+  out=out.replace(/<p\b[^>]*class=["'][^"']*source-note[^"']*["'][^>]*>[\s\S]*?<\/p>/gi,'');
+  out=out.replace(/\s*(?:·\s*)?<a\b[^>]*href=["']https?:\/\/[^"']+["'][^>]*>\s*Official(?:\s+product)?\s+source\s*<\/a>/gi,'');
+  out=out.replace(/\s*(?:·\s*)?<a\b[^>]*href=["']https?:\/\/[^"']+["'][^>]*>\s*[^<]{0,120}\s+official(?:\s+product)?\s+source\s*<\/a>/gi,'');
+  out=out.replace(/<strong>\s*Editorial evidence:\s*<\/strong>\s*/gi,'');
+  out=out.replace(/<strong>\s*Primary sources:\s*<\/strong>\s*/gi,'');
+  return out;
+}
 function styleTag(){
   return `<style data-toolscout-public-redesign="2">
 :root{--ts-g:#0B0D0C;--ts-c:#141715;--ts-o:#F3F5F1;--ts-soft:#F8F9F6;--ts-m:#90978F;--ts-line:#DDE2DC;--ts-l:#B7FF3C;--ts-fast:140ms;--ts-base:180ms;--ts-ease:cubic-bezier(.2,.7,.2,1);--ts-out:cubic-bezier(.16,1,.3,1)}
@@ -60,6 +74,7 @@ export async function transformPublicRedesignResponse(request,response){
   if(!isPublicVisualPath(url.pathname))return response;
   let html=await response.text();
   if(!/<body\b/i.test(html))return response;
+  if(isCommercialDecisionPath(url.pathname))html=stripCommercialVendorSourceLinks(html);
   if(!html.includes('data-toolscout-public-redesign="2"'))html=html.replace('</head>',styleTag()+'</head>');
   if(!/<html\b[^>]*data-toolscout-redesign=["']2["']/i.test(html))html=html.replace(/<html\b([^>]*)>/i,(match,attrs)=>'<html'+attrs+' data-toolscout-redesign="2">');
   if(!html.includes('class="ts2-global-nav"'))html=html.replace(/<body\b[^>]*>/i,m=>m+navHtml());
