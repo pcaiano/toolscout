@@ -27,20 +27,21 @@
       ],
       "maxPerRun": 1,
       "includePattern": "chatgpt|gpt[- ]?6|images|model",
-      "excludePattern": "customer story|case study|grant|funding|government|research"
+      "excludePattern": "customer story|case study|grant|funding|government|research|devday|recap"
     },
     {
       "id": "hubspot-releases",
       "toolSlug": "hubspot",
       "toolName": "HubSpot",
       "sourceName": "HubSpot Releases and Updates",
-      "url": "https://community.hubspot.com/c/resources/releases-and-updates/134.rss",
-      "parser": "feed",
+      "url": "https://community.hubspot.com/c/resources/releases-and-updates/134",
+      "parser": "html-linked",
       "allowedHosts": [
         "community.hubspot.com"
       ],
       "maxPerRun": 1,
-      "excludePattern": "webinar|event|industry edit|roundup"
+      "excludePattern": "webinar|event|industry edit|roundup",
+      "linkPattern": "^/t/"
     },
     {
       "id": "notion-releases",
