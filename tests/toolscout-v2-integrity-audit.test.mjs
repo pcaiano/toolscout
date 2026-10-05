@@ -99,6 +99,9 @@ test('hourly runtime escalation mirrors the stuck mission boundary used by the d
   const stuck=classifyRuntimeIntegrityMission({engine:'distribution',mission:'network_cycle',status:'running',age_minutes:31,completed_age_minutes:20});
   assert.equal(stuck?.kind,'stuck');
   assert.equal(stuck?.severity,'P1');
+  const stale=classifyRuntimeIntegrityMission({engine:'growth',mission:'execution_contract',status:'completed',age_minutes:46,completed_age_minutes:46});
+  assert.equal(stale?.kind,'outside_cadence');
+  assert.equal(stale?.severity,'P2');
 });
 
 test('hourly runtime escalation detects active actions without execution contracts',()=>{
