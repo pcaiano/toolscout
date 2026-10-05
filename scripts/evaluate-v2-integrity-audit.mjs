@@ -18,7 +18,12 @@ export const MISSION_CADENCE_LIMITS=Object.freeze({
 
 const rows=(payload,index)=>(payload[index]&&Array.isArray(payload[index].results)?payload[index].results:[]);
 const one=(payload,index)=>rows(payload,index)[0]||{};
-const fail=(message,evidence)=>{throw new Error(message+': '+JSON.stringify(evidence))};
+const fail=(message,evidence)=>{
+  const error=new Error(message+': '+JSON.stringify(evidence));
+  error.integrityCode=String(message||'integrity_failure').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,120)||'integrity_failure';
+  error.integrityEvidence=evidence;
+  throw error;
+};
 const nullableNumber=value=>value===null||value===undefined||value===''?null:Number(value);
 
 export function evaluateIntegrityPayload(payload,{runningGraceMinutes=30}={}){
@@ -89,6 +94,24 @@ export function evaluateIntegrityPayload(payload,{runningGraceMinutes=30}={}){
 const isMain=process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url);
 if(isMain){
   const inputPath=process.argv[2]||'integrity.json';
-  const payload=JSON.parse(fs.readFileSync(inputPath,'utf8'));
-  console.log(JSON.stringify(evaluateIntegrityPayload(payload),null,2));
+  const reportPath=process.argv[3]||'integrity-report.json';
+  let report;
+  try{
+    const payload=JSON.parse(fs.readFileSync(inputPath,'utf8'));
+    const result=evaluateIntegrityPayload(payload);
+    report={ok:true,code:'healthy',message:'ToolScout 2.0 Integrity Audit is healthy.',checked_at:new Date().toISOString(),result};
+    console.log(JSON.stringify(result,null,2));
+  }catch(error){
+    report={
+      ok:false,
+      code:error?.integrityCode||'integrity_audit_error',
+      message:String(error?.message||error),
+      evidence:error?.integrityEvidence||null,
+      checked_at:new Date().toISOString()
+    };
+    console.error(JSON.stringify(report,null,2));
+    process.exitCode=1;
+  }finally{
+    fs.writeFileSync(reportPath,JSON.stringify(report,null,2)+'\n');
+  }
 }
