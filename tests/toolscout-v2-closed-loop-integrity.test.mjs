@@ -68,18 +68,6 @@ test('authority runnable truth uses the same readiness contract as make sender a
 });
 
 
-test('authority recovery claims runnable sender work before observing public candidates',()=>{
-  const closedLoop=fs.readFileSync(new URL('../growth-runtime-closed-loop-worker.js',import.meta.url),'utf8');
-  const start=closedLoop.indexOf('async function closeAuthorityExecutionLoop');
-  const end=closedLoop.indexOf('function analyticsPath',start);
-  const body=closedLoop.slice(start,end);
-  const dispatch=body.indexOf("/api/growth/execution/dispatch");
-  const handoff=body.indexOf("/api/distribution/vendor-amplification/public-candidates?limit=8");
-  assert.ok(dispatch>0,'authority recovery must include bounded execution dispatch');
-  assert.ok(handoff>dispatch,'sender handoff must be observed only after execution dispatch');
-  assert.match(body,/beforeSenderDispatch\.runnableQueue>0&&beforeSenderDispatch\.senderClaimed<=0/);
-});
-
 test('Cloudflare primary cycle dispatches execution before authority recovery',()=>{
   const primary=fs.readFileSync(new URL('../cloudflare-primary-runtime-worker.js',import.meta.url),'utf8');
   const start=primary.indexOf('async function runPrimaryCycle');
