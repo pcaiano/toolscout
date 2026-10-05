@@ -31,7 +31,8 @@ export function classifyRuntimeIntegrityMission(row,{runningGraceMinutes=30}={})
     if(completedAge>limit+runningGraceMinutes)return{kind:'previous_completion_outside_cadence',severity:'P2',key,limit,age,completedAge};
     return null;
   }
-  if(status==='completed'&&(age===null||!Number.isFinite(age)||age>limit))return{kind:'outside_cadence',severity:age!==null&&age>limit*2?'P1':'P2',key,limit,age,completedAge};
+  if(status!=='completed')return{kind:'not_completed',severity:'P1',key,limit,age,completedAge,status};
+  if(age===null||!Number.isFinite(age)||age>limit)return{kind:'outside_cadence',severity:age!==null&&age>limit*2?'P1':'P2',key,limit,age,completedAge};
   return null;
 }
 const n=v=>{const x=Number(v);return Number.isFinite(x)?x:0};
