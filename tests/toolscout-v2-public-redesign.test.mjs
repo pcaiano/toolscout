@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {transformPublicRedesignResponse} from '../public-redesign-runtime.js';
+import {transformPublicOutboundPolicyResponse,transformPublicRedesignResponse} from '../public-redesign-runtime.js';
 
 const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
@@ -180,4 +180,34 @@ test('homepage header leaves the finder as the primary action',()=>{
   assert.match(html,/classList\.toggle\('is-compact',delta>0\)/);
   assert.match(html,/min-height:64px;padding:12px 0 9px/);
   assert.match(html,/min-height:58px;padding:7px 0 6px/);
+});
+
+
+test('software news receives the ToolScout 2.0 news surface',async()=>{
+  const source='<!doctype html><html><head></head><body><div class="wrap article"><div class="top"><a class="brand" href="/">ToolScout</a></div><main><header class="hero"><h1>News</h1></header></main></div></body></html>';
+  const response=new Response(source,{status:200,headers:{'content-type':'text/html; charset=UTF-8'}});
+  const out=await transformPublicRedesignResponse(new Request('https://trytoolscout.org/news/example-story'),response);
+  const html=await out.text();
+  assert.match(html,/data-toolscout-surface="news"/);
+  assert.match(html,/data-toolscout-public-redesign="2"/);
+  assert.match(html,/\.ts2-global-nav \+ \.wrap > \.top:first-child\{display:none!important\}/);
+});
+
+test('public outbound policy removes direct external anchors but preserves internal profile and monetizable CTA routes',async()=>{
+  const source='<!doctype html><html><head></head><body><a href="https://vendor.example/source">Source</a><a href="/tools/example">Profile</a><a href="/go/example?source=software-news">Visit example</a></body></html>';
+  const response=new Response(source,{status:200,headers:{'content-type':'text/html; charset=UTF-8'}});
+  const out=await transformPublicOutboundPolicyResponse(new Request('https://trytoolscout.org/news/example-story'),response);
+  const html=await out.text();
+  assert.doesNotMatch(html,/href="https:\/\/vendor\.example\/source"/);
+  assert.match(html,/>Source</);
+  assert.match(html,/href="\/tools\/example"/);
+  assert.match(html,/href="\/go\/example\?source=software-news"/);
+});
+
+test('public outbound policy also applies to the homepage while private surfaces remain untouched',async()=>{
+  const source='<!doctype html><html><head></head><body><a href="https://external.example/">External</a></body></html>';
+  const home=await transformPublicOutboundPolicyResponse(new Request('https://trytoolscout.org/'),new Response(source,{status:200,headers:{'content-type':'text/html'}}));
+  assert.doesNotMatch(await home.text(),/href="https:\/\/external\.example\//);
+  const privateResponse=await transformPublicOutboundPolicyResponse(new Request('https://trytoolscout.org/analytics'),new Response(source,{status:200,headers:{'content-type':'text/html'}}));
+  assert.equal(await privateResponse.text(),source);
 });
