@@ -2,6 +2,7 @@ import {transformSeoPublicPage} from './seo-cloudflare-runtime-worker.js';
 import {injectToolScoutSocialFooter} from './social-profiles.js';
 import {canonicalizePublicHtmlResponse} from './public-canonical-contract.js';
 import {injectNewsletterSignup} from './newsletter-public-runtime.js';
+import {transformPublicOutboundPolicyResponse,transformPublicRedesignResponse} from './public-redesign-runtime.js';
 
 function editorialRoute(pathname){
   const p=String(pathname||'');
@@ -46,12 +47,15 @@ export async function handlePublicEditorialRoute(request,env){
     return new Response(asset.body,{status:asset.status,statusText:asset.statusText,headers});
   }
 
-  // Preserve the two useful public transformations while bypassing the legacy
-  // control/observability decorator chain.
+  // Keep editorial pages on the same ToolScout 2.0 visual and outbound
+  // contract as every other public HTML surface, even though this owner bypasses
+  // the generic public asset pipeline.
   const seo=await transformSeoPublicPage(request,asset,env);
   const newsletter=route.surface==='news'?await injectNewsletterSignup(seo,{source:'news-article'}):seo;
-  const social=await injectToolScoutSocialFooter(newsletter);
-  const finalResponse=await canonicalizePublicHtmlResponse(social,url.pathname);
+  const redesigned=await transformPublicRedesignResponse(request,newsletter);
+  const social=await injectToolScoutSocialFooter(redesigned);
+  const canonical=await canonicalizePublicHtmlResponse(social,url.pathname);
+  const finalResponse=await transformPublicOutboundPolicyResponse(request,canonical);
   const headers=new Headers(finalResponse.headers);
   headers.set('X-ToolScout-Public-Plane','editorial-v1');
   headers.set('X-ToolScout-Editorial-Surface',route.surface);

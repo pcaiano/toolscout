@@ -10,14 +10,19 @@ test('news path is owned by the direct editorial public plane',()=>{
   assert.equal(ownsPublicEditorialPath('/best-seo-tools-for-agencies'),false);
 });
 
-test('direct news response preserves editorial evidence and adds standard public transforms',async()=>{
+test('direct news response uses ToolScout 2.0 and removes non-monetizable external anchors',async()=>{
   const response=await handlePublicEditorialRoute(new Request('https://trytoolscout.org/news/zapier-update'),env);
   assert.equal(response.status,200);
   assert.equal(response.headers.get('X-ToolScout-Public-Plane'),'editorial-v1');
   const html=await response.text();
   assert.match(html,/rel="canonical" href="https:\/\/trytoolscout\.org\/news\/zapier-update"/);
   assert.doesNotMatch(html,/trytoolscout\.org\/news\/zapier-update\.html/);
-  assert.match(html,/https:\/\/zapier\.com\//);
+  assert.match(html,/data-toolscout-redesign="2"/);
+  assert.match(html,/data-toolscout-surface="news"/);
+  assert.match(html,/class="ts2-global-nav"/);
+  assert.doesNotMatch(html,/href="https:\/\/zapier\.com\//);
+  assert.match(html,/>Official source</);
+  assert.doesNotMatch(html,/href="https:\/\/(?:www\.)?(?:linkedin\.com|x\.com|bsky\.app|dev\.to|pinterest\.com|threads\.com)/);
   assert.match(html,/data-toolscout-social-footer="1"/);
 });
 
@@ -63,4 +68,17 @@ test('Software Trends JSON dataset bypasses HTML transforms',async()=>{
   assert.match(response.headers.get('content-type')||'',/application\/json/);
   const body=await response.json();
   assert.equal(body.version,4);
+});
+
+
+test('Software Trends direct owner also receives redesign and outbound protection',async()=>{
+  const trends='<html><head><link rel="canonical" href="https://trytoolscout.org/software-trends-index"></head><body><div class="wrap"><div class="top">Legacy nav</div><main><header class="hero"><h1>Software trends</h1></header><a href="https://vendor.example/source">Primary source</a><a href="/news/example">Read ToolScout article</a></main></div></body></html>';
+  const trendsEnv={ASSETS:{fetch:async()=>new Response(trends,{status:200,headers:{'Content-Type':'text/html; charset=UTF-8'}})}};
+  const response=await handlePublicEditorialRoute(new Request('https://trytoolscout.org/software-trends-index'),trendsEnv);
+  const html=await response.text();
+  assert.match(html,/data-toolscout-redesign="2"/);
+  assert.match(html,/data-toolscout-surface="trends"/);
+  assert.match(html,/class="ts2-global-nav"/);
+  assert.doesNotMatch(html,/href="https:\/\/vendor\.example\/source"/);
+  assert.match(html,/href="\/news\/example"/);
 });
