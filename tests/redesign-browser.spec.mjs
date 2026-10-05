@@ -89,6 +89,28 @@ test('Command Center redesign fixture exposes GA4 and GSC explorers',async({page
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2)).toBeTruthy();
 });
 
+test.describe('mobile global navigation fit',()=>{
+  test.use({viewport:{width:390,height:844}});
+  test('all six primary navigation links are fully visible without horizontal rail clipping',async({page})=>{
+    for(const item of [
+      ['/index.html','.navlinks'],
+      ['/.browser-fixtures/trends-public.html','.ts2-links'],
+      ['/.browser-fixtures/publisher-kit.html','.nav-links']
+    ]){
+      const [path,selector]=item;
+      await page.goto(base+path,{waitUntil:'domcontentloaded'});
+      const fit=await page.locator(selector).evaluate(nav=>{
+        const nr=nav.getBoundingClientRect();
+        const links=[...nav.querySelectorAll('a')].map(a=>{const r=a.getBoundingClientRect();return{text:(a.textContent||'').trim(),left:r.left,right:r.right}});
+        return{scrollFree:nav.scrollWidth<=nav.clientWidth+1,links,navLeft:nr.left,navRight:nr.right,allVisible:links.every(x=>x.left>=nr.left-1&&x.right<=nr.right+1)};
+      });
+      expect(fit.scrollFree,path+' nav should not horizontally scroll at 390px').toBeTruthy();
+      expect(fit.allVisible,path+' nav links should be fully visible').toBeTruthy();
+      expect(fit.links.map(x=>x.text)).toEqual(['Tools','Guides','Compare',"What's new",'Trends','Publisher Kit']);
+    }
+  });
+});
+
 test.describe('mobile release smoke',()=>{
   test.use({viewport:{width:390,height:844}});
   test('public redesign and Command Center avoid page-level horizontal overflow',async({page})=>{
