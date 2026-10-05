@@ -26,7 +26,9 @@ async function fetchText(pathname,{redirect='follow',headers={},method='GET',bod
 // Live sitemap must contain every URL in the deployed repository sitemap.
 const repoSitemap=fs.readFileSync('sitemap.xml','utf8');
 const expectedSitemap=sitemapUrls(repoSitemap);
-const liveSitemapResponse=await fetchText('/sitemap.xml');
+const liveSitemapResponse=await fetchText('/sitemap.xml?toolscout_v2_smoke='+Date.now(),{
+  headers:{'Cache-Control':'no-cache','Pragma':'no-cache'}
+});
 if(!liveSitemapResponse.ok)errors.push({code:'live_sitemap_unavailable',status:liveSitemapResponse.status});
 else{
   const live=sitemapUrls(liveSitemapResponse.text);
