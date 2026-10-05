@@ -24,13 +24,13 @@
       color:var(--graphite);background:var(--off);line-height:1.45
     }
     *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--off);color:var(--graphite)}
-    a{color:inherit}button,input{font:inherit}.shell{max-width:1440px;margin:auto;padding-left:72px;padding-right:72px}
+    a{color:inherit}button,input,select{font:inherit}.shell{max-width:1440px;margin:auto;padding-left:72px;padding-right:72px}
     .darkBand{background:var(--graphite);color:var(--off)}.lightBand{background:var(--off)}
     nav{height:84px;display:flex;align-items:center;justify-content:space-between;gap:24px;border-bottom:1px solid var(--dark-line)}
     .brand{display:inline-flex;align-items:center;gap:11px;color:var(--off);font-size:22px;font-weight:850;letter-spacing:-.045em;text-decoration:none}
-    .brand img{width:24px;height:24px;border-radius:5px}.navlinks{display:flex;align-items:center;gap:27px;font-size:13px}
+    .brand img{width:24px;height:24px;border-radius:5px}.navActions{display:flex;align-items:center;gap:25px}.navlinks{display:flex;align-items:center;gap:25px;font-size:13px}
     .navlinks a{color:#CDD2CC;text-decoration:none;transition:color var(--fast) var(--ease)}.navlinks a:hover{color:#fff}
-    .navCta{background:var(--lime);color:var(--graphite)!important;padding:12px 17px;border-radius:7px;font-weight:800}
+    .navCta{background:var(--lime);color:var(--graphite)!important;padding:12px 17px;border-radius:7px;font-weight:800;text-decoration:none;white-space:nowrap}
     .hero{min-height:610px;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);border-bottom:1px solid var(--dark-line)}
     .heroCopy{padding:76px 0 76px;max-width:590px}.heroStage{min-height:100%;position:relative}
     .heroStage::after{content:"";position:absolute;width:1px;height:160px;background:linear-gradient(transparent,rgba(183,255,60,.34),transparent);left:52%;top:29%;opacity:.65}
@@ -61,22 +61,20 @@
     .btn:hover{transform:translateY(-1px)}.btn.secondary{background:transparent;color:var(--graphite)!important;border-color:var(--line)}.empty-state{padding:20px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);display:grid;gap:4px}.empty-state span{color:#646B64}
     .section{margin:0 auto 82px}.sectionHead{display:flex;justify-content:space-between;gap:30px;align-items:end;margin-bottom:27px}.sectionHead .eyebrow{color:#6F766F}.sectionHead h2{font-size:clamp(36px,4.5vw,52px);line-height:1;letter-spacing:-.055em;margin:7px 0 0}.sectionHead p{max-width:440px;color:#646B64;line-height:1.6;margin:0}
     .decisionDoors{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.door{min-height:282px;border:1px solid var(--line);border-radius:10px;padding:25px;display:flex;flex-direction:column;color:var(--graphite);text-decoration:none;background:var(--soft);transition:transform var(--fast) var(--ease),border-color var(--fast) var(--ease)}
-    .door:hover{transform:translateY(-2px);border-color:#BFC6BE}.doorLabel{font-size:10px;text-transform:uppercase;letter-spacing:.11em;color:#717971;font-weight:850}.doorLogos{display:flex;align-items:center;gap:7px;margin:18px 0 13px}.doorLogos img{width:38px;height:38px;object-fit:contain;border:1px solid var(--line);border-radius:8px;background:#fff;padding:5px}
+    .door:hover{transform:translateY(-2px);border-color:#BFC6BE}.doorLabel{font-size:10px;text-transform:uppercase;letter-spacing:.11em;color:#717971;font-weight:850}.doorLogos{display:flex;align-items:center;gap:7px;margin:18px 0 13px}.doorLogos img{width:38px;height:38px;object-fit:contain;border:1px solid var(--line);border-radius:8px;background:#fff;padding:5px}.doorTag{display:inline-flex;align-self:flex-start;margin:20px 0 15px;padding:8px 10px;border:1px solid var(--graphite);border-radius:999px;font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.1em}
     .door h3{font-size:28px;line-height:1.05;letter-spacing:-.045em;margin:0 0 10px}.door p{color:#646B64;font-size:14px;line-height:1.55;margin:0 0 22px}.doorAction{margin-top:auto;font-size:10px;font-weight:850;letter-spacing:.09em}.liveDot{display:inline-block;width:7px;height:7px;background:var(--lime);border-radius:50%;margin-right:7px}
     .editorialProof{display:grid;grid-template-columns:5fr 7fr;gap:56px;border-top:1px solid var(--graphite);padding-top:54px}.editorialProof h2{font-size:39px;line-height:1.08;letter-spacing:-.05em;margin:8px 0}.editorialProof .statement{color:#646B64;font-size:17px;line-height:1.65;max-width:760px}.editorialProof .textLink{display:inline-block;margin-top:13px}
     .textLink{font-size:11px;letter-spacing:.07em;font-weight:850;text-decoration:none}.textLink:hover{text-decoration:underline}
-    .comparisonList,.pickGrid{border-top:1px solid var(--graphite)}.comparisonRow,.pick{display:grid;align-items:center;color:var(--graphite);text-decoration:none;border-bottom:1px solid var(--line);transition:padding-left var(--fast) var(--ease)}
-    .comparisonRow{grid-template-columns:80px 1fr 220px auto;gap:18px;padding:18px 0}.comparisonRow:hover,.pick:hover{padding-left:5px}.comparisonIcons{display:flex}.comparisonIcons img{width:34px;height:34px;border-radius:8px;border:1px solid var(--line);background:#fff;padding:4px}.comparisonIcons img+img{margin-left:-7px}
-    .comparisonRow strong{font-size:20px;letter-spacing:-.03em}.comparisonRow span{color:#707770;font-size:13px}.rowArrow{font-size:20px!important;color:var(--graphite)!important}
-    .pickGrid{display:grid;grid-template-columns:1fr 1fr}.pick{grid-template-columns:1fr auto;padding:18px 0}.pick:nth-child(odd){padding-right:28px}.pick:nth-child(even){padding-left:28px;border-left:1px solid var(--line)}.pick strong{font-size:16px}.pick span{font-size:19px}
-    .pulse{display:grid;grid-template-columns:1.4fr 1fr;border-top:1px solid var(--graphite)}.pulseLead{padding:29px 34px 32px 0;border-right:1px solid var(--line);min-height:310px}.pulseTop{display:flex;align-items:center;gap:8px;font-size:10px;text-transform:uppercase;letter-spacing:.11em;font-weight:850}
+    .compareBuilder{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto;gap:14px;align-items:end;border-top:1px solid var(--graphite);border-bottom:1px solid var(--line);padding:24px 0}.comparePicker{display:grid;gap:8px}.comparePicker label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:850;color:#707770}.comparePicker select{width:100%;min-height:50px;border:1px solid var(--line);border-radius:8px;background:var(--soft);color:var(--graphite);padding:0 42px 0 14px;font-size:15px;font-weight:700;outline:0}.comparePicker select:focus{border-color:#9AA29A}.compareJoin{align-self:center;padding-bottom:14px;color:#767D76;font-size:10px;font-weight:900;letter-spacing:.12em}.compareGo{min-height:50px;display:inline-flex;align-items:center;justify-content:center;padding:0 18px;border-radius:8px;background:var(--graphite);color:#fff;text-decoration:none;font-size:12px;font-weight:850;white-space:nowrap}.compareGo:hover{transform:translateY(-1px)}.compareHint{display:flex;justify-content:space-between;gap:18px;align-items:center;margin-top:13px;color:#707770;font-size:12px}.compareHint a{font-weight:850;text-decoration:none;color:var(--graphite)}
+    .pickGrid{border-top:1px solid var(--graphite);display:grid;grid-template-columns:1fr 1fr}.pick{display:grid;align-items:center;color:var(--graphite);text-decoration:none;border-bottom:1px solid var(--line);transition:padding-left var(--fast) var(--ease);grid-template-columns:1fr auto;padding:18px 0}.pick:hover{padding-left:5px}.pick:nth-child(odd){padding-right:28px}.pick:nth-child(even){padding-left:28px;border-left:1px solid var(--line)}.pick strong{font-size:16px}.pick span{font-size:19px}
+    .pulse{display:grid;grid-template-columns:1.4fr 1fr;border-top:1px solid var(--graphite)}.pulseLead{padding:29px 34px 32px 0;border-right:1px solid var(--line);min-height:310px}.pulseTop{display:flex;align-items:center;justify-content:space-between;gap:14px;font-size:10px;text-transform:uppercase;letter-spacing:.11em;font-weight:850}.pulseLive{display:inline-flex;align-items:center}.pulseCycle{color:#7A817A;font-variant-numeric:tabular-nums}
     .pulseStory{transition:opacity var(--base) var(--ease),transform var(--base) var(--ease)}.pulseStory.swap{opacity:0;transform:translateY(6px)}.pulseBrand{display:flex;align-items:center;gap:11px;margin-top:29px}.pulseBrand img{width:34px;height:34px;border-radius:8px;border:1px solid var(--line);background:#fff;padding:4px}.pulseBrand strong{font-size:15px}.pulseMeta{font-size:10px;text-transform:uppercase;letter-spacing:.075em;color:#767D76;margin-top:2px}
     .pulseLead h3{font-size:32px;line-height:1.08;letter-spacing:-.045em;margin:15px 0 11px;max-width:680px}.pulseLead p{font-size:15px;line-height:1.62;color:#5F665F;max-width:690px}.pulseLinks{display:flex;gap:18px;flex-wrap:wrap;margin-top:24px}
     .pulseSecondary{padding-left:34px}.pulseItem{width:100%;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;padding:24px 0;cursor:pointer;color:var(--graphite);transition:padding-left var(--fast) var(--ease)}.pulseItem:hover{padding-left:6px}.pulseItem small{display:block;color:#777E77;font-size:9px;text-transform:uppercase;letter-spacing:.09em;font-weight:850}.pulseItem strong{display:block;font-size:17px;line-height:1.35;margin-top:7px}
     .trust{border-top:1px solid var(--line);padding-top:30px;text-align:left}.trust p{font-size:12px;line-height:1.6;color:#717871;max-width:740px}.trust-links{display:flex;gap:18px;flex-wrap:wrap;margin-top:13px}.trust-links a{font-size:12px;color:#555D55;text-decoration:none}.badgeRow{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:24px;filter:grayscale(1);opacity:.58}.badgeRow img{max-height:44px;width:auto}
     .pageEnter{animation:pageEnter var(--base) var(--out) both}@keyframes pageEnter{from{opacity:.35;transform:translateY(7px)}to{opacity:1;transform:none}}
-    @media(max-width:960px){.shell{padding-left:30px;padding-right:30px}.navlinks{gap:16px}.hero{grid-template-columns:1fr}.heroStage{display:none}.decisionDoors{grid-template-columns:1fr}.door{min-height:auto}.editorialProof{grid-template-columns:1fr}.comparisonRow{grid-template-columns:70px 1fr auto}.comparisonRow>span:not(.rowArrow){display:none}.pulse{grid-template-columns:1fr}.pulseLead{border-right:0;border-bottom:1px solid var(--line);padding-right:0}.pulseSecondary{padding-left:0}}
-    @media(max-width:700px){.shell{padding-left:20px;padding-right:20px}nav{height:72px}.navlinks a:not(.navCta){display:none}.navCta{padding:10px 12px}.hero{min-height:560px}.heroCopy{padding:55px 0 58px}.hero h1{font-size:52px}.heroLead{font-size:16px}.intentBox{min-height:56px}.choices{grid-template-columns:1fr}.contentShell{padding-top:48px}.section{margin-bottom:64px}.sectionHead{align-items:flex-start;flex-direction:column}.sectionHead h2{font-size:36px}.editorialProof{gap:20px}.editorialProof h2{font-size:31px}.comparisonRow{grid-template-columns:58px 1fr auto}.pickGrid{grid-template-columns:1fr}.pick:nth-child(odd),.pick:nth-child(even){padding:17px 0;border-left:0}.pulseLead h3{font-size:27px}.profile-card,.result-bottom{align-items:flex-start;flex-direction:column}.profile-card .chips{justify-content:flex-start}.reason-grid{grid-template-columns:1fr}.featured-badge{position:static;display:inline-block;margin-bottom:10px}.badgeRow{gap:10px}.badgeRow img{max-height:36px}}
+    @media(max-width:960px){.shell{padding-left:30px;padding-right:30px}.navActions{gap:16px}.navlinks{gap:16px}.hero{grid-template-columns:1fr}.heroStage{display:none}.decisionDoors{grid-template-columns:1fr}.door{min-height:auto}.editorialProof{grid-template-columns:1fr}.pulse{grid-template-columns:1fr}.pulseLead{border-right:0;border-bottom:1px solid var(--line);padding-right:0}.pulseSecondary{padding-left:0}}
+    @media(max-width:700px){.shell{padding-left:20px;padding-right:20px}nav{height:auto;min-height:72px;padding:14px 0 11px;align-items:center;flex-wrap:wrap;row-gap:11px}.brand{font-size:20px}.navActions{display:contents}.navCta{order:2;margin-left:auto;padding:10px 12px}.navlinks{order:3;width:100%;gap:18px;overflow-x:auto;overscroll-behavior-inline:contain;padding:1px 0 3px;scrollbar-width:none}.navlinks::-webkit-scrollbar{display:none}.navlinks a{display:inline-flex!important;white-space:nowrap;font-size:12px;color:#BAC0BA}.hero{min-height:560px}.heroCopy{padding:55px 0 58px}.hero h1{font-size:52px}.heroLead{font-size:16px}.intentBox{min-height:56px}.choices{grid-template-columns:1fr}.contentShell{padding-top:48px}.section{margin-bottom:64px}.sectionHead{align-items:flex-start;flex-direction:column}.sectionHead h2{font-size:36px}.editorialProof{gap:20px}.editorialProof h2{font-size:31px}.compareBuilder{grid-template-columns:1fr;gap:12px;padding:18px 0}.compareJoin{display:none}.compareGo{width:100%}.compareHint{align-items:flex-start;flex-direction:column;gap:7px}.pickGrid{grid-template-columns:1fr}.pick:nth-child(odd),.pick:nth-child(even){padding:17px 0;border-left:0}.pulseLead h3{font-size:27px}.profile-card,.result-bottom{align-items:flex-start;flex-direction:column}.profile-card .chips{justify-content:flex-start}.reason-grid{grid-template-columns:1fr}.featured-badge{position:static;display:inline-block;margin-bottom:10px}.badgeRow{gap:10px}.badgeRow img{max-height:36px}}
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
   </style>
 </head>
@@ -85,7 +83,7 @@
   <div class="shell">
     <nav>
       <a class="brand" href="/" aria-label="ToolScout home"><img src="/favicon.svg" alt="" width="24" height="24">ToolScout</a>
-      <div class="navlinks"><a href="#compare">Compare</a><a href="#picks">Best picks</a><a href="#updates">What's new</a><a href="/tools.html">Tools</a><a class="navCta" href="#finder">Find my tools →</a></div>
+      <div class="navActions"><div class="navlinks" aria-label="Primary"><a href="/tools.html">Tools</a><a href="/guides.html">Guides</a><a href="/compare.html">Compare</a><a href="/whats-new.html">What's new</a></div><a class="navCta" href="#finder">Find my tools →</a></div>
     </nav>
     <main class="pageEnter">
       <section class="hero" id="finder">
@@ -114,10 +112,10 @@
     <section class="section" aria-labelledby="ways-title">
       <div class="sectionHead"><div><div class="eyebrow">Three ways in</div><h2 id="ways-title">Choose how you want to decide.</h2></div><p>Start with a close choice, a job to solve, or a software change worth following.</p></div>
       <div class="decisionDoors">
-        <a class="door" href="/make-vs-zapier.html"><span data-comparison-favicons="1" aria-hidden="true" style="display:inline-flex;align-items:center;vertical-align:middle;margin-right:8px"><img src="https://www.google.com/s2/favicons?domain=www.make.com&amp;sz=128" alt="" width="22" height="22" loading="lazy" decoding="async" style="width:22px;height:22px;object-fit:contain;border-radius:6px;background:#fff;border:1px solid #e4e7ec"><img src="https://www.google.com/s2/favicons?domain=zapier.com&amp;sz=128" alt="" width="22" height="22" loading="lazy" decoding="async" style="width:22px;height:22px;object-fit:contain;border-radius:6px;background:#fff;border:1px solid #e4e7ec;margin-left:-5px"></span>
-          <span class="doorLabel">01 / Decide</span>
-          <span class="doorLogos"><img src="https://www.google.com/s2/favicons?domain=make.com&sz=128" alt="Make logo"><img src="https://www.google.com/s2/favicons?domain=zapier.com&sz=128" alt="Zapier logo"></span>
-          <h3>Make or Zapier?</h3><p>Control versus simplicity. Start with the tradeoff, then inspect the evidence.</p><span class="doorAction">Compare →</span>
+        <a class="door" href="/compare.html">
+          <span class="doorLabel">01 / Compare</span>
+          <span class="doorTag">Comparator</span>
+          <h3>Compare any two tools</h3><p>Choose the software you are deciding between and inspect the tradeoffs side by side.</p><span class="doorAction">Open comparator →</span>
         </a>
         <a class="door" href="/best-crm-for-small-business.html">
           <span class="doorLabel">02 / Discover</span>
@@ -138,14 +136,14 @@
     </section>
 
     <section class="section" id="compare">
-      <div class="sectionHead"><div><div class="eyebrow">Decision briefs</div><h2>Compare when the choice is close.</h2></div><p>Each comparison leads with the decision and the tradeoff before the feature table.</p></div>
-      <div class="comparisonList">
-        <a class="comparisonRow" href="/make-vs-zapier.html"><span class="comparisonIcons"><img src="https://www.google.com/s2/favicons?domain=make.com&sz=128" alt=""><img src="https://www.google.com/s2/favicons?domain=zapier.com&sz=128" alt=""></span><strong><span data-comparison-favicons="1" aria-hidden="true" style="display:inline-flex;align-items:center;vertical-align:middle;margin-right:8px"><img src="https://www.google.com/s2/favicons?domain=www.make.com&amp;sz=128" alt="" width="22" height="22" loading="lazy" decoding="async" style="width:22px;height:22px;object-fit:contain;border-radius:6px;background:#fff;border:1px solid #e4e7ec"><img src="https://www.google.com/s2/favicons?domain=zapier.com&amp;sz=128" alt="" width="22" height="22" loading="lazy" decoding="async" style="width:22px;height:22px;object-fit:contain;border-radius:6px;background:#fff;border:1px solid #e4e7ec;margin-left:-5px"></span>Make vs Zapier</strong><span>Control or simplicity?</span><span class="rowArrow">→</span></a>
-        <a class="comparisonRow" href="/hubspot-vs-pipedrive.html"><span class="comparisonIcons"><img src="https://www.google.com/s2/favicons?domain=hubspot.com&sz=128" alt=""><img src="https://www.google.com/s2/favicons?domain=pipedrive.com&sz=128" alt=""></span><strong><span data-comparison-favicons="1" aria-hidden="true" style="display:inline-flex;align-items:center;vertical-align:middle;margin-right:8px"><img src="https://www.google.com/s2/favicons?domain=www.hubspot.com&amp;sz=128" alt="" width="22" height="22" loading="lazy" decoding="async" style="width:22px;height:22px;object-fit:contain;border-radius:6px;background:#fff;border:1px solid #e4e7ec"><img src="https://www.google.com/s2/favicons?domain=www.pipedrive.com&amp;sz=128" alt="" width="22" height="22" loading="lazy" decoding="async" style="width:22px;height:22px;object-fit:contain;border-radius:6px;background:#fff;border:1px solid #e4e7ec;margin-left:-5px"></span>HubSpot vs Pipedrive</strong><span>Platform breadth or sales focus?</span><span class="rowArrow">→</span></a>
-        <a class="comparisonRow" href="/notion-vs-clickup.html"><span class="comparisonIcons"><img src="https://www.google.com/s2/favicons?domain=notion.com&sz=128" alt=""><img src="https://www.google.com/s2/favicons?domain=clickup.com&sz=128" alt=""></span><strong><span data-comparison-favicons="1" aria-hidden="true" style="display:inline-flex;align-items:center;vertical-align:middle;margin-right:8px"><img src="https://www.google.com/s2/favicons?domain=www.notion.com&amp;sz=128" alt="" width="22" height="22" loading="lazy" decoding="async" style="width:22px;height:22px;object-fit:contain;border-radius:6px;background:#fff;border:1px solid #e4e7ec"><img src="https://www.google.com/s2/favicons?domain=clickup.com&amp;sz=128" alt="" width="22" height="22" loading="lazy" decoding="async" style="width:22px;height:22px;object-fit:contain;border-radius:6px;background:#fff;border:1px solid #e4e7ec;margin-left:-5px"></span>Notion vs ClickUp</strong><span>Flexible workspace or execution system?</span><span class="rowArrow">→</span></a>
-        <a class="comparisonRow" href="/semrush-vs-ahrefs.html"><span class="comparisonIcons"><img src="https://www.google.com/s2/favicons?domain=semrush.com&sz=128" alt=""><img src="https://www.google.com/s2/favicons?domain=ahrefs.com&sz=128" alt=""></span><strong><span data-comparison-favicons="1" aria-hidden="true" style="display:inline-flex;align-items:center;vertical-align:middle;margin-right:8px"><img src="https://www.google.com/s2/favicons?domain=www.semrush.com&amp;sz=128" alt="" width="22" height="22" loading="lazy" decoding="async" style="width:22px;height:22px;object-fit:contain;border-radius:6px;background:#fff;border:1px solid #e4e7ec"><img src="https://www.google.com/s2/favicons?domain=ahrefs.com&amp;sz=128" alt="" width="22" height="22" loading="lazy" decoding="async" style="width:22px;height:22px;object-fit:contain;border-radius:6px;background:#fff;border:1px solid #e4e7ec;margin-left:-5px"></span>Semrush vs Ahrefs</strong><span>Broad marketing suite or focused SEO depth?</span><span class="rowArrow">→</span></a>
+      <div class="sectionHead"><div><div class="eyebrow">Comparator</div><h2>Compare when the choice is close.</h2></div><p>Choose any two tools and go straight to a side by side decision view.</p></div>
+      <div class="compareBuilder" id="homeComparator">
+        <div class="comparePicker"><label for="homeCompareA">First tool</label><select id="homeCompareA" aria-label="First tool"><option>Loading tools…</option></select></div>
+        <div class="compareJoin" aria-hidden="true">VS</div>
+        <div class="comparePicker"><label for="homeCompareB">Second tool</label><select id="homeCompareB" aria-label="Second tool"><option>Loading tools…</option></select></div>
+        <a class="compareGo" id="homeCompareGo" href="/compare.html">Compare →</a>
       </div>
-      <div style="margin-top:17px;text-align:right"><a class="textLink" href="/compare.html">BUILD ANOTHER COMPARISON →</a></div>
+      <div class="compareHint"><span>Any comparison eligible tool in the current ToolScout catalog.</span><a href="/compare.html">Open full comparator →</a></div>
     </section>
 
     <section class="section" id="picks">
@@ -164,7 +162,7 @@
       <div class="sectionHead"><div><div class="eyebrow">Editorial pulse</div><h2>What's new in software.</h2></div><p>Fresh product changes selected for buyer relevance. Partner relationships never determine inclusion or placement.</p></div>
       <div class="pulse" id="softwarePulse">
         <article class="pulseLead">
-          <div class="pulseTop"><i class="liveDot"></i>What's new · live</div>
+          <div class="pulseTop"><span class="pulseLive"><i class="liveDot"></i>What's new · live</span><span class="pulseCycle" id="pulseCycle">1 / 3</span></div>
           <div class="pulseStory" id="pulseStory">
             <div class="pulseBrand"><img id="pulseLogo" src="https://www.google.com/s2/favicons?domain=github.com&sz=128" alt=""><div><strong id="pulseTool">GitHub</strong><div class="pulseMeta" id="pulseMeta">Integration update · 2 Oct 2026</div></div></div>
             <h3 id="pulseTitle">Copilot code review now works through the API</h3>
@@ -199,10 +197,33 @@
     {toolName:'ChatGPT',toolSlug:'chatgpt',label:'Pricing and packaging update',publishedAt:'2026-09-29',title:'GPT-6.1 Sol changes the price performance equation',summary:'A lower cost model tier can alter which AI assistant or coding stack makes economic sense for teams with sustained usage.',articleUrl:'/news/chatgpt-introducing-gpt-6-1-sol.html',sourceUrl:'https://openai.com/'},
     {toolName:'GitHub',toolSlug:'github',label:'Official product update',publishedAt:'2026-09-28',title:'Copilot adds sandboxing and agent observability',summary:'Local sandboxing and agent monitoring give software teams more control over AI assisted development.',articleUrl:'/news/github-copilot-sandboxing-observability.html',sourceUrl:'https://github.com/'}
   ];
-  let stories=fallback,current=0,toolsBySlug=new Map();
-  const story=document.getElementById('pulseStory'),secondary=document.getElementById('pulseSecondary');
+  let stories=fallback,current=0,toolsBySlug=new Map(),rotateTimer=null;
+  const story=document.getElementById('pulseStory'),secondary=document.getElementById('pulseSecondary'),pulse=document.getElementById('softwarePulse');
+  const reduceMotion=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function stopRotation(){if(rotateTimer){clearTimeout(rotateTimer);rotateTimer=null}}
+  function scheduleRotation(){stopRotation();if(reduceMotion||document.hidden||stories.length<2)return;rotateTimer=setTimeout(()=>select((current+1)%stories.length),12000)}
+  function comparatorOptions(tools){
+    const a=document.getElementById('homeCompareA'),b=document.getElementById('homeCompareB'),go=document.getElementById('homeCompareGo');
+    if(!a||!b||!go)return;
+    const eligible=(Array.isArray(tools)?tools:[]).filter(t=>t&&t.slug&&t.name&&t.comparisonEligible!==false).sort((x,y)=>String(x.name).localeCompare(String(y.name)));
+    if(eligible.length<2){a.innerHTML='<option>Comparator unavailable</option>';b.innerHTML='<option>Comparator unavailable</option>';go.href='/compare.html';return}
+    const options=eligible.map(t=>'<option value="'+esc(t.slug)+'">'+esc(t.name)+'</option>').join('');
+    a.innerHTML=options;b.innerHTML=options;
+    const make=eligible.find(t=>t.slug==='make'),zapier=eligible.find(t=>t.slug==='zapier');
+    a.value=(make||eligible[0]).slug;
+    b.value=(zapier||eligible.find(t=>t.slug!==a.value)||eligible[1]).slug;
+    function sync(changed){
+      if(a.value===b.value){
+        const replacement=eligible.find(t=>t.slug!==changed.value);
+        if(replacement)(changed===a?b:a).value=replacement.slug;
+      }
+      go.href='/compare.html?a='+encodeURIComponent(a.value)+'&b='+encodeURIComponent(b.value)+'&source=homepage-comparator';
+    }
+    a.addEventListener('change',()=>sync(a));b.addEventListener('change',()=>sync(b));sync(a);
+  }
   function hydrate(item){
     const tool=toolsBySlug.get(item.toolSlug)||{},domain=domainOf(tool.sourceUrl||item.sourceUrl);
+    const cycle=document.getElementById('pulseCycle');if(cycle)cycle.textContent=(current+1)+' / '+stories.length;
     document.getElementById('pulseLogo').src=favicon(domain);
     document.getElementById('pulseLogo').alt=(item.toolName||'Software')+' logo';
     document.getElementById('pulseTool').textContent=item.toolName||'Software';
@@ -222,17 +243,20 @@
   function select(index){
     if(index===current||!stories[index])return;
     if(story)story.classList.add('swap');
-    setTimeout(()=>{current=index;hydrate(stories[index]);renderSecondary();if(story)story.classList.remove('swap')},170);
+    stopRotation();
+    setTimeout(()=>{current=index;hydrate(stories[index]);renderSecondary();if(story)story.classList.remove('swap');scheduleRotation()},170);
   }
   Promise.all([
     fetch('/data/software-updates.json',{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()),
     fetch('/data/tools.json',{cache:'no-store'}).then(r=>r.ok?r.json():[])
   ]).then(([updates,tools])=>{
-    toolsBySlug=new Map((Array.isArray(tools)?tools:[]).map(t=>[t.slug,t]));
+    toolsBySlug=new Map((Array.isArray(tools)?tools:[]).map(t=>[t.slug,t]));comparatorOptions(tools);
     const items=Array.isArray(updates.items)?updates.items.slice().sort((a,b)=>String(b.publishedAt||'').localeCompare(String(a.publishedAt||''))).slice(0,3):[];
     if(items.length)stories=items;
-    current=0;hydrate(stories[0]);renderSecondary();
-  }).catch(()=>{hydrate(stories[0]);renderSecondary()});
+    current=0;hydrate(stories[0]);renderSecondary();scheduleRotation();
+  }).catch(()=>{hydrate(stories[0]);renderSecondary();scheduleRotation()});
+  if(pulse){pulse.addEventListener('pointerenter',stopRotation);pulse.addEventListener('pointerleave',scheduleRotation);pulse.addEventListener('focusin',stopRotation);pulse.addEventListener('focusout',scheduleRotation)}
+  document.addEventListener('visibilitychange',scheduleRotation);
 })();
 </script>
 </body>
