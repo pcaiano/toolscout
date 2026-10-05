@@ -49,7 +49,9 @@ for(const opp of gsc.opportunities||[]){
   const current=opportunityByPage.get(page);
   if(!current||Number(opp.impressions||0)>Number(current.impressions||0))opportunityByPage.set(page,opp);
 }
-const surface=[...new Set([...sitemapPages(),...opportunityByPage.keys()])];
+const sitemapSurface=sitemapPages();
+const sitemapSet=new Set(sitemapSurface);
+const surface=[...new Set([...sitemapSurface,...opportunityByPage.keys()])];
 const rows=[];
 for(const page of surface){
   const opp=opportunityByPage.get(page)||{};
@@ -70,7 +72,7 @@ for(const page of surface){
     page,
     pageType:authority.pageType,
     exists:authority.exists,
-    indexedSurface:sitemapPages().includes(page),
+    indexedSurface:sitemapSet.has(page),
     observedInGsc:opportunityByPage.has(page),
     editorialAuthorityScore:authority.score,
     hardFloorScore:hardFloor,
