@@ -1,0 +1,262 @@
+{
+  "generatedAt": "2026-10-05T07:40:08.263Z",
+  "objective": "Detect competitor coverage gaps, deduplicate against ToolScout, verify first-party sources, publish evidence-backed coverage profiles, submit them through the normal sitemap surface and measure Search Console outcomes on subsequent cycles.",
+  "guardrails": [
+    "Competitor pages are used only to discover market signals and possible official-source links.",
+    "Editorial facts come from the verified first-party source, not competitor copy.",
+    "Catalog rankings are not changed by competitive-gap profiles.",
+    "Unverified or thin candidates are held and retried instead of being published."
+  ],
+  "summary": {
+    "scannedGaps": 37,
+    "activeProfiles": 3,
+    "newProfiles": 3,
+    "resolvedAsExistingCoverage": 1,
+    "held": 33,
+    "contentResearch": 0,
+    "searchVisibleProfiles": 0,
+    "trafficObservedProfiles": 0
+  },
+  "admitted": [
+    {
+      "slug": "anijam-ai",
+      "sourceUrl": "https://www.anijam.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+      "category": "content",
+      "features": [
+        "citations",
+        "video generation",
+        "voice",
+        "social media"
+      ]
+    },
+    {
+      "slug": "chatzy-ai",
+      "sourceUrl": "https://chatzy.ai/",
+      "category": "developer",
+      "features": [
+        "citations",
+        "voice",
+        "automation",
+        "deployment"
+      ]
+    },
+    {
+      "slug": "cosupport-ai",
+      "sourceUrl": "https://cosupport.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+      "category": "ai-assistant",
+      "features": [
+        "AI assistant",
+        "chatbot",
+        "conversational AI",
+        "citations",
+        "voice",
+        "collaboration",
+        "API",
+        "automation",
+        "integrations",
+        "design"
+      ]
+    }
+  ],
+  "resolved": [
+    {
+      "slug": "claude-code",
+      "reason": "covered-by-catalog-entity"
+    }
+  ],
+  "held": [
+    {
+      "slug": "ai-background-remover",
+      "reason": "official-source-not-resolved",
+      "retry": "next-cycle"
+    },
+    {
+      "slug": "ai-email-writer",
+      "reason": "official-source-not-resolved",
+      "retry": "next-cycle"
+    },
+    {
+      "slug": "ai-image-editor",
+      "reason": "official-source-not-resolved",
+      "retry": "next-cycle"
+    },
+    {
+      "slug": "ai-image-upscaler",
+      "reason": "official-source-not-resolved",
+      "retry": "next-cycle"
+    },
+    {
+      "slug": "audio-editor",
+      "reason": "official-source-not-resolved",
+      "retry": "next-cycle"
+    },
+    {
+      "slug": "content-creation",
+      "reason": "official-source-not-resolved",
+      "retry": "next-cycle"
+    },
+    {
+      "slug": "coool-ai",
+      "reason": "official-source-unreachable",
+      "sourceUrl": "https://coool.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+      "retry": "next-cycle"
+    },
+    {
+      "slug": "davinci-ai",
+      "reason": "cycle-admission-cap",
+      "retry": "next-cycle"
+    },
+    {
+      "slug": "deep-swap-ai",
+      "reason": "cycle-admission-cap",
+      "retry": "next-cycle"
+    },
+    {
+      "slug": "face-swap-ai",
+      "reason": "cycle-admission-cap",
+      "retry": "next-cycle"
+    },
+    {
+      "slug": "faq",
+      "reason": "cycle-admission-cap",
+      "retry": "next-cycle"
+    },
+    {
+      "slug": "goenhance-ai",
+      "reason": "cycle-admission-cap",
+      "retry": "next-cycle"
+    },
+    {
+      "slug": "lip-sync-ai",
+      "reason": "cycle-admission-cap",
+      "retry": "next-cycle"
+    },
+    {
+      "slug": "lorka-ai",
+      "reason": "cycle-admission-cap",
+      "retry": "next-cycle"
+    },
+    {
+      "slug": "makiverse",
+      "reason": "cycle-admission-cap",
+      "retry": "next-cycle"
+    },
+    {
+      "slug": "maxaeo",
+      "reason": "cycle-admission-cap",
+      "retry": "next-cycle"
+    },
+    {
+      "slug": "no-code",
+      "reason": "cycle-admission-cap",
+      "retry": "next-cycle"
+    },
+    {
+      "slug": "paioclaw",
+      "reason": "cycle-admission-cap",
+      "retry": "next-cycle"
+    },
+    {
+      "slug": "pine-ai",
+      "reason": "cycle-admission-cap",
+      "retry": "next-cycle"
+    },
+    {
+      "slug": "pixmax-ai",
+      "reason": "cycle-admission-cap",
+      "retry": "next-cycle"
+    },
+    {
+      "slug": "postwizard-ai",
+      "reason": "cycle-admission-cap",
+      "retry": "next-cycle"
+    },
+    {
+      "slug": "questie-ai",
+      "reason": "cycle-admission-cap",
+      "retry": "next-cycle"
+    },
+    {
+      "slug": "resume-ai",
+      "reason": "cycle-admission-cap",
+      "retry": "next-cycle"
+    },
+    {
+      "slug": "search-engine",
+      "reason": "cycle-admission-cap",
+      "retry": "next-cycle"
+    },
+    {
+      "slug": "sketchbubble-ai",
+      "reason": "cycle-admission-cap",
+      "retry": "next-cycle"
+    },
+    {
+      "slug": "talkpix-ai",
+      "reason": "cycle-admission-cap",
+      "retry": "next-cycle"
+    },
+    {
+      "slug": "teachquill",
+      "reason": "cycle-admission-cap",
+      "retry": "next-cycle"
+    },
+    {
+      "slug": "typli-ai",
+      "reason": "cycle-admission-cap",
+      "retry": "next-cycle"
+    },
+    {
+      "slug": "video-editing",
+      "reason": "cycle-admission-cap",
+      "retry": "next-cycle"
+    },
+    {
+      "slug": "vidflux-ai",
+      "reason": "cycle-admission-cap",
+      "retry": "next-cycle"
+    },
+    {
+      "slug": "vmaker-ai",
+      "reason": "cycle-admission-cap",
+      "retry": "next-cycle"
+    },
+    {
+      "slug": "weryai",
+      "reason": "cycle-admission-cap",
+      "retry": "next-cycle"
+    },
+    {
+      "slug": "wondershare-repairit",
+      "reason": "cycle-admission-cap",
+      "retry": "next-cycle"
+    }
+  ],
+  "contentResearch": [],
+  "performance": [
+    {
+      "slug": "anijam-ai",
+      "clicks": 0,
+      "impressions": 0,
+      "ctr": 0,
+      "position": 0,
+      "status": "not-observed"
+    },
+    {
+      "slug": "chatzy-ai",
+      "clicks": 0,
+      "impressions": 0,
+      "ctr": 0,
+      "position": 0,
+      "status": "not-observed"
+    },
+    {
+      "slug": "cosupport-ai",
+      "clicks": 0,
+      "impressions": 0,
+      "ctr": 0,
+      "position": 0,
+      "status": "not-observed"
+    }
+  ]
+}

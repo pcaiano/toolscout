@@ -1,0 +1,107 @@
+[
+  {
+    "slug": "anijam-ai",
+    "name": "Anijam AI",
+    "category": "content",
+    "description": "Anijam AI is an all-in-one AI video agent. Chat to create cinematic films, anime, UGC ads, and social videos — just like ChatGPT. No skills needed. Try Anijam AI for free!",
+    "sourceUrl": "https://www.anijam.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+    "features": [
+      "citations",
+      "video generation",
+      "voice",
+      "social media"
+    ],
+    "firstVerified": "2026-10-05",
+    "lastVerified": "2026-10-05",
+    "marketSignals": {
+      "count": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "exampleUrls": [
+        "https://www.futurepedia.io/tool/anijam-ai",
+        "https://www.aixploria.com/anijam-ai/"
+      ]
+    },
+    "verification": {
+      "mode": "competitive-gap-first-party",
+      "officialSourceDiscoveryScore": 14,
+      "officialSourceVotes": 2,
+      "categoryEvidenceScore": 1,
+      "competitorContentUsedForEditorialFacts": false
+    }
+  },
+  {
+    "slug": "chatzy-ai",
+    "name": "Chatzy AI",
+    "category": "developer",
+    "description": "Deploy intelligent AI agents across WhatsApp, voice, web, and social. Qualify leads, automate follow-ups, and drive conversions 24/7 with enterprise-ready infrastructure.",
+    "sourceUrl": "https://chatzy.ai/",
+    "features": [
+      "citations",
+      "voice",
+      "automation",
+      "deployment"
+    ],
+    "firstVerified": "2026-10-05",
+    "lastVerified": "2026-10-05",
+    "marketSignals": {
+      "count": 2,
+      "sources": [
+        "Aixploria",
+        "Dynamite AI"
+      ],
+      "exampleUrls": [
+        "https://www.aixploria.com/chatzy-ai/",
+        "https://dynamite-ai.com/tools/chatzy-ai"
+      ]
+    },
+    "verification": {
+      "mode": "competitive-gap-first-party",
+      "officialSourceDiscoveryScore": 14,
+      "officialSourceVotes": 2,
+      "categoryEvidenceScore": 1,
+      "competitorContentUsedForEditorialFacts": false
+    }
+  },
+  {
+    "slug": "cosupport-ai",
+    "name": "Cosupport AI",
+    "category": "ai-assistant",
+    "description": "Automate customer service with CoSupport AI. Handle repetitive tickets, accelerate response times, and deliver 99% accurate, multilingual support. Try it free.",
+    "sourceUrl": "https://cosupport.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+    "features": [
+      "AI assistant",
+      "chatbot",
+      "conversational AI",
+      "citations",
+      "voice",
+      "collaboration",
+      "API",
+      "automation",
+      "integrations",
+      "design"
+    ],
+    "firstVerified": "2026-10-05",
+    "lastVerified": "2026-10-05",
+    "marketSignals": {
+      "count": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "exampleUrls": [
+        "https://www.futurepedia.io/tool/cosupport-ai",
+        "https://www.aixploria.com/cosupport-ai/"
+      ]
+    },
+    "verification": {
+      "mode": "competitive-gap-first-party",
+      "officialSourceDiscoveryScore": 14,
+      "officialSourceVotes": 2,
+      "categoryEvidenceScore": 4,
+      "competitorContentUsedForEditorialFacts": false
+    }
+  }
+]

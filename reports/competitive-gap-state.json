@@ -1,0 +1,446 @@
+{
+  "version": 1,
+  "updatedAt": "2026-10-05T07:40:08.263Z",
+  "candidates": {
+    "ai-background-remover": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Toolify",
+        "Aixploria"
+      ],
+      "status": "awaiting-official-source"
+    },
+    "ai-email-writer": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Futurepedia",
+        "Toolify"
+      ],
+      "status": "awaiting-official-source"
+    },
+    "ai-image-editor": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Aixploria",
+        "Dynamite AI"
+      ],
+      "status": "awaiting-official-source"
+    },
+    "ai-image-upscaler": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Toolify",
+        "Dynamite AI"
+      ],
+      "status": "awaiting-official-source"
+    },
+    "anijam-ai": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "status": "profile-published-pending-generation",
+      "officialSource": "https://www.anijam.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+      "profileCreatedAt": "2026-10-05T07:40:08.263Z",
+      "gsc": {
+        "slug": "anijam-ai",
+        "clicks": 0,
+        "impressions": 0,
+        "ctr": 0,
+        "position": 0,
+        "status": "not-observed"
+      },
+      "lastMeasuredAt": "2026-10-05T07:40:08.263Z"
+    },
+    "audio-editor": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Capterra",
+        "Dynamite AI"
+      ],
+      "status": "awaiting-official-source"
+    },
+    "chatzy-ai": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Aixploria",
+        "Dynamite AI"
+      ],
+      "status": "profile-published-pending-generation",
+      "officialSource": "https://chatzy.ai/",
+      "profileCreatedAt": "2026-10-05T07:40:08.263Z",
+      "gsc": {
+        "slug": "chatzy-ai",
+        "clicks": 0,
+        "impressions": 0,
+        "ctr": 0,
+        "position": 0,
+        "status": "not-observed"
+      },
+      "lastMeasuredAt": "2026-10-05T07:40:08.263Z"
+    },
+    "claude-code": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "AlternativeTo",
+        "Aixploria"
+      ],
+      "status": "resolved-covered"
+    },
+    "content-creation": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Capterra",
+        "Dynamite AI"
+      ],
+      "status": "awaiting-official-source"
+    },
+    "coool-ai": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "status": "awaiting-official-source"
+    },
+    "cosupport-ai": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "status": "profile-published-pending-generation",
+      "officialSource": "https://cosupport.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+      "profileCreatedAt": "2026-10-05T07:40:08.263Z",
+      "gsc": {
+        "slug": "cosupport-ai",
+        "clicks": 0,
+        "impressions": 0,
+        "ctr": 0,
+        "position": 0,
+        "status": "not-observed"
+      },
+      "lastMeasuredAt": "2026-10-05T07:40:08.263Z"
+    },
+    "davinci-ai": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "status": "queued"
+    },
+    "deep-swap-ai": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Aixploria",
+        "Dynamite AI"
+      ],
+      "status": "queued"
+    },
+    "face-swap-ai": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Aixploria",
+        "Dynamite AI"
+      ],
+      "status": "queued"
+    },
+    "faq": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "AlternativeTo",
+        "FutureTools"
+      ],
+      "status": "queued"
+    },
+    "goenhance-ai": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "status": "queued"
+    },
+    "lip-sync-ai": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Aixploria",
+        "Dynamite AI"
+      ],
+      "status": "queued"
+    },
+    "lorka-ai": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "status": "queued"
+    },
+    "makiverse": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Aixploria",
+        "Dynamite AI"
+      ],
+      "status": "queued"
+    },
+    "maxaeo": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Aixploria",
+        "Dynamite AI"
+      ],
+      "status": "queued"
+    },
+    "no-code": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Capterra",
+        "Dynamite AI"
+      ],
+      "status": "queued"
+    },
+    "paioclaw": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "status": "queued"
+    },
+    "pine-ai": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "status": "queued"
+    },
+    "pixmax-ai": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "status": "queued"
+    },
+    "postwizard-ai": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "status": "queued"
+    },
+    "questie-ai": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "status": "queued"
+    },
+    "resume-ai": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Futurepedia",
+        "Toolify"
+      ],
+      "status": "queued"
+    },
+    "search-engine": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Capterra",
+        "Dynamite AI"
+      ],
+      "status": "queued"
+    },
+    "sketchbubble-ai": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "status": "queued"
+    },
+    "talkpix-ai": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "status": "queued"
+    },
+    "teachquill": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Aixploria",
+        "Dynamite AI"
+      ],
+      "status": "queued"
+    },
+    "typli-ai": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "status": "queued"
+    },
+    "video-editing": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Capterra",
+        "Dynamite AI"
+      ],
+      "status": "queued"
+    },
+    "vidflux-ai": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "status": "queued"
+    },
+    "vmaker-ai": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "status": "queued"
+    },
+    "weryai": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "status": "queued"
+    },
+    "wondershare-repairit": {
+      "candidateType": "software-entity",
+      "firstSeenAt": "2026-10-05T07:40:08.263Z",
+      "lastSeenAt": "2026-10-05T07:40:08.263Z",
+      "mentions": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "status": "queued"
+    }
+  }
+}

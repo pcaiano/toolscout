@@ -9,9 +9,9 @@
   "primarySourceCount": 11,
   "searchVisibility": {
     "source": "Google Search Console",
-    "impressions": 2215,
-    "clicks": 1,
-    "ctr": 0.0451,
+    "impressions": 6339,
+    "clicks": 7,
+    "ctr": 0.1104,
     "position": 0
   },
   "editorialPolicy": "Updates are selected for buyer relevance. Affiliate status, commission and partner relationships do not influence inclusion or placement.",
@@ -378,8 +378,8 @@
         },
         {
           "type": "guide",
-          "url": "/best-crm-for-real-estate",
-          "label": "Best CRM for Real Estate"
+          "url": "/best-crm-with-automation",
+          "label": "Best CRM with Automation"
         },
         {
           "type": "guide",

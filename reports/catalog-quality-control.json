@@ -1,0 +1,353 @@
+{
+  "generatedAt": "2026-10-05T07:40:14.179Z",
+  "methodology": "Field-level first-party quality control for volatile catalog facts plus validated visual asset resolution. Ambiguous changes are reported, not silently rewritten.",
+  "summary": {
+    "tools": 109,
+    "critical": 10,
+    "high": 15,
+    "medium": 0,
+    "low": 0,
+    "autoCorrections": 10,
+    "assetsResolved": 99
+  },
+  "corrections": [
+    {
+      "slug": "monday-crm",
+      "field": "freePlan",
+      "from": false,
+      "to": true,
+      "evidence": "official_source_explicit_free_plan"
+    },
+    {
+      "slug": "ahrefs",
+      "field": "freePlan",
+      "from": false,
+      "to": true,
+      "evidence": "official_source_explicit_free_plan"
+    },
+    {
+      "slug": "socialbee",
+      "field": "freePlan",
+      "from": false,
+      "to": true,
+      "evidence": "official_source_explicit_free_plan"
+    },
+    {
+      "slug": "moz-pro",
+      "field": "freePlan",
+      "from": false,
+      "to": true,
+      "evidence": "official_source_explicit_free_plan"
+    },
+    {
+      "slug": "squarespace",
+      "field": "freePlan",
+      "from": false,
+      "to": true,
+      "evidence": "official_source_explicit_free_plan"
+    },
+    {
+      "slug": "help-scout",
+      "field": "freePlan",
+      "from": false,
+      "to": true,
+      "evidence": "official_source_explicit_free_plan"
+    },
+    {
+      "slug": "basecamp",
+      "field": "freePlan",
+      "from": false,
+      "to": true,
+      "evidence": "official_source_explicit_free_plan"
+    },
+    {
+      "slug": "paperform",
+      "field": "freePlan",
+      "from": false,
+      "to": true,
+      "evidence": "official_source_explicit_free_plan"
+    },
+    {
+      "slug": "anijam-ai",
+      "field": "freePlan",
+      "from": false,
+      "to": true,
+      "evidence": "official_source_explicit_free_plan"
+    },
+    {
+      "slug": "chatzy-ai",
+      "field": "freePlan",
+      "from": false,
+      "to": true,
+      "evidence": "official_source_explicit_free_plan"
+    }
+  ],
+  "findings": [
+    {
+      "slug": "ahrefs",
+      "severity": "critical",
+      "type": "free_plan_contradiction",
+      "catalogValue": false,
+      "observedValue": true,
+      "confidence": "explicit",
+      "reason": "official_source_explicit_free_plan",
+      "evidenceUrls": [
+        "https://ahrefs.com/",
+        "https://ahrefs.com/pricing",
+        "https://ahrefs.com/pricing?utm_source=homepage"
+      ]
+    },
+    {
+      "slug": "anijam-ai",
+      "severity": "critical",
+      "type": "free_plan_contradiction",
+      "catalogValue": false,
+      "observedValue": true,
+      "confidence": "explicit",
+      "reason": "official_source_explicit_free_plan",
+      "evidenceUrls": [
+        "https://www.anijam.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+        "https://www.anijam.ai/pricing/"
+      ]
+    },
+    {
+      "slug": "basecamp",
+      "severity": "critical",
+      "type": "free_plan_contradiction",
+      "catalogValue": false,
+      "observedValue": true,
+      "confidence": "explicit",
+      "reason": "official_source_explicit_free_plan",
+      "evidenceUrls": [
+        "https://basecamp.com/",
+        "https://basecamp.com/pricing",
+        "https://basecamp.com/features"
+      ]
+    },
+    {
+      "slug": "chatzy-ai",
+      "severity": "critical",
+      "type": "free_plan_contradiction",
+      "catalogValue": false,
+      "observedValue": true,
+      "confidence": "explicit",
+      "reason": "official_source_explicit_free_plan",
+      "evidenceUrls": [
+        "https://chatzy.ai/",
+        "https://chatzy.ai/pricing"
+      ]
+    },
+    {
+      "slug": "help-scout",
+      "severity": "critical",
+      "type": "free_plan_contradiction",
+      "catalogValue": false,
+      "observedValue": true,
+      "confidence": "explicit",
+      "reason": "official_source_explicit_free_plan",
+      "evidenceUrls": [
+        "https://www.helpscout.com/",
+        "https://www.helpscout.com/pricing/"
+      ]
+    },
+    {
+      "slug": "monday-crm",
+      "severity": "critical",
+      "type": "free_plan_contradiction",
+      "catalogValue": false,
+      "observedValue": true,
+      "confidence": "explicit",
+      "reason": "official_source_explicit_free_plan",
+      "evidenceUrls": [
+        "https://monday.com/",
+        "https://monday.com/pricing",
+        "https://monday.com/pricing"
+      ]
+    },
+    {
+      "slug": "moz-pro",
+      "severity": "critical",
+      "type": "free_plan_contradiction",
+      "catalogValue": false,
+      "observedValue": true,
+      "confidence": "explicit",
+      "reason": "official_source_explicit_free_plan",
+      "evidenceUrls": [
+        "https://moz.com/products/pro",
+        "https://moz.com/products/api/pricing",
+        "https://moz.com/products/pro/pricing"
+      ]
+    },
+    {
+      "slug": "paperform",
+      "severity": "critical",
+      "type": "free_plan_contradiction",
+      "catalogValue": false,
+      "observedValue": true,
+      "confidence": "explicit",
+      "reason": "official_source_explicit_free_plan",
+      "evidenceUrls": [
+        "https://paperform.co/",
+        "https://paperform.co/pricing/",
+        "https://paperform.co/product/"
+      ]
+    },
+    {
+      "slug": "socialbee",
+      "severity": "critical",
+      "type": "free_plan_contradiction",
+      "catalogValue": false,
+      "observedValue": true,
+      "confidence": "explicit",
+      "reason": "official_source_explicit_free_plan",
+      "evidenceUrls": [
+        "https://socialbee.com/",
+        "https://socialbee.com/pricing/",
+        "https://socialbee.com/features/"
+      ]
+    },
+    {
+      "slug": "squarespace",
+      "severity": "critical",
+      "type": "free_plan_contradiction",
+      "catalogValue": false,
+      "observedValue": true,
+      "confidence": "explicit",
+      "reason": "official_source_explicit_free_plan",
+      "evidenceUrls": [
+        "https://www.squarespace.com/",
+        "https://www.squarespace.com/pricing",
+        "https://www.squarespace.com/financial-solutions"
+      ]
+    },
+    {
+      "slug": "attio",
+      "severity": "high",
+      "type": "free_plan_contradiction",
+      "catalogValue": true,
+      "observedValue": false,
+      "confidence": "inferred",
+      "reason": "official_pricing_page_lists_trial_and_paid_pricing_without_free_plan",
+      "evidenceUrls": [
+        "https://attio.com/",
+        "https://attio.com/pricing",
+        "https://attio.com/platform/workflows"
+      ]
+    },
+    {
+      "slug": "canva",
+      "severity": "high",
+      "type": "official_source_unavailable",
+      "detail": "http_403"
+    },
+    {
+      "slug": "character-ai",
+      "severity": "high",
+      "type": "official_source_unavailable",
+      "detail": "http_403"
+    },
+    {
+      "slug": "chatgpt",
+      "severity": "high",
+      "type": "official_source_unavailable",
+      "detail": "http_403"
+    },
+    {
+      "slug": "claude",
+      "severity": "high",
+      "type": "official_source_unavailable",
+      "detail": "http_403"
+    },
+    {
+      "slug": "constant-contact",
+      "severity": "high",
+      "type": "official_source_unavailable",
+      "detail": "http_403"
+    },
+    {
+      "slug": "freshsales",
+      "severity": "high",
+      "type": "free_plan_contradiction",
+      "catalogValue": true,
+      "observedValue": false,
+      "confidence": "inferred",
+      "reason": "official_pricing_page_lists_trial_and_paid_pricing_without_free_plan",
+      "evidenceUrls": [
+        "https://www.freshworks.com/crm/sales/",
+        "https://www.freshworks.com/crm/pricing/?utm_medium=home&amp;utm_campaign=hellobar&amp;utm_source=organic",
+        "https://www.freshworks.com/crm/pricing/"
+      ]
+    },
+    {
+      "slug": "gemini",
+      "severity": "high",
+      "type": "official_source_unavailable",
+      "detail": "network_error"
+    },
+    {
+      "slug": "grammarly",
+      "severity": "high",
+      "type": "free_plan_contradiction",
+      "catalogValue": true,
+      "observedValue": false,
+      "confidence": "inferred",
+      "reason": "official_pricing_page_lists_trial_and_paid_pricing_without_free_plan",
+      "evidenceUrls": [
+        "https://www.grammarly.com/",
+        "https://www.grammarly.com/plans",
+        "https://www.grammarly.com/features"
+      ]
+    },
+    {
+      "slug": "integrately",
+      "severity": "high",
+      "type": "free_plan_contradiction",
+      "catalogValue": true,
+      "observedValue": false,
+      "confidence": "inferred",
+      "reason": "official_pricing_page_lists_trial_and_paid_pricing_without_free_plan",
+      "evidenceUrls": [
+        "https://integrately.com/",
+        "https://integrately.com/pricing"
+      ]
+    },
+    {
+      "slug": "kit",
+      "severity": "high",
+      "type": "official_source_unavailable",
+      "detail": "http_403"
+    },
+    {
+      "slug": "loom",
+      "severity": "high",
+      "type": "free_plan_contradiction",
+      "catalogValue": true,
+      "observedValue": false,
+      "confidence": "inferred",
+      "reason": "official_pricing_page_lists_trial_and_paid_pricing_without_free_plan",
+      "evidenceUrls": [
+        "https://www.loom.com/",
+        "https://www.loom.com/pricing",
+        "https://www.loom.com/products/chrome-screen-recorder"
+      ]
+    },
+    {
+      "slug": "make",
+      "severity": "high",
+      "type": "official_source_unavailable",
+      "detail": "http_403"
+    },
+    {
+      "slug": "perplexity",
+      "severity": "high",
+      "type": "official_source_unavailable",
+      "detail": "http_403"
+    },
+    {
+      "slug": "ubersuggest",
+      "severity": "high",
+      "type": "official_source_unavailable",
+      "detail": "http_403"
+    }
+  ]
+}

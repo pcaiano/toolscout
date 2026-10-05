@@ -1,0 +1,4512 @@
+{
+  "version": 1,
+  "generatedAt": "2026-10-05T07:40:14.179Z",
+  "tools": {
+    "systeme-io": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://systeme.io/",
+      "evidenceUrls": [
+        "https://systeme.io/",
+        "https://systeme.io/pricing",
+        "https://systeme.io/features"
+      ],
+      "pageFingerprint": "d4182a15a67a45f2a90a5364",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$17/month",
+          "$47/month",
+          "$97/month",
+          "$20/month",
+          "$39/month",
+          "$89/month",
+          "$245/month",
+          "$0"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "funnels",
+          "email marketing",
+          "courses",
+          "digital products",
+          "automation"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "beehiiv": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.beehiiv.com/",
+      "evidenceUrls": [
+        "https://www.beehiiv.com/",
+        "https://www.beehiiv.com/pricing",
+        "https://www.beehiiv.com/newsletter-platform"
+      ],
+      "pageFingerprint": "fce8ec42cfd1250ea0c6c5b0",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$ 0",
+          "$ 49",
+          "$ 95",
+          "$0",
+          "$49 /mo",
+          "$39/mo",
+          "$95 /mo",
+          "$0.30 per"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "newsletters",
+          "analytics",
+          "monetization",
+          "automation"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "hubspot": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.hubspot.com/",
+      "evidenceUrls": [
+        "https://www.hubspot.com/",
+        "https://www.hubspot.com/pricing/marketing",
+        "https://www.hubspot.com/products/crm"
+      ],
+      "pageFingerprint": "76e35330c6227b135ed96190",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [
+          "$15/month",
+          "$50/month",
+          "$75/month"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "crm",
+          "sales",
+          "marketing",
+          "service",
+          "automation",
+          "integrations"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": null,
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "jotform": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.jotform.com/",
+      "evidenceUrls": [
+        "https://www.jotform.com/",
+        "https://www.jotform.com/pricing/",
+        "https://www.jotform.com/enterprise/pricing/"
+      ],
+      "pageFingerprint": "654dffa4d789766dd67b199a",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "forms",
+          "payments",
+          "workflows",
+          "approvals",
+          "integrations",
+          "automation"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": null,
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "adcreative-ai": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.adcreative.ai/",
+      "evidenceUrls": [
+        "https://www.adcreative.ai/",
+        "https://www.adcreative.ai/generate-product-photoshoots",
+        "https://www.adcreative.ai/product-videoshoot-ai"
+      ],
+      "pageFingerprint": "0f2ef877fbe8c8441733b22a",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [
+          "$35",
+          "$ 39 /month",
+          "$ 10",
+          "$39",
+          "$89",
+          "$139",
+          "$189",
+          "$ 249",
+          "$ 249 /month",
+          "$ 50",
+          "$249",
+          "$339",
+          "$400",
+          "$ 599",
+          "$ 999 /month",
+          "$ 250",
+          "$ 999",
+          "$ 1,09",
+          "$ 1,39",
+          "$ 39",
+          "$ 29 /month",
+          "$ 28",
+          "$ 29",
+          "$65",
+          "$ 105",
+          "$ 145",
+          "$ 185 /month",
+          "$ 192",
+          "$ 185",
+          "$ 255"
+        ],
+        "trialDays": [
+          7
+        ],
+        "observedCatalogFeatures": [
+          "ad creatives",
+          "creative scoring",
+          "advertising",
+          "automation"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": null,
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "pipedrive": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.pipedrive.com/",
+      "evidenceUrls": [
+        "https://www.pipedrive.com/",
+        "https://www.pipedrive.com/en/features/pipeline-management"
+      ],
+      "pageFingerprint": "dcbde8cdde9217f19bc7020d",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [],
+        "trialDays": [
+          14
+        ],
+        "observedCatalogFeatures": [
+          "crm",
+          "sales pipeline",
+          "integrations",
+          "automation"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": null,
+        "freePlan": null,
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "semrush": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.semrush.com/",
+      "evidenceUrls": [
+        "https://www.semrush.com/",
+        "https://www.semrush.com/pricing/seo-ai-search/",
+        "https://www.semrush.com/features/keyword-research/"
+      ],
+      "pageFingerprint": "e3687e95023f756e72265a2f",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [
+          "$ 117",
+          "$ 139 month",
+          "$ 139",
+          "$ 165",
+          "$ 199 month",
+          "$ 199",
+          "$ 248",
+          "$ 299 month",
+          "$ 299",
+          "$ 455",
+          "$ 549 month",
+          "$ 549",
+          "$0 /mo",
+          "$ 45 /mo",
+          "$ 90 /mo",
+          "$ 10 /mo",
+          "$ 20 /mo",
+          "$2.3"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "seo",
+          "keyword research",
+          "content",
+          "AI visibility",
+          "integrations"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": null,
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "jasper": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.jasper.ai/",
+      "evidenceUrls": [
+        "https://www.jasper.ai/",
+        "https://www.jasper.ai/pricing",
+        "https://www.jasper.ai/platform"
+      ],
+      "pageFingerprint": "c097301286984d8233c91981",
+      "volatile": {
+        "freePlan": {
+          "value": false,
+          "confidence": "inferred",
+          "reason": "official_pricing_page_lists_trial_and_paid_pricing_without_free_plan"
+        },
+        "pricingTokens": [
+          "$ 69 month",
+          "$ 59 month",
+          "$59/month",
+          "$69/month"
+        ],
+        "trialDays": [
+          7
+        ],
+        "observedCatalogFeatures": [
+          "AI writing",
+          "marketing content",
+          "brand voice",
+          "content workflows",
+          "automation"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "brevo": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.brevo.com/",
+      "evidenceUrls": [
+        "https://www.brevo.com/",
+        "https://www.brevo.com/pricing/",
+        "https://www.brevo.com/products/marketing-platform/"
+      ],
+      "pageFingerprint": "11e6783790b9cec7761e901f",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$1"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "email marketing",
+          "SMS",
+          "automation",
+          "CRM",
+          "transactional email",
+          "integrations"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "activecampaign": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.activecampaign.com/",
+      "evidenceUrls": [
+        "https://www.activecampaign.com/",
+        "https://www.activecampaign.com/pricing",
+        "https://www.activecampaign.com/pricing/contact/"
+      ],
+      "pageFingerprint": "8366768a56579c3d668027de",
+      "volatile": {
+        "freePlan": {
+          "value": false,
+          "confidence": "inferred",
+          "reason": "official_pricing_page_lists_trial_and_paid_pricing_without_free_plan"
+        },
+        "pricingTokens": [
+          "$76,00"
+        ],
+        "trialDays": [
+          14
+        ],
+        "observedCatalogFeatures": [
+          "email marketing",
+          "CRM",
+          "marketing automation",
+          "sales automation",
+          "integrations"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "mailchimp": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://mailchimp.com/",
+      "evidenceUrls": [
+        "https://mailchimp.com/",
+        "https://mailchimp.com/pricing/marketing/",
+        "https://mailchimp.com/pricing/marketing/compare-plans/"
+      ],
+      "pageFingerprint": "7bfcef0016b118cd401616e6",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$ 20",
+          "$ 350",
+          "$20 /month",
+          "$ 13",
+          "$ 0 /month",
+          "$299 per month",
+          "$800/mo",
+          "$385/mo"
+        ],
+        "trialDays": [
+          14
+        ],
+        "observedCatalogFeatures": [
+          "email marketing",
+          "automation",
+          "audience management",
+          "campaigns",
+          "analytics",
+          "integrations"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "zapier": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://zapier.com/",
+      "evidenceUrls": [
+        "https://zapier.com/",
+        "https://zapier.com/pricing",
+        "https://zapier.com/solutions/revops-automation"
+      ],
+      "pageFingerprint": "725a12ad217e657c96327eb6",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$40",
+          "$1",
+          "$0 /month",
+          "$19.99 /month",
+          "$69 /month",
+          "$400",
+          "$33.33 /month",
+          "$160",
+          "$13.33 /month",
+          "$800",
+          "$66.67 /month",
+          "$500,00"
+        ],
+        "trialDays": [
+          14
+        ],
+        "observedCatalogFeatures": [
+          "automation",
+          "workflows",
+          "integrations",
+          "AI automation",
+          "data transfer"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "make": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "http_403",
+      "sourceUrl": "https://www.make.com/"
+    },
+    "zoho-crm": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.zoho.com/en-us/crm/",
+      "evidenceUrls": [
+        "https://www.zoho.com/en-us/crm/"
+      ],
+      "pageFingerprint": "acd60f5a492d413b6a9d1643",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [
+          "$100"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "crm",
+          "sales pipeline",
+          "automation",
+          "integrations"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": null,
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "monday-crm": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://monday.com/",
+      "evidenceUrls": [
+        "https://monday.com/",
+        "https://monday.com/pricing",
+        "https://monday.com/pricing"
+      ],
+      "pageFingerprint": "6c371116d804d3344f9b9ab9",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$250",
+          "$ 0",
+          "$10",
+          "$ 9",
+          "$90",
+          "$9",
+          "$90 /",
+          "$ 12",
+          "$120",
+          "$140",
+          "$12",
+          "$20",
+          "$120 /",
+          "$ 19",
+          "$190",
+          "$220",
+          "$19",
+          "$30",
+          "$190 /",
+          "$ 18",
+          "$ 25",
+          "$ 17",
+          "$ 41",
+          "$ 28",
+          "$ 31",
+          "$93 /",
+          "$ 45",
+          "$135 /",
+          "$27 /",
+          "$36 /"
+        ],
+        "trialDays": [
+          14
+        ],
+        "observedCatalogFeatures": [
+          "crm",
+          "workflows",
+          "automation",
+          "collaboration",
+          "integrations"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "typeform": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.typeform.com/",
+      "evidenceUrls": [
+        "https://www.typeform.com/",
+        "https://www.typeform.com/pricing",
+        "https://www.typeform.com/pricing?taboption=talent"
+      ],
+      "pageFingerprint": "5c3e5f895949b699aca44c0a",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$3.67",
+          "169 usd /",
+          "028 usd",
+          "119 usd /",
+          "600 usd /",
+          "39 usd /",
+          "468 usd",
+          "28 usd /",
+          "132 usd /",
+          "79 usd /",
+          "948 usd",
+          "56 usd /",
+          "276 usd /",
+          "129 usd /",
+          "548 usd",
+          "91 usd /",
+          "456 usd /",
+          "0 usd /",
+          "379 usd /mo",
+          "266 usd /mo",
+          "119 usd/mo",
+          "25 usd /mo",
+          "75 usd /mo",
+          "0 usd",
+          "0 usd per month",
+          "349 usd /mo"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "forms",
+          "lead capture",
+          "analytics",
+          "integrations"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "tally": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://tally.so/",
+      "evidenceUrls": [
+        "https://tally.so/",
+        "https://tally.so/pricing",
+        "https://tally.so/features"
+      ],
+      "pageFingerprint": "142d227ece461afd5b828593",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [
+          "$ 24 per month",
+          "$ 74 per month",
+          "$29/month",
+          "$290/year",
+          "$89/month",
+          "$890/year"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "forms",
+          "surveys",
+          "payments",
+          "logic",
+          "integrations"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": null,
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "ahrefs": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://ahrefs.com/",
+      "evidenceUrls": [
+        "https://ahrefs.com/",
+        "https://ahrefs.com/pricing",
+        "https://ahrefs.com/pricing?utm_source=homepage"
+      ],
+      "pageFingerprint": "39ed51a6e978d2b0d6f3a006",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$ 129 /",
+          "$ 249 /",
+          "$ 449 /",
+          "$40/mo",
+          "$60/mo",
+          "$80/mo",
+          "$ 1,49",
+          "$ 29 /",
+          "$199/mo",
+          "$50/mo",
+          "$0.02",
+          "$100/mo",
+          "$0.01",
+          "$250/mo",
+          "$99/mo",
+          "$20/mo",
+          "$200/mo"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "seo"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "se-ranking": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://seranking.com/",
+      "evidenceUrls": [
+        "https://seranking.com/",
+        "https://seranking.com/api-pricing.html",
+        "https://seranking.com/content-marketing-platform.html"
+      ],
+      "pageFingerprint": "400faa5094021139d9b87658",
+      "volatile": {
+        "freePlan": {
+          "value": false,
+          "confidence": "inferred",
+          "reason": "official_pricing_page_lists_trial_and_paid_pricing_without_free_plan"
+        },
+        "pricingTokens": [
+          "$ 103.20 /mo",
+          "$ 223.20 /mo",
+          "$ 69.00 /mo",
+          "$ 71.20 /mo",
+          "$ 149.00 /mo",
+          "$ 50 /mo",
+          "$ 179",
+          "$ 200.00 /mo",
+          "$30/",
+          "$ 45 /mo"
+        ],
+        "trialDays": [
+          14
+        ],
+        "observedCatalogFeatures": [
+          "seo",
+          "rank tracking",
+          "keyword research",
+          "site audit"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "clickup": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://clickup.com/",
+      "evidenceUrls": [
+        "https://clickup.com/",
+        "https://clickup.com/pricing",
+        "https://clickup.com/plans/enterprise"
+      ],
+      "pageFingerprint": "f9df14d30a43a0a65635f483",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$3.9",
+          "$7 per",
+          "$10 per",
+          "$12 per",
+          "$19 per",
+          "$100",
+          "$750",
+          "$7",
+          "$12",
+          "$9 per",
+          "$28 per",
+          "$0.00"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "tasks",
+          "projects",
+          "docs",
+          "workflows",
+          "dashboards",
+          "collaboration"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "claude": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "http_403",
+      "sourceUrl": "https://claude.ai/"
+    },
+    "calendly": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://calendly.com/",
+      "evidenceUrls": [
+        "https://calendly.com/",
+        "https://calendly.com/pricing",
+        "https://calendly.com/features/mobile-apps"
+      ],
+      "pageFingerprint": "c25909961de2d29fd53714c4",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [
+          "$150",
+          "$1,20",
+          "$10 /",
+          "$16 /",
+          "$15"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "scheduling",
+          "routing forms",
+          "reminders",
+          "follow-ups",
+          "team scheduling",
+          "integrations"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": null,
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "posthog": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://posthog.com/",
+      "evidenceUrls": [
+        "https://posthog.com/",
+        "https://posthog.com/pricing",
+        "https://posthog.com/product-analytics"
+      ],
+      "pageFingerprint": "c5adc73b422361981a30b03d",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$0",
+          "$ 0.00",
+          "$5",
+          "$25",
+          "$20",
+          "$2",
+          "$80",
+          "$0.05/"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "product analytics",
+          "web analytics",
+          "funnels",
+          "retention",
+          "session replay",
+          "feature flags",
+          "experiments",
+          "surveys",
+          "error tracking"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "notion": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.notion.com/",
+      "evidenceUrls": [
+        "https://www.notion.com/",
+        "https://www.notion.com/pricing",
+        "https://www.notion.com/product"
+      ],
+      "pageFingerprint": "92e91be8b9d8e26a0addb86b",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$0 per",
+          "$10 per",
+          "$20 per",
+          "$8/month",
+          "$10/month"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "docs",
+          "projects",
+          "databases",
+          "forms",
+          "AI meeting notes",
+          "agents",
+          "database automations",
+          "integrations"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "asana": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://asana.com/",
+      "evidenceUrls": [
+        "https://asana.com/",
+        "https://asana.com/pricing",
+        "https://asana.com/product/ai"
+      ],
+      "pageFingerprint": "f12ffc303f9c79684cc5e560",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$0",
+          "$10.99 per",
+          "$24.99 per",
+          "$13.49",
+          "$30.49",
+          "$0.50 per",
+          "$5.99 per",
+          "$0.60 per",
+          "$300,00"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "project management",
+          "tasks",
+          "timeline",
+          "boards",
+          "workflows",
+          "rules",
+          "forms",
+          "reporting",
+          "resource management"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "trello": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://trello.com/",
+      "evidenceUrls": [
+        "https://trello.com/",
+        "https://trello.com/pricing",
+        "https://trello.com/teams/product"
+      ],
+      "pageFingerprint": "25122647cad6cab67ddaa03b",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$ 0",
+          "$ 5",
+          "$6",
+          "$ 10",
+          "$12.50",
+          "$ 17.50",
+          "$210.00 annual",
+          "$4/month"
+        ],
+        "trialDays": [
+          14
+        ],
+        "observedCatalogFeatures": [
+          "boards",
+          "lists",
+          "cards",
+          "task management",
+          "integrations"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "airtable": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.airtable.com/",
+      "evidenceUrls": [
+        "https://www.airtable.com/",
+        "https://airtable.com/pricing",
+        "https://www.airtable.com/platform"
+      ],
+      "pageFingerprint": "94dfc59787c227e91c3e260f",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$4",
+          "$600",
+          "$1.7",
+          "$3",
+          "$500",
+          "$1",
+          "$8.4",
+          "$750",
+          "$200",
+          "$285",
+          "$2.1",
+          "$1.1",
+          "$132",
+          "$48",
+          "$20,10",
+          "$25,31",
+          "$29,04",
+          "$44,75",
+          "$14,49",
+          "$13,79",
+          "$56,01",
+          "$48,13",
+          "$20/",
+          "$45/"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "relational databases",
+          "interfaces",
+          "automations",
+          "reporting",
+          "views",
+          "governance",
+          "integrations",
+          "AI workflows"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "n8n": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://n8n.io/",
+      "evidenceUrls": [
+        "https://n8n.io/",
+        "https://n8n.io/pricing/",
+        "https://n8n.io/features/"
+      ],
+      "pageFingerprint": "fa3b696da05ab1f440f28de2",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [
+          "£2.2",
+          "000 eur"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "workflow automation",
+          "AI workflows",
+          "AI agents",
+          "MCP",
+          "webhooks",
+          "data transformation",
+          "self-hosting",
+          "integrations"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": null,
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "apollo": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.apollo.io/",
+      "evidenceUrls": [
+        "https://www.apollo.io/",
+        "https://www.apollo.io/pricing",
+        "https://www.apollo.io/product/data"
+      ],
+      "pageFingerprint": "c787ee80000fe7cd4645ba86",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [
+          "$1.2"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "prospecting",
+          "API",
+          "sales analytics",
+          "CRM integrations"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": null,
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "lemlist": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.lemlist.com/",
+      "evidenceUrls": [
+        "https://www.lemlist.com/",
+        "https://www.lemlist.com/pricing",
+        "https://www.lemlist.com/product/b2b-lead-database"
+      ],
+      "pageFingerprint": "b9a114065c542111c7ec2959",
+      "volatile": {
+        "freePlan": {
+          "value": false,
+          "confidence": "inferred",
+          "reason": "official_pricing_page_lists_trial_and_paid_pricing_without_free_plan"
+        },
+        "pricingTokens": [
+          "$330",
+          "$69",
+          "$55 /",
+          "$55",
+          "$109",
+          "$87 /",
+          "$20",
+          "$16 /",
+          "$16",
+          "$29",
+          "$21 /",
+          "$21",
+          "$55 /mo",
+          "$87 /mo"
+        ],
+        "trialDays": [
+          14,
+          30
+        ],
+        "observedCatalogFeatures": [
+          "multichannel sequences",
+          "calling",
+          "WhatsApp",
+          "SMS",
+          "deliverability",
+          "unified inbox"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "intercom": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.intercom.com/",
+      "evidenceUrls": [
+        "https://www.intercom.com/",
+        "https://www.intercom.com/pricing",
+        "https://www.intercom.com/solutions/technology"
+      ],
+      "pageFingerprint": "5d79467b041435e00e15a673",
+      "volatile": {
+        "freePlan": {
+          "value": false,
+          "confidence": "inferred",
+          "reason": "official_pricing_page_lists_trial_and_paid_pricing_without_free_plan"
+        },
+        "pricingTokens": [
+          "$19 per",
+          "$0.99 per",
+          "$85 per",
+          "$10",
+          "$132 per",
+          "$90.09 /mo",
+          "$19.00 /mo",
+          "$109.09 /mo",
+          "$33/mo",
+          "$1.99 per",
+          "$99 per",
+          "$29 per",
+          "$99/month",
+          "$35 per",
+          "$0.01 per"
+        ],
+        "trialDays": [
+          14
+        ],
+        "observedCatalogFeatures": [
+          "helpdesk",
+          "omnichannel inbox",
+          "ticketing",
+          "workflows",
+          "help center",
+          "knowledge hub",
+          "reporting",
+          "integrations",
+          "Fin AI Agent"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "zendesk": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.zendesk.com/",
+      "evidenceUrls": [
+        "https://www.zendesk.com/",
+        "https://www.zendesk.com/pricing/",
+        "https://www.zendesk.com/platform/"
+      ],
+      "pageFingerprint": "b07bb0d8e584c95c29d03a33",
+      "volatile": {
+        "freePlan": {
+          "value": false,
+          "confidence": "inferred",
+          "reason": "official_pricing_page_lists_trial_and_paid_pricing_without_free_plan"
+        },
+        "pricingTokens": [
+          "$19/month",
+          "$19",
+          "$55",
+          "$115",
+          "$50",
+          "$83",
+          "$115 month",
+          "$25",
+          "$69",
+          "$149",
+          "$1.50",
+          "$2.00",
+          "$200 per",
+          "$50/"
+        ],
+        "trialDays": [
+          14
+        ],
+        "observedCatalogFeatures": [
+          "ticketing",
+          "messaging",
+          "live chat",
+          "voice",
+          "knowledge base",
+          "analytics",
+          "workflows",
+          "integrations",
+          "AI agents"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "instantly": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://instantly.ai/",
+      "evidenceUrls": [
+        "https://instantly.ai/",
+        "https://instantly.ai/pricing"
+      ],
+      "pageFingerprint": "1180484301973d04741396f4",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [
+          "$94 /month",
+          "$47/mo",
+          "$194 /month",
+          "$358/mo",
+          "$197/mo",
+          "$555 /month",
+          "$85 /month",
+          "$94/month",
+          "$175 /month",
+          "$194/month",
+          "$500 /month",
+          "$555/month",
+          "$47 /month",
+          "$97 /month",
+          "$358 /month",
+          "$37.6 /month",
+          "$77.6 /month",
+          "$286.3 /month",
+          "$197 /month",
+          "$87.3 /month",
+          "$177.3 /month"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "email warmup",
+          "AI reply agent",
+          "CRM",
+          "inbox placement"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": null,
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "kit": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "http_403",
+      "sourceUrl": "https://kit.com/"
+    },
+    "klaviyo": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.klaviyo.com/",
+      "evidenceUrls": [
+        "https://www.klaviyo.com/",
+        "https://www.klaviyo.com/pricing",
+        "https://www.klaviyo.com/platform"
+      ],
+      "pageFingerprint": "2e3b2babefc01f335bcb2b76",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$1",
+          "$5"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "email marketing",
+          "SMS",
+          "mobile push",
+          "customer profiles",
+          "web forms",
+          "predictive analytics",
+          "350+ integrations"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "canva": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "http_403",
+      "sourceUrl": "https://www.canva.com/"
+    },
+    "figma": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.figma.com/",
+      "evidenceUrls": [
+        "https://www.figma.com/",
+        "https://www.figma.com/pricing/",
+        "https://www.figma.com/product-development/"
+      ],
+      "pageFingerprint": "05234c11f32256c35e685f53",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [
+          "$16 /mo",
+          "$12 /mo",
+          "$3 /mo",
+          "$55 /mo",
+          "$25 /mo",
+          "$5 /mo",
+          "$90 /mo",
+          "$35 /mo"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "FigJam",
+          "Dev Mode",
+          "design systems",
+          "MCP"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": null,
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "grammarly": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.grammarly.com/",
+      "evidenceUrls": [
+        "https://www.grammarly.com/",
+        "https://www.grammarly.com/plans",
+        "https://www.grammarly.com/features"
+      ],
+      "pageFingerprint": "6a9eb40bca794a06aff67ef0",
+      "volatile": {
+        "freePlan": {
+          "value": false,
+          "confidence": "inferred",
+          "reason": "official_pricing_page_lists_trial_and_paid_pricing_without_free_plan"
+        },
+        "pricingTokens": [
+          "$0",
+          "$12",
+          "$30",
+          "$5,00",
+          "$210"
+        ],
+        "trialDays": [
+          7
+        ],
+        "observedCatalogFeatures": [
+          "AI writing",
+          "paragraph rewrites",
+          "proofreading",
+          "grammar",
+          "clarity",
+          "tone suggestions",
+          "AI agents"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "buffer": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://buffer.com/",
+      "evidenceUrls": [
+        "https://buffer.com/",
+        "https://buffer.com/pricing?cta=bufferSite-globalNav-pricing-pricing-1",
+        "https://buffer.com/transparent-pricing"
+      ],
+      "pageFingerprint": "ee873cb167e954e70535edb0",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$26.9",
+          "$5 /month",
+          "$ 60",
+          "$10 /month",
+          "$ 120"
+        ],
+        "trialDays": [
+          14
+        ],
+        "observedCatalogFeatures": [
+          "publishing",
+          "content ideas",
+          "AI Assistant",
+          "analytics",
+          "link in bio",
+          "API"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "webflow": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://webflow.com/",
+      "evidenceUrls": [
+        "https://webflow.com/"
+      ],
+      "pageFingerprint": "4eaf6786afdd8f3765527321",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [
+          "$4",
+          "$200",
+          "$25",
+          "$6"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "CMS",
+          "hosting",
+          "code components",
+          "collaboration"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": null,
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "surfer": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://surferseo.com/",
+      "evidenceUrls": [
+        "https://surferseo.com/",
+        "https://surferseo.com/pricing/",
+        "https://surferseo.com/solutions/marketing-manager/"
+      ],
+      "pageFingerprint": "17b13773edd289ed8fad9961",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [
+          "$3",
+          "82 usd per month",
+          "$156",
+          "99 usd per month",
+          "$240",
+          "182 usd per month",
+          "$444",
+          "299 usd per month",
+          "$720",
+          "49 usd per month",
+          "$120",
+          "$ 0",
+          "$ 0 annual"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "content optimization",
+          "content editor",
+          "SERP analysis",
+          "keyword research",
+          "content audit"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": null,
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "mixpanel": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://mixpanel.com/home/",
+      "evidenceUrls": [
+        "https://mixpanel.com/home/",
+        "https://mixpanel.com/pricing/",
+        "https://mixpanel.com/platform/product-analytics/"
+      ],
+      "pageFingerprint": "95fc111a976de6f2d0e12738",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$1.2",
+          "$0",
+          "$8",
+          "$ 120 /",
+          "$ 140",
+          "$480/yr"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "product analytics",
+          "funnels",
+          "retention",
+          "user journeys"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "freshdesk": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.freshworks.com/freshdesk/",
+      "evidenceUrls": [
+        "https://www.freshworks.com/freshdesk/",
+        "https://www.freshworks.com/freshdesk/pricing/",
+        "https://www.freshworks.com/platform/ai-capability/"
+      ],
+      "pageFingerprint": "d68f8f9ae2799d8c94368999",
+      "volatile": {
+        "freePlan": {
+          "value": false,
+          "confidence": "inferred",
+          "reason": "official_pricing_page_lists_trial_and_paid_pricing_without_free_plan"
+        },
+        "pricingTokens": [
+          "$19 /",
+          "$49 /",
+          "$2 /",
+          "$80 /",
+          "$15 /",
+          "$55 /",
+          "$29 /",
+          "$7 /",
+          "$89 /",
+          "$12 /",
+          "$49 per",
+          "$80 per"
+        ],
+        "trialDays": [
+          14
+        ],
+        "observedCatalogFeatures": [
+          "ticketing",
+          "shared inbox",
+          "automation",
+          "knowledge base",
+          "reporting",
+          "integrations"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "framer": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.framer.com/",
+      "evidenceUrls": [
+        "https://www.framer.com/",
+        "https://www.framer.com/pricing",
+        "https://www.framer.com/solutions/designers/"
+      ],
+      "pageFingerprint": "ca3702fc466bacf2533c2f69",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$67",
+          "$99",
+          "$0",
+          "$10 per month",
+          "$30 per month",
+          "$20 /",
+          "$10",
+          "$30",
+          "$20 per",
+          "$40 per",
+          "$10 per",
+          "$50 per",
+          "$200"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "AI website builder",
+          "CMS",
+          "SEO",
+          "analytics",
+          "publishing",
+          "collaboration"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "perplexity": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "http_403",
+      "sourceUrl": "https://www.perplexity.ai/"
+    },
+    "slack": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://slack.com/",
+      "evidenceUrls": [
+        "https://slack.com/",
+        "https://slack.com/pricing",
+        "https://slack.com/pricing/paid-vs-free"
+      ],
+      "pageFingerprint": "98ef1893c032280a5590306e",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$51",
+          "$0",
+          "$8.75",
+          "$4.38",
+          "$7.25",
+          "$18",
+          "$9",
+          "$15",
+          "$45",
+          "$2.1",
+          "$8.75 per",
+          "$9 per"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "channels",
+          "messaging",
+          "huddles",
+          "clips",
+          "canvases",
+          "lists",
+          "file sharing",
+          "integrations",
+          "AI summaries"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "cursor": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://cursor.com/",
+      "evidenceUrls": [
+        "https://cursor.com/",
+        "https://cursor.com/pricing",
+        "https://cursor.com/en-US/pricing"
+      ],
+      "pageFingerprint": "fbc2cc5701367b13725d3211",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [
+          "$20 /",
+          "$40 /"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "coding agent"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": null,
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "shopify": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.shopify.com/",
+      "evidenceUrls": [
+        "https://www.shopify.com/",
+        "https://www.shopify.com/pricing",
+        "https://www.shopify.com/solutions/b2b/enterprise"
+      ],
+      "pageFingerprint": "72bacf992011e78eb29e2d81",
+      "volatile": {
+        "freePlan": {
+          "value": false,
+          "confidence": "inferred",
+          "reason": "official_pricing_page_lists_trial_and_paid_pricing_without_free_plan"
+        },
+        "pricingTokens": [
+          "$125.00",
+          "$4",
+          "$5",
+          "$1/month",
+          "$29 /mo",
+          "$5,00",
+          "$79 /mo",
+          "$7,50",
+          "$299 /mo",
+          "$10,00",
+          "$2,30",
+          "$399",
+          "$89 /mo",
+          "$0 /mo",
+          "$1.1",
+          "$39",
+          "$29",
+          "0 usd",
+          "$89/mo",
+          "$99/mo",
+          "$105",
+          "0 usd/mo",
+          "$79",
+          "$299",
+          "$1 per month",
+          "$1",
+          "$250,00"
+        ],
+        "trialDays": [
+          3
+        ],
+        "observedCatalogFeatures": [
+          "online store",
+          "product catalog",
+          "checkout",
+          "payments",
+          "analytics",
+          "app ecosystem"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "loom": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.loom.com/",
+      "evidenceUrls": [
+        "https://www.loom.com/",
+        "https://www.loom.com/pricing",
+        "https://www.loom.com/products/chrome-screen-recorder"
+      ],
+      "pageFingerprint": "ed5c4365b09abb6d2b2783bd",
+      "volatile": {
+        "freePlan": {
+          "value": false,
+          "confidence": "inferred",
+          "reason": "official_pricing_page_lists_trial_and_paid_pricing_without_free_plan"
+        },
+        "pricingTokens": [
+          "$0",
+          "$18 per user",
+          "$24 per user"
+        ],
+        "trialDays": [
+          14
+        ],
+        "observedCatalogFeatures": [
+          "screen recording",
+          "camera recording",
+          "async video",
+          "sharing",
+          "transcripts",
+          "comments",
+          "team library",
+          "editing"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "miro": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://miro.com/",
+      "evidenceUrls": [
+        "https://miro.com/",
+        "https://miro.com/pricing/",
+        "https://miro.com/pricing/"
+      ],
+      "pageFingerprint": "47b16222426a36ae3a40eb1b",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$ 0",
+          "$ 8 /month",
+          "$ 20 /month",
+          "$1,00",
+          "$500"
+        ],
+        "trialDays": [
+          14
+        ],
+        "observedCatalogFeatures": [
+          "online whiteboard",
+          "diagramming",
+          "workshops",
+          "journey mapping",
+          "templates",
+          "integrations"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "hootsuite": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.hootsuite.com/",
+      "evidenceUrls": [
+        "https://www.hootsuite.com/",
+        "https://www.hootsuite.com/plans",
+        "https://www.hootsuite.com/plans/enterprise"
+      ],
+      "pageFingerprint": "6bd3d036832172d06acc40a2",
+      "volatile": {
+        "freePlan": {
+          "value": false,
+          "confidence": "inferred",
+          "reason": "official_pricing_page_lists_trial_and_paid_pricing_without_free_plan"
+        },
+        "pricingTokens": [
+          "$1.5",
+          "$99",
+          "$199",
+          "$399",
+          "$42.7",
+          "$24.8"
+        ],
+        "trialDays": [
+          14
+        ],
+        "observedCatalogFeatures": [
+          "publishing",
+          "engagement",
+          "analytics",
+          "social listening"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "sprout-social": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://sproutsocial.com/",
+      "evidenceUrls": [
+        "https://sproutsocial.com/",
+        "https://sproutsocial.com/pricing/",
+        "https://sproutsocial.com/demo/?plan=EnterprisePricing"
+      ],
+      "pageFingerprint": "4c39b6bfa7b6541144054708",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [
+          "$199 per",
+          "$299 per",
+          "$399 per",
+          "$ 199 per",
+          "$ 299 per",
+          "$ 399 per",
+          "$ 79 per",
+          "$99 per"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "publishing",
+          "engagement",
+          "analytics",
+          "inbox",
+          "reporting"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": null,
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "later": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://later.com/",
+      "evidenceUrls": [
+        "https://later.com/",
+        "https://later.com/pricing/",
+        "https://later.com/influencer-marketing-platform/"
+      ],
+      "pageFingerprint": "e193c0a9a138a719823f4641",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$2",
+          "$1.2",
+          "$ 18.75",
+          "$ 37.50",
+          "$11.25",
+          "$3.75",
+          "$ 82.50",
+          "$5 per"
+        ],
+        "trialDays": [
+          14
+        ],
+        "observedCatalogFeatures": [
+          "analytics",
+          "link in bio",
+          "media library"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "socialbee": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://socialbee.com/",
+      "evidenceUrls": [
+        "https://socialbee.com/",
+        "https://socialbee.com/pricing/",
+        "https://socialbee.com/features/"
+      ],
+      "pageFingerprint": "4592f2ed4cc33d6993308d45",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$29 /",
+          "$49 /",
+          "$99 /",
+          "$600 per month",
+          "$29/month",
+          "$49/month",
+          "$99/month",
+          "$179/month",
+          "$329/month",
+          "$449/month",
+          "$29",
+          "$348/year",
+          "$292.32/year",
+          "$55.68",
+          "$49",
+          "$588/year",
+          "$493.92/year",
+          "$94.08",
+          "$99",
+          "$1,18",
+          "$997.92/year",
+          "$190.08",
+          "$179",
+          "$2,14",
+          "$1,80",
+          "$343.68",
+          "$329",
+          "$3,94",
+          "$3,31",
+          "$631.68"
+        ],
+        "trialDays": [
+          14
+        ],
+        "observedCatalogFeatures": [
+          "content categories",
+          "AI content",
+          "analytics",
+          "team collaboration"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "hotjar": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://contentsquare.com/hotjar/?utm_campaign=exp__hj_hp_redirection",
+      "evidenceUrls": [
+        "https://contentsquare.com/hotjar/?utm_campaign=exp__hj_hp_redirection",
+        "https://contentsquare.com/pricing/",
+        "https://contentsquare.com/platform/capabilities/ai/"
+      ],
+      "pageFingerprint": "ff7fd4324f4d745350058574",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [],
+        "trialDays": [
+          15
+        ],
+        "observedCatalogFeatures": [
+          "heatmaps",
+          "surveys",
+          "feedback",
+          "funnels"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": null,
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "amplitude": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://amplitude.com/",
+      "evidenceUrls": [
+        "https://amplitude.com/",
+        "https://amplitude.com/pricing?siteLocation=nav",
+        "https://amplitude.com/self-improving-products?siteLocation=nav"
+      ],
+      "pageFingerprint": "fb1072699632f89af65dd204",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$0",
+          "$10"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "product analytics",
+          "funnels",
+          "retention",
+          "experiments",
+          "cohorts"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "plausible": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://plausible.io/",
+      "evidenceUrls": [
+        "https://plausible.io/",
+        "https://plausible.io/features"
+      ],
+      "pageFingerprint": "1112d3d4c08e1f3c8d078b17",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [
+          "$9 /month",
+          "$14 /month",
+          "$19 /month"
+        ],
+        "trialDays": [
+          30
+        ],
+        "observedCatalogFeatures": [
+          "web analytics",
+          "goals",
+          "events",
+          "funnels",
+          "dashboards"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": null,
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "matomo": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://matomo.org/",
+      "evidenceUrls": [
+        "https://matomo.org/",
+        "https://matomo.org/firebase-vs-matomo-features-pricing-and-key-differences/",
+        "https://matomo.org/support-plans/"
+      ],
+      "pageFingerprint": "9a8892b069767d3ffcc389ac",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$97.3",
+          "€22 per month"
+        ],
+        "trialDays": [
+          21
+        ],
+        "observedCatalogFeatures": [
+          "web analytics",
+          "privacy controls",
+          "goals",
+          "funnels",
+          "heatmaps",
+          "session recording"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "github": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://github.com/",
+      "evidenceUrls": [
+        "https://github.com/",
+        "https://github.com/pricing",
+        "https://github.com/features/copilot"
+      ],
+      "pageFingerprint": "fe8a0de545be22f7865e93fb",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$ 0",
+          "$ 4",
+          "$0.18/",
+          "$0.07/",
+          "$ 21",
+          "$0.18 per",
+          "$0.07 per",
+          "$5 per month",
+          "$0",
+          "$ 4 per",
+          "$ 21 per",
+          "$ 10",
+          "$15 month",
+          "$ 39",
+          "$70 month",
+          "$ 100",
+          "$200 month",
+          "$ 19",
+          "$100/month",
+          "$0.01",
+          "$10"
+        ],
+        "trialDays": [
+          30
+        ],
+        "observedCatalogFeatures": [
+          "pull requests",
+          "issues",
+          "actions",
+          "codespaces",
+          "code review",
+          "AI coding"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "gitlab": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://about.gitlab.com/",
+      "evidenceUrls": [
+        "https://about.gitlab.com/",
+        "https://about.gitlab.com/pricing/",
+        "https://about.gitlab.com/pricing/premium/"
+      ],
+      "pageFingerprint": "3f52f0d26b4ba7cd10797825",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$ 0 per",
+          "$ 29 per",
+          "$12",
+          "$24",
+          "$15/user",
+          "$ 1 per",
+          "$ 10 per",
+          "$ 5 per month",
+          "$ 15 per",
+          "$1/"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "CI/CD",
+          "security",
+          "code review",
+          "DevOps"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "replit": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://replit.com/",
+      "evidenceUrls": [
+        "https://replit.com/",
+        "https://replit.com/pricing"
+      ],
+      "pageFingerprint": "cab131035ff656111e2a5a11",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [
+          "$0",
+          "$20",
+          "$18 per month",
+          "$120",
+          "$100",
+          "$90 per month",
+          "$18 /",
+          "$90 /"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "collaboration",
+          "hosting"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": null,
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "vercel": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://vercel.com/",
+      "evidenceUrls": [
+        "https://vercel.com/",
+        "https://vercel.com/pricing",
+        "https://vercel.com/products/observability"
+      ],
+      "pageFingerprint": "b203204bc1f8b959063353fe",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [
+          "$0 /mo",
+          "$20 /mo",
+          "$20",
+          "$0.50 per",
+          "$1 per",
+          "$0.40 per",
+          "$4 per",
+          "$50 /",
+          "$0.02",
+          "$5 per",
+          "$0.05 per",
+          "$3 per",
+          "$250 per",
+          "$2 per",
+          "$0.12",
+          "$0.01",
+          "$0.60 per",
+          "$0.08 per",
+          "$0.10 per",
+          "$0.06 per",
+          "$20 per",
+          "$0.25 /",
+          "$3.00 per",
+          "$0.95 per",
+          "$0.00",
+          "$0.10",
+          "$100 /",
+          "$20 /",
+          "$250",
+          "$0.03 per"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "serverless",
+          "analytics",
+          "CDN"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": null,
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "netlify": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.netlify.com/",
+      "evidenceUrls": [
+        "https://www.netlify.com/",
+        "https://www.netlify.com/pricing/",
+        "https://www.netlify.com/platform/"
+      ],
+      "pageFingerprint": "b71a6c4bf4ef0c6d6b124ee8",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$0",
+          "$9 /month",
+          "$20 /month",
+          "$5 /",
+          "$10 /",
+          "$40",
+          "$15",
+          "$9/month"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "serverless functions",
+          "forms",
+          "CDN"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "sentry": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://sentry.io/welcome/",
+      "evidenceUrls": [
+        "https://sentry.io/welcome/",
+        "https://sentry.io/pricing/",
+        "https://sentry.io/product/error-monitoring/"
+      ],
+      "pageFingerprint": "0366211fac131b3b9f20b7b6",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [
+          "$0",
+          "$26/mo",
+          "$80/mo",
+          "$0.50/",
+          "$1.00/",
+          "$0.78/mo",
+          "$0.25/",
+          "$0.03",
+          "$ 26.00 /mo",
+          "$ 0.00",
+          "$0.00",
+          "$ 312.00 /yr",
+          "$ 26.00"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "error tracking",
+          "performance monitoring",
+          "tracing",
+          "replays"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": null,
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "chatgpt": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "http_403",
+      "sourceUrl": "https://chatgpt.com/"
+    },
+    "gemini": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "network_error",
+      "sourceUrl": "https://gemini.google.com/"
+    },
+    "notebooklm": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://notebook.google.com/",
+      "evidenceUrls": [
+        "https://notebook.google.com/"
+      ],
+      "pageFingerprint": "0f167890623f637a806192c4",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "audio overviews"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": null,
+        "freePlan": null,
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "copy-ai": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.copy.ai/",
+      "evidenceUrls": [
+        "https://www.copy.ai/",
+        "https://www.copy.ai/platform/how-it-works",
+        "https://www.copy.ai/platform/platform-components"
+      ],
+      "pageFingerprint": "54c8b209febd1d135c3a91b4",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [
+          "$16"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "content generation",
+          "brand voice",
+          "automation"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": null,
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "moz-pro": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://moz.com/products/pro",
+      "evidenceUrls": [
+        "https://moz.com/products/pro",
+        "https://moz.com/products/api/pricing",
+        "https://moz.com/products/pro/pricing"
+      ],
+      "pageFingerprint": "83548846ed6bf618455ef079",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$20/month",
+          "$20",
+          "$75/month",
+          "$ 20",
+          "$ 75",
+          "$5 /",
+          "$125",
+          "$500/month",
+          "$ 125",
+          "$25 /",
+          "$ 250",
+          "$20 /",
+          "$ 500",
+          "$10 /",
+          "$0",
+          "$75",
+          "$250",
+          "$500",
+          "$5",
+          "$25",
+          "$10",
+          "$ 99",
+          "$79/mo",
+          "$238/yr",
+          "$ 79",
+          "$950",
+          "$ 179",
+          "$143/mo",
+          "$429/yr",
+          "$ 143"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "keyword research",
+          "site audits"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "ubersuggest": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "http_403",
+      "sourceUrl": "https://neilpatel.com/ubersuggest/"
+    },
+    "mangools": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://mangools.com/",
+      "evidenceUrls": [
+        "https://mangools.com/",
+        "https://mangools.com/plans-and-pricing?ref=header-mngls",
+        "https://mangools.com/plans-and-pricing?ref=footer-mngls"
+      ],
+      "pageFingerprint": "c18d86b1c155510b01888946",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "keyword research",
+          "SERP analysis",
+          "rank tracking",
+          "backlinks",
+          "SEO metrics"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": null,
+        "freePlan": null,
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "screaming-frog": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.screamingfrog.co.uk/seo-spider/",
+      "evidenceUrls": [
+        "https://www.screamingfrog.co.uk/seo-spider/",
+        "https://www.screamingfrog.co.uk/seo-spider/pricing/",
+        "https://www.screamingfrog.co.uk/log-file-analyser/pricing/"
+      ],
+      "pageFingerprint": "d2e52e7203eb46647b4dbfda",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [
+          "£199 per year"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "technical SEO audits",
+          "broken links",
+          "structured data"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": null,
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "wix": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.wix.com/",
+      "evidenceUrls": [
+        "https://www.wix.com/",
+        "https://www.wix.com/plans",
+        "https://www.wix.com/features/main"
+      ],
+      "pageFingerprint": "10ab2cb1011221519470bf80",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [
+          "$250",
+          "$ 159",
+          "$ 159/",
+          "$ 39",
+          "$ 29",
+          "$ 17",
+          "$ 0"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "website builder",
+          "templates",
+          "hosting",
+          "ecommerce",
+          "SEO tools"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": null,
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "squarespace": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.squarespace.com/",
+      "evidenceUrls": [
+        "https://www.squarespace.com/",
+        "https://www.squarespace.com/pricing",
+        "https://www.squarespace.com/financial-solutions"
+      ],
+      "pageFingerprint": "5020333da0c3d54fafd166bd",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$ 0",
+          "$ 36",
+          "$36",
+          "$19/mo",
+          "$14 annual",
+          "$25 /mo",
+          "$19 /mo",
+          "$0.30",
+          "$39 /mo",
+          "$29 /mo",
+          "$0.99",
+          "$65 /mo",
+          "$49 /mo",
+          "$139 /mo",
+          "$99 /mo",
+          "$250",
+          "$10.00"
+        ],
+        "trialDays": [
+          14
+        ],
+        "observedCatalogFeatures": [
+          "website builder",
+          "templates",
+          "hosting",
+          "ecommerce",
+          "marketing tools"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "wordpress-com": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://wordpress.com/",
+      "evidenceUrls": [
+        "https://wordpress.com/",
+        "https://wordpress.com/pricing/",
+        "https://wordpress.com/features/"
+      ],
+      "pageFingerprint": "18f675063a6f3e61b3930c60",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$25,00",
+          "$ 9",
+          "$ 4",
+          "$ 3.25",
+          "$ 2.75 per month",
+          "$ 18",
+          "$ 8",
+          "$ 6.50",
+          "$ 5.50 per month",
+          "$ 40",
+          "$ 25",
+          "$ 20",
+          "$ 17.50 per month",
+          "$200",
+          "$ 70",
+          "$ 45",
+          "$ 36",
+          "$ 31.50 per month",
+          "$ 0",
+          "$ 2.75",
+          "$ 5.50",
+          "$ 17.50",
+          "$ 31.50",
+          "$2.75/month",
+          "$4/month"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "blogging",
+          "themes",
+          "hosting",
+          "SEO tools"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "help-scout": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.helpscout.com/",
+      "evidenceUrls": [
+        "https://www.helpscout.com/",
+        "https://www.helpscout.com/pricing/"
+      ],
+      "pageFingerprint": "fc903605fc3eeda337762375",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$ 25 per",
+          "$ 45 per",
+          "$ 75 per",
+          "$ 0.75 /",
+          "$135,20",
+          "$281,21",
+          "$438,69",
+          "$855,11",
+          "$0",
+          "$146,23",
+          "$2,26",
+          "$2,60",
+          "$2,99",
+          "$7,87",
+          "$132,93",
+          "$278,60",
+          "$289,46",
+          "$701,00",
+          "$10/mo",
+          "$0.75 per",
+          "$20/mo",
+          "$10 per month",
+          "$12 per month",
+          "$20 per month",
+          "$24 per month"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "shared inbox",
+          "help center",
+          "workflows",
+          "reporting",
+          "customer profiles"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "gorgias": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.gorgias.com/",
+      "evidenceUrls": [
+        "https://www.gorgias.com/",
+        "https://www.gorgias.com/pricing",
+        "https://www.gorgias.com/pricing?ref=home&amp;ref-position=other"
+      ],
+      "pageFingerprint": "816f1699168a7a418e4feb2c",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [
+          "$500",
+          "$40 /mo",
+          "$10/mo",
+          "$30/mo",
+          "$90",
+          "$77 /mo",
+          "$924",
+          "$50/mo",
+          "$27/mo",
+          "$550",
+          "$471 /mo",
+          "$5,65",
+          "$300/mo",
+          "$171/mo",
+          "$1,43",
+          "$1,22",
+          "$14,72",
+          "$750/mo",
+          "$477/mo",
+          "$10 /mo",
+          "$60 /mo",
+          "$60/mo",
+          "$360 /mo",
+          "$360/mo",
+          "$900 /mo",
+          "$900/mo",
+          "$60",
+          "$50 /mo",
+          "$600",
+          "$360"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "helpdesk",
+          "automation",
+          "customer context"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": null,
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "crisp": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://crisp.chat/en/",
+      "evidenceUrls": [
+        "https://crisp.chat/en/",
+        "https://crisp.chat/en/pricing/"
+      ],
+      "pageFingerprint": "257d7c49397fdfd78e31cd4a",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$ 45 per month",
+          "$ 5",
+          "$ 95 per month",
+          "$ 25",
+          "$ 295 per month",
+          "$ 75",
+          "$ 0",
+          "$ 45",
+          "$ 95",
+          "$ 295",
+          "$ 10"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "live chat",
+          "shared inbox",
+          "chatbot",
+          "knowledge base",
+          "campaigns"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "salesforce": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.salesforce.com/?bc=DB",
+      "evidenceUrls": [
+        "https://www.salesforce.com/?bc=DB",
+        "https://www.salesforce.com/agentforce/pricing/?bc=DB",
+        "https://www.salesforce.com/pricing/?bc=DB"
+      ],
+      "pageFingerprint": "778b1cb07f890686fb4c7ef0",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [
+          "$ 0",
+          "£ 0",
+          "$ 500",
+          "$ 700",
+          "£ 400",
+          "$ 2",
+          "$ 2.80",
+          "£ 1.60",
+          "$ 125 user",
+          "$ 150 user",
+          "$550 user",
+          "$ 5",
+          "$ 7",
+          "£ 4",
+          "$ 500 per",
+          "$ 700 per",
+          "£ 400 per",
+          "$ 2 per",
+          "$ 2.80 per",
+          "£ 1.60 per",
+          "$ 125",
+          "$ 175",
+          "£ 100",
+          "$0.20",
+          "$120",
+          "$120 per month",
+          "$0.30",
+          "$1,80",
+          "$0.50",
+          "$300"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "CRM",
+          "sales cloud",
+          "service cloud",
+          "automation",
+          "analytics",
+          "integrations"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": null,
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "close": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://close.com/",
+      "evidenceUrls": [
+        "https://close.com/",
+        "https://close.com/pricing"
+      ],
+      "pageFingerprint": "6fbe69d6f49d32a8d5bc8c91",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [
+          "$100,00",
+          "$ 19 per user",
+          "$ 9 per user",
+          "$ 49 per user",
+          "$ 35 per user",
+          "$ 109 per user",
+          "$ 99 per user",
+          "$ 149 per user",
+          "$ 139 per user",
+          "$19 per user",
+          "$9 per user",
+          "$49 per user",
+          "$35 per user",
+          "$109 per user",
+          "$99 per user",
+          "$149 per user",
+          "$139 per user",
+          "$5",
+          "$1/",
+          "$50 per month",
+          "$50 /",
+          "$0.02 /",
+          "$0.02/",
+          "$1/month",
+          "$9/",
+          "$35/",
+          "$99/",
+          "$139/"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "CRM",
+          "email",
+          "calling",
+          "SMS",
+          "sales automation",
+          "pipeline management"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": null,
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "copper": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.copper.com/",
+      "evidenceUrls": [
+        "https://www.copper.com/",
+        "https://www.copper.com/pricing",
+        "https://www.copper.com/industries/commercial-production-crm"
+      ],
+      "pageFingerprint": "26bbfb79b449f6f7d2f03292",
+      "volatile": {
+        "freePlan": {
+          "value": false,
+          "confidence": "inferred",
+          "reason": "official_pricing_page_lists_trial_and_paid_pricing_without_free_plan"
+        },
+        "pricingTokens": [
+          "$ 29 per",
+          "$ 69 per",
+          "$ 134 per",
+          "$ 23",
+          "$ 59",
+          "$ 99"
+        ],
+        "trialDays": [
+          14
+        ],
+        "observedCatalogFeatures": [
+          "CRM",
+          "Google Workspace integration",
+          "tasks",
+          "automation",
+          "reporting"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "freshsales": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.freshworks.com/crm/sales/",
+      "evidenceUrls": [
+        "https://www.freshworks.com/crm/sales/",
+        "https://www.freshworks.com/crm/pricing/?utm_medium=home&amp;utm_campaign=hellobar&amp;utm_source=organic",
+        "https://www.freshworks.com/crm/pricing/"
+      ],
+      "pageFingerprint": "e706bedfc646d3b1ce080874",
+      "volatile": {
+        "freePlan": {
+          "value": false,
+          "confidence": "inferred",
+          "reason": "official_pricing_page_lists_trial_and_paid_pricing_without_free_plan"
+        },
+        "pricingTokens": [
+          "$9",
+          "$9 /",
+          "$19 /",
+          "$49 /",
+          "$39 /",
+          "$59 /"
+        ],
+        "trialDays": [
+          21
+        ],
+        "observedCatalogFeatures": [
+          "CRM",
+          "email"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "attio": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://attio.com/",
+      "evidenceUrls": [
+        "https://attio.com/",
+        "https://attio.com/pricing",
+        "https://attio.com/platform/workflows"
+      ],
+      "pageFingerprint": "c8428ee42f5a33b9112ce272",
+      "volatile": {
+        "freePlan": {
+          "value": false,
+          "confidence": "inferred",
+          "reason": "official_pricing_page_lists_trial_and_paid_pricing_without_free_plan"
+        },
+        "pricingTokens": [
+          "$125",
+          "$5",
+          "2026 usd",
+          "$20,80",
+          "$36,40",
+          "$54,00",
+          "$31,20",
+          "$62,50",
+          "$11,00",
+          "$78,00",
+          "$26,40",
+          "$29,28",
+          "$18,28",
+          "$107,00",
+          "$86,00",
+          "$250",
+          "$ 0",
+          "$ 44",
+          "$ 99",
+          "$85/mo",
+          "$70/mo",
+          "$150/mo",
+          "$120/mo",
+          "$330/mo",
+          "$260/mo",
+          "$595/mo",
+          "$475/mo"
+        ],
+        "trialDays": [
+          14
+        ],
+        "observedCatalogFeatures": [
+          "CRM",
+          "automation"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "mailerlite": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.mailerlite.com/",
+      "evidenceUrls": [
+        "https://www.mailerlite.com/",
+        "https://www.mailerlite.com/pricing",
+        "https://www.mailerlite.com/features/email-marketing"
+      ],
+      "pageFingerprint": "24d11ec7e5c931655aee3dba",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$1",
+          "$0",
+          "$12/month",
+          "$25/month",
+          "$12 /",
+          "$25 /"
+        ],
+        "trialDays": [
+          14
+        ],
+        "observedCatalogFeatures": [
+          "email marketing",
+          "automation",
+          "landing pages",
+          "websites",
+          "forms",
+          "subscriber management"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "getresponse": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.getresponse.com/",
+      "evidenceUrls": [
+        "https://www.getresponse.com/",
+        "https://www.getresponse.com/pricing/trial",
+        "https://www.getresponse.com/pricing"
+      ],
+      "pageFingerprint": "aa06fbf36dfa5c49e33d4435",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$43,00",
+          "€16.5",
+          "€25.4",
+          "$13",
+          "$ 15",
+          "$ 41",
+          "$ 48",
+          "$ 127",
+          "$ 56",
+          "$ 149",
+          "$100",
+          "$1,00",
+          "$ 19 /mo",
+          "$ 59 /mo",
+          "$ 69 /mo",
+          "$19 per month"
+        ],
+        "trialDays": [
+          14
+        ],
+        "observedCatalogFeatures": [
+          "email marketing",
+          "automation",
+          "landing pages",
+          "funnels",
+          "webinars",
+          "ecommerce marketing"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "omnisend": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.omnisend.com/",
+      "evidenceUrls": [
+        "https://www.omnisend.com/",
+        "https://www.omnisend.com/pricing/",
+        "https://www.omnisend.com/features/"
+      ],
+      "pageFingerprint": "8754d354adff9f86582e717c",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$79",
+          "$1",
+          "$0.00",
+          "$400",
+          "$400 per month",
+          "$0 /mo",
+          "$11.20 /mo",
+          "$48.00",
+          "$33.60",
+          "$5/month",
+          "$41.30 /mo",
+          "$177.00",
+          "$123.90",
+          "$50",
+          "$10",
+          "$15",
+          "$20",
+          "$25",
+          "$30",
+          "$40",
+          "$65",
+          "$80",
+          "$90",
+          "$100",
+          "$120",
+          "$140",
+          "$160",
+          "$200",
+          "$240",
+          "$280"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "email marketing",
+          "SMS",
+          "automation",
+          "segmentation",
+          "forms"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "constant-contact": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "http_403",
+      "sourceUrl": "https://www.constantcontact.com/"
+    },
+    "basecamp": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://basecamp.com/",
+      "evidenceUrls": [
+        "https://basecamp.com/",
+        "https://basecamp.com/pricing",
+        "https://basecamp.com/features"
+      ],
+      "pageFingerprint": "c1f74882c2c9cff626bf7857",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$5,00",
+          "$25 /mo",
+          "$59 /mo",
+          "$99 /mo",
+          "$299 /mo",
+          "$300/month",
+          "$100/month"
+        ],
+        "trialDays": [
+          30,
+          45
+        ],
+        "observedCatalogFeatures": [
+          "projects",
+          "to-dos",
+          "messages",
+          "files"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "wrike": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.wrike.com/",
+      "evidenceUrls": [
+        "https://www.wrike.com/",
+        "https://www.wrike.com/support-packages/",
+        "https://www.wrike.com/ai/features-vbx/"
+      ],
+      "pageFingerprint": "bb81f9f32c70c3e87c6fac3d",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "project management",
+          "workflows",
+          "dashboards",
+          "automation",
+          "reporting"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": null,
+        "freePlan": null,
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "linear": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://linear.app/",
+      "evidenceUrls": [
+        "https://linear.app/",
+        "https://linear.app/pricing",
+        "https://linear.app/changelog/2026-09-14-loops-for-product-management"
+      ],
+      "pageFingerprint": "ab85d4f8c373007dcc8d6ee7",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [
+          "$0",
+          "$10 per",
+          "$ 1",
+          "$16 per"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "projects",
+          "roadmaps",
+          "cycles",
+          "integrations"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": null,
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "jira": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.atlassian.com/software/jira",
+      "evidenceUrls": [
+        "https://www.atlassian.com/software/jira",
+        "https://www.atlassian.com/software/jira/pricing",
+        "https://www.atlassian.com/collections/teamwork/pricing"
+      ],
+      "pageFingerprint": "e9658cd9e4a61cda17939dba",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$2.8",
+          "$600,00",
+          "$0",
+          "$13.08 per user",
+          "$28.08 per user"
+        ],
+        "trialDays": [
+          14,
+          30
+        ],
+        "observedCatalogFeatures": [
+          "workflows"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "pabbly-connect": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.pabbly.com/connect/",
+      "evidenceUrls": [
+        "https://www.pabbly.com/connect/"
+      ],
+      "pageFingerprint": "59632b8e233653eda42e064c",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [
+          "$64 /month",
+          "$828/year",
+          "$2,02",
+          "$2,98",
+          "$1000",
+          "$349"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "app integrations",
+          "webhooks",
+          "filters",
+          "routers",
+          "multi-step workflows"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": null,
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "integrately": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://integrately.com/",
+      "evidenceUrls": [
+        "https://integrately.com/",
+        "https://integrately.com/pricing"
+      ],
+      "pageFingerprint": "311747eec7cfb22095b2fe10",
+      "volatile": {
+        "freePlan": {
+          "value": false,
+          "confidence": "inferred",
+          "reason": "official_pricing_page_lists_trial_and_paid_pricing_without_free_plan"
+        },
+        "pricingTokens": [
+          "$ 5",
+          "$ 19",
+          "$ 49",
+          "$ 39 per month",
+          "$ 129",
+          "$ 99 per month",
+          "$ 249",
+          "$ 399",
+          "$ 239 per month",
+          "$ 599",
+          "$ 999"
+        ],
+        "trialDays": [
+          14
+        ],
+        "observedCatalogFeatures": [
+          "webhooks"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "workato": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.workato.com/",
+      "evidenceUrls": [
+        "https://www.workato.com/",
+        "https://www.workato.com/pricing",
+        "https://www.workato.com/predictable-pricing"
+      ],
+      "pageFingerprint": "13e5867c02d0735c2d3a85b6",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "integrations",
+          "data orchestration",
+          "workflow automation",
+          "governance"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": null,
+        "freePlan": null,
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "paperform": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://paperform.co/",
+      "evidenceUrls": [
+        "https://paperform.co/",
+        "https://paperform.co/pricing/",
+        "https://paperform.co/product/"
+      ],
+      "pageFingerprint": "a712cad32fcd4439bbd10c6e",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$0 /month",
+          "$10/month",
+          "$25/month",
+          "$49 /month",
+          "$20/month",
+          "$124 /month",
+          "$10 /",
+          "$49/month",
+          "$124/month",
+          "$1",
+          "$59 month",
+          "$149",
+          "$780",
+          "$4,80",
+          "$10"
+        ],
+        "trialDays": [
+          7
+        ],
+        "observedCatalogFeatures": [
+          "forms",
+          "payments",
+          "bookings",
+          "logic",
+          "integrations",
+          "automation"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "fillout": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.fillout.com/",
+      "evidenceUrls": [
+        "https://www.fillout.com/",
+        "https://www.fillout.com/pricing"
+      ],
+      "pageFingerprint": "743e8aaf782afa498c814f63",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$0 /",
+          "$15 /",
+          "$ 228",
+          "$ 180",
+          "$40 /",
+          "$ 588",
+          "$ 480",
+          "$75 /",
+          "$ 1068",
+          "$ 900"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "forms",
+          "scheduling",
+          "logic",
+          "payments"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "bigcommerce": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.bigcommerce.com/",
+      "evidenceUrls": [
+        "https://www.bigcommerce.com/",
+        "https://www.bigcommerce.com/pricing/",
+        "https://www.bigcommerce.com/enterprise-pricing/"
+      ],
+      "pageFingerprint": "943e66105bb0f8b4e77dd4d0",
+      "volatile": {
+        "freePlan": {
+          "value": false,
+          "confidence": "inferred",
+          "reason": "official_pricing_page_lists_trial_and_paid_pricing_without_free_plan"
+        },
+        "pricingTokens": [
+          "$700",
+          "$30",
+          "$29",
+          "$100",
+          "$79",
+          "$1",
+          "$299",
+          "$33,33",
+          "$1,49",
+          "$0",
+          "$39/mo",
+          "$29 annual",
+          "$105/mo",
+          "$79 annual",
+          "$399/mo",
+          "$299 annual",
+          "$30/mo",
+          "$50/mo",
+          "$100/mo",
+          "$39/month",
+          "$105/month",
+          "$399/month",
+          "$299/month",
+          "$2",
+          "$0.29 per"
+        ],
+        "trialDays": [
+          15
+        ],
+        "observedCatalogFeatures": [
+          "online store",
+          "catalog",
+          "checkout",
+          "payments",
+          "analytics",
+          "integrations"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "woocommerce": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://woocommerce.com/",
+      "evidenceUrls": [
+        "https://woocommerce.com/",
+        "https://woocommerce.com/pricing/",
+        "https://woocommerce.com/products/"
+      ],
+      "pageFingerprint": "fd9c68f18286ebd91e1ccc03",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [
+          "$25",
+          "$350/month",
+          "$29",
+          "$299/year",
+          "$0",
+          "$29/mo",
+          "$399/month",
+          "$2,30",
+          "$50",
+          "$1,00",
+          "$500",
+          "$22",
+          "$125",
+          "$0.30 per",
+          "$0.49 per",
+          "$800",
+          "$250",
+          "$500/month",
+          "$2,00",
+          "$59/month",
+          "$2",
+          "$70,00",
+          "$0 year",
+          "$15,00",
+          "$35,00",
+          "$3,00",
+          "$300",
+          "$50,00",
+          "$139,00",
+          "$89,50"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "online store",
+          "payments",
+          "extensions",
+          "customization"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": null,
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "adobe-express": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.adobe.com/express/",
+      "evidenceUrls": [
+        "https://www.adobe.com/express/",
+        "https://www.adobe.com/express/fragments/pricing-cards/simplified-pricing-card-default"
+      ],
+      "pageFingerprint": "e7ffcb7932712d356dc127cc",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [],
+        "trialDays": [
+          30
+        ],
+        "observedCatalogFeatures": [
+          "video",
+          "templates"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": null,
+        "freePlan": null,
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "descript": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.descript.com/",
+      "evidenceUrls": [
+        "https://www.descript.com/",
+        "https://www.descript.com/pricing",
+        "https://www.descript.com/use-case/product-demo"
+      ],
+      "pageFingerprint": "4b0e3d0fd98b35e0ba2715e0",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$ 16",
+          "$ 24 per",
+          "$ 24",
+          "$ 35 per",
+          "$ 50",
+          "$ 65 per",
+          "$0",
+          "1 gbp"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "video editing",
+          "audio editing",
+          "transcription",
+          "screen recording",
+          "captions"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "podia": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.podia.com/",
+      "evidenceUrls": [
+        "https://www.podia.com/",
+        "https://www.podia.com/pricing",
+        "https://www.podia.com/features"
+      ],
+      "pageFingerprint": "2a1928a99e9e3cdf753c4c12",
+      "volatile": {
+        "freePlan": {
+          "value": false,
+          "confidence": "inferred",
+          "reason": "official_pricing_page_lists_trial_and_paid_pricing_without_free_plan"
+        },
+        "pricingTokens": [
+          "$900",
+          "$0",
+          "$42 /mo",
+          "$504",
+          "$84 /mo",
+          "$1,00",
+          "$150 /mo",
+          "$1,80"
+        ],
+        "trialDays": [
+          14
+        ],
+        "observedCatalogFeatures": [
+          "online courses",
+          "digital downloads",
+          "coaching",
+          "website builder",
+          "email marketing",
+          "online store"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "unbounce": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://unbounce.com/",
+      "evidenceUrls": [
+        "https://unbounce.com/",
+        "https://unbounce.com/pricing/",
+        "https://unbounce.com/product/landing-pages/"
+      ],
+      "pageFingerprint": "7df411e8804ffa5edad51a19",
+      "volatile": {
+        "freePlan": {
+          "value": false,
+          "confidence": "inferred",
+          "reason": "official_pricing_page_lists_trial_and_paid_pricing_without_free_plan"
+        },
+        "pricingTokens": [
+          "$ 29",
+          "$ 22",
+          "$ 99",
+          "$ 74",
+          "$ 149",
+          "$ 112",
+          "$ 249",
+          "$ 187"
+        ],
+        "trialDays": [
+          14
+        ],
+        "observedCatalogFeatures": [
+          "landing pages",
+          "lead generation",
+          "A/B testing",
+          "AI copywriting",
+          "popups and sticky bars",
+          "forms",
+          "integrations"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "character-ai": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "http_403",
+      "sourceUrl": "https://character.ai/"
+    },
+    "google-ai-studio": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://aistudio.google.com/welcome",
+      "evidenceUrls": [
+        "https://aistudio.google.com/welcome"
+      ],
+      "pageFingerprint": "d3adf7b0d8e55ae591281316",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [],
+        "trialDays": [],
+        "observedCatalogFeatures": []
+      },
+      "fieldVerifiedAt": {
+        "pricing": null,
+        "freePlan": null,
+        "trial": null,
+        "features": null
+      }
+    },
+    "kling-ai": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://kling.ai/",
+      "evidenceUrls": [
+        "https://kling.ai/",
+        "https://kling.ai/dev/pricing",
+        "https://kling.ai/document-api/quickStart/productIntroduction/overview"
+      ],
+      "pageFingerprint": "430b04ecbbeb87b786475bb6",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "motion control",
+          "API platform"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": null,
+        "freePlan": null,
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "otter-ai": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://otter.ai/",
+      "evidenceUrls": [
+        "https://otter.ai/",
+        "https://otter.ai/pricing",
+        "https://otter.ai/blog/increasing-productivity-in-meetings-with-an-ai-meeting-assistant"
+      ],
+      "pageFingerprint": "e2c777d7bba3b22b2c264c26",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$19.99/month",
+          "$16",
+          "$8",
+          "$30",
+          "$24 /",
+          "$4",
+          "$19",
+          "$8.33",
+          "$19.99",
+          "$6.67",
+          "$79.99 annual",
+          "$13.59",
+          "$2"
+        ],
+        "trialDays": [
+          7
+        ],
+        "observedCatalogFeatures": [
+          "live transcription",
+          "meeting recording",
+          "automated summaries",
+          "Otter AI Chat"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": "2026-10-05T07:40:14.179Z",
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "anijam-ai": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://www.anijam.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+      "evidenceUrls": [
+        "https://www.anijam.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+        "https://www.anijam.ai/pricing/"
+      ],
+      "pageFingerprint": "f49f328f4384f49d830a1951",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [
+          "$ 16 /month",
+          "$ 25",
+          "$192 /",
+          "$ 26 /month",
+          "$ 50",
+          "$312 /",
+          "$ 58 /month",
+          "$ 100",
+          "$696 /",
+          "$ 166 /month",
+          "$ 300",
+          "$1,99",
+          "$ 10"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "voice",
+          "social media"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "chatzy-ai": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://chatzy.ai/",
+      "evidenceUrls": [
+        "https://chatzy.ai/",
+        "https://chatzy.ai/pricing"
+      ],
+      "pageFingerprint": "ea505c9beb01cf2c405b7545",
+      "volatile": {
+        "freePlan": {
+          "value": true,
+          "confidence": "explicit",
+          "reason": "official_source_explicit_free_plan"
+        },
+        "pricingTokens": [],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "voice",
+          "automation",
+          "deployment"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": null,
+        "freePlan": "2026-10-05T07:40:14.179Z",
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    },
+    "cosupport-ai": {
+      "checkedAt": "2026-10-05T07:40:14.179Z",
+      "sourceStatus": "ok",
+      "sourceUrl": "https://cosupport.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+      "evidenceUrls": [
+        "https://cosupport.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+        "https://cosupport.ai/pricing",
+        "https://cosupport.ai/product-demo"
+      ],
+      "pageFingerprint": "d26d7bb95a04aa914059c29b",
+      "volatile": {
+        "freePlan": {
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
+        },
+        "pricingTokens": [
+          "$9.3",
+          "$9,30",
+          "$0.04 per",
+          "$0.19 per",
+          "$99 per",
+          "$0.04",
+          "$0.19",
+          "$7",
+          "$14",
+          "$99/mo",
+          "$0.19 /",
+          "$99 /",
+          "$0.04 /",
+          "$14,00",
+          "$168"
+        ],
+        "trialDays": [],
+        "observedCatalogFeatures": [
+          "AI assistant",
+          "chatbot",
+          "conversational AI",
+          "voice",
+          "collaboration",
+          "API",
+          "automation",
+          "integrations",
+          "design"
+        ]
+      },
+      "fieldVerifiedAt": {
+        "pricing": "2026-10-05T07:40:14.179Z",
+        "freePlan": null,
+        "trial": null,
+        "features": "2026-10-05T07:40:14.179Z"
+      }
+    }
+  }
+}

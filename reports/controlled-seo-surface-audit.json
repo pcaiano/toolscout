@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-09-13T12:15:30.018Z",
+  "generatedAt": "2026-10-05T07:41:23.205Z",
   "rule": "Every root best-*.html page must belong to the canonical SEO intent registry and pass the same publication gates. Held, consolidated and uncontrolled legacy guides cannot remain public.",
-  "rootGuideCount": 35,
+  "rootGuideCount": 36,
   "canonicalIntentCount": 39,
-  "heldCount": 4,
+  "heldCount": 3,
   "uncontrolled": [],
   "heldStillPublic": [],
   "consolidationSourcesStillPublic": [],

@@ -1,28 +1,50 @@
 {
-  "generatedAt": "2026-09-13T12:15:29.721Z",
+  "generatedAt": "2026-10-05T07:41:22.256Z",
   "policy": "Only distinct informational intents with observed Search Console demand may become indexable blog candidates. Existing commercial guide intents are not duplicated in the blog.",
   "minimumImpressions": 10,
-  "count": 2,
+  "count": 4,
   "items": [
     {
       "slug": "what-is-airtable",
       "query": "what is airtable",
-      "sourcePage": "https://trytoolscout.org/tools/airtable.html",
-      "sourcePath": "/tools/airtable.html",
-      "impressions": 26,
+      "sourcePage": "https://trytoolscout.org/tools/airtable",
+      "sourcePath": "/tools/airtable",
+      "impressions": 67,
       "clicks": 0,
-      "position": 85.5,
+      "position": 86.5821,
       "evidence": "Google Search Console query",
       "publicationStatus": "candidate-needs-grounded-content"
     },
     {
       "slug": "what-is-airtable-used-for",
       "query": "what is airtable used for",
-      "sourcePage": "https://trytoolscout.org/tools/airtable.html",
-      "sourcePath": "/tools/airtable.html",
+      "sourcePage": "https://trytoolscout.org/tools/airtable",
+      "sourcePath": "/tools/airtable",
+      "impressions": 48,
+      "clicks": 0,
+      "position": 91.2708,
+      "evidence": "Google Search Console query",
+      "publicationStatus": "candidate-needs-grounded-content"
+    },
+    {
+      "slug": "what-is-airtable-and-how-it-works",
+      "query": "what is airtable and how it works",
+      "sourcePage": "https://trytoolscout.org/tools/airtable",
+      "sourcePath": "/tools/airtable",
       "impressions": 20,
       "clicks": 0,
-      "position": 89,
+      "position": 93.55,
+      "evidence": "Google Search Console query",
+      "publicationStatus": "candidate-needs-grounded-content"
+    },
+    {
+      "slug": "what-is-klaviyo",
+      "query": "what is klaviyo",
+      "sourcePage": "https://trytoolscout.org/tools/klaviyo",
+      "sourcePath": "/tools/klaviyo",
+      "impressions": 11,
+      "clicks": 0,
+      "position": 78.6364,
       "evidence": "Google Search Console query",
       "publicationStatus": "candidate-needs-grounded-content"
     }

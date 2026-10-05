@@ -1,0 +1,50 @@
+{
+  "generatedAt": "2026-10-05T07:40:02.201Z",
+  "sourceGeneratedAt": "2026-09-14T14:01:51.032Z",
+  "blockedCount": 5,
+  "trackedCount": 6,
+  "items": [
+    {
+      "url": "https://trytoolscout.org/",
+      "status": "indexed",
+      "blocksEditorialOptimization": false,
+      "coverageState": "Submitted and indexed",
+      "lastCrawlTime": "2026-09-11T02:44:30+00:00"
+    },
+    {
+      "url": "https://trytoolscout.org/guides",
+      "status": "canonical-alternate",
+      "blocksEditorialOptimization": true,
+      "coverageState": "Alternate page with proper canonical tag",
+      "lastCrawlTime": "2026-09-07T20:11:35+00:00"
+    },
+    {
+      "url": "https://trytoolscout.org/tools",
+      "status": "canonical-alternate",
+      "blocksEditorialOptimization": true,
+      "coverageState": "Alternate page with proper canonical tag",
+      "lastCrawlTime": "2026-09-07T14:50:16+00:00"
+    },
+    {
+      "url": "https://trytoolscout.org/activecampaign-vs-mailchimp",
+      "status": "canonical-alternate",
+      "blocksEditorialOptimization": true,
+      "coverageState": "Alternate page with proper canonical tag",
+      "lastCrawlTime": "2026-09-01T14:31:41+00:00"
+    },
+    {
+      "url": "https://trytoolscout.org/best-free-project-management-tools",
+      "status": "canonical-alternate",
+      "blocksEditorialOptimization": true,
+      "coverageState": "Alternate page with proper canonical tag",
+      "lastCrawlTime": "2026-09-02T00:42:53+00:00"
+    },
+    {
+      "url": "https://trytoolscout.org/tools/shopify",
+      "status": "canonical-alternate",
+      "blocksEditorialOptimization": true,
+      "coverageState": "Alternate page with proper canonical tag",
+      "lastCrawlTime": "2026-09-11T15:59:27+00:00"
+    }
+  ]
+}

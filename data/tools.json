@@ -541,7 +541,7 @@
     "category": "crm",
     "description": "Flexible CRM and workflow platform for managing leads, pipelines, customer work and sales processes.",
     "pricing": "Paid plans; verify current pricing before publication",
-    "freePlan": false,
+    "freePlan": true,
     "features": [
       "crm",
       "pipeline management",
@@ -558,7 +558,7 @@
     "affiliateProgram": "monday.com Partner Program",
     "commission": "Pending verification",
     "sourceUrl": "https://monday.com/",
-    "lastVerified": "2026-08-29",
+    "lastVerified": "2026-10-05",
     "scores": {
       "price": 5,
       "ease": 9,
@@ -653,7 +653,7 @@
     "category": "seo",
     "description": "SEO and search marketing platform for keyword research, competitor analysis, backlinks and content research.",
     "pricing": "Paid plans; verify current pricing before publication",
-    "freePlan": false,
+    "freePlan": true,
     "features": [
       "seo",
       "keyword research",
@@ -670,7 +670,7 @@
     "affiliateProgram": "No affiliate program — vendor states discontinued",
     "commission": "N/A",
     "sourceUrl": "https://ahrefs.com/",
-    "lastVerified": "2026-08-29",
+    "lastVerified": "2026-10-05",
     "scores": {
       "price": 4,
       "ease": 7,
@@ -2211,7 +2211,7 @@
     "category": "social",
     "description": "Social media management tool for content scheduling, category-based publishing, analytics and AI-assisted creation.",
     "pricing": "Paid plans with trial options; verify current pricing before publication",
-    "freePlan": false,
+    "freePlan": true,
     "features": [
       "social scheduling",
       "content categories",
@@ -2229,7 +2229,7 @@
     "affiliateProgram": "Pending verification",
     "commission": "Pending verification",
     "sourceUrl": "https://socialbee.com/",
-    "lastVerified": "2026-09-01",
+    "lastVerified": "2026-10-05",
     "scores": {
       "price": 7,
       "ease": 9,
@@ -2818,7 +2818,7 @@
     "category": "seo",
     "description": "SEO software suite for keyword research, rank tracking, site auditing, backlinks and search visibility analysis.",
     "pricing": "Paid plans with trial options; verify current pricing before publication",
-    "freePlan": false,
+    "freePlan": true,
     "features": [
       "keyword research",
       "rank tracking",
@@ -2835,7 +2835,7 @@
     "affiliateProgram": "Pending verification",
     "commission": "Pending verification",
     "sourceUrl": "https://moz.com/products/pro",
-    "lastVerified": "2026-09-01",
+    "lastVerified": "2026-10-05",
     "scores": {
       "price": 6,
       "ease": 8,
@@ -3015,7 +3015,7 @@
     "category": "website",
     "description": "Website and commerce platform for building polished sites, portfolios, online stores and service-business experiences.",
     "pricing": "Paid plans with trial options; verify current pricing before publication",
-    "freePlan": false,
+    "freePlan": true,
     "features": [
       "website builder",
       "templates",
@@ -3033,7 +3033,7 @@
     "affiliateProgram": "Pending verification",
     "commission": "Pending verification",
     "sourceUrl": "https://www.squarespace.com/",
-    "lastVerified": "2026-09-01",
+    "lastVerified": "2026-10-05",
     "scores": {
       "price": 6,
       "ease": 10,
@@ -3095,7 +3095,7 @@
     "category": "support",
     "description": "Customer support platform for shared inboxes, help centers, messaging and team workflows with a focus on human support.",
     "pricing": "Paid plans with trial options; verify current pricing before publication",
-    "freePlan": false,
+    "freePlan": true,
     "features": [
       "shared inbox",
       "help center",
@@ -3112,7 +3112,7 @@
     "affiliateProgram": "Pending verification",
     "commission": "Pending verification",
     "sourceUrl": "https://www.helpscout.com/",
-    "lastVerified": "2026-09-01",
+    "lastVerified": "2026-10-05",
     "scores": {
       "price": 7,
       "ease": 9,
@@ -3572,7 +3572,7 @@
     "category": "business",
     "description": "Project and team collaboration platform combining tasks, messaging, schedules, files and project communication.",
     "pricing": "Paid plans; verify current pricing before publication",
-    "freePlan": false,
+    "freePlan": true,
     "features": [
       "projects",
       "to-dos",
@@ -3590,7 +3590,7 @@
     "affiliateProgram": "Pending verification",
     "commission": "Pending verification",
     "sourceUrl": "https://basecamp.com/",
-    "lastVerified": "2026-09-01",
+    "lastVerified": "2026-10-05",
     "scores": {
       "price": 6,
       "ease": 9,
@@ -3851,7 +3851,7 @@
     "category": "forms",
     "description": "Flexible form and document builder for lead capture, payments, bookings and workflow-based data collection.",
     "pricing": "Paid plans with trial options; verify current pricing before publication",
-    "freePlan": false,
+    "freePlan": true,
     "features": [
       "forms",
       "payments",
@@ -3869,7 +3869,7 @@
     "affiliateProgram": "Pending verification",
     "commission": "Pending verification",
     "sourceUrl": "https://paperform.co/",
-    "lastVerified": "2026-09-01",
+    "lastVerified": "2026-10-05",
     "scores": {
       "price": 7,
       "ease": 9,
@@ -4360,6 +4360,171 @@
       "admittedAt": "2026-09-23T00:00:00Z",
       "affiliateNeutral": true,
       "reviewMethod": "first_party_verified_structured_profile_v2"
+    }
+  },
+  {
+    "affiliateUrl": "",
+    "slug": "anijam-ai",
+    "name": "Anijam AI",
+    "category": "content",
+    "description": "Anijam AI is an all-in-one AI video agent. Chat to create cinematic films, anime, UGC ads, and social videos — just like ChatGPT. No skills needed. Try Anijam AI for free!",
+    "pricing": "See vendor for current pricing",
+    "freePlan": true,
+    "freePlanKnown": false,
+    "features": [
+      "citations",
+      "video generation",
+      "voice",
+      "social media"
+    ],
+    "bestFor": [
+      "content teams",
+      "creators evaluating content production software"
+    ],
+    "affiliateProgram": "Not evaluated for catalog admission",
+    "commission": "Commercial terms are separate from editorial selection",
+    "sourceUrl": "https://www.anijam.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+    "lastVerified": "2026-10-05",
+    "scores": {
+      "price": 5,
+      "ease": 5,
+      "automation": 5,
+      "integrations": 5,
+      "sales": 5,
+      "ai": 5,
+      "marketing": 5,
+      "seo": 5,
+      "research": 5,
+      "content": 5,
+      "agency": 5
+    },
+    "catalogTier": "coverage",
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "provenance": {
+      "mode": "verified_competitive_gap_coverage",
+      "admittedAt": "2026-10-05T07:40:13.050Z",
+      "source": "competitive-gap-loop",
+      "marketSignals": {
+        "count": 2,
+        "sources": [
+          "Futurepedia",
+          "Aixploria"
+        ]
+      },
+      "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
+    }
+  },
+  {
+    "affiliateUrl": "",
+    "slug": "chatzy-ai",
+    "name": "Chatzy AI",
+    "category": "developer",
+    "description": "Deploy intelligent AI agents across WhatsApp, voice, web, and social. Qualify leads, automate follow-ups, and drive conversions 24/7 with enterprise-ready infrastructure.",
+    "pricing": "See vendor for current pricing",
+    "freePlan": true,
+    "freePlanKnown": false,
+    "features": [
+      "citations",
+      "voice",
+      "automation",
+      "deployment"
+    ],
+    "bestFor": [
+      "developers",
+      "engineering teams evaluating developer software"
+    ],
+    "affiliateProgram": "Not evaluated for catalog admission",
+    "commission": "Commercial terms are separate from editorial selection",
+    "sourceUrl": "https://chatzy.ai/",
+    "lastVerified": "2026-10-05",
+    "scores": {
+      "price": 5,
+      "ease": 5,
+      "automation": 5,
+      "integrations": 5,
+      "sales": 5,
+      "ai": 5,
+      "marketing": 5,
+      "seo": 5,
+      "research": 5,
+      "content": 5,
+      "agency": 5
+    },
+    "catalogTier": "coverage",
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "provenance": {
+      "mode": "verified_competitive_gap_coverage",
+      "admittedAt": "2026-10-05T07:40:13.050Z",
+      "source": "competitive-gap-loop",
+      "marketSignals": {
+        "count": 2,
+        "sources": [
+          "Aixploria",
+          "Dynamite AI"
+        ]
+      },
+      "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
+    }
+  },
+  {
+    "affiliateUrl": "",
+    "slug": "cosupport-ai",
+    "name": "Cosupport AI",
+    "category": "ai-assistant",
+    "description": "Automate customer service with CoSupport AI. Handle repetitive tickets, accelerate response times, and deliver 99% accurate, multilingual support. Try it free.",
+    "pricing": "See vendor for current pricing",
+    "freePlan": false,
+    "freePlanKnown": false,
+    "features": [
+      "AI assistant",
+      "chatbot",
+      "conversational AI",
+      "citations",
+      "voice",
+      "collaboration",
+      "API",
+      "automation",
+      "integrations",
+      "design"
+    ],
+    "bestFor": [
+      "knowledge workers",
+      "teams evaluating general AI assistants"
+    ],
+    "affiliateProgram": "Not evaluated for catalog admission",
+    "commission": "Commercial terms are separate from editorial selection",
+    "sourceUrl": "https://cosupport.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+    "lastVerified": "2026-10-05",
+    "scores": {
+      "price": 5,
+      "ease": 5,
+      "automation": 5,
+      "integrations": 5,
+      "sales": 5,
+      "ai": 5,
+      "marketing": 5,
+      "seo": 5,
+      "research": 5,
+      "content": 5,
+      "agency": 5
+    },
+    "catalogTier": "coverage",
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "provenance": {
+      "mode": "verified_competitive_gap_coverage",
+      "admittedAt": "2026-10-05T07:40:13.050Z",
+      "source": "competitive-gap-loop",
+      "marketSignals": {
+        "count": 2,
+        "sources": [
+          "Futurepedia",
+          "Aixploria"
+        ]
+      },
+      "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
     }
   }
 ]

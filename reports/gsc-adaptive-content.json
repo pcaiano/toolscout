@@ -1,13 +1,78 @@
 {
-  "generatedAt": "2026-09-13T12:15:28.579Z",
-  "gscGeneratedAt": "2026-09-13T12:15:25.035Z",
+  "generatedAt": "2026-10-05T07:41:20.430Z",
+  "gscGeneratedAt": "2026-10-05T07:40:01.971Z",
   "minimumImpressionsForHighConfidenceAction": 20,
   "rule": "Observed GSC demand may trigger additive factual decision depth. Low-sample first-page pages are protected from aggressive adaptive changes. Query strings must pass safety and intent-alignment checks before they can trigger adaptation.",
-  "adaptiveApplied": 6,
-  "protectedLowSample": 7,
+  "adaptiveApplied": 0,
+  "protectedLowSample": 1,
   "items": [
     {
       "intent": "best-crm-for-real-estate",
+      "impressions": 4,
+      "clicks": 0,
+      "position": 92.75,
+      "meaningfulSample": false,
+      "lowSampleFirstPage": false,
+      "dominantQuery": null,
+      "action": "measure-only"
+    },
+    {
+      "intent": "best-crm-for-consultants",
+      "impressions": 5,
+      "clicks": 0,
+      "position": 88,
+      "meaningfulSample": false,
+      "lowSampleFirstPage": false,
+      "dominantQuery": {
+        "query": "crm for independent consultants",
+        "impressions": 2,
+        "position": 82.5,
+        "alignment": 1
+      },
+      "action": "measure-only"
+    },
+    {
+      "intent": "best-forms-for-small-business",
+      "impressions": 1,
+      "clicks": 0,
+      "position": 38,
+      "meaningfulSample": false,
+      "lowSampleFirstPage": false,
+      "dominantQuery": null,
+      "action": "measure-only"
+    },
+    {
+      "intent": "best-lead-capture-forms",
+      "impressions": 16,
+      "clicks": 0,
+      "position": 49.1875,
+      "meaningfulSample": false,
+      "lowSampleFirstPage": false,
+      "dominantQuery": {
+        "query": "lead validation forms",
+        "impressions": 5,
+        "position": 46.6,
+        "alignment": 0.667
+      },
+      "action": "measure-only"
+    },
+    {
+      "intent": "best-sales-prospecting-tools",
+      "impressions": 4,
+      "clicks": 0,
+      "position": 70.25,
+      "meaningfulSample": false,
+      "lowSampleFirstPage": false,
+      "dominantQuery": {
+        "query": "sales prospecting tools",
+        "impressions": 2,
+        "position": 72,
+        "alignment": 1
+      },
+      "action": "measure-only"
+    },
+    {
+      "intent": "best-email-marketing-tools",
       "impressions": 0,
       "clicks": 0,
       "position": 0,
@@ -17,65 +82,10 @@
       "action": "measure-only"
     },
     {
-      "intent": "best-crm-for-consultants",
+      "intent": "best-cold-email-tools",
       "impressions": 1,
       "clicks": 0,
-      "position": 8,
-      "meaningfulSample": false,
-      "lowSampleFirstPage": true,
-      "dominantQuery": null,
-      "action": "protect-first-page-low-sample"
-    },
-    {
-      "intent": "best-forms-for-small-business",
-      "impressions": 4,
-      "clicks": 0,
-      "position": 4.5,
-      "meaningfulSample": false,
-      "lowSampleFirstPage": true,
-      "dominantQuery": null,
-      "action": "protect-first-page-low-sample"
-    },
-    {
-      "intent": "best-lead-capture-forms",
-      "impressions": 4,
-      "clicks": 0,
-      "position": 47.5,
-      "meaningfulSample": false,
-      "lowSampleFirstPage": false,
-      "dominantQuery": {
-        "query": "best lead capture forms",
-        "impressions": 2,
-        "position": 88.5,
-        "alignment": 1
-      },
-      "action": "measure-only"
-    },
-    {
-      "intent": "best-sales-prospecting-tools",
-      "impressions": 3,
-      "clicks": 0,
-      "position": 7.6667,
-      "meaningfulSample": false,
-      "lowSampleFirstPage": true,
-      "dominantQuery": null,
-      "action": "protect-first-page-low-sample"
-    },
-    {
-      "intent": "best-email-marketing-tools",
-      "impressions": 2,
-      "clicks": 0,
-      "position": 8.5,
-      "meaningfulSample": false,
-      "lowSampleFirstPage": true,
-      "dominantQuery": null,
-      "action": "protect-first-page-low-sample"
-    },
-    {
-      "intent": "best-cold-email-tools",
-      "impressions": 2,
-      "clicks": 0,
-      "position": 6.5,
+      "position": 9,
       "meaningfulSample": false,
       "lowSampleFirstPage": true,
       "dominantQuery": null,
@@ -83,123 +93,133 @@
     },
     {
       "intent": "best-crm-for-small-business",
-      "impressions": 1,
+      "impressions": 293,
       "clicks": 0,
-      "position": 8,
-      "meaningfulSample": false,
-      "lowSampleFirstPage": true,
-      "dominantQuery": null,
-      "action": "protect-first-page-low-sample"
+      "position": 77.6177,
+      "meaningfulSample": true,
+      "lowSampleFirstPage": false,
+      "dominantQuery": {
+        "query": "best crm for small business",
+        "impressions": 71,
+        "position": 78.4366,
+        "alignment": 1
+      },
+      "action": "measure-only"
     },
     {
       "intent": "best-keyword-research-tools",
-      "impressions": 42,
+      "impressions": 79,
       "clicks": 0,
-      "position": 74.3095,
+      "position": 75.1899,
       "meaningfulSample": true,
+      "lowSampleFirstPage": false,
+      "dominantQuery": {
+        "query": "competitive keyword research tools",
+        "impressions": 12,
+        "position": 95.9167,
+        "alignment": 1
+      },
+      "action": "measure-only"
+    },
+    {
+      "intent": "best-ai-research-tools",
+      "impressions": 8,
+      "clicks": 0,
+      "position": 50.125,
+      "meaningfulSample": false,
       "lowSampleFirstPage": false,
       "dominantQuery": null,
       "action": "measure-only"
     },
     {
-      "intent": "best-ai-research-tools",
-      "impressions": 1,
-      "clicks": 0,
-      "position": 1,
-      "meaningfulSample": false,
-      "lowSampleFirstPage": true,
-      "dominantQuery": null,
-      "action": "protect-first-page-low-sample"
-    },
-    {
       "intent": "best-seo-tools-for-agencies",
-      "impressions": 535,
+      "impressions": 2223,
       "clicks": 0,
-      "position": 77.0355,
+      "position": 80.2753,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
-        "query": "best seo tool for agencies",
-        "impressions": 51,
-        "position": 72.098,
+        "query": "seo software for agencies",
+        "impressions": 138,
+        "position": 88.4275,
         "alignment": 1
       },
-      "action": "deepen-weak-ranking"
+      "action": "measure-only"
     },
     {
       "intent": "best-funnel-builder",
-      "impressions": 127,
+      "impressions": 146,
       "clicks": 0,
-      "position": 77.1024,
+      "position": 74.7397,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
         "query": "best funnel builder",
-        "impressions": 31,
-        "position": 65.5484,
+        "impressions": 32,
+        "position": 67.3438,
         "alignment": 1
       },
-      "action": "deepen-weak-ranking"
+      "action": "measure-only"
     },
     {
       "intent": "best-crm-for-sales-teams",
-      "impressions": 50,
+      "impressions": 54,
       "clicks": 0,
-      "position": 75.52,
+      "position": 57.1852,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
-        "query": "crm for sales teams",
-        "impressions": 15,
-        "position": 74.6667,
-        "alignment": 1
+        "query": "crm for sales team",
+        "impressions": 11,
+        "position": 65.9091,
+        "alignment": 0.667
       },
-      "action": "deepen-weak-ranking"
+      "action": "measure-only"
     },
     {
       "intent": "best-free-crm",
-      "impressions": 42,
+      "impressions": 149,
       "clicks": 0,
-      "position": 73.0952,
+      "position": 77.8456,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
         "query": "best free crm tools",
-        "impressions": 11,
-        "position": 66.1818,
+        "impressions": 20,
+        "position": 68.5,
         "alignment": 1
       },
-      "action": "deepen-weak-ranking"
+      "action": "measure-only"
     },
     {
       "intent": "best-project-management-tools",
-      "impressions": 67,
+      "impressions": 132,
       "clicks": 0,
-      "position": 40.0448,
+      "position": 44.8788,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
-        "query": "project management workflow tools",
-        "impressions": 10,
-        "position": 32.7,
+        "query": "management tool",
+        "impressions": 16,
+        "position": 66.75,
         "alignment": 1
       },
-      "action": "deepen-weak-ranking"
+      "action": "measure-only"
     },
     {
       "intent": "best-free-project-management-tools",
-      "impressions": 47,
+      "impressions": 73,
       "clicks": 0,
-      "position": 55.383,
+      "position": 62.137,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
         "query": "free online project manager tools",
-        "impressions": 19,
-        "position": 66.8421,
+        "impressions": 21,
+        "position": 67.381,
         "alignment": 0.667
       },
-      "action": "deepen-weak-ranking"
+      "action": "measure-only"
     }
   ]
 }

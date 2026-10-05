@@ -1,19 +1,46 @@
 {
-  "generatedAt": "2026-09-21T22:11:01.245Z",
+  "generatedAt": "2026-10-05T07:41:20.060Z",
   "engine": "ToolScout Organic Growth Engine v4",
   "brain": "shared-growth-v3",
-  "brainDirectivesGeneratedAt": "2026-09-21T22:11:01.183Z",
-  "newInterventions": [],
+  "brainDirectivesGeneratedAt": "2026-10-05T07:41:19.982Z",
+  "newInterventions": [
+    {
+      "intent": "best-crm-for-small-business",
+      "variant": "decision-depth-v1",
+      "lane": "seo-authority-depth",
+      "priorityScore": 100,
+      "impressions": 293,
+      "position": 77.6177,
+      "brainOpportunity": "search:best-crm-for-small-business",
+      "brainActions": [
+        "content_amplification",
+        "search_measurement"
+      ]
+    },
+    {
+      "intent": "best-social-media-management-tools",
+      "variant": "decision-depth-v1",
+      "lane": "seo-authority-depth",
+      "priorityScore": 100,
+      "impressions": 172,
+      "position": 63.0523,
+      "brainOpportunity": "search:best-social-media-management-tools",
+      "brainActions": [
+        "content_amplification",
+        "search_measurement"
+      ]
+    }
+  ],
   "activeOptimizations": [
     {
       "intent": "best-seo-tools-for-agencies",
       "latest": {
         "clicks": 0,
-        "impressions": 810,
+        "impressions": 2223,
         "ctr": 0,
-        "position": 75.8444
+        "position": 80.2753
       },
-      "lastSeenAt": "2026-09-21T22:11:01.245Z",
+      "lastSeenAt": "2026-10-05T07:41:20.060Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T10:07:59.605Z",
       "baseline": {
@@ -29,11 +56,11 @@
       "intent": "best-project-management-tools",
       "latest": {
         "clicks": 0,
-        "impressions": 120,
+        "impressions": 132,
         "ctr": 0,
-        "position": 39.4083
+        "position": 44.8788
       },
-      "lastSeenAt": "2026-09-21T22:11:01.245Z",
+      "lastSeenAt": "2026-10-05T07:41:20.060Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T10:07:59.605Z",
       "baseline": {
@@ -49,11 +76,11 @@
       "intent": "best-no-code-automation-tools",
       "latest": {
         "clicks": 0,
-        "impressions": 266,
+        "impressions": 106,
         "ctr": 0,
-        "position": 74.1053
+        "position": 76.4057
       },
-      "lastSeenAt": "2026-09-21T22:11:01.245Z",
+      "lastSeenAt": "2026-10-05T07:41:20.060Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T10:07:59.605Z",
       "baseline": {
@@ -69,11 +96,11 @@
       "intent": "best-crm-for-sales-teams",
       "latest": {
         "clicks": 0,
-        "impressions": 55,
+        "impressions": 54,
         "ctr": 0,
-        "position": 74.8364
+        "position": 57.1852
       },
-      "lastSeenAt": "2026-09-21T22:11:01.245Z",
+      "lastSeenAt": "2026-10-05T07:41:20.060Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T12:15:28.070Z",
       "baseline": {
@@ -89,11 +116,11 @@
       "intent": "best-funnel-builder",
       "latest": {
         "clicks": 0,
-        "impressions": 194,
+        "impressions": 146,
         "ctr": 0,
-        "position": 75.9227
+        "position": 74.7397
       },
-      "lastSeenAt": "2026-09-21T22:11:01.245Z",
+      "lastSeenAt": "2026-10-05T07:41:20.060Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T12:15:28.070Z",
       "baseline": {
@@ -136,11 +163,11 @@
       "intent": "best-free-crm",
       "latest": {
         "clicks": 0,
-        "impressions": 80,
+        "impressions": 149,
         "ctr": 0,
-        "position": 74.0625
+        "position": 77.8456
       },
-      "lastSeenAt": "2026-09-21T22:11:01.245Z",
+      "lastSeenAt": "2026-10-05T07:41:20.060Z",
       "contentOptimizationSuspended": false,
       "indexing": null,
       "activeVariant": "decision-depth-v1",
@@ -156,11 +183,11 @@
       "intent": "best-keyword-research-tools",
       "latest": {
         "clicks": 0,
-        "impressions": 76,
+        "impressions": 79,
         "ctr": 0,
-        "position": 73.3553
+        "position": 75.1899
       },
-      "lastSeenAt": "2026-09-21T22:11:01.245Z",
+      "lastSeenAt": "2026-10-05T07:41:20.060Z",
       "contentOptimizationSuspended": false,
       "indexing": null,
       "activeVariant": "decision-depth-v1",
@@ -171,27 +198,86 @@
         "ctr": 0,
         "position": 73.3733
       }
-    }
-  ],
-  "indexingRecovery": [
+    },
     {
-      "intent": "best-free-project-management-tools",
-      "status": "canonical-alternate",
-      "coverageState": "Alternate page with proper canonical tag",
-      "lastCrawlTime": "2026-09-02T00:42:53+00:00",
-      "action": "repair-indexing",
-      "executionPlan": [
-        "preserve-current-url",
-        "verify-self-canonical",
-        "verify-sitemap-entry",
-        "verify-indexability",
-        "strengthen-internal-discovery",
-        "validate-public-surface",
-        "recheck-google-indexing"
-      ]
+      "intent": "best-crm-for-small-business",
+      "latest": {
+        "clicks": 0,
+        "impressions": 293,
+        "ctr": 0,
+        "position": 77.6177
+      },
+      "lastSeenAt": "2026-10-05T07:41:20.060Z",
+      "contentOptimizationSuspended": false,
+      "indexing": null,
+      "activeVariant": "decision-depth-v1",
+      "lastInterventionAt": "2026-10-05T07:41:20.060Z",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 293,
+        "ctr": 0,
+        "position": 77.6177
+      }
+    },
+    {
+      "intent": "best-social-media-management-tools",
+      "latest": {
+        "clicks": 0,
+        "impressions": 172,
+        "ctr": 0,
+        "position": 63.0523
+      },
+      "lastSeenAt": "2026-10-05T07:41:20.060Z",
+      "contentOptimizationSuspended": false,
+      "indexing": null,
+      "activeVariant": "decision-depth-v1",
+      "lastInterventionAt": "2026-10-05T07:41:20.060Z",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 172,
+        "ctr": 0,
+        "position": 63.0523
+      }
     }
   ],
-  "evaluations": [],
+  "indexingRecovery": [],
+  "evaluations": [
+    {
+      "intent": "best-seo-tools-for-agencies",
+      "variant": "decision-depth-v1",
+      "outcome": "neutral",
+      "positionChange": 3.206,
+      "clickGain": 0
+    },
+    {
+      "intent": "best-project-management-tools",
+      "variant": "decision-depth-v1",
+      "outcome": "neutral",
+      "positionChange": 4.956,
+      "clickGain": 0
+    },
+    {
+      "intent": "best-free-crm",
+      "variant": "decision-depth-v1",
+      "outcome": "neutral",
+      "positionChange": 3.719,
+      "clickGain": 0
+    },
+    {
+      "intent": "best-funnel-builder",
+      "variant": "decision-depth-v1",
+      "outcome": "neutral",
+      "positionChange": -2.363,
+      "clickGain": 0
+    },
+    {
+      "intent": "best-no-code-automation-tools",
+      "variant": "decision-depth-v1",
+      "outcome": "neutral",
+      "positionChange": 2.704,
+      "clickGain": 0
+    }
+  ],
   "rollbacks": [],
   "ownerActionRequired": false
 }
