@@ -49,3 +49,14 @@ test('compute router applies redesign to direct public decision and navigation o
   assert.match(router,/ownership\.owner==='public_decision'\|\|ownership\.owner==='public_navigation'/);
   assert.match(router,/response=await transformPublicRedesignResponse\(request,response\)/);
 });
+
+
+test('public redesign removes direct vendor source links from commercial decision pages',async()=>{
+  const source='<!doctype html><html><head></head><body><main><h1>Example tool</h1><p class="small"><strong>Editorial evidence:</strong> <a href="https://vendor.example/pricing" target="_blank" rel="noopener">Official product source</a>. Information last checked 2026-10-05.</p><p class="source-note"><strong>Primary sources:</strong> <a href="https://vendor.example/">Example official source</a>.</p><a href="/go/example" rel="nofollow sponsored">Explore Example</a></main></body></html>';
+  const response=new Response(source,{status:200,headers:{'content-type':'text/html; charset=UTF-8'}});
+  const out=await transformPublicRedesignResponse(new Request('https://trytoolscout.org/tools/example'),response);
+  const html=await out.text();
+  assert.doesNotMatch(html,/https:\/\/vendor\.example/);
+  assert.doesNotMatch(html,/Official product source|Primary sources:/);
+  assert.match(html,/href="\/go\/example"/);
+});
