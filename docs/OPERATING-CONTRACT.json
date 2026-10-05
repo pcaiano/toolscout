@@ -149,7 +149,10 @@
     "github_actions_never_own_primary_production_scheduler",
     "only_operating_contract_listed_github_workflows_may_exist_on_main",
     "render_postgres_runtime_is_not_canonical_business_state",
-    "dated_or_snapshot_bound_repair_workflows_cannot_reenter_main_without_contract_change"
+    "dated_or_snapshot_bound_repair_workflows_cannot_reenter_main_without_contract_change",
+    "distribution_public_embed_owns_embed_assets_and_distribution_learning_owns_embed_telemetry",
+    "finder_embed_preserves_first_party_intent_and_broad_category_quality_gates",
+    "embed_telemetry_never_stores_raw_finder_queries"
   ],
   "mission": {
     "starts_on": "2026-09-29",
@@ -202,6 +205,7 @@
       "growth-brain-seo-executor.yml",
       "gsc-growth-bridge.yml",
       "gsc-search-reality.yml",
+      "public-visual-integrity.yml",
       "search-evidence-watchdog.yml",
       "seo-engine-v2.yml",
       "toolscout-v2-ci.yml",
@@ -212,7 +216,8 @@
     "scheduled_workflows": {
       "gsc-search-reality.yml": "23 6 * * *",
       "search-evidence-watchdog.yml": "47 6 * * *",
-      "seo-engine-v2.yml": "17 5 * * *"
+      "seo-engine-v2.yml": "17 5 * * *",
+      "public-visual-integrity.yml": "17 5 * * *"
     },
     "legacy_conservation_branch": "pre-conservation-2026-09-13",
     "conservation_stubs_removed": 53,

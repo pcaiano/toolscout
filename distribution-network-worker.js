@@ -70,8 +70,8 @@ function routeNextAction(type){
 async function ensureSchema(_env){return true;}
 function outreachCopy(row){
   const name=safe(row.surface_name||row.domain,180);
-  const subject=`ToolScout publisher resources for ${name}`;
-  const body=`<p>Hello,</p><p>I'm Pedro Caiano from ToolScout. We publish independent software comparisons, buying guides and tool recommendations for people choosing software for a specific job.</p><p>We make our embeddable Finder, Compare and Pick components available free to publishers. There is no paid placement, reciprocal link or exclusivity requirement.</p><p>If this is useful for ${safe(name,180)}, the public publisher kit is here:<br><a href="https://trytoolscout.org/distribution/publisher-kit">https://trytoolscout.org/distribution/publisher-kit</a></p><p>Best regards,<br>Pedro Caiano<br>ToolScout<br><a href="https://trytoolscout.org">trytoolscout.org</a></p>`;
+  const subject=`Free software Finder widget for ${name}`;
+  const body=`<p>Hello,</p><p>I'm Pedro Caiano from ToolScout. We built a free software discovery Finder that publishers can add with one script tag.</p><p>Visitors describe the job they need software to do and get a focused shortlist directly inside the publisher's site. The recommendation logic is independent, with no pay to rank.</p><p>There is no paid placement, reciprocal link or exclusivity requirement. Finder Full and Finder Mini are both available.</p><p>If this could be useful for ${safe(name,180)}, the live demo and copy-paste embed code are here:<br><a href="https://trytoolscout.org/distribution/publisher-kit">https://trytoolscout.org/distribution/publisher-kit</a></p><p>Best regards,<br>Pedro Caiano<br>ToolScout<br><a href="https://trytoolscout.org">trytoolscout.org</a></p>`;
   return {subject,body};
 }
 
@@ -488,7 +488,7 @@ async function verifyAdoption(env,{surfaceSlug=null}={}){
   await ensureSchema(env);
   const target=safe(surfaceSlug||'',100);
   const r=await env.DB.prepare(`SELECT n.surface_slug,n.domain,n.status,
-    EXISTS(SELECT 1 FROM distribution_embeds e WHERE lower(replace(e.publisher_host,'www.',''))=n.domain AND COALESCE(e.impressions,0)>0) embed_live,
+    EXISTS(SELECT 1 FROM distribution_embed_events e WHERE lower(replace(COALESCE(e.source_host,''),'www.',''))=n.domain AND e.event_type='impression') embed_live,
     EXISTS(SELECT 1 FROM distribution_embed_clicks c WHERE lower(replace(c.source_host,'www.',''))=n.domain) embed_click,
     EXISTS(SELECT 1 FROM distribution_placements p WHERE p.surface_slug=n.surface_slug AND p.backlink_verified=1) backlink_live
     FROM distribution_network_outreach n
@@ -509,12 +509,33 @@ async function verifyAdoption(env,{surfaceSlug=null}={}){
 
 async function metrics(env){
   await ensureSchema(env);
-  const [status,adoption,routeActions]=await Promise.all([
+  const [status,adoption,routeActions,embed]=await Promise.all([
     env.DB.prepare(`SELECT status,COUNT(*) n FROM distribution_network_outreach GROUP BY status`).all(),
     env.DB.prepare(`SELECT adoption_kind,COUNT(*) n FROM distribution_network_outreach WHERE status='adopted' GROUP BY adoption_kind`).all(),
-    env.DB.prepare(`SELECT status,COUNT(*) n FROM distribution_contact_route_actions GROUP BY status`).all().catch(()=>({results:[]}))
+    env.DB.prepare(`SELECT status,COUNT(*) n FROM distribution_contact_route_actions GROUP BY status`).all().catch(()=>({results:[]})),
+    env.DB.prepare(`SELECT
+      COUNT(DISTINCT COALESCE(NULLIF(publisher_id,''),NULLIF(source_host,''))) publishers_30d,
+      SUM(CASE WHEN event_type='impression' THEN 1 ELSE 0 END) impressions_30d,
+      SUM(CASE WHEN event_type='search' THEN 1 ELSE 0 END) searches_30d,
+      SUM(CASE WHEN event_type='results' THEN 1 ELSE 0 END) result_views_30d,
+      SUM(CASE WHEN event_type='profile_click' THEN 1 ELSE 0 END) profile_clicks_30d,
+      SUM(CASE WHEN event_type='vendor_click' THEN 1 ELSE 0 END) vendor_clicks_30d
+      FROM distribution_embed_events WHERE created_at>=datetime('now','-30 days')`).first().catch(()=>null)
   ]);
-  return {status:'connected',states:Object.fromEntries((status.results||[]).map(x=>[x.status,Number(x.n||0)])),adoption:Object.fromEntries((adoption.results||[]).map(x=>[x.adoption_kind,Number(x.n||0)])),routeActions:Object.fromEntries((routeActions.results||[]).map(x=>[x.status,Number(x.n||0)]))};
+  return {
+    status:'connected',
+    states:Object.fromEntries((status.results||[]).map(x=>[x.status,Number(x.n||0)])),
+    adoption:Object.fromEntries((adoption.results||[]).map(x=>[x.adoption_kind,Number(x.n||0)])),
+    routeActions:Object.fromEntries((routeActions.results||[]).map(x=>[x.status,Number(x.n||0)])),
+    embed:{
+      publishers30d:Number(embed?.publishers_30d||0),
+      impressions30d:Number(embed?.impressions_30d||0),
+      searches30d:Number(embed?.searches_30d||0),
+      resultViews30d:Number(embed?.result_views_30d||0),
+      profileClicks30d:Number(embed?.profile_clicks_30d||0),
+      vendorClicks30d:Number(embed?.vendor_clicks_30d||0)
+    }
+  };
 }
 
 export async function runDistributionNetworkCycle(env,task=null){

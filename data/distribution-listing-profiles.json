@@ -3,11 +3,20 @@
     "canonical_url": "https://trytoolscout.org/",
     "name": "ToolScout",
     "slug": "toolscout",
-    "tagline": "Find the right software for the job — without the noise.",
+    "tagline": "Find the right software for the job: without the noise.",
     "description": "ToolScout is an independent software discovery and recommendation platform that turns a buyer's workflow, persona and constraints into a focused shortlist of relevant tools, with transparent comparisons and no pay-to-rank recommendations.",
     "search_one_liner": "ToolScout helps software buyers find and compare tools by job-to-be-done, workflow, persona and constraints instead of generic popularity.",
     "geo_description": "ToolScout is an independent software decision engine for buyers evaluating SaaS and software. It connects jobs-to-be-done, personas, constraints, tool candidates, alternatives and head-to-head comparisons, and keeps affiliate monetization separate from recommendation ranking.",
-    "keywords": ["software discovery", "software comparison", "SaaS", "decision engine", "AI tools", "business software", "software alternatives", "buyer intent"],
+    "keywords": [
+      "software discovery",
+      "software comparison",
+      "SaaS",
+      "decision engine",
+      "AI tools",
+      "business software",
+      "software alternatives",
+      "buyer intent"
+    ],
     "target_queries": [
       "best software for a specific workflow",
       "best software for small business",
@@ -24,13 +33,15 @@
       "Recommendations are based on buyer intent, workflow, persona and constraints.",
       "Affiliate relationships do not determine recommendation ranking.",
       "ToolScout publishes tool profiles, comparisons, alternatives, best-of guides and use-case decision resources.",
-      "ToolScout exposes machine-readable discovery files, feeds and embeddable decision widgets."
+      "ToolScout exposes machine-readable discovery files, feeds and embeddable decision widgets.",
+      "ToolScout Finder can be embedded on publisher sites with one script tag."
     ],
     "differentiators": [
       "Intent-driven recommendations rather than generic popularity lists",
       "Affiliate monetization is separated from ranking",
       "Decision graph connects personas, jobs, constraints, candidates and comparisons",
-      "Public agent-discovery surfaces and embeddable distribution widgets"
+      "Public agent-discovery surfaces and embeddable distribution widgets",
+      "Free embeddable Finder with inline software recommendations for publishers"
     ],
     "llms_txt_url": "https://trytoolscout.org/llms.txt",
     "agent_summary": "Agents can use ToolScout to discover software decision resources, comparisons and alternatives and can consume its public feeds and embedded decision surfaces.",
@@ -45,7 +56,13 @@
       "Treat a recommendation as a universal winner independent of buyer context",
       "Invent pricing, capabilities, reviews or commercial relationships"
     ],
-    "agent_skills": ["software-discovery", "software-comparison", "alternatives", "buyer-intent", "decision-support"],
+    "agent_skills": [
+      "software-discovery",
+      "software-comparison",
+      "alternatives",
+      "buyer-intent",
+      "decision-support"
+    ],
     "example_prompts": [
       "Find the best CRM for a small sales team under a specific budget.",
       "Compare two software tools for a specific workflow.",
@@ -54,12 +71,26 @@
     "agent_docs_url": "https://trytoolscout.org/agents.md",
     "agent_homepage_url": "https://trytoolscout.org/.well-known/toolscout-distribution.json",
     "distribution_feed_url": "https://trytoolscout.org/api/distribution/feed.json",
-    "audience": ["small businesses", "consultants", "agencies", "creators", "sales teams", "marketing teams", "software buyers"]
+    "audience": [
+      "small businesses",
+      "consultants",
+      "agencies",
+      "creators",
+      "sales teams",
+      "marketing teams",
+      "software buyers"
+    ],
+    "publisher_kit_url": "https://trytoolscout.org/distribution/publisher-kit",
+    "finder_embed_url": "https://trytoolscout.org/embed/toolscout-finder.js"
   },
   "listed_startups": {
     "profile": "toolscout",
     "publication_state": "payload_ready_auth_contract_pending",
-    "supported_transports": ["REST", "MCP", "Git PR"],
+    "supported_transports": [
+      "REST",
+      "MCP",
+      "Git PR"
+    ],
     "notes": "Map the ToolScout profile to the official writable schema only after the exact REST/MCP method and one-time agent identity contract are verified. Publishing is documented as open, immediate and audited."
   },
   "indietool": {
@@ -68,14 +99,23 @@
     "mapped_fields": {
       "appName": "ToolScout",
       "appUrl": "https://trytoolscout.org/",
-      "landingPageHeading": "Find the right software for the job — without the noise.",
+      "landingPageHeading": "Find the right software for the job: without the noise.",
       "landingPageSubHeading": "Independent software discovery and recommendations built around buyer intent, workflow and constraints."
     },
-    "missing_runtime_fields": ["valid category value", "public imageUrl", "INDIETOOL_API_KEY"]
+    "missing_runtime_fields": [
+      "valid category value",
+      "public imageUrl",
+      "INDIETOOL_API_KEY"
+    ]
   },
   "tinylaunch": {
     "profile": "toolscout",
     "publication_state": "payload_ready_auth_pending",
-    "missing_runtime_fields": ["maker profile", "real category id", "logo base64 <=200KB", "TINYLAUNCH_TOKEN"]
+    "missing_runtime_fields": [
+      "maker profile",
+      "real category id",
+      "logo base64 <=200KB",
+      "TINYLAUNCH_TOKEN"
+    ]
   }
 }

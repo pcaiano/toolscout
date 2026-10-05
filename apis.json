@@ -6,34 +6,98 @@
   "url": "https://trytoolscout.org/apis.json",
   "image": "https://trytoolscout.org/embed/badge.svg",
   "created": "2026-09-07",
-  "modified": "2026-09-07",
+  "modified": "2026-10-05",
   "specificationVersion": "0.19",
-  "tags": ["Software Discovery","Software Recommendations","Decision Support","API Discovery","AI Agents","MCP","A2A","AEO","GEO"],
-  "maintainers": [{"name":"ToolScout"}],
+  "tags": [
+    "Software Discovery",
+    "Software Recommendations",
+    "Decision Support",
+    "API Discovery",
+    "AI Agents",
+    "MCP",
+    "A2A",
+    "AEO",
+    "GEO"
+  ],
+  "maintainers": [
+    {
+      "name": "ToolScout"
+    }
+  ],
   "apis": [
     {
       "aid": "toolscout:public-discovery-api",
       "name": "ToolScout Public Discovery API",
-      "description": "Public read-only endpoints exposing ToolScout software recommendations, agent protocols, distribution assets, machine-discovery metadata and embeddable discovery surfaces.",
+      "description": "Public endpoints exposing ToolScout software recommendations, agent protocols, distribution assets, machine-discovery metadata, embeddable discovery surfaces and privacy-bounded embed telemetry.",
       "image": "https://trytoolscout.org/embed/badge.svg",
       "humanURL": "https://trytoolscout.org/",
       "baseURL": "https://trytoolscout.org",
-      "tags": ["Software Discovery","Software Recommendations","Distribution","AI Agents","MCP","A2A","Machine Readable"],
+      "tags": [
+        "Software Discovery",
+        "Software Recommendations",
+        "Distribution",
+        "AI Agents",
+        "MCP",
+        "A2A",
+        "Machine Readable",
+        "Embeddable Finder"
+      ],
       "properties": [
-        {"type":"OpenAPI","url":"https://trytoolscout.org/openapi.json"},
-        {"type":"Documentation","url":"https://trytoolscout.org/agents.md"},
-        {"type":"RecommendationAPI","url":"https://trytoolscout.org/api/recommend?q=crm"},
-        {"type":"MCP","url":"https://trytoolscout.org/mcp"},
-        {"type":"A2AAgentCard","url":"https://trytoolscout.org/.well-known/agent-card.json"},
-        {"type":"A2A","url":"https://trytoolscout.org/a2a"},
-        {"type":"JSONFeed","url":"https://trytoolscout.org/api/distribution/feed.json"},
-        {"type":"RSS","url":"https://trytoolscout.org/distribution/feed.xml"},
-        {"type":"LLMSTxt","url":"https://trytoolscout.org/llms.txt"}
+        {
+          "type": "OpenAPI",
+          "url": "https://trytoolscout.org/openapi.json"
+        },
+        {
+          "type": "Documentation",
+          "url": "https://trytoolscout.org/agents.md"
+        },
+        {
+          "type": "RecommendationAPI",
+          "url": "https://trytoolscout.org/api/recommend?q=crm"
+        },
+        {
+          "type": "MCP",
+          "url": "https://trytoolscout.org/mcp"
+        },
+        {
+          "type": "A2AAgentCard",
+          "url": "https://trytoolscout.org/.well-known/agent-card.json"
+        },
+        {
+          "type": "A2A",
+          "url": "https://trytoolscout.org/a2a"
+        },
+        {
+          "type": "JSONFeed",
+          "url": "https://trytoolscout.org/api/distribution/feed.json"
+        },
+        {
+          "type": "RSS",
+          "url": "https://trytoolscout.org/distribution/feed.xml"
+        },
+        {
+          "type": "LLMSTxt",
+          "url": "https://trytoolscout.org/llms.txt"
+        },
+        {
+          "type": "PublisherKit",
+          "url": "https://trytoolscout.org/distribution/publisher-kit"
+        },
+        {
+          "type": "FinderEmbed",
+          "url": "https://trytoolscout.org/embed/toolscout-finder.js"
+        }
       ]
     }
   ],
   "common": [
-    {"type":"TermsOfService","url":"https://trytoolscout.org/methodology.html"},
-    {"type":"PrivacyPolicy","url":"https://trytoolscout.org/privacy.html"}
+    {
+      "type": "TermsOfService",
+      "url": "https://trytoolscout.org/methodology"
+    },
+    {
+      "type": "PrivacyPolicy",
+      "url": "https://trytoolscout.org/privacy"
+    }
   ]
 }

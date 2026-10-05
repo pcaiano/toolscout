@@ -2,11 +2,13 @@
   "openapi": "3.1.0",
   "info": {
     "title": "ToolScout Public Discovery API",
-    "version": "1.1.0",
-    "description": "Public read-only discovery, recommendation and distribution endpoints for ToolScout. No authentication is required for the endpoints documented here."
+    "version": "1.2.0",
+    "description": "Public discovery, recommendation and distribution endpoints for ToolScout. No authentication is required for the endpoints documented here."
   },
   "servers": [
-    {"url": "https://trytoolscout.org"}
+    {
+      "url": "https://trytoolscout.org"
+    }
   ],
   "paths": {
     "/api/recommend": {
@@ -14,12 +16,79 @@
         "summary": "Get ranked software recommendations for a described job or need",
         "operationId": "recommendTools",
         "parameters": [
-          {"name":"q","in":"query","required":true,"schema":{"type":"string","minLength":2,"maxLength":300},"description":"Natural-language description of the software need."},
-          {"name":"goal","in":"query","required":false,"schema":{"type":"string"}},
-          {"name":"budget","in":"query","required":false,"schema":{"type":"string","enum":["free","low","mid","high"]}},
-          {"name":"team","in":"query","required":false,"schema":{"type":"string","enum":["solo","small","team","large","agency"]}},
-          {"name":"priority","in":"query","required":false,"schema":{"type":"string","enum":["ease","automation","integrations","features"]}},
-          {"name":"limit","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":5,"default":3}}
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 300
+            },
+            "description": "Natural-language description of the software need."
+          },
+          {
+            "name": "goal",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "budget",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "free",
+                "low",
+                "mid",
+                "high"
+              ]
+            }
+          },
+          {
+            "name": "team",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "solo",
+                "small",
+                "team",
+                "large",
+                "agency"
+              ]
+            }
+          },
+          {
+            "name": "priority",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ease",
+                "automation",
+                "integrations",
+                "features"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5,
+              "default": 3
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -27,23 +96,145 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type":"object",
-                  "required":["query","count","recommendations","ranking","affiliate_disclosure"],
+                  "type": "object",
+                  "required": [
+                    "query",
+                    "count",
+                    "recommendations",
+                    "ranking",
+                    "affiliate_disclosure",
+                    "recommendation_type"
+                  ],
                   "properties": {
-                    "query":{"type":"string"},
-                    "profile":{"type":"object"},
-                    "intent":{"type":["object","null"]},
-                    "count":{"type":"integer"},
-                    "ranking":{"type":"string"},
-                    "affiliate_disclosure":{"type":"string"},
-                    "recommendations":{"type":"array","items":{"type":"object","required":["slug","name","category","match","tool_url"],"properties":{"slug":{"type":"string"},"name":{"type":"string"},"category":{"type":"string"},"description":{"type":"string"},"pricing":{"type":"string"},"free_plan":{"type":"boolean"},"match":{"type":"integer","minimum":0,"maximum":95},"reasons":{"type":"array","items":{"type":"string"}},"best_for":{"type":"array","items":{"type":"string"}},"features":{"type":"array","items":{"type":"string"}},"tool_url":{"type":"string","format":"uri"}}}}
+                    "query": {
+                      "type": "string"
+                    },
+                    "profile": {
+                      "type": "object"
+                    },
+                    "intent": {
+                      "type": [
+                        "object",
+                        "null"
+                      ]
+                    },
+                    "count": {
+                      "type": "integer"
+                    },
+                    "ranking": {
+                      "type": "string"
+                    },
+                    "affiliate_disclosure": {
+                      "type": "string"
+                    },
+                    "recommendations": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "slug",
+                          "name",
+                          "category",
+                          "match",
+                          "match_type",
+                          "match_label",
+                          "profile_url",
+                          "tool_url"
+                        ],
+                        "properties": {
+                          "slug": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "category": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "pricing": {
+                            "type": "string"
+                          },
+                          "free_plan": {
+                            "type": "boolean"
+                          },
+                          "match": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ],
+                            "minimum": 0,
+                            "maximum": 95,
+                            "description": "Personalized match score. Null for broad category searches where ToolScout avoids false precision."
+                          },
+                          "reasons": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "best_for": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "features": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "tool_url": {
+                            "type": "string",
+                            "format": "uri"
+                          },
+                          "match_type": {
+                            "type": "string",
+                            "enum": [
+                              "personalized",
+                              "category_fit"
+                            ]
+                          },
+                          "match_label": {
+                            "type": "string"
+                          },
+                          "profile_url": {
+                            "type": "string",
+                            "format": "uri"
+                          }
+                        }
+                      }
+                    },
+                    "observed_intent": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "recommendation_type": {
+                      "type": "string",
+                      "enum": [
+                        "category",
+                        "personalized"
+                      ]
+                    }
                   }
                 }
               }
             }
           },
-          "400":{"description":"Missing or invalid query"},
-          "503":{"description":"Recommendation catalog temporarily unavailable"}
+          "400": {
+            "description": "Missing or invalid query"
+          },
+          "422": {
+            "description": "The request does not contain enough reliable software intent to rank tools."
+          },
+          "503": {
+            "description": "Recommendation catalog temporarily unavailable"
+          }
         }
       }
     },
@@ -58,20 +249,48 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": ["name","home","updated_at","items"],
+                  "required": [
+                    "name",
+                    "home",
+                    "updated_at",
+                    "items"
+                  ],
                   "properties": {
-                    "name": {"type": "string"},
-                    "home": {"type": "string","format": "uri"},
-                    "updated_at": {"type": "string","format": "date-time"},
+                    "name": {
+                      "type": "string"
+                    },
+                    "home": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
                     "items": {
                       "type": "array",
                       "items": {
                         "type": "object",
-                        "required": ["url"],
+                        "required": [
+                          "url"
+                        ],
                         "properties": {
-                          "url": {"type": "string","format": "uri"},
-                          "type": {"type": ["string","null"]},
-                          "last_seen_at": {"type": ["string","null"]}
+                          "url": {
+                            "type": "string",
+                            "format": "uri"
+                          },
+                          "type": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "last_seen_at": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          }
                         }
                       }
                     }
@@ -87,28 +306,266 @@
       "get": {
         "summary": "Get ToolScout machine-discovery and embed manifest",
         "operationId": "getDistributionManifest",
-        "responses": {"200":{"description":"ToolScout distribution manifest","content":{"application/json":{"schema":{"type":"object"}}}}}
+        "responses": {
+          "200": {
+            "description": "ToolScout distribution manifest",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/distribution/feed.xml": {
       "get": {
         "summary": "Get ToolScout distribution RSS feed",
         "operationId": "getDistributionRss",
-        "responses": {"200":{"description":"RSS 2.0 distribution feed","content":{"application/rss+xml":{"schema":{"type":"string"}}}}}
+        "responses": {
+          "200": {
+            "description": "RSS 2.0 distribution feed",
+            "content": {
+              "application/rss+xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/embed/toolscout.js": {
       "get": {
         "summary": "Get the generic ToolScout embed script",
         "operationId": "getToolScoutEmbed",
-        "responses": {"200":{"description":"JavaScript embed","content":{"application/javascript":{"schema":{"type":"string"}}}}}
+        "responses": {
+          "200": {
+            "description": "JavaScript embed",
+            "content": {
+              "application/javascript": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/embed/badge.svg": {
       "get": {
         "summary": "Get the ToolScout embed badge",
         "operationId": "getToolScoutBadge",
-        "responses": {"200":{"description":"ToolScout SVG badge","content":{"image/svg+xml":{"schema":{"type":"string"}}}}}
+        "responses": {
+          "200": {
+            "description": "ToolScout SVG badge",
+            "content": {
+              "image/svg+xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/distribution/embed-event": {
+      "post": {
+        "summary": "Record privacy-bounded ToolScout embed telemetry",
+        "operationId": "recordToolScoutEmbedEvent",
+        "description": "Records publisher adoption and widget interaction evidence. Raw Finder search text is not accepted or stored by this telemetry contract.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "text/plain": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "embed_type",
+                  "event"
+                ],
+                "properties": {
+                  "embed_type": {
+                    "type": "string",
+                    "enum": [
+                      "finder",
+                      "compare",
+                      "pick"
+                    ]
+                  },
+                  "event": {
+                    "type": "string",
+                    "enum": [
+                      "impression",
+                      "interaction",
+                      "click",
+                      "search",
+                      "results",
+                      "unresolved",
+                      "profile_click",
+                      "vendor_click",
+                      "error"
+                    ]
+                  },
+                  "publisher_id": {
+                    "type": "string",
+                    "maxLength": 120
+                  },
+                  "publisher_host": {
+                    "type": "string",
+                    "maxLength": 120
+                  },
+                  "asset_id": {
+                    "type": "string",
+                    "maxLength": 120
+                  },
+                  "intent_slug": {
+                    "type": "string",
+                    "maxLength": 100
+                  },
+                  "result_slug": {
+                    "type": "string",
+                    "maxLength": 100
+                  },
+                  "result_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 20
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "full",
+                      "mini"
+                    ]
+                  }
+                }
+              }
+            },
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "embed_type",
+                  "event"
+                ],
+                "properties": {
+                  "embed_type": {
+                    "type": "string",
+                    "enum": [
+                      "finder",
+                      "compare",
+                      "pick"
+                    ]
+                  },
+                  "event": {
+                    "type": "string"
+                  },
+                  "publisher_id": {
+                    "type": "string"
+                  },
+                  "publisher_host": {
+                    "type": "string"
+                  },
+                  "asset_id": {
+                    "type": "string"
+                  },
+                  "intent_slug": {
+                    "type": "string"
+                  },
+                  "result_slug": {
+                    "type": "string"
+                  },
+                  "result_count": {
+                    "type": "integer"
+                  },
+                  "mode": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Telemetry accepted"
+          },
+          "400": {
+            "description": "Invalid telemetry event"
+          },
+          "503": {
+            "description": "Telemetry store temporarily unavailable"
+          }
+        }
+      },
+      "options": {
+        "summary": "CORS preflight for ToolScout embed telemetry",
+        "operationId": "preflightToolScoutEmbedEvent",
+        "responses": {
+          "204": {
+            "description": "CORS preflight accepted"
+          }
+        }
+      }
+    },
+    "/embed/toolscout-finder.js": {
+      "get": {
+        "summary": "Get the ToolScout Software Finder embed script",
+        "operationId": "getToolScoutFinderEmbed",
+        "responses": {
+          "200": {
+            "description": "JavaScript embed",
+            "content": {
+              "application/javascript": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/embed/toolscout-compare.js": {
+      "get": {
+        "summary": "Get the ToolScout comparison embed script",
+        "operationId": "getToolScoutCompareEmbed",
+        "responses": {
+          "200": {
+            "description": "JavaScript embed",
+            "content": {
+              "application/javascript": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/embed/toolscout-pick.js": {
+      "get": {
+        "summary": "Get the ToolScout Pick embed script",
+        "operationId": "getToolScoutPickEmbed",
+        "responses": {
+          "200": {
+            "description": "JavaScript embed",
+            "content": {
+              "application/javascript": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
       }
     }
   }

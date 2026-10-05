@@ -479,3 +479,12 @@ Catalog curation and expansion now prioritize research of tools with verified or
 ## Newsletter audience capture - 2026-10-05
 
 What's New and individual software-news articles capture explicit ToolScout update subscriptions into D1 for durability, then immediately sync them to HubSpot. The runtime upserts the contact by email and opts the contact into HubSpot's Marketing Information subscription using explicit-consent legal basis. Failed syncs retry on the scheduler. Admin metrics expose total subscribers, 24h and MTD signups, HubSpot synced, pending and failed counts.
+
+## Finder embed distribution product - 2026-10-05
+
+ToolScout Finder is now treated as a first-class publisher acquisition asset rather than a link-only embed. The product contract provides Full and Mini modes, inline recommendations, explicit publisher attribution, tracked profile and vendor actions, and a publisher kit with live demo and copy-paste installation. Embed telemetry intentionally excludes raw Finder query text.
+
+Distribution Network outreach now leads with the free Finder widget. A verified external Finder impression is valid publisher-adoption evidence, and the network metrics surface 30-day publisher, impression, search, result-view, profile-click and vendor-click counts.
+
+The public recommendation API inherits the Finder's intent-recognition and broad-category safeguards. Unrecognised requests resolve explicitly rather than receiving a default ranking, and broad category searches use qualitative category-fit labels instead of personalised percentage claims.
+

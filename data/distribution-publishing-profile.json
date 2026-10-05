@@ -22,7 +22,19 @@
     "feed_rss_tracking": "utm_source=toolscout_rss&utm_medium=distribution&utm_campaign=syndication",
     "llms": "https://trytoolscout.org/llms.txt",
     "agents": "https://trytoolscout.org/agents.md",
-    "manifest": "https://trytoolscout.org/.well-known/toolscout-distribution.json"
+    "manifest": "https://trytoolscout.org/.well-known/toolscout-distribution.json",
+    "publisher_kit": "https://trytoolscout.org/distribution/publisher-kit",
+    "finder_widget": {
+      "script": "https://trytoolscout.org/embed/toolscout-finder.js",
+      "modes": [
+        "full",
+        "mini"
+      ],
+      "install": "One script tag with a stable data-publisher identifier.",
+      "positioning": "Free embeddable software discovery that returns ToolScout recommendations inside the publisher site.",
+      "ranking_policy": "Affiliate relationships do not influence ranking.",
+      "telemetry_policy": "Publisher adoption and interactions are measured without storing raw Finder queries."
+    }
   },
   "founder": {
     "name": "Pedro Caiano",

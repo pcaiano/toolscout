@@ -7,9 +7,11 @@ import {handleDistributionEmbedRoute} from '../distribution-embed-worker.js';
 const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
 test('distribution public embed surfaces have direct ToolScout 2.0 ownership',()=>{
-  for(const path of ['/distribution/publisher-kit','/api/recommend','/embed/toolscout.js','/embed/badge.svg','/distribution/feed.xml']){
+  for(const path of ['/distribution/publisher-kit','/api/recommend','/embed/toolscout.js','/embed/toolscout-finder.js','/embed/toolscout-compare.js','/embed/toolscout-pick.js','/embed/badge.svg','/distribution/feed.xml']){
     assert.equal(routeOwner(path,{method:'GET'}).owner,'distribution_public_embed');
   }
+  assert.equal(routeOwner('/api/distribution/embed-event',{method:'POST'}).owner,'distribution_learning_runtime');
+  assert.equal(routeOwner('/api/distribution/embed-event',{method:'OPTIONS'}).owner,'distribution_learning_runtime');
   assert.equal(routeOwner('/api/distribution/feed.json',{method:'GET'}).owner,'traffic_integrity_live');
   assert.equal(routeOwner('/go/embed',{method:'GET'}).owner,'affiliate_redirect');
 });
