@@ -10,6 +10,7 @@ test('Software Trends is a structured citation ready dataset',()=>{
   assert.match(src,/buyerImpact/);
   assert.match(src,/decisionPagesFor/);
   assert.match(src,/trendBreakdown/);
+  assert.match(src,/windowStart/);
   assert.match(src,/vendorActivity/);
   assert.match(src,/evidenceHighlights/);
   assert.match(src,/'@type':'Dataset'/);
@@ -21,6 +22,7 @@ test('Software Trends is analysis rather than a duplicate chronological feed',()
   assert.match(src,/Signals,/);
   assert.match(src,/This is analysis, not another news feed/);
   assert.match(src,/Where the change is clustering/);
+  assert.match(src,/rolling 30 day/i);
   assert.match(src,/Observed activity/);
   assert.match(src,/Enough proof\. No duplicate feed/);
   assert.match(src,/VIEW ALL WHAT\\'S NEW/);
