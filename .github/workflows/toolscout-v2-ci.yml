@@ -3,6 +3,7 @@ name: ToolScout 2.0 Migration CI
 on:
   pull_request:
     paths:
+      - '.github/workflows/**'
       - 'acquisition-value-model.js'
       - 'compute-router-worker.js'
       - 'toolscout-v2-closure-runtime.js'
