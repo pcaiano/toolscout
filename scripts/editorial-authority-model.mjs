@@ -51,6 +51,7 @@ export function scoreEditorialPage(html,{pageType='other',hasFreshUpdate=false}=
   const hasH1=/<h1(?:\s[^>]*)?>[\s\S]*?<\/h1>/i.test(html);
   const internalLinks=countMatches(html,/href=["']\/(?!\/)/gi);
   const hasEditorialPolicy=/(editorial bar|editorial policy|affiliate status never|affiliate relationships do not determine|does not sell ranking positions|independent analysis)/i.test(html);
+  const hasEditorialEvidence=/(Editorial evidence:|Primary sources:)/i.test(html);
   const dated=countMatches(html,/\b20\d{2}-\d{2}-\d{2}\b/g)>0||countMatches(html,/\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{1,2},\s+20\d{2}\b/gi)>0;
   const hasStructuredData=/<script[^>]+application\/ld\+json/i.test(html);
   const verificationMatch=String(html||'').match(/(?:last checked|checked|verified on|last verified)\s+(20\d{2}-\d{2}-\d{2})/i);
@@ -110,6 +111,7 @@ export function scoreEditorialPage(html,{pageType='other',hasFreshUpdate=false}=
   }else{
     score=10;
     if(sourceLinks>0)score+=Math.min(15,5+sourceLinks*5);
+    else if(hasEditorialEvidence)score+=10;
     if(hasAnalysis)score+=15;
     if(hasTradeoffs)score+=10;
     if(hasVerification)score+=10;
@@ -141,6 +143,7 @@ export function scoreEditorialPage(html,{pageType='other',hasFreshUpdate=false}=
     hasH1,
     internalLinks,
     hasEditorialPolicy,
+    hasEditorialEvidence,
     dated,
     verificationDate,
     hasRecentVerification,
