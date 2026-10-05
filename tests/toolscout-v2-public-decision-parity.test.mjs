@@ -93,7 +93,8 @@ for(const row of cases){
 test('verified renderer does not replace static guide with runtime ranking',async()=>{
   const response=await renderPublicDecisionCandidate(new Request('https://trytoolscout.org/best-seo-tools-for-agencies'),env());
   const html=await response.text();
-  assert.match(html,/Official source/i);
+  assert.match(html,/Editorial evidence:/i);
+  assert.doesNotMatch(html,/Official source/i);
   assert.doesNotMatch(html,/New catalog tools compete under the same eligibility/i);
 });
 

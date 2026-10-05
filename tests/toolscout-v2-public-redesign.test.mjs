@@ -67,6 +67,7 @@ test('public redesign removes direct vendor source links from commercial decisio
   const html=await out.text();
   assert.doesNotMatch(html,/https:\/\/vendor\.example/);
   assert.doesNotMatch(html,/Official product source|Primary sources:/);
+  assert.match(html,/Editorial evidence:/);
   assert.match(html,/href="\/go\/example"/);
 });
 
@@ -90,7 +91,7 @@ test('public hubs receive ToolScout 2.0 surface styling and active navigation',a
   const runtime=read('public-redesign-runtime.js');
   assert.match(runtime,/ToolScout 2\.0 hub surfaces/);
   assert.match(runtime,/data-toolscout-surface="whats-new"/);
-  assert.match(runtime,/\.ts2-global-nav\{background:var\(--ts-g\)/);
+  assert.match(runtime,/\.ts2-global-nav\{position:sticky;top:0;z-index:1000;background:rgba\(11,13,12,\.96\)/);
 });
 
 
@@ -132,7 +133,8 @@ test('commercial source cleanup leaves readable verification wording',async()=>{
   const response=new Response(source,{status:200,headers:{'content-type':'text/html; charset=UTF-8'}});
   const out=await transformPublicRedesignResponse(new Request('https://trytoolscout.org/tools/example'),response);
   const html=await out.text();
-  assert.doesNotMatch(html,/Official product source|Source data last checked|>\s*\./);
+  assert.doesNotMatch(html,/https:\/\/vendor\.example|Source data last checked/);
+  assert.match(html,/Editorial evidence:/);
   assert.match(html,/Information last checked 2026-09-01/);
 });
 
@@ -156,7 +158,12 @@ test('shared public navigation is isolated from legacy nav CSS and matches homep
   assert.match(runtime,/justify-content:flex-start!important/);
   assert.match(runtime,/flex:0 0 auto!important/);
   assert.match(runtime,/height:84px;max-width:1440px/);
+  assert.match(runtime,/\.ts2-global-nav\{position:sticky;top:0;z-index:1000/);
+  assert.match(runtime,/\.ts2-global-nav\.is-compact \.ts2-global-nav-inner\{height:64px\}/);
+  assert.match(runtime,/data-toolscout-sticky-nav="2"/);
+  assert.match(runtime,/classList\.toggle\('is-compact',delta>0\)/);
   assert.match(runtime,/min-height:72px;padding:14px 20px 11px/);
+  assert.match(runtime,/min-height:62px;padding:8px 20px 7px/);
   assert.match(runtime,/font-size:12px;color:#BAC0BA/);
 });
 
@@ -166,5 +173,11 @@ test('homepage header leaves the finder as the primary action',()=>{
   assert.doesNotMatch(html,/class="navCta"/);
   assert.doesNotMatch(html,/href="#finder">Find my tools/);
   assert.match(html,/id="need"/);
+  assert.match(html,/class="homeGlobalNav darkBand"/);
+  assert.match(html,/\.homeGlobalNav\{position:sticky;top:0;z-index:1000/);
+  assert.match(html,/\.homeGlobalNav\.is-compact nav\{height:64px\}/);
+  assert.match(html,/data-toolscout-sticky-nav="home"/);
+  assert.match(html,/classList\.toggle\('is-compact',delta>0\)/);
   assert.match(html,/min-height:64px;padding:12px 0 9px/);
+  assert.match(html,/min-height:58px;padding:7px 0 6px/);
 });

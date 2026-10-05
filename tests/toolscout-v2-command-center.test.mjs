@@ -19,8 +19,8 @@ test('Command Center puts editorial authority beside business outcomes',()=>{
   assert.match(ui,/Business outcomes first: demand, traffic, authority, editorial depth and monetized outbound/);
   assert.match(ui,/id="editorialBody"/);
   assert.match(ui,/function editorialAuthority\(\)/);
-  assert.match(ui,/Highest-priority authority gaps/);
-  assert.match(ui,/It is not a Google ranking score/);
+  assert.match(ui,/Highest-priority authority work/);
+  assert.match(ui,/not a Google ranking score/);
   assert.match(ui,/metric\('Referring domains'/);
   assert.match(ui,/metric\('Editorial portfolio'/);
   assert.match(ui,/gscProgress\(\);editorialAuthority\(\);brain\(\)/);
