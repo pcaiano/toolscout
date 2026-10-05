@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {executableIntentSearchActions} from '../search-action-policy.js';
+import {isQualifyingAuthorityBacklog} from '../growth-runtime-closed-loop-worker.js';
 
 const orchestrator=fs.readFileSync(new URL('../distribution-orchestrator-worker.js',import.meta.url),'utf8');
 const schedules=fs.readFileSync(new URL('../runtime-schedule-contract.js',import.meta.url),'utf8');
@@ -45,4 +46,23 @@ test('scheduled planning immediately materializes execution contracts without mo
 
 test('affiliate schedule contract matches active versus maintenance cadence',()=>{
   assert.match(schedules,/affiliate_coverage:\{owner:'growth_scheduler',cron:TOOLSCOUT_CRONS\.hourly,subcadence:'2h_active_12h_maintenance_or_recovery'/);
+});
+
+
+test('authority recovery treats non-executable outreach inventory as qualification backlog',()=>{
+  assert.equal(isQualifyingAuthorityBacklog(
+    {queue:3,runnableQueue:0,deferredQueue:0,qualificationQueue:0},
+    {externalAttemptObserved:false,handoffReady:false}
+  ),true);
+  assert.equal(isQualifyingAuthorityBacklog(
+    {queue:3,runnableQueue:1,deferredQueue:2,qualificationQueue:2},
+    {externalAttemptObserved:false,handoffReady:false}
+  ),false);
+});
+
+test('authority runnable truth uses the same readiness contract as make sender admission',()=>{
+  const closedLoop=fs.readFileSync(new URL('../growth-runtime-closed-loop-worker.js',import.meta.url),'utf8');
+  assert.match(closedLoop,/MAKE_SENDER_READY_CONDITION/);
+  assert.match(closedLoop,/executor='make_sender'.*status IN \('pending','claimed'\).*MAKE_SENDER_READY_CONDITION/s);
+  assert.doesNotMatch(closedLoop,/runnable_external_queue[\s\S]{0,240}status IN \('pending','claimed','attempted'\)/);
 });

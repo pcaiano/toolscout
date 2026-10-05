@@ -69,7 +69,7 @@ test('qualification-only inventory is not treated as externally runnable authori
 });
 
 test('authority snapshot separates external execution from qualification work',()=>{
-  assert.ok(closedLoopSource.includes("action IN ('backlink_reference_outreach','publisher_outreach') AND status IN ('pending','claimed','attempted')) runnable_external_queue"));
+  assert.ok(closedLoopSource.includes("executor='make_sender' AND action IN ('backlink_reference_outreach','publisher_outreach') AND status IN ('pending','claimed') AND ${MAKE_SENDER_READY_CONDITION}) runnable_external_queue"));
   assert.ok(closedLoopSource.includes("action IN ('verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','autonomous_route_qualification') AND status IN ('pending','claimed','attempted','deferred','stalled')) qualification_queue"));
 });
 

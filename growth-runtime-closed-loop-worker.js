@@ -6,6 +6,7 @@ import {handleDistributionThroughputRoute} from './distribution-throughput-worke
 import {handleDistributionSubmissionRoute} from './distribution-submission-worker.js';
 import {handleDistributionNetworkRoute} from './distribution-network-worker.js';
 import {handleDistributionSenderRoute} from './distribution-sender-worker.js';
+import {MAKE_SENDER_READY_CONDITION} from './growth-execution-contract.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store, max-age=0'};
 const AUTHORITY_ATTEMPT_MIN_24H=4;
@@ -32,13 +33,13 @@ async function authoritySnapshot(env){
       (SELECT COUNT(*) FROM distribution_submissions WHERE surface_slug<>'indexnow' AND attempts>0 AND COALESCE(last_attempt_at,created_at)>=datetime('now','-24 hours'))+
       (SELECT COUNT(*) FROM distribution_events WHERE event_type IN ('vendor_outreach_sent','publisher_network_outreach_sent') AND created_at>=datetime('now','-24 hours')) attempts24,
       (SELECT COUNT(*) FROM growth_execution_contract WHERE action IN ('backlink_reference_outreach','verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','publisher_outreach','autonomous_route_qualification') AND status IN ('pending','claimed','attempted','deferred','stalled')) queue,
-      (SELECT COUNT(*) FROM growth_execution_contract WHERE action IN ('backlink_reference_outreach','publisher_outreach') AND status IN ('pending','claimed','attempted')) runnable_external_queue,
+      (SELECT COUNT(*) FROM growth_execution_contract WHERE executor='make_sender' AND action IN ('backlink_reference_outreach','publisher_outreach') AND status IN ('pending','claimed') AND ${MAKE_SENDER_READY_CONDITION}) runnable_external_queue,
       (SELECT COUNT(*) FROM growth_execution_contract WHERE action IN ('verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','autonomous_route_qualification') AND status IN ('pending','claimed','attempted','deferred','stalled')) qualification_queue,
       (SELECT COUNT(*) FROM growth_execution_contract WHERE action IN ('backlink_reference_outreach','verify_backlink_acquisition','publisher_contact_discovery','execute_alternate_routes','publisher_outreach','autonomous_route_qualification') AND status='deferred') deferred_queue,
       (SELECT COUNT(*) FROM growth_action_events WHERE status='prepared' AND engine IN ('distribution_route','distribution_network','vendor_amplification')) prepared,
-      (SELECT COUNT(*) FROM growth_execution_contract WHERE executor='make_sender' AND status='claimed') sender_claimed,
-      (SELECT MAX(claimed_at) FROM growth_execution_contract WHERE executor='make_sender' AND status='claimed') sender_newest_claimed_at,
-      (SELECT MIN(claimed_at) FROM growth_execution_contract WHERE executor='make_sender' AND status='claimed') sender_oldest_claimed_at`),
+      (SELECT COUNT(*) FROM growth_execution_contract WHERE executor='make_sender' AND status='claimed' AND ${MAKE_SENDER_READY_CONDITION}) sender_claimed,
+      (SELECT MAX(claimed_at) FROM growth_execution_contract WHERE executor='make_sender' AND status='claimed' AND ${MAKE_SENDER_READY_CONDITION}) sender_newest_claimed_at,
+      (SELECT MIN(claimed_at) FROM growth_execution_contract WHERE executor='make_sender' AND status='claimed' AND ${MAKE_SENDER_READY_CONDITION}) sender_oldest_claimed_at`),
     all(env,`SELECT event_type,status,detail,created_at FROM distribution_events
       WHERE event_type IN ('vendor_outreach_sent','publisher_network_outreach_sent','vendor_outreach_failed','publisher_network_outreach_failed','authority_closed_loop_external_attempt','authority_closed_loop_handoff_ready','authority_external_handoff_pending','authority_external_handoff_timeout','authority_queue_without_external_handoff','authority_backlog_awaiting_qualification')
       ORDER BY created_at DESC LIMIT 8`),
@@ -154,7 +155,7 @@ async function discoverySnapshot(request,env){
   };
 }
 export function isQualifyingAuthorityBacklog(state,{externalAttemptObserved=false,handoffReady=false}={}){
-  return !externalAttemptObserved&&!handoffReady&&Number(state?.runnableQueue||0)<=0&&(Number(state?.deferredQueue||0)>0||Number(state?.qualificationQueue||0)>0);
+  return !externalAttemptObserved&&!handoffReady&&Number(state?.runnableQueue||0)<=0&&(Number(state?.queue||0)>0||Number(state?.deferredQueue||0)>0||Number(state?.qualificationQueue||0)>0);
 }
 
 async function closeAuthorityExecutionLoop(request,env,ctx){
