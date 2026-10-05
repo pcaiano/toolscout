@@ -33,7 +33,28 @@
       "install": "One script tag with a stable data-publisher identifier.",
       "positioning": "Free embeddable software discovery that returns ToolScout recommendations inside the publisher site.",
       "ranking_policy": "Affiliate relationships do not influence ranking.",
-      "telemetry_policy": "Publisher adoption and interactions are measured without storing raw Finder queries."
+      "telemetry_policy": "Publisher adoption and interactions are measured without storing raw Finder queries.",
+      "themes": [
+        {
+          "id": "graphite",
+          "label": "Graphite",
+          "best_for": "Dark interfaces and high-contrast editorial layouts"
+        },
+        {
+          "id": "paper",
+          "label": "Paper",
+          "best_for": "Light websites, blogs and publishing layouts"
+        },
+        {
+          "id": "neutral",
+          "label": "Neutral",
+          "best_for": "Restrained corporate, media and documentation sites"
+        }
+      ],
+      "legacy_theme_aliases": {
+        "dark": "graphite",
+        "light": "paper"
+      }
     }
   },
   "founder": {
