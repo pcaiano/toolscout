@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {transformPublicOutboundPolicyResponse,transformPublicRedesignResponse} from '../public-redesign-runtime.js';
+import {injectToolScoutSocialFooter} from '../social-profiles.js';
 
 const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
@@ -112,11 +113,23 @@ test('core public hubs do not append SEO link farms beneath the product UI',()=>
   assert.match(seo,/Do not append search-demand link farms to the visible page/);
 });
 
-test('public social footer stays compact in ToolScout 2.0',()=>{
+test('public social footer is an integrated responsive social rail',async()=>{
   const social=read('social-profiles.js');
   assert.match(social,/ToolScout elsewhere/);
-  assert.match(social,/margin:24px auto 0/);
-  assert.doesNotMatch(social,/Follow ToolScout/);
+  assert.match(social,/Product updates and editorial notes\./);
+  assert.match(social,/class="ts-social-links" role="navigation"/);
+  assert.doesNotMatch(social,/<nav[^>]*aria-label="ToolScout social profiles"/);
+  assert.match(social,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)!important/);
+  assert.match(social,/font-size:12px!important/);
+  assert.doesNotMatch(social,/margin:24px auto 0/);
+
+  const source='<!doctype html><html><head></head><body><main>Page</main><section class="trust"><p>Trust copy</p><div class="badgeRow">Badges</div></section></body></html>';
+  const response=new Response(source,{status:200,headers:{'content-type':'text/html; charset=UTF-8'}});
+  const out=await injectToolScoutSocialFooter(response);
+  const html=await out.text();
+  assert.equal((html.match(/data-toolscout-social-footer="1"/g)||[]).length,1);
+  assert.match(html,/class="badgeRow">Badges<\/div><div data-toolscout-social-footer="1"/);
+  assert.doesNotMatch(html,/<footer class="ts-social-footer-shell"/);
 });
 
 
