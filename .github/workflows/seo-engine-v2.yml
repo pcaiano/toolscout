@@ -34,6 +34,7 @@ jobs:
           GSC_LOOKBACK_DAYS: '28'
         run: node scripts/sync-gsc-signals.mjs
       - name: Discover and publish material software news
+        # Official first-party sources only; the engine applies a buyer-relevance gate before publication.
         run: |
           node --check scripts/discover-software-news.mjs
           node scripts/discover-software-news.mjs
