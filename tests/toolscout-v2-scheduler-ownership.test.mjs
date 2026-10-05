@@ -125,6 +125,9 @@ test('compute router dispatches growth scheduling while growth scheduler owns th
   assert.match(scheduler,/verifyNewsSources/);
   assert.match(scheduler,/runGrowthSupervisorAudit/);
   assert.match(scheduler,/mission:'self_audit'/);
+  assert.match(scheduler,/mission:'network_cycle'[^\n]+singleFlightMinutes:20/,'scheduled network cycle must have a bounded single-flight lease');
+  const network=read('distribution-network-worker.js');
+  assert.match(network,/mission:'network_cycle',triggerName:'manual_api',singleFlightMinutes:20/,'manual network cycle must share the same bounded lease');
   assert.equal(missionOwner('growth_supervisor_audit'),'growth_scheduler');
   const orchestrator=read('distribution-orchestrator-worker.js');
   const orchestratorScheduled=orchestrator.slice(orchestrator.lastIndexOf('},async scheduled(event,env,ctx){'));
