@@ -3,7 +3,7 @@ import path from 'node:path';
 
 const ROOT=process.cwd();
 const BASE='https://trytoolscout.org';
-const PAGE_URL=BASE+'/software-trends-index';
+const PAGE_URL=BASE+'/software-trends-index.html';
 const DATA_URL=BASE+'/software-trends-index.json';
 const VERSION=5;
 const read=(file,fallback)=>{try{return JSON.parse(fs.readFileSync(path.join(ROOT,file),'utf8'));}catch{return fallback;}};
