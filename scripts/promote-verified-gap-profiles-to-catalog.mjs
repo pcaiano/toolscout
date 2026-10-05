@@ -17,6 +17,16 @@ const minSignals = Number(policy.minimumIndependentMarketSignals || 2);
 const minCapabilities = Number(policy.minimumVerifiedCapabilities || 3);
 const minDescription = Number(policy.minimumDescriptionLength || 60);
 const timeoutMs = 12000;
+const UNKNOWN_AI_INTEGRATION = {
+  status:'unverified',
+  tier:'unknown',
+  mcp:'unknown',
+  publicApi:null,
+  assistants:[],
+  summary:'ToolScout has not yet verified this tool\'s current ChatGPT, Claude, Gemini, MCP or agent integration options.',
+  verifiedAt:null,
+  sources:[]
+};
 
 const BEST_FOR = {
   crm: ['teams managing customer relationships', 'sales teams evaluating CRM workflows'],
@@ -144,6 +154,7 @@ if (policy.autoPromoteVerifiedCompetitiveGapProfiles !== false) {
       sourceUrl:source.finalUrl || profile.sourceUrl,
       lastVerified:today,
       scores:neutralScores(profile),
+      aiIntegration:profile?.aiIntegration && typeof profile.aiIntegration==='object' ? profile.aiIntegration : {...UNKNOWN_AI_INTEGRATION},
       catalogTier:'coverage',
       rankingEligible:policy.rankingEligibleOnAdmission === true,
       comparisonEligible:policy.comparisonEligibleOnAdmission === true,
