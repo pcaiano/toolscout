@@ -285,6 +285,60 @@ function validCandidate(candidate,config){
   if(!publicHttps(candidate?.sourceUrl))errors.push('invalid_official_source');
   return errors;
 }
+
+const AFFILIATE_RESEARCH_STATUS_WEIGHT=Object.freeze({
+  active:70,approved:70,
+  program_exists:45,submitted:45,needs_info:45,under_review:45,review:45,application_ready:45,
+  rejected:0,no_program_found:0,unavailable:0
+});
+function normalizedAffiliateStatus(value){return String(value||'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'')}
+async function affiliateResearchRegistry(env){
+  const registry=new Map(),rank=status=>Number(AFFILIATE_RESEARCH_STATUS_WEIGHT[normalizedAffiliateStatus(status)]||0);
+  const put=(slug,status)=>{
+    const key=String(slug||'').toLowerCase().trim();if(!key)return;
+    const normalized=normalizedAffiliateStatus(status),prior=registry.get(key);
+    if(!prior||rank(normalized)>rank(prior))registry.set(key,normalized);
+  };
+  const asset=await assetJson(env,'/data/affiliate-pipeline.json',{verified_programs:[]});
+  for(const row of Array.isArray(asset?.verified_programs)?asset.verified_programs:[])put(row?.slug,row?.status);
+  const queries=[
+    `SELECT tool_slug,status FROM affiliate_program_discovery`,
+    `SELECT tool_slug,status FROM affiliate_workflow`,
+    `SELECT tool_slug,programme_status status FROM affiliate_network_program_evidence`
+  ];
+  for(const sql of queries){
+    const rows=await env.DB.prepare(sql).all().catch(()=>({results:[]}));
+    for(const row of rows.results||[])put(row?.tool_slug,row?.status);
+  }
+  return registry;
+}
+export function catalogCandidateResearchPriority(candidate,affiliateStatus=null,config={}){
+  const weights=config?.discovery?.researchPriority||{};
+  const activeAffiliate=Number(weights.activeAffiliateProgram??70);
+  const knownAffiliate=Number(weights.knownAffiliateProgram??45);
+  const verifiedMcp=Number(weights.verifiedMcp??60);
+  const verifiedAi=Number(weights.verifiedAiInteroperability??40);
+  const aiHintWeight=Number(weights.aiOrAgentResearchHint??20);
+  const combo=Number(weights.combinedAiAndAffiliateBonus??35);
+  const p=candidate?.aiIntegration&&typeof candidate.aiIntegration==='object'?candidate.aiIntegration:null;
+  const mcp=String(p?.mcp||'').toLowerCase();
+  let ai=0,aiSignal='none';
+  if(mcp==='official'||mcp==='community'){ai=verifiedMcp;aiSignal='mcp'}
+  else if(String(p?.status||'').toLowerCase()==='verified'){ai=verifiedAi;aiSignal='verified_ai_interoperability'}
+  else{
+    const text=[candidate?.name,candidate?.slug,candidate?.description,...(candidate?.features||[]),...(candidate?.bestFor||[])].filter(Boolean).join(' ').toLowerCase();
+    if(/\bmcp\b|model context protocol|chatgpt|claude|gemini|copilot|ai agent|agentic|agent connectivity|ai integration|development agents/.test(text)){ai=aiHintWeight;aiSignal='ai_agent_research_hint'}
+  }
+  const status=normalizedAffiliateStatus(affiliateStatus);
+  let affiliate=Number(AFFILIATE_RESEARCH_STATUS_WEIGHT[status]||0),affiliateSignal=status||'none';
+  if(status==='active'||status==='approved')affiliate=Math.max(affiliate,activeAffiliate);
+  else if(affiliate>0)affiliate=Math.max(affiliate,knownAffiliate);
+  if(!affiliate){
+    const raw=String(candidate?.affiliateProgram||'').toLowerCase();
+    if(raw&&!/pending|unknown|none|not available|no program/.test(raw)){affiliate=knownAffiliate;affiliateSignal='candidate_program_evidence'}
+  }
+  return{score:ai+affiliate+(ai>0&&affiliate>0?combo:0),ai,affiliate,aiSignal,affiliateSignal};
+}
 async function syncMarketGaps(env){
   const report=await assetJson(env,'/reports/competitive-gap-signals.json',{gaps:[]});
   let synced=0;
@@ -303,33 +357,40 @@ export async function admitTrustedCandidates(env){
   const staticTools=await assetJson(env,'/data/tools.json',[]);
   const existing=new Set((Array.isArray(staticTools)?staticTools:[]).map(x=>String(x?.slug||'').toLowerCase()));
   for(const x of await runtimeCandidates(env))existing.add(String(x?.slug||'').toLowerCase());
-  let admitted=0,held=0,considered=0;
+  const affiliateRegistry=await affiliateResearchRegistry(env);
+  const pool=[],seen=new Set();let sequence=0;
   for(const file of config?.trustedCandidateFiles||[]){
     const candidates=await assetJson(env,'/'+String(file).replace(/^\//,''),[]);
     for(const raw of Array.isArray(candidates)?candidates:[]){
-      if(admitted>=MAX_ADMIT_PER_DAY||considered>=MAX_CANDIDATE_CHECKS_PER_CYCLE)break;
-      const slug=String(raw?.slug||'').toLowerCase();if(!slug||existing.has(slug))continue;
-      considered++;
-      const errors=validCandidate(raw,config);if(errors.length){held++;continue}
-      const source=await fetchOfficial(raw.sourceUrl);if(config?.admission?.requireReachableOfficialSource!==false&&source.status!=='ok'){held++;continue}
-      const aiIntegration=raw?.aiIntegration&&typeof raw.aiIntegration==='object'?raw.aiIntegration:{status:'unverified',tier:'unknown',mcp:'unknown',publicApi:null,assistants:[],summary:'ToolScout has not yet verified this tool\'s current ChatGPT, Claude, Gemini, MCP or agent integration options.',verifiedAt:null,sources:[]};
-      let profile={...raw,aiIntegration,sourceUrl:source.finalUrl||raw.sourceUrl,lastVerified:new Date().toISOString().slice(0,10),rankingEligible:true,comparisonEligible:true,provenance:{...(raw.provenance||{}),mode:'runtime_trusted_catalog',admittedAt:new Date().toISOString(),affiliateNeutral:true,reviewMethod:'first_party_verified_structured_profile_v2'}};
-      profile.editorialReview=profile.editorialReview||runtimeEditorialView(profile);
-      const quality=await auditCatalogTool(env,profile);
-      if(!quality.publishable){held++;await logEvent(env,slug,'catalog_candidate_quality_hold','completed','Trusted candidate failed full catalog quality gate before publication.',{issues:quality.issues,warnings:quality.warnings});continue}
-      profile=quality.repairedTool;
-      await env.DB.prepare(`INSERT INTO catalog_runtime_candidates(tool_slug,profile_json,status,source_status,verified_at,updated_at) VALUES(?,?,'published','ok',datetime('now'),datetime('now'))
-        ON CONFLICT(tool_slug) DO UPDATE SET profile_json=excluded.profile_json,status='published',source_status='ok',verified_at=datetime('now'),updated_at=datetime('now')`)
-        .bind(slug,JSON.stringify(profile)).run();
-      await logEvent(env,slug,'catalog_candidate_admitted','completed','Trusted candidate admitted as a full ToolScout catalog peer after official-source and deterministic quality gates.',{source_url:profile.sourceUrl,category:profile.category});
-      existing.add(slug);admitted++;
+      const slug=String(raw?.slug||'').toLowerCase();if(!slug||existing.has(slug)||seen.has(slug))continue;
+      seen.add(slug);
+      const priority=catalogCandidateResearchPriority(raw,affiliateRegistry.get(slug)||null,config);
+      pool.push({raw,slug,priority,sequence:sequence++});
     }
+  }
+  pool.sort((a,b)=>b.priority.score-a.priority.score||b.priority.affiliate-a.priority.affiliate||b.priority.ai-a.priority.ai||a.sequence-b.sequence||a.slug.localeCompare(b.slug));
+  let admitted=0,held=0,considered=0;
+  for(const item of pool){
     if(admitted>=MAX_ADMIT_PER_DAY||considered>=MAX_CANDIDATE_CHECKS_PER_CYCLE)break;
+    const {raw,slug,priority}=item;considered++;
+    const errors=validCandidate(raw,config);if(errors.length){held++;continue}
+    const source=await fetchOfficial(raw.sourceUrl);if(config?.admission?.requireReachableOfficialSource!==false&&source.status!=='ok'){held++;continue}
+    const aiIntegration=raw?.aiIntegration&&typeof raw.aiIntegration==='object'?raw.aiIntegration:{status:'unverified',tier:'unknown',mcp:'unknown',publicApi:null,assistants:[],summary:'ToolScout has not yet verified this tool\'s current ChatGPT, Claude, Gemini, MCP or agent integration options.',verifiedAt:null,sources:[]};
+    let profile={...raw,aiIntegration,sourceUrl:source.finalUrl||raw.sourceUrl,lastVerified:new Date().toISOString().slice(0,10),rankingEligible:true,comparisonEligible:true,provenance:{...(raw.provenance||{}),mode:'runtime_trusted_catalog',admittedAt:new Date().toISOString(),affiliateNeutral:true,reviewMethod:'first_party_verified_structured_profile_v2',researchPriority:{score:priority.score,aiSignal:priority.aiSignal,affiliateSignal:priority.affiliateSignal}}};
+    profile.editorialReview=profile.editorialReview||runtimeEditorialView(profile);
+    const quality=await auditCatalogTool(env,profile);
+    if(!quality.publishable){held++;await logEvent(env,slug,'catalog_candidate_quality_hold','completed','Trusted candidate failed full catalog quality gate before publication.',{issues:quality.issues,warnings:quality.warnings,research_priority:priority});continue}
+    profile=quality.repairedTool;
+    await env.DB.prepare(`INSERT INTO catalog_runtime_candidates(tool_slug,profile_json,status,source_status,verified_at,updated_at) VALUES(?,?,'published','ok',datetime('now'),datetime('now'))
+      ON CONFLICT(tool_slug) DO UPDATE SET profile_json=excluded.profile_json,status='published',source_status='ok',verified_at=datetime('now'),updated_at=datetime('now')`)
+      .bind(slug,JSON.stringify(profile)).run();
+    await logEvent(env,slug,'catalog_candidate_admitted','completed','Trusted candidate admitted as a full ToolScout catalog peer after official-source and deterministic quality gates.',{source_url:profile.sourceUrl,category:profile.category,research_priority:priority});
+    existing.add(slug);admitted++;
   }
   const market_gaps=await syncMarketGaps(env);
   runtimeCache.at=0;
   if(admitted>0)await runtimeSnapshot(env,{force:true}).catch(()=>null);
-  return{ok:true,considered,admitted,held,market_gaps_synced:market_gaps,max_admissions:MAX_ADMIT_PER_DAY,candidate_check_limit:MAX_CANDIDATE_CHECKS_PER_CYCLE,rule:'Affiliate economics cannot increase catalog admission or ranking eligibility.'};
+  return{ok:true,considered,admitted,held,market_gaps_synced:market_gaps,max_admissions:MAX_ADMIT_PER_DAY,candidate_check_limit:MAX_CANDIDATE_CHECKS_PER_CYCLE,priority_policy:'affiliate_plus_ai_mcp_research_first',rule:'Affiliate programme availability and verified AI or MCP connectivity may prioritize research throughput. Admission, rankings and fit remain affiliate-neutral.'};
 }
 export async function auditCatalogQualityBatch(env,{limit=12}={}){
   await ensureSchema(env);
