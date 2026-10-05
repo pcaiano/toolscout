@@ -152,7 +152,10 @@
     "dated_or_snapshot_bound_repair_workflows_cannot_reenter_main_without_contract_change",
     "distribution_public_embed_owns_embed_assets_and_distribution_learning_owns_embed_telemetry",
     "finder_embed_preserves_first_party_intent_and_broad_category_quality_gates",
-    "embed_telemetry_never_stores_raw_finder_queries"
+    "embed_telemetry_never_stores_raw_finder_queries",
+    "global_public_navigation_exposes_trends_and_publisher_kit",
+    "software_trends_never_renders_second_local_header",
+    "software_trends_and_publisher_kit_remain_in_canonical_sitemap"
   ],
   "mission": {
     "starts_on": "2026-09-29",
