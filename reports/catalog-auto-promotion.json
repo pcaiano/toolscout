@@ -1,37 +1,37 @@
 {
-  "generatedAt": "2026-10-05T11:17:29.080Z",
+  "generatedAt": "2026-10-05T11:26:58.077Z",
   "policy": "Broaden the indexable catalog using verified first-party product facts and repeated market signals, while keeping ranking and comparison eligibility separate until stronger tool-specific editorial evidence exists.",
   "summary": {
-    "catalogTools": 118,
+    "catalogTools": 121,
     "promoted": 3,
-    "held": 9,
+    "held": 12,
     "maxPromotionsPerCycle": 5
   },
   "promoted": [
     {
-      "slug": "paioclaw",
-      "name": "Paioclaw",
+      "slug": "questie-ai",
+      "name": "Questie AI",
       "category": "ai-assistant",
       "signals": 2,
-      "capabilities": 8,
+      "capabilities": 10,
       "catalogTier": "coverage",
       "rankingEligible": true,
       "comparisonEligible": true
     },
     {
-      "slug": "pine-ai",
-      "name": "Pine AI",
-      "category": "ai-assistant",
+      "slug": "resume-ai",
+      "name": "Resume AI",
+      "category": "developer",
       "signals": 2,
-      "capabilities": 6,
+      "capabilities": 10,
       "catalogTier": "coverage",
       "rankingEligible": true,
       "comparisonEligible": true
     },
     {
-      "slug": "pixmax-ai",
-      "name": "Pixmax AI",
-      "category": "content",
+      "slug": "talkpix-ai",
+      "name": "Talkpix AI",
+      "category": "developer",
       "signals": 2,
       "capabilities": 9,
       "catalogTier": "coverage",
@@ -74,6 +74,18 @@
     },
     {
       "slug": "lorka-ai",
+      "reason": "entity_already_in_catalog"
+    },
+    {
+      "slug": "paioclaw",
+      "reason": "entity_already_in_catalog"
+    },
+    {
+      "slug": "pine-ai",
+      "reason": "entity_already_in_catalog"
+    },
+    {
+      "slug": "pixmax-ai",
       "reason": "entity_already_in_catalog"
     }
   ]

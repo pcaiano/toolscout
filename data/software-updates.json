@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-10-05T11:17:00.649Z",
+  "updatedAt": "2026-10-05T11:26:33.372Z",
   "editorialPolicy": "Updates are selected for buyer relevance. Affiliate status, commission and partner relationships do not influence inclusion or placement.",
   "items": [
     {
@@ -15,6 +15,22 @@
       "sourceUrl": "https://openai.com/index/new-chatgpt-ads-format-and-measurement",
       "articleUrl": "/news/chatgpt-building-advertising-for-the-way-people-use-ai.html",
       "profileUrl": "/news/chatgpt-building-advertising-for-the-way-people-use-ai.html",
+      "outboundUrl": null,
+      "outboundLabel": null,
+      "partnerUpdate": false
+    },
+    {
+      "id": "github-repository-security-advisory-comments-api-in-public-preview",
+      "publishedAt": "2026-10-02",
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "label": "Security update",
+      "title": "Repository security advisory comments API in public preview",
+      "summary": "You can now read, add, and edit comments on repository security advisories using the REST API, including advisories created from private vulnerability reports.",
+      "sourceName": "GitHub Changelog",
+      "sourceUrl": "https://github.blog/changelog/2026-10-02-repository-security-advisory-comments-api-in-public-preview",
+      "articleUrl": "/news/github-repository-security-advisory-comments-api-in-public-preview.html",
+      "profileUrl": "/news/github-repository-security-advisory-comments-api-in-public-preview.html",
       "outboundUrl": null,
       "outboundLabel": null,
       "partnerUpdate": false

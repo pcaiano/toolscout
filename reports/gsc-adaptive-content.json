@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-05T11:19:13.035Z",
-  "gscGeneratedAt": "2026-10-05T11:16:59.485Z",
+  "generatedAt": "2026-10-05T11:28:06.811Z",
+  "gscGeneratedAt": "2026-10-05T11:26:32.064Z",
   "minimumImpressionsForHighConfidenceAction": 20,
   "rule": "Observed GSC demand may trigger additive factual decision depth. Low-sample first-page pages are protected from aggressive adaptive changes. Query strings must pass safety and intent-alignment checks before they can trigger adaptation.",
   "adaptiveApplied": 0,
@@ -133,15 +133,15 @@
     },
     {
       "intent": "best-seo-tools-for-agencies",
-      "impressions": 2312,
+      "impressions": 2323,
       "clicks": 0,
-      "position": 80.2366,
+      "position": 80.257,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
         "query": "seo software for agencies",
-        "impressions": 151,
-        "position": 88.1325,
+        "impressions": 153,
+        "position": 88.0719,
         "alignment": 1
       },
       "action": "measure-only"

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T11:19:11.621Z",
+  "generatedAt": "2026-10-05T11:28:05.276Z",
   "methodology": "Search impressions are visibility, not traffic. First-page visibility is always a strategic opportunity. Low-sample first-page signals are protected and measured; they are not discarded and they are not treated as high-confidence CTR evidence. Automatic ranking conclusions require at least 20 impressions unless a click is observed. Tool eligibility requires an allowed category, capability fit where defined, hard attribute constraints where defined, and semantic relevance. ToolScout 2.0 adds an editorial-authority gap signal so observed-demand pages with weak primary-source evidence, buyer analysis or information gain are deepened before new surface is created.",
   "gsc": {
     "available": true,
@@ -10,8 +10,8 @@
     "dataState": "all",
     "siteTotals": {
       "clicks": 7,
-      "impressions": 6480,
-      "ctr": 0.108
+      "impressions": 6491,
+      "ctr": 0.1078
     },
     "reason": "Google Search Console signals drive growth prioritization. First-page and striking-distance visibility is always retained as a strategic opportunity. Samples below 20 impressions are protected and measured rather than aggressively rewritten. Meaningful weak rankings are treated as relevance or authority problems."
   },
@@ -40,10 +40,10 @@
       "affiliateSignal": 0,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 2312,
+        "impressions": 2323,
         "clicks": 0,
         "ctr": 0,
-        "position": 80.2366,
+        "position": 80.257,
         "opportunity": "relevance-gap",
         "opportunityScore": 32,
         "meaningfulSample": true,
@@ -1684,11 +1684,11 @@
       "intent": "best-ai-assistants",
       "title": "Best AI Assistants",
       "category": "ai-assistant",
-      "priorityScore": 28,
+      "priorityScore": 29,
       "topFit": 5,
-      "eligibleToolCount": 7,
+      "eligibleToolCount": 8,
       "minimumEligibleTools": 2,
-      "catalogDepth": 14,
+      "catalogDepth": 16,
       "commercialSignal": 8,
       "affiliateSignal": 0,
       "searchSignal": {
@@ -1708,7 +1708,7 @@
       "topTools": [
         "cosupport-ai",
         "lorka-ai",
-        "paioclaw"
+        "questie-ai"
       ],
       "requiredCapabilities": [
         "ai assistant",

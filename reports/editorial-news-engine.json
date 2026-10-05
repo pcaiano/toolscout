@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T11:17:00.650Z",
+  "generatedAt": "2026-10-05T11:26:33.374Z",
   "engine": "ToolScout Editorial News Engine v1",
   "lookbackDays": 14,
   "maxPerRun": 4,
@@ -16,7 +16,7 @@
       "status": "ok",
       "fetched": "https://openai.com/news/rss.xml",
       "parsed": 1246,
-      "recent": 1
+      "recent": 0
     },
     {
       "id": "hubspot-releases",
@@ -38,22 +38,14 @@
       "recent": 0
     }
   ],
-  "candidates": 2,
+  "candidates": 1,
   "published": [
     {
-      "id": "github-new-fields-for-securityadvisory-graphql-api",
+      "id": "github-repository-security-advisory-comments-api-in-public-preview",
       "date": "2026-10-02",
       "toolSlug": "github",
-      "title": "New fields for SecurityAdvisory GraphQL API",
-      "sourceUrl": "https://github.blog/changelog/2026-10-02-new-fields-for-securityadvisory-graphql-api",
-      "score": 7
-    },
-    {
-      "id": "chatgpt-introducing-gpt-6-sol-and-luna",
-      "date": "2026-09-22",
-      "toolSlug": "chatgpt",
-      "title": "Introducing GPT-6 Sol and Luna",
-      "sourceUrl": "https://openai.com/index/introducing-gpt-6-sol-and-luna",
+      "title": "Repository security advisory comments API in public preview",
+      "sourceUrl": "https://github.blog/changelog/2026-10-02-repository-security-advisory-comments-api-in-public-preview",
       "score": 7
     }
   ],

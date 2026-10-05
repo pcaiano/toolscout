@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-10-05T11:17:31.656Z",
+  "generatedAt": "2026-10-05T11:26:58.809Z",
   "methodology": "Field-level first-party quality control for volatile catalog facts plus validated visual asset resolution. Ambiguous changes are reported, not silently rewritten.",
   "summary": {
-    "tools": 118,
+    "tools": 121,
     "critical": 1,
-    "high": 15,
-    "medium": 6,
+    "high": 14,
+    "medium": 8,
     "low": 0,
     "autoCorrections": 1,
-    "assetsResolved": 108
+    "assetsResolved": 111
   },
   "corrections": [
     {
-      "slug": "paioclaw",
+      "slug": "resume-ai",
       "field": "freePlan",
       "from": false,
       "to": true,
@@ -21,7 +21,7 @@
   ],
   "findings": [
     {
-      "slug": "paioclaw",
+      "slug": "resume-ai",
       "severity": "critical",
       "type": "free_plan_contradiction",
       "catalogValue": false,
@@ -29,8 +29,7 @@
       "confidence": "explicit",
       "reason": "official_source_explicit_free_plan",
       "evidenceUrls": [
-        "https://paioclaw.ai/",
-        "https://paioclaw.ai/pricing/"
+        "https://resume-ai.com/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia"
       ]
     },
     {
@@ -98,20 +97,6 @@
       "detail": "network_error"
     },
     {
-      "slug": "grammarly",
-      "severity": "high",
-      "type": "free_plan_contradiction",
-      "catalogValue": true,
-      "observedValue": false,
-      "confidence": "inferred",
-      "reason": "official_pricing_page_lists_trial_and_paid_pricing_without_free_plan",
-      "evidenceUrls": [
-        "https://www.grammarly.com/",
-        "https://www.grammarly.com/plans",
-        "https://www.grammarly.com/features"
-      ]
-    },
-    {
       "slug": "integrately",
       "severity": "high",
       "type": "free_plan_contradiction",
@@ -167,6 +152,10 @@
       "severity": "medium",
       "type": "pricing_evidence_changed",
       "previous": [
+        "$20/",
+        "$45/"
+      ],
+      "current": [
         "$4",
         "$600",
         "$1.7",
@@ -192,10 +181,6 @@
         "$20/",
         "$45/"
       ],
-      "current": [
-        "$20/",
-        "$45/"
-      ],
       "evidenceUrls": [
         "https://www.airtable.com/",
         "https://airtable.com/pricing",
@@ -207,15 +192,6 @@
       "severity": "medium",
       "type": "pricing_evidence_changed",
       "previous": [
-        "$32",
-        "$0",
-        "$49 /mo",
-        "$39/mo",
-        "$95 /mo",
-        "$12",
-        "$0.30 per"
-      ],
-      "current": [
         "$ 0",
         "$ 49",
         "$ 95",
@@ -225,10 +201,102 @@
         "$95 /mo",
         "$0.30 per"
       ],
+      "current": [
+        "$32",
+        "$0",
+        "$49 /mo",
+        "$39/mo",
+        "$95 /mo",
+        "$12",
+        "$0.30 per"
+      ],
       "evidenceUrls": [
         "https://www.beehiiv.com/",
         "https://www.beehiiv.com/pricing",
         "https://www.beehiiv.com/newsletter-platform"
+      ]
+    },
+    {
+      "slug": "grammarly",
+      "severity": "medium",
+      "type": "pricing_evidence_changed",
+      "previous": [
+        "$0",
+        "$12",
+        "$30",
+        "$5,00",
+        "$210"
+      ],
+      "current": [
+        "$0",
+        "$12",
+        "$30",
+        "$5,00",
+        "$210",
+        "$0.00"
+      ],
+      "evidenceUrls": [
+        "https://www.grammarly.com/",
+        "https://www.grammarly.com/plans",
+        "https://www.grammarly.com/features"
+      ]
+    },
+    {
+      "slug": "grammarly",
+      "severity": "medium",
+      "type": "trial_evidence_changed",
+      "previous": [
+        7
+      ],
+      "current": [],
+      "evidenceUrls": [
+        "https://www.grammarly.com/",
+        "https://www.grammarly.com/plans",
+        "https://www.grammarly.com/features"
+      ]
+    },
+    {
+      "slug": "intercom",
+      "severity": "medium",
+      "type": "pricing_evidence_changed",
+      "previous": [
+        "$19 per",
+        "$0.99 per",
+        "$85 per",
+        "$10",
+        "$132 per",
+        "$90.09 /mo",
+        "$19.00 /mo",
+        "$109.09 /mo",
+        "$33/mo",
+        "$1.99 per",
+        "$99 per",
+        "$29 per",
+        "$99/month",
+        "$35 per",
+        "$0.01 per"
+      ],
+      "current": [
+        "$19 per",
+        "$0.99 per",
+        "$29 per",
+        "$85 per",
+        "$10",
+        "$132 per",
+        "$90.09 /mo",
+        "$29.00 /mo",
+        "$119.09 /mo",
+        "$33/mo",
+        "$1.99 per",
+        "$99 per",
+        "$99/month",
+        "$35 per",
+        "$0.01 per"
+      ],
+      "evidenceUrls": [
+        "https://www.intercom.com/",
+        "https://www.intercom.com/pricing",
+        "https://www.intercom.com/solutions/technology"
       ]
     },
     {
@@ -237,14 +305,14 @@
       "type": "pricing_evidence_changed",
       "previous": [
         "$2.8",
+        "$600,00"
+      ],
+      "current": [
+        "$2.8",
         "$600,00",
         "$0",
         "$13.08 per user",
         "$28.08 per user"
-      ],
-      "current": [
-        "$2.8",
-        "$600,00"
       ],
       "evidenceUrls": [
         "https://www.atlassian.com/software/jira",
@@ -256,11 +324,11 @@
       "slug": "jira",
       "severity": "medium",
       "type": "trial_evidence_changed",
-      "previous": [
+      "previous": [],
+      "current": [
         14,
         30
       ],
-      "current": [],
       "evidenceUrls": [
         "https://www.atlassian.com/software/jira",
         "https://www.atlassian.com/software/jira/pricing",
@@ -268,106 +336,20 @@
       ]
     },
     {
-      "slug": "mailchimp",
+      "slug": "screaming-frog",
       "severity": "medium",
       "type": "pricing_evidence_changed",
       "previous": [
-        "$ 20",
-        "$ 350",
-        "$20 /month",
-        "$ 13",
-        "$ 0 /month",
-        "$299 per month",
-        "$800/mo",
-        "$385/mo"
+        "$279 per year",
+        "£199 per year"
       ],
       "current": [
-        "$ 20",
-        "$ 350",
-        "$ 13",
-        "$ 0 /month",
-        "$299 per month",
-        "$800/mo",
-        "$385/mo"
+        "£199 per year"
       ],
       "evidenceUrls": [
-        "https://mailchimp.com/",
-        "https://mailchimp.com/pricing/marketing/",
-        "https://mailchimp.com/pricing/marketing/compare-plans/"
-      ]
-    },
-    {
-      "slug": "salesforce",
-      "severity": "medium",
-      "type": "pricing_evidence_changed",
-      "previous": [
-        "$ 0",
-        "£ 0",
-        "$ 500",
-        "$ 700",
-        "£ 400",
-        "$ 2",
-        "$ 2.80",
-        "£ 1.60",
-        "$ 125 user",
-        "$ 150 user",
-        "$550 user",
-        "$ 5",
-        "$ 7",
-        "£ 4",
-        "$ 500 per",
-        "$ 700 per",
-        "£ 400 per",
-        "$ 2 per",
-        "$ 2.80 per",
-        "£ 1.60 per",
-        "$ 125",
-        "$ 175",
-        "£ 100",
-        "$0.20",
-        "$120",
-        "$120 per month",
-        "$0.30",
-        "$1,80",
-        "$0.50",
-        "$300"
-      ],
-      "current": [
-        "$ 275",
-        "$ 385",
-        "£ 220",
-        "$ 500",
-        "$ 700",
-        "£ 400",
-        "$ 350",
-        "$ 490",
-        "£ 280",
-        "$ 600",
-        "$ 840",
-        "£ 480",
-        "$ 980",
-        "£ 560",
-        "$0",
-        "$ 0",
-        "£ 0",
-        "$ 2",
-        "$ 2.80",
-        "£ 1.60",
-        "$ 125 user",
-        "$ 150 user",
-        "$550 user",
-        "$ 5",
-        "$ 7",
-        "£ 4",
-        "$ 500 per",
-        "$ 700 per",
-        "£ 400 per",
-        "$ 2 per"
-      ],
-      "evidenceUrls": [
-        "https://www.salesforce.com/?bc=DB",
-        "https://www.salesforce.com/government/solutions/pricing/?bc=DB",
-        "https://www.salesforce.com/agentforce/pricing/?bc=DB"
+        "https://www.screamingfrog.co.uk/seo-spider/",
+        "https://www.screamingfrog.co.uk/seo-spider/pricing/",
+        "https://www.screamingfrog.co.uk/log-file-analyser/pricing/"
       ]
     }
   ]

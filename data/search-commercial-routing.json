@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T11:19:11.679Z",
+  "generatedAt": "2026-10-05T11:28:05.353Z",
   "engine": "ToolScout Search Commercial Routing v1",
   "objective": "Route editorial, internal-linking and distribution work from observed Google demand while keeping affiliate economics separate from editorial ranking.",
   "rules": {
@@ -61,9 +61,9 @@
       "pathname": "/best-seo-tools-for-agencies",
       "type": "guide",
       "clicks": 0,
-      "impressions": 2312,
+      "impressions": 2323,
       "ctr": 0,
-      "position": 80.2366,
+      "position": 80.257,
       "topQueries": [
         {
           "query": "best seo tools for agency",
@@ -74,8 +74,8 @@
         {
           "query": "seo software for agencies",
           "clicks": 0,
-          "impressions": 151,
-          "position": 88.1325
+          "impressions": 153,
+          "position": 88.0719
         },
         {
           "query": "seo tools for agency",
@@ -99,7 +99,7 @@
       "monetized": false,
       "monetizedSlugs": [],
       "lane": "relevance-and-authority",
-      "priorityScore": 134.11,
+      "priorityScore": 134.19,
       "actions": [
         "improve-query-intent-match",
         "deepen-evidence",

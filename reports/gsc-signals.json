@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T11:16:59.485Z",
+  "generatedAt": "2026-10-05T11:26:32.064Z",
   "source": "Google Search Console Search Analytics API",
   "property": "sc-domain:trytoolscout.org",
   "dataState": "all",
@@ -8,8 +8,8 @@
   "endDate": "2026-10-05",
   "siteTotals": {
     "clicks": 7,
-    "impressions": 6480,
-    "ctr": 0.108
+    "impressions": 6491,
+    "ctr": 0.1078
   },
   "pageTypeSummary": {
     "comparison": {
@@ -25,7 +25,7 @@
     "guide": {
       "pages": 39,
       "clicks": 0,
-      "impressions": 4177
+      "impressions": 4188
     },
     "home": {
       "pages": 1,
@@ -52,9 +52,9 @@
       "type": "guide",
       "intent": "best-seo-tools-for-agencies",
       "clicks": 0,
-      "impressions": 2312,
+      "impressions": 2323,
       "ctr": 0,
-      "position": 80.2366,
+      "position": 80.257,
       "topQueries": [
         {
           "query": "best seo tools for agency",
@@ -65,8 +65,8 @@
         {
           "query": "seo software for agencies",
           "clicks": 0,
-          "impressions": 151,
-          "position": 88.1325
+          "impressions": 153,
+          "position": 88.0719
         },
         {
           "query": "seo tools for agency",
@@ -95,8 +95,8 @@
         {
           "query": "seo tools for agencies",
           "clicks": 0,
-          "impressions": 98,
-          "position": 84.4694
+          "impressions": 99,
+          "position": 84.4949
         },
         {
           "query": "what is the best tool for seo agency",
@@ -113,8 +113,8 @@
         {
           "query": "best seo software for agencies",
           "clicks": 0,
-          "impressions": 73,
-          "position": 74.0411
+          "impressions": 74,
+          "position": 74.027
         }
       ]
     },
@@ -4487,9 +4487,9 @@
       "intent": "best-seo-tools-for-agencies",
       "page": "https://trytoolscout.org/best-seo-tools-for-agencies",
       "clicks": 0,
-      "impressions": 2312,
+      "impressions": 2323,
       "ctr": 0,
-      "position": 80.2366,
+      "position": 80.257,
       "topQueries": [
         {
           "query": "best seo tools for agency",
@@ -4500,8 +4500,8 @@
         {
           "query": "seo software for agencies",
           "clicks": 0,
-          "impressions": 151,
-          "position": 88.1325
+          "impressions": 153,
+          "position": 88.0719
         },
         {
           "query": "seo tools for agency",
@@ -4530,8 +4530,8 @@
         {
           "query": "seo tools for agencies",
           "clicks": 0,
-          "impressions": 98,
-          "position": 84.4694
+          "impressions": 99,
+          "position": 84.4949
         },
         {
           "query": "what is the best tool for seo agency",
@@ -4548,8 +4548,8 @@
         {
           "query": "best seo software for agencies",
           "clicks": 0,
-          "impressions": 73,
-          "position": 74.0411
+          "impressions": 74,
+          "position": 74.027
         }
       ]
     },

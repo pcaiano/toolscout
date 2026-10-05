@@ -428,5 +428,122 @@
       "categoryEvidenceScore": 2,
       "competitorContentUsedForEditorialFacts": false
     }
+  },
+  {
+    "slug": "questie-ai",
+    "name": "Questie AI",
+    "category": "ai-assistant",
+    "description": "Create your own AI gaming companion that reacts to gameplay and voice chats with you. AI character chat &amp; roleplay. Try Questie free, join 50k+ gamers.",
+    "sourceUrl": "https://www.questie.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+    "features": [
+      "AI assistant",
+      "chatbot",
+      "conversational AI",
+      "citations",
+      "analysis",
+      "multimodal",
+      "voice",
+      "integrations",
+      "forms",
+      "design"
+    ],
+    "firstVerified": "2026-10-05",
+    "lastVerified": "2026-10-05",
+    "marketSignals": {
+      "count": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "exampleUrls": [
+        "https://www.futurepedia.io/tool/questie-ai",
+        "https://www.aixploria.com/questie-ai/"
+      ]
+    },
+    "verification": {
+      "mode": "competitive-gap-first-party",
+      "officialSourceDiscoveryScore": 14,
+      "officialSourceVotes": 2,
+      "categoryEvidenceScore": 3,
+      "competitorContentUsedForEditorialFacts": false
+    }
+  },
+  {
+    "slug": "resume-ai",
+    "name": "Resume AI",
+    "category": "developer",
+    "description": "Resume-AI gives you every tool to land your next job — free resume audit, ATS optimizer, AI resume builder, cover letter generator, mock interview coach, job matching, salary negotiation, and more. Trusted by 12,000+ job seekers.",
+    "sourceUrl": "https://resume-ai.com/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+    "features": [
+      "AI assistant",
+      "research",
+      "citations",
+      "analysis",
+      "writing",
+      "multimodal",
+      "transcription",
+      "summarization",
+      "voice",
+      "templates"
+    ],
+    "firstVerified": "2026-10-05",
+    "lastVerified": "2026-10-05",
+    "marketSignals": {
+      "count": 2,
+      "sources": [
+        "Futurepedia",
+        "Toolify"
+      ],
+      "exampleUrls": [
+        "https://www.futurepedia.io/tool/resume-ai",
+        "https://www.toolify.ai/category/resume-ai",
+        "https://www.toolify.ai/zh/category/resume-ai"
+      ]
+    },
+    "verification": {
+      "mode": "competitive-gap-first-party",
+      "officialSourceDiscoveryScore": 14,
+      "officialSourceVotes": 1,
+      "categoryEvidenceScore": 2,
+      "competitorContentUsedForEditorialFacts": false
+    }
+  },
+  {
+    "slug": "talkpix-ai",
+    "name": "Talkpix AI",
+    "category": "developer",
+    "description": "Create talking videos, product ads, product photos and AI clips from a photo, product or prompt. Share, sell or create for clients—no subscription required.",
+    "sourceUrl": "https://www.talkpix.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+    "features": [
+      "citations",
+      "image generation",
+      "video generation",
+      "voice",
+      "API",
+      "automation",
+      "design",
+      "templates",
+      "ecommerce"
+    ],
+    "firstVerified": "2026-10-05",
+    "lastVerified": "2026-10-05",
+    "marketSignals": {
+      "count": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "exampleUrls": [
+        "https://www.futurepedia.io/tool/talkpix-ai",
+        "https://www.aixploria.com/talkpix-ai/"
+      ]
+    },
+    "verification": {
+      "mode": "competitive-gap-first-party",
+      "officialSourceDiscoveryScore": 14,
+      "officialSourceVotes": 2,
+      "categoryEvidenceScore": 3,
+      "competitorContentUsedForEditorialFacts": false
+    }
   }
 ]

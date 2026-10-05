@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T11:17:10.143Z",
+  "generatedAt": "2026-10-05T11:26:40.574Z",
   "objective": "Detect competitor coverage gaps, deduplicate against ToolScout, verify first-party sources, publish evidence-backed coverage profiles, submit them through the normal sitemap surface and measure Search Console outcomes on subsequent cycles.",
   "guardrails": [
     "Competitor pages are used only to discover market signals and possible official-source links.",
@@ -8,54 +8,60 @@
     "Unverified or thin candidates are held and retried instead of being published."
   ],
   "summary": {
-    "scannedGaps": 28,
-    "activeProfiles": 12,
+    "scannedGaps": 25,
+    "activeProfiles": 15,
     "newProfiles": 3,
     "resolvedAsExistingCoverage": 1,
-    "held": 24,
+    "held": 21,
     "contentResearch": 0,
     "searchVisibleProfiles": 0,
     "trafficObservedProfiles": 0
   },
   "admitted": [
     {
-      "slug": "paioclaw",
-      "sourceUrl": "https://paioclaw.ai/",
+      "slug": "questie-ai",
+      "sourceUrl": "https://www.questie.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
       "category": "ai-assistant",
       "features": [
         "AI assistant",
-        "research",
+        "chatbot",
+        "conversational AI",
         "citations",
+        "analysis",
+        "multimodal",
         "voice",
-        "API",
+        "integrations",
         "forms",
-        "design",
-        "deployment"
+        "design"
       ]
     },
     {
-      "slug": "pine-ai",
-      "sourceUrl": "https://www.19pine.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
-      "category": "ai-assistant",
+      "slug": "resume-ai",
+      "sourceUrl": "https://resume-ai.com/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+      "category": "developer",
       "features": [
         "AI assistant",
         "research",
         "citations",
+        "analysis",
+        "writing",
+        "multimodal",
+        "transcription",
         "summarization",
-        "forms",
-        "ecommerce"
+        "voice",
+        "templates"
       ]
     },
     {
-      "slug": "pixmax-ai",
-      "sourceUrl": "https://www.pixmax.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
-      "category": "content",
+      "slug": "talkpix-ai",
+      "sourceUrl": "https://www.talkpix.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+      "category": "developer",
       "features": [
         "citations",
         "image generation",
         "video generation",
         "voice",
-        "collaboration",
+        "API",
         "automation",
         "design",
         "templates",
@@ -132,32 +138,20 @@
     },
     {
       "slug": "postwizard-ai",
-      "reason": "cycle-admission-cap",
-      "retry": "next-cycle"
-    },
-    {
-      "slug": "questie-ai",
-      "reason": "cycle-admission-cap",
-      "retry": "next-cycle"
-    },
-    {
-      "slug": "resume-ai",
-      "reason": "cycle-admission-cap",
-      "retry": "next-cycle"
+      "reason": "first-party-evidence-too-thin",
+      "sourceUrl": "https://postwizard.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+      "descriptionLength": 129,
+      "verifiedCapabilities": 0
     },
     {
       "slug": "search-engine",
-      "reason": "cycle-admission-cap",
+      "reason": "official-source-not-resolved",
       "retry": "next-cycle"
     },
     {
       "slug": "sketchbubble-ai",
-      "reason": "cycle-admission-cap",
-      "retry": "next-cycle"
-    },
-    {
-      "slug": "talkpix-ai",
-      "reason": "cycle-admission-cap",
+      "reason": "official-source-unreachable",
+      "sourceUrl": "https://www.sketchbubble.com/en/ai-presentation-maker?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
       "retry": "next-cycle"
     },
     {
@@ -288,6 +282,30 @@
     },
     {
       "slug": "pixmax-ai",
+      "clicks": 0,
+      "impressions": 0,
+      "ctr": 0,
+      "position": 0,
+      "status": "not-observed"
+    },
+    {
+      "slug": "questie-ai",
+      "clicks": 0,
+      "impressions": 0,
+      "ctr": 0,
+      "position": 0,
+      "status": "not-observed"
+    },
+    {
+      "slug": "resume-ai",
+      "clicks": 0,
+      "impressions": 0,
+      "ctr": 0,
+      "position": 0,
+      "status": "not-observed"
+    },
+    {
+      "slug": "talkpix-ai",
       "clicks": 0,
       "impressions": 0,
       "ctr": 0,

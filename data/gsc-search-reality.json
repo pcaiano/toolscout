@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T11:16:59.483Z",
+  "generatedAt": "2026-10-05T11:26:32.062Z",
   "source": "Google Search Console first-party APIs",
   "property": "sc-domain:trytoolscout.org",
   "authorizationScope": "https://www.googleapis.com/auth/webmasters.readonly",
@@ -8,17 +8,17 @@
       "startDate": "2026-09-08",
       "endDate": "2026-10-05",
       "clicks": 7,
-      "impressions": 6480,
-      "ctr": 0.108,
-      "position": 67.9471
+      "impressions": 6491,
+      "ctr": 0.1078,
+      "position": 67.9752
     },
     "recent7": {
       "startDate": "2026-09-29",
       "endDate": "2026-10-05",
       "clicks": 2,
-      "impressions": 2683,
-      "ctr": 0.0745,
-      "position": 75.0157
+      "impressions": 2694,
+      "ctr": 0.0742,
+      "position": 75.0546
     },
     "previous7": {
       "startDate": "2026-09-22",
@@ -30,23 +30,23 @@
     },
     "change7d": {
       "clicksPct": -50,
-      "impressionsPct": 173.78,
-      "positionDelta": 12.032
+      "impressionsPct": 174.9,
+      "positionDelta": 12.0709
     },
     "countries": [
       {
         "country": "usa",
         "clicks": 1,
-        "impressions": 4034,
-        "ctr": 0.0248,
-        "position": 71.4085
+        "impressions": 4044,
+        "ctr": 0.0247,
+        "position": 71.4426
       },
       {
         "country": "gbr",
         "clicks": 0,
-        "impressions": 578,
+        "impressions": 579,
         "ctr": 0,
-        "position": 72.0052
+        "position": 72.0155
       },
       {
         "country": "aus",
@@ -144,23 +144,23 @@
       {
         "device": "DESKTOP",
         "clicks": 4,
-        "impressions": 4896,
-        "ctr": 0.0817,
-        "position": 68.3011
+        "impressions": 4904,
+        "ctr": 0.0816,
+        "position": 68.3224
       },
       {
         "device": "MOBILE",
         "clicks": 2,
-        "impressions": 1253,
-        "ctr": 0.1596,
-        "position": 73.0774
+        "impressions": 1255,
+        "ctr": 0.1594,
+        "position": 73.1036
       },
       {
         "device": "TABLET",
         "clicks": 0,
-        "impressions": 41,
+        "impressions": 42,
         "ctr": 0,
-        "position": 79.0244
+        "position": 79.5238
       }
     ],
     "observedPages": 139
@@ -191,16 +191,16 @@
     "note": "Primary index-health metrics use canonical URLs in the current ToolScout sitemap. Legacy or alternate URLs observed in Search Analytics are inspected separately and do not count as canonical index failures.",
     "preservedFromPrevious": true,
     "preservedFromGeneratedAt": "2026-10-05T07:40:01.968Z",
-    "lastInspectionAttemptAt": "2026-10-05T11:16:59.483Z",
+    "lastInspectionAttemptAt": "2026-10-05T11:26:32.062Z",
     "lastInspectionAttemptCoveragePct": 0,
-    "lastInspectionAttemptErrors": 203,
+    "lastInspectionAttemptErrors": 208,
     "quotaLimited": true
   },
   "sitemaps": {
     "apiOk": true,
     "apiStatus": 200,
     "apiError": null,
-    "localSitemapUrls": 193,
+    "localSitemapUrls": 198,
     "submittedCount": 1,
     "items": [
       {
@@ -339,8 +339,8 @@
           "url": "https://trytoolscout.org/best-seo-tools-for-agencies",
           "kind": "high_impression_low_rank",
           "score": 95.1,
-          "impressions": 2312,
-          "position": 80.2366,
+          "impressions": 2323,
+          "position": 80.257,
           "action": "authority_depth_and_query_alignment"
         },
         {
@@ -480,10 +480,10 @@
       "url": "https://trytoolscout.org/best-seo-tools-for-agencies",
       "page": "/best-seo-tools-for-agencies",
       "score": 95.1,
-      "impressions": 2312,
+      "impressions": 2323,
       "clicks": 0,
       "ctr": 0,
-      "position": 80.2366,
+      "position": 80.257,
       "action": "authority_depth_and_query_alignment"
     },
     {
@@ -4686,9 +4686,9 @@
     "This URL Inspection attempt did not meet the 80% coverage quality gate. The previous healthy index-health snapshot was preserved while Search Analytics was refreshed."
   ],
   "inspectionRun": {
-    "attempted": 203,
+    "attempted": 208,
     "succeeded": 0,
-    "errors": 203,
+    "errors": 208,
     "coveragePct": 0,
     "quotaLimited": true,
     "preservedPriorHealthySnapshot": true

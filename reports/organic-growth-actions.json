@@ -1,19 +1,19 @@
 {
-  "generatedAt": "2026-10-05T11:19:12.722Z",
+  "generatedAt": "2026-10-05T11:28:06.347Z",
   "engine": "ToolScout Organic Growth Engine v4",
   "brain": "shared-growth-v3",
-  "brainDirectivesGeneratedAt": "2026-10-05T11:19:12.642Z",
+  "brainDirectivesGeneratedAt": "2026-10-05T11:28:06.256Z",
   "newInterventions": [],
   "activeOptimizations": [
     {
       "intent": "best-seo-tools-for-agencies",
       "latest": {
         "clicks": 0,
-        "impressions": 2312,
+        "impressions": 2323,
         "ctr": 0,
-        "position": 80.2366
+        "position": 80.257
       },
-      "lastSeenAt": "2026-10-05T11:19:12.722Z",
+      "lastSeenAt": "2026-10-05T11:28:06.347Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T10:07:59.605Z",
       "baseline": {
@@ -33,7 +33,7 @@
         "ctr": 0,
         "position": 44.9549
       },
-      "lastSeenAt": "2026-10-05T11:19:12.722Z",
+      "lastSeenAt": "2026-10-05T11:28:06.347Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T10:07:59.605Z",
       "baseline": {
@@ -53,7 +53,7 @@
         "ctr": 0,
         "position": 76.4057
       },
-      "lastSeenAt": "2026-10-05T11:19:12.722Z",
+      "lastSeenAt": "2026-10-05T11:28:06.347Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T10:07:59.605Z",
       "baseline": {
@@ -73,7 +73,7 @@
         "ctr": 0,
         "position": 58.1607
       },
-      "lastSeenAt": "2026-10-05T11:19:12.722Z",
+      "lastSeenAt": "2026-10-05T11:28:06.347Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T12:15:28.070Z",
       "baseline": {
@@ -93,7 +93,7 @@
         "ctr": 0,
         "position": 74.7397
       },
-      "lastSeenAt": "2026-10-05T11:19:12.722Z",
+      "lastSeenAt": "2026-10-05T11:28:06.347Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T12:15:28.070Z",
       "baseline": {
@@ -140,7 +140,7 @@
         "ctr": 0,
         "position": 77.7067
       },
-      "lastSeenAt": "2026-10-05T11:19:12.722Z",
+      "lastSeenAt": "2026-10-05T11:28:06.347Z",
       "contentOptimizationSuspended": false,
       "indexing": null,
       "activeVariant": "decision-depth-v1",
@@ -160,7 +160,7 @@
         "ctr": 0,
         "position": 75.425
       },
-      "lastSeenAt": "2026-10-05T11:19:12.722Z",
+      "lastSeenAt": "2026-10-05T11:28:06.347Z",
       "contentOptimizationSuspended": false,
       "indexing": null,
       "activeVariant": "decision-depth-v1",
@@ -180,7 +180,7 @@
         "ctr": 0,
         "position": 77.3333
       },
-      "lastSeenAt": "2026-10-05T11:19:12.722Z",
+      "lastSeenAt": "2026-10-05T11:28:06.347Z",
       "contentOptimizationSuspended": false,
       "indexing": null,
       "activeVariant": "decision-depth-v1",
@@ -200,7 +200,7 @@
         "ctr": 0,
         "position": 65.1304
       },
-      "lastSeenAt": "2026-10-05T11:19:12.722Z",
+      "lastSeenAt": "2026-10-05T11:28:06.347Z",
       "contentOptimizationSuspended": false,
       "indexing": null,
       "activeVariant": "decision-depth-v1",
@@ -220,7 +220,7 @@
         "ctr": 0,
         "position": 62.1648
       },
-      "lastSeenAt": "2026-10-05T11:19:12.722Z",
+      "lastSeenAt": "2026-10-05T11:28:06.347Z",
       "contentOptimizationSuspended": false,
       "indexing": null,
       "activeVariant": "decision-depth-v1",
@@ -242,7 +242,7 @@
         "ctr": 0,
         "position": 76.3846
       },
-      "lastSeenAt": "2026-10-05T11:19:12.722Z",
+      "lastSeenAt": "2026-10-05T11:28:06.347Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-10-05T08:37:44.412Z",
       "baseline": {
@@ -262,7 +262,7 @@
         "ctr": 0,
         "position": 80.0816
       },
-      "lastSeenAt": "2026-10-05T11:19:12.722Z",
+      "lastSeenAt": "2026-10-05T11:28:06.347Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-10-05T08:37:44.412Z",
       "baseline": {
@@ -279,7 +279,7 @@
       "intent": "best-seo-tools-for-agencies",
       "variant": "decision-depth-v1",
       "outcome": "neutral",
-      "positionChange": 3.167,
+      "positionChange": 3.188,
       "clickGain": 0
     },
     {

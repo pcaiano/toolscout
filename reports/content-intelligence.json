@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T11:19:12.764Z",
+  "generatedAt": "2026-10-05T11:28:06.398Z",
   "engine": "ToolScout Content Intelligence v1.3",
   "objective": "Choose and test content opportunities using observed page-level search demand and likely-human social/commercial behavior without allowing affiliate economics to influence editorial recommendations.",
   "evidenceTier": "directional",
@@ -20,7 +20,7 @@
       "observedGscIntents": 39,
       "observedGscPages": 139,
       "searchClicks": 7,
-      "searchImpressions": 6480,
+      "searchImpressions": 6491,
       "organicAcquisitionStatus": "early-search-acquisition",
       "indexingRecovery": 1,
       "actionableOpportunities": 20,
@@ -31,7 +31,7 @@
       "strikingMeaningful": 0,
       "strikingLowSample": 1,
       "authorityDepthOpportunities": 13,
-      "competitorResearchCandidates": 28
+      "competitorResearchCandidates": 25
     },
     "routingSummary": {
       "pages": 139,
@@ -47,8 +47,8 @@
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 2312,
-        "position": 80.2366,
+        "impressions": 2323,
+        "position": 80.257,
         "topTools": [
           "semrush",
           "ahrefs",
@@ -175,10 +175,10 @@
         "pathname": "/best-seo-tools-for-agencies",
         "type": "guide",
         "lane": "relevance-and-authority",
-        "priorityScore": 134.11,
-        "impressions": 2312,
+        "priorityScore": 134.19,
+        "impressions": 2323,
         "clicks": 0,
-        "position": 80.2366,
+        "position": 80.257,
         "monetized": false,
         "monetizedSlugs": [],
         "actions": [

@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-05T11:19:11.722Z",
+  "generatedAt": "2026-10-05T11:28:05.411Z",
   "engine": "ToolScout Search and Answer Opportunity Engine v6",
   "objective": "Autonomously pursue sustainable search rankings and qualified clicks while separating indexing failures from content-performance failures.",
   "acquisitionTruth": {
     "status": "early-search-acquisition",
     "searchClicks": 7,
-    "searchImpressions": 6480,
-    "ctr": 0.108,
+    "searchImpressions": 6491,
+    "ctr": 0.1078,
     "gscStartDate": "2026-09-08",
     "gscEndDate": "2026-10-05",
     "gscDataState": "all",
@@ -34,7 +34,7 @@
     "observedGscIntents": 39,
     "observedGscPages": 139,
     "searchClicks": 7,
-    "searchImpressions": 6480,
+    "searchImpressions": 6491,
     "organicAcquisitionStatus": "early-search-acquisition",
     "indexingRecovery": 1,
     "actionableOpportunities": 20,
@@ -45,7 +45,7 @@
     "strikingMeaningful": 0,
     "strikingLowSample": 1,
     "authorityDepthOpportunities": 13,
-    "competitorResearchCandidates": 28
+    "competitorResearchCandidates": 25
   },
   "opportunities": [
     {
@@ -143,10 +143,10 @@
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 2312,
+        "impressions": 2323,
         "clicks": 0,
         "ctr": 0,
-        "position": 80.2366,
+        "position": 80.257,
         "opportunity": "relevance-gap",
         "opportunityScore": 32,
         "meaningfulSample": true,
@@ -1710,7 +1710,7 @@
     },
     {
       "intent": "best-ai-assistants",
-      "priorityScore": 28,
+      "priorityScore": 29,
       "lane": "measure",
       "action": "measure-and-recheck",
       "reason": "No strong observed-search trigger yet. Continue automatic measurement.",
@@ -1752,7 +1752,7 @@
       "topTools": [
         "cosupport-ai",
         "lorka-ai",
-        "paioclaw"
+        "questie-ai"
       ]
     },
     {
@@ -2827,9 +2827,9 @@
       "pathname": "/best-seo-tools-for-agencies",
       "type": "guide",
       "clicks": 0,
-      "impressions": 2312,
+      "impressions": 2323,
       "ctr": 0,
-      "position": 80.2366,
+      "position": 80.257,
       "topQueries": [
         {
           "query": "best seo tools for agency",
@@ -2840,8 +2840,8 @@
         {
           "query": "seo software for agencies",
           "clicks": 0,
-          "impressions": 151,
-          "position": 88.1325
+          "impressions": 153,
+          "position": 88.0719
         },
         {
           "query": "seo tools for agency",
@@ -2867,7 +2867,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 28.815,
+      "opportunityScore": 28.945,
       "outcome": "visibility-only"
     },
     {
@@ -4333,7 +4333,7 @@
     },
     {
       "intent": "best-ai-assistants",
-      "priorityScore": 28,
+      "priorityScore": 29,
       "lane": "measure",
       "action": "measure-and-recheck",
       "indexingSignal": null,
@@ -4567,42 +4567,6 @@
       "sources": [
         "Capterra",
         "Dynamite AI"
-      ],
-      "action": "auto-research-only",
-      "ownerActionRequired": false,
-      "publishGate": "Require distinct observed intent, verified catalog evidence, non-duplication, semantic eligibility and useful decision context before autonomous publication.",
-      "reason": "Competitor patterns are research signals, not publication evidence."
-    },
-    {
-      "candidate": "paioclaw",
-      "competitorMentions": 2,
-      "sources": [
-        "Futurepedia",
-        "Aixploria"
-      ],
-      "action": "auto-research-only",
-      "ownerActionRequired": false,
-      "publishGate": "Require distinct observed intent, verified catalog evidence, non-duplication, semantic eligibility and useful decision context before autonomous publication.",
-      "reason": "Competitor patterns are research signals, not publication evidence."
-    },
-    {
-      "candidate": "pine-ai",
-      "competitorMentions": 2,
-      "sources": [
-        "Futurepedia",
-        "Aixploria"
-      ],
-      "action": "auto-research-only",
-      "ownerActionRequired": false,
-      "publishGate": "Require distinct observed intent, verified catalog evidence, non-duplication, semantic eligibility and useful decision context before autonomous publication.",
-      "reason": "Competitor patterns are research signals, not publication evidence."
-    },
-    {
-      "candidate": "pixmax-ai",
-      "competitorMentions": 2,
-      "sources": [
-        "Futurepedia",
-        "Aixploria"
       ],
       "action": "auto-research-only",
       "ownerActionRequired": false,

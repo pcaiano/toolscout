@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T11:17:10.103Z",
+  "generatedAt": "2026-10-05T11:26:40.518Z",
   "methodology": "Public sitemap URL patterns only, with robots.txt sitemap discovery, bounded recursive sitemap-index expansion and entity-level deduplication against the ToolScout catalog. Competitor content is not copied or used for editorial conclusions. Repeated URL themes are market-coverage signals and must pass first-party verification and ToolScout quality gates before publication.",
   "sources": [
     {
@@ -69,8 +69,8 @@
       "sampledUrls": 750
     }
   ],
-  "suppressedCovered": 45,
-  "count": 28,
+  "suppressedCovered": 51,
+  "count": 25,
   "gaps": [
     {
       "slug": "ai-background-remover",
@@ -242,48 +242,6 @@
         "https://www.capterra.com/app-building-software/features/no-code/",
         "https://www.capterra.com/business-process-management-software/features/no-code/",
         "https://dynamite-ai.com/categories/no-code"
-      ]
-    },
-    {
-      "slug": "paioclaw",
-      "candidateType": "software-entity",
-      "entityKey": "paioclaw",
-      "mentions": 2,
-      "sources": [
-        "Futurepedia",
-        "Aixploria"
-      ],
-      "exampleUrls": [
-        "https://www.futurepedia.io/tool/paioclaw",
-        "https://www.aixploria.com/paioclaw/"
-      ]
-    },
-    {
-      "slug": "pine-ai",
-      "candidateType": "software-entity",
-      "entityKey": "pine",
-      "mentions": 2,
-      "sources": [
-        "Futurepedia",
-        "Aixploria"
-      ],
-      "exampleUrls": [
-        "https://www.futurepedia.io/tool/pine-ai",
-        "https://www.aixploria.com/pine-ai/"
-      ]
-    },
-    {
-      "slug": "pixmax-ai",
-      "candidateType": "software-entity",
-      "entityKey": "pixmax",
-      "mentions": 2,
-      "sources": [
-        "Futurepedia",
-        "Aixploria"
-      ],
-      "exampleUrls": [
-        "https://www.futurepedia.io/tool/pixmax-ai",
-        "https://www.aixploria.com/pixmax-ai/"
       ]
     },
     {
