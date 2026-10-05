@@ -80,7 +80,7 @@ import {handleCatalogAutonomyRoute} from './catalog-autonomy-worker.js';
 import {handleFunnelRuntimeRoute} from './funnel-worker.js';
 import {handleDynamicRuntimeRoute} from './dynamic-worker.js';
 import {transformComparisonAiResponse} from './comparison-ai-runtime.js';
-import {transformPublicRedesignResponse} from './public-redesign-runtime.js';
+import {transformPublicOutboundPolicyResponse,transformPublicRedesignResponse} from './public-redesign-runtime.js';
 import {handleNewsletterRoute,runNewsletterHubSpotSync} from './newsletter-runtime-worker.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
@@ -108,7 +108,8 @@ async function publicAssetPipeline(request,env,ctx){
   response=await transformSeoPublicPage(request,response,env);
   if(request.method==='GET')response=await transformComparisonAiResponse(request,response,env);
   if(request.method==='GET')response=await transformPublicRedesignResponse(request,response);
-  if(request.method==='GET')return injectToolScoutSocialFooter(response);
+  if(request.method==='GET')response=await injectToolScoutSocialFooter(response);
+  if(request.method==='GET')return transformPublicOutboundPolicyResponse(request,response);
   return response;
 }
 const OVERFLOW_CRON=TOOLSCOUT_CRONS.primaryGrowth;
@@ -2374,6 +2375,7 @@ async function earlyOwnedRoute(request,env,ctx){
   if(!response)return null;
   if(request.method==='GET'&&(ownership.owner==='public_decision'||ownership.owner==='public_navigation')){
     response=await transformPublicRedesignResponse(request,response);
+    response=await transformPublicOutboundPolicyResponse(request,response);
   }
   const headers=new Headers(response.headers);
   headers.set('X-ToolScout-Route-Owner',ownership.owner);
