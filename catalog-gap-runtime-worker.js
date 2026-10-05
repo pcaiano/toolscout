@@ -184,6 +184,51 @@ function detectFreePlan(text,hint){
   if(/\bfree plan\b|\bfree tier\b|\bfree version\b/.test(t))return{freePlan:true,freePlanKnown:true};
   return{freePlan:false,freePlanKnown:false};
 }
+function aiEvidenceLinkScore(url,label){
+  const text=(String(label||'')+' '+String(url||'')).toLowerCase();
+  let score=0;
+  for(const re of [/\bmcp\b|model.context.protocol/,/chatgpt|openai/,/claude|anthropic/,/gemini|google.ai/,/ai.agent|agentic|agents/,/integrat|connector|plugin/,/developer|api|sdk/])if(re.test(text))score+=4;
+  return score;
+}
+async function aiEvidencePages(official){
+  const pages=[official],root=(()=>{try{return new URL(official.url)}catch{return null}})();if(!root)return pages;
+  const candidates=new Map(),re=/<a\b[^>]*href=["']([^"'#]+)["'][^>]*>([\s\S]*?)<\/a>/gi;let m;
+  while((m=re.exec(String(official.html||'')))){
+    let u;try{u=new URL(m[1],root)}catch{continue}
+    if(u.protocol!=='https:'||u.hostname.replace(/^www\./,'')!==root.hostname.replace(/^www\./,''))continue;
+    const label=strip(m[2]).slice(0,180),score=aiEvidenceLinkScore(u.toString(),label);if(score<4)continue;
+    const key=u.origin+u.pathname,row=candidates.get(key)||{url:u.toString(),score:0};row.score=Math.max(row.score,score);candidates.set(key,row);
+  }
+  const targets=[...candidates.values()].sort((a,b)=>b.score-a.score).slice(0,2);
+  const extra=await Promise.all(targets.map(x=>fetchPage(x.url)));
+  return pages.concat(extra.filter(Boolean));
+}
+function aiIntegrationFromPages(name,pages){
+  const corpus=pages.map(p=>String(p?.title||'')+' '+String(p?.description||'')+' '+String(p?.text||'')).join(' ').toLowerCase();
+  const bridge=/\b(integrat(?:e|es|ed|ion|ions)|connector|connects? to|works? with|plugin|extension|mcp|model context protocol|agent tool|ai agent|agentic)\b/;
+  const assistants=[];
+  if(/\b(chatgpt|openai)\b/.test(corpus)&&bridge.test(corpus)&&!/^(chatgpt|openai)$/i.test(String(name||'').trim()))assistants.push('ChatGPT');
+  if(/\b(claude|anthropic)\b/.test(corpus)&&bridge.test(corpus)&&!/^(claude|anthropic)$/i.test(String(name||'').trim()))assistants.push('Claude');
+  if(/\b(gemini|google ai)\b/.test(corpus)&&bridge.test(corpus)&&!/^(gemini|google ai studio)$/i.test(String(name||'').trim()))assistants.push('Gemini');
+  const mcp=/\bmodel context protocol\b|\bmcp (?:server|client|connector|integration|support)\b/.test(corpus)?'official':'unknown';
+  const agentBridge=/\b(ai agent|agentic|agent tools?|agent connector|agent integration)\b/.test(corpus)&&bridge.test(corpus);
+  const publicApi=/\b(api|sdk)\b/.test(corpus)&&/developer|developers|documentation|docs|platform/.test(corpus)?true:null;
+  const verified=mcp==='official'||assistants.length>0||agentBridge;
+  const tier=!verified?'unknown':(mcp==='official'||assistants.length>=2?'strong':'moderate');
+  const signalPages=pages.filter(p=>{const t=(String(p?.title||'')+' '+String(p?.description||'')+' '+String(p?.text||'')).toLowerCase();return /mcp|model context protocol|chatgpt|openai|claude|anthropic|gemini|google ai|ai agent|agentic|agent tool/.test(t)&&bridge.test(t)});
+  const sources=[...new Set((signalPages.length?signalPages:verified?pages.slice(0,1):[]).map(p=>p?.url).filter(Boolean))].slice(0,3);
+  const subject=assistants.length?' with '+assistants.join(', '):mcp==='official'?' through an official MCP surface':agentBridge?' for AI-agent workflows':'';
+  return{
+    status:verified?'verified':'unverified',
+    tier,
+    mcp,
+    publicApi,
+    assistants,
+    summary:verified?`${name} has first-party evidence of AI interoperability${subject}. Verify current permissions and feature scope before depending on it in production.`:'ToolScout has not yet verified this tool\'s current ChatGPT, Claude, Gemini, MCP or agent integration options.',
+    verifiedAt:verified?new Date().toISOString().slice(0,10):null,
+    sources
+  };
+}
 function editorialReview(profile){
   const entries=Object.entries(profile.scores||{}).filter(([,v])=>Number.isFinite(Number(v))).sort((a,b)=>Number(b[1])-Number(a[1]));
   const label={price:'value for money',ease:'ease of use',automation:'automation',integrations:'integrations',sales:'sales capability',ai:'AI capability',marketing:'marketing capability',seo:'SEO capability',research:'research capability',content:'content capability',agency:'agency fit'};
@@ -240,6 +285,8 @@ export async function executeCatalogGrowthTask(env,task={}){
   const verifiedFeatures=[...new Set(evidenceFeatures)].filter(Boolean).slice(0,10);
   const description=clean(hint?.description||(official.description.length>=60?official.description:(name+' provides '+verifiedFeatures.slice(0,4).join(', ')+'.')));
   const free=detectFreePlan(corpus,hint);
+  const aiPages=await aiEvidencePages(official);
+  const aiIntegration=aiIntegrationFromPages(name,aiPages);
   const profile={
     slug,name,category:cat,description,
     pricing:hint?.pricing||(free.freePlan?'Free plan available; paid plans may vary. See vendor for current pricing.':'See vendor for current pricing.'),
@@ -248,6 +295,7 @@ export async function executeCatalogGrowthTask(env,task={}){
     sourceUrl:hint?.sourceUrl||official.url,verificationUrl:official.url,
     lastVerified:new Date().toISOString().slice(0,10),
     scores:fullScores(cat,verifiedFeatures,hint?.scores),
+    aiIntegration,
     rankingEligible:true,comparisonEligible:true,directOfficialCta:false,
     provenance:{mode:'verified_catalog_runtime',admittedAt:new Date().toISOString(),marketSignals:{count:Number(gap.signals||0),sources},affiliateNeutral:true,competitorContentUsedForEditorialFacts:false,reviewMethod:'first_party_verified_structured_profile_v2'}
   };
@@ -262,6 +310,6 @@ export async function executeCatalogGrowthTask(env,task={}){
   await env.DB.prepare("INSERT INTO catalog_runtime_state(tool_slug,source_url,source_status,http_status,final_url,quality_status,static_last_verified,last_checked_at,updated_at) VALUES(?,?,'ok',200,?,'healthy',date('now'),datetime('now'),datetime('now')) ON CONFLICT(tool_slug) DO UPDATE SET source_url=excluded.source_url,source_status='ok',http_status=200,final_url=excluded.final_url,quality_status='healthy',static_last_verified=date('now'),last_checked_at=datetime('now'),updated_at=datetime('now')").bind(slug,official.url,official.url).run().catch(()=>{});
   await env.DB.prepare("UPDATE catalog_market_gaps SET status='published',updated_at=datetime('now') WHERE tool_slug=?").bind(slug).run();
   const toolscoutUrl=BASE+'/tools/'+slug;
-  await event(env,slug,name+' added automatically as a full ToolScout catalog profile after first-party verification and scoring.',{slug,name,source_url:official.url,toolscout_url:toolscoutUrl,category:cat,market_signals:Number(gap.signals||0),verified_capabilities:verifiedFeatures,logo_url:profile.logoUrl,logo_provenance:profile.logoProvenance});
+  await event(env,slug,name+' added automatically as a full ToolScout catalog profile after first-party verification and scoring.',{slug,name,source_url:official.url,toolscout_url:toolscoutUrl,category:cat,market_signals:Number(gap.signals||0),verified_capabilities:verifiedFeatures,ai_interoperability:profile.aiIntegration,logo_url:profile.logoUrl,logo_provenance:profile.logoProvenance});
   return{ok:true,verified:true,admitted:true,slug,profile,toolscoutUrl};
 }

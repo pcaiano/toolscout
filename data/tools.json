@@ -35,6 +35,16 @@
       "research": 2,
       "content": 8,
       "agency": 7
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -75,6 +85,16 @@
       "research": 5,
       "content": 10,
       "agency": 7
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -114,6 +134,23 @@
       "research": 4,
       "content": 7,
       "agency": 9
+    },
+    "aiIntegration": {
+      "status": "verified",
+      "tier": "strong",
+      "mcp": "official",
+      "publicApi": true,
+      "assistants": [
+        "ChatGPT",
+        "Claude",
+        "Gemini"
+      ],
+      "summary": "HubSpot offers official connectors for ChatGPT, Claude and Gemini, plus a remote MCP server for compatible AI clients and agents.",
+      "verifiedAt": "2026-10-05",
+      "sources": [
+        "https://ecosystem.hubspot.com/marketplace/featured/hubspot-connectors",
+        "https://developers.hubspot.com/docs/apps/developer-platform/build-apps/integrate-with-the-remote-hubspot-mcp-server"
+      ]
     }
   },
   {
@@ -153,6 +190,16 @@
       "research": 2,
       "content": 4,
       "agency": 7
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -191,6 +238,16 @@
       "research": 6,
       "content": 9,
       "agency": 9
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -230,6 +287,16 @@
       "research": 3,
       "content": 2,
       "agency": 7
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -270,6 +337,16 @@
       "research": 10,
       "content": 9,
       "agency": 10
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -307,6 +384,16 @@
       "research": 4,
       "content": 10,
       "agency": 9
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -345,6 +432,16 @@
       "research": 2,
       "content": 7,
       "agency": 8
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -382,6 +479,16 @@
       "research": 3,
       "content": 7,
       "agency": 9
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -420,6 +527,16 @@
       "research": 4,
       "content": 8,
       "agency": 7
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -458,6 +575,22 @@
       "research": 2,
       "content": 3,
       "agency": 10
+    },
+    "aiIntegration": {
+      "status": "verified",
+      "tier": "strong",
+      "mcp": "official",
+      "publicApi": true,
+      "assistants": [
+        "ChatGPT",
+        "Claude"
+      ],
+      "summary": "Zapier MCP lets compatible AI clients such as ChatGPT and Claude discover and run actions across Zapier's connected app ecosystem.",
+      "verifiedAt": "2026-10-05",
+      "sources": [
+        "https://help.zapier.com/hc/en-us/articles/48308034391821-What-is-Zapier-MCP",
+        "https://zapier.com/mcp"
+      ]
     }
   },
   {
@@ -495,6 +628,23 @@
       "research": 2,
       "content": 2,
       "agency": 10
+    },
+    "aiIntegration": {
+      "status": "verified",
+      "tier": "strong",
+      "mcp": "official",
+      "publicApi": true,
+      "assistants": [
+        "ChatGPT",
+        "Claude"
+      ],
+      "summary": "Make exposes scenarios and tools through an official MCP server and supports AI workflows from ChatGPT and Claude.",
+      "verifiedAt": "2026-10-05",
+      "sources": [
+        "https://www.make.com/en/mcp",
+        "https://help.make.com/make-now-a-built-in-connector-on-anthropic-claude",
+        "https://help.make.com/official-make-plugin-for-chatgpt-is-now-available"
+      ]
     }
   },
   {
@@ -533,6 +683,16 @@
       "research": 3,
       "content": 2,
       "agency": 8
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -571,6 +731,16 @@
       "research": 2,
       "content": 2,
       "agency": 9
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -608,6 +778,16 @@
       "research": 9,
       "content": 5,
       "agency": 8
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -645,6 +825,16 @@
       "research": 5,
       "content": 3,
       "agency": 7
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -683,6 +873,16 @@
       "research": 10,
       "content": 8,
       "agency": 10
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -720,6 +920,16 @@
       "research": 9,
       "content": 7,
       "agency": 9
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -759,6 +969,16 @@
       "research": 3,
       "content": 5,
       "agency": 9
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -802,6 +1022,16 @@
       "research": 9,
       "content": 9,
       "agency": 7
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -845,6 +1075,16 @@
       "research": 2,
       "content": 2,
       "agency": 8
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -888,6 +1128,16 @@
       "research": 9,
       "content": 3,
       "agency": 7
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -933,6 +1183,16 @@
       "research": 7,
       "content": 9,
       "agency": 8
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -978,6 +1238,16 @@
       "research": 4,
       "content": 4,
       "agency": 9
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -1023,6 +1293,16 @@
       "research": 2,
       "content": 5,
       "agency": 7
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -1067,6 +1347,16 @@
       "research": 7,
       "content": 5,
       "agency": 9
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -1111,6 +1401,18 @@
       "research": 4,
       "content": 3,
       "agency": 10
+    },
+    "aiIntegration": {
+      "status": "verified",
+      "tier": "strong",
+      "mcp": "official",
+      "publicApi": true,
+      "assistants": [],
+      "summary": "n8n includes MCP client and MCP server capabilities alongside AI Agent tooling, making it suitable for agentic automation and AI tool orchestration.",
+      "verifiedAt": "2026-10-05",
+      "sources": [
+        "https://docs.n8n.io/"
+      ]
     }
   },
   {
@@ -1154,6 +1456,16 @@
       "research": 9,
       "content": 4,
       "agency": 9
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -1199,6 +1511,16 @@
       "research": 8,
       "content": 6,
       "agency": 10
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -1245,6 +1567,16 @@
       "research": 5,
       "content": 6,
       "agency": 8
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -1290,6 +1622,16 @@
       "research": 5,
       "content": 5,
       "agency": 8
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -1334,6 +1676,16 @@
       "research": 8,
       "content": 5,
       "agency": 10
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -1379,6 +1731,16 @@
       "research": 3,
       "content": 9,
       "agency": 7
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -1424,6 +1786,16 @@
       "research": 6,
       "content": 8,
       "agency": 9
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -1471,6 +1843,16 @@
       "research": 3,
       "content": 10,
       "agency": 9
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -1516,6 +1898,23 @@
       "research": 6,
       "content": 7,
       "agency": 9
+    },
+    "aiIntegration": {
+      "status": "verified",
+      "tier": "strong",
+      "mcp": "official",
+      "publicApi": true,
+      "assistants": [
+        "OpenAI Codex",
+        "Claude Code",
+        "Claude Desktop"
+      ],
+      "summary": "Official Figma MCP support lets compatible AI clients read design context and, in supported clients, write native Figma content.",
+      "verifiedAt": "2026-10-05",
+      "sources": [
+        "https://developers.figma.com/docs/figma-mcp-server/",
+        "https://developers.figma.com/docs/figma-mcp-server/remote-server-installation/"
+      ]
     }
   },
   {
@@ -1559,6 +1958,16 @@
       "research": 6,
       "content": 10,
       "agency": 7
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -1603,6 +2012,16 @@
       "research": 5,
       "content": 10,
       "agency": 9
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -1647,6 +2066,16 @@
       "research": 3,
       "content": 8,
       "agency": 10
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -1689,6 +2118,16 @@
       "research": 9,
       "content": 10,
       "agency": 10
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -1731,6 +2170,16 @@
       "research": 10,
       "content": 3,
       "agency": 7
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -1774,6 +2223,16 @@
       "research": 4,
       "content": 5,
       "agency": 8
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -1819,6 +2278,16 @@
       "research": 3,
       "content": 8,
       "agency": 9
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -1862,6 +2331,16 @@
       "research": 10,
       "content": 8,
       "agency": 7
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -1908,6 +2387,16 @@
       "research": 4,
       "content": 6,
       "agency": 9
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -1951,6 +2440,16 @@
       "research": 8,
       "content": 4,
       "agency": 7
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -1995,6 +2494,16 @@
       "research": 4,
       "content": 7,
       "agency": 9
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -2040,6 +2549,16 @@
       "research": 2,
       "content": 9,
       "agency": 8
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -2085,6 +2604,16 @@
       "research": 7,
       "content": 7,
       "agency": 9
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -2124,6 +2653,16 @@
       "research": 7,
       "content": 8,
       "agency": 10
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -2163,6 +2702,16 @@
       "research": 9,
       "content": 8,
       "agency": 10
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -2202,6 +2751,16 @@
       "research": 5,
       "content": 9,
       "agency": 8
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -2242,6 +2801,16 @@
       "research": 4,
       "content": 9,
       "agency": 9
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -2282,6 +2851,16 @@
       "research": 9,
       "content": 4,
       "agency": 8
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -2322,6 +2901,16 @@
       "research": 10,
       "content": 3,
       "agency": 8
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -2362,6 +2951,16 @@
       "research": 7,
       "content": 3,
       "agency": 7
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -2403,6 +3002,16 @@
       "research": 8,
       "content": 3,
       "agency": 8
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -2444,6 +3053,23 @@
       "research": 8,
       "content": 4,
       "agency": 8
+    },
+    "aiIntegration": {
+      "status": "verified",
+      "tier": "strong",
+      "mcp": "official",
+      "publicApi": true,
+      "assistants": [
+        "OpenAI Codex",
+        "Claude Code",
+        "Claude Desktop",
+        "Google Gemini CLI"
+      ],
+      "summary": "GitHub's official MCP server connects compatible AI assistants to repositories, issues, pull requests, Actions and other GitHub workflows.",
+      "verifiedAt": "2026-10-05",
+      "sources": [
+        "https://github.com/github/github-mcp-server"
+      ]
     }
   },
   {
@@ -2484,6 +3110,16 @@
       "research": 7,
       "content": 3,
       "agency": 8
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -2525,6 +3161,16 @@
       "research": 5,
       "content": 4,
       "agency": 6
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -2565,6 +3211,16 @@
       "research": 4,
       "content": 3,
       "agency": 8
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -2605,6 +3261,16 @@
       "research": 3,
       "content": 3,
       "agency": 9
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -2645,6 +3311,16 @@
       "research": 8,
       "content": 2,
       "agency": 7
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -2688,6 +3364,16 @@
       "research": 10,
       "content": 10,
       "agency": 9
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -2729,6 +3415,16 @@
       "research": 10,
       "content": 9,
       "agency": 8
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -2769,6 +3465,16 @@
       "research": 10,
       "content": 8,
       "agency": 6
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -2809,6 +3515,16 @@
       "research": 5,
       "content": 10,
       "agency": 9
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -2848,6 +3564,16 @@
       "research": 9,
       "content": 8,
       "agency": 9
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -2887,6 +3613,16 @@
       "research": 8,
       "content": 8,
       "agency": 7
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -2926,6 +3662,16 @@
       "research": 9,
       "content": 7,
       "agency": 7
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -2966,6 +3712,16 @@
       "research": 10,
       "content": 5,
       "agency": 10
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -3006,6 +3762,16 @@
       "research": 2,
       "content": 8,
       "agency": 7
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -3046,6 +3812,16 @@
       "research": 2,
       "content": 9,
       "agency": 7
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -3086,6 +3862,16 @@
       "research": 3,
       "content": 10,
       "agency": 8
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -3125,6 +3911,16 @@
       "research": 4,
       "content": 5,
       "agency": 8
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -3164,6 +3960,16 @@
       "research": 4,
       "content": 5,
       "agency": 8
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -3204,6 +4010,16 @@
       "research": 3,
       "content": 5,
       "agency": 8
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -3244,6 +4060,16 @@
       "research": 6,
       "content": 5,
       "agency": 9
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -3284,6 +4110,16 @@
       "research": 3,
       "content": 3,
       "agency": 8
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -3324,6 +4160,16 @@
       "research": 3,
       "content": 3,
       "agency": 7
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -3364,6 +4210,16 @@
       "research": 3,
       "content": 3,
       "agency": 8
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -3404,6 +4260,16 @@
       "research": 4,
       "content": 3,
       "agency": 8
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -3444,6 +4310,16 @@
       "research": 3,
       "content": 9,
       "agency": 8
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -3484,6 +4360,16 @@
       "research": 3,
       "content": 8,
       "agency": 8
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -3523,6 +4409,16 @@
       "research": 3,
       "content": 8,
       "agency": 9
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -3563,6 +4459,16 @@
       "research": 3,
       "content": 8,
       "agency": 7
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -3603,6 +4509,16 @@
       "research": 2,
       "content": 5,
       "agency": 9
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -3643,6 +4559,16 @@
       "research": 3,
       "content": 4,
       "agency": 10
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -3683,6 +4609,16 @@
       "research": 4,
       "content": 3,
       "agency": 7
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -3723,6 +4659,16 @@
       "research": 4,
       "content": 3,
       "agency": 8
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -3763,6 +4709,16 @@
       "research": 2,
       "content": 3,
       "agency": 9
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -3802,6 +4758,16 @@
       "research": 2,
       "content": 3,
       "agency": 8
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -3842,6 +4808,16 @@
       "research": 5,
       "content": 3,
       "agency": 8
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -3882,6 +4858,16 @@
       "research": 5,
       "content": 5,
       "agency": 9
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -3922,6 +4908,16 @@
       "research": 6,
       "content": 4,
       "agency": 8
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -3962,6 +4958,16 @@
       "research": 3,
       "content": 6,
       "agency": 9
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -4002,6 +5008,16 @@
       "research": 3,
       "content": 8,
       "agency": 10
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -4042,6 +5058,16 @@
       "research": 2,
       "content": 10,
       "agency": 8
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -4083,6 +5109,16 @@
       "research": 3,
       "content": 10,
       "agency": 8
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -4122,6 +5158,16 @@
       "research": 1,
       "content": 8,
       "agency": 4
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -4168,6 +5214,16 @@
       "research": 4,
       "content": 8,
       "agency": 10
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -4216,6 +5272,16 @@
       "admittedAt": "2026-09-23T00:00:00Z",
       "affiliateNeutral": true,
       "reviewMethod": "first_party_verified_structured_profile_v2"
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -4264,6 +5330,16 @@
       "admittedAt": "2026-09-23T00:00:00Z",
       "affiliateNeutral": true,
       "reviewMethod": "first_party_verified_structured_profile_v2"
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -4312,6 +5388,16 @@
       "admittedAt": "2026-09-23T00:00:00Z",
       "affiliateNeutral": true,
       "reviewMethod": "first_party_verified_structured_profile_v2"
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -4360,6 +5446,16 @@
       "admittedAt": "2026-09-23T00:00:00Z",
       "affiliateNeutral": true,
       "reviewMethod": "first_party_verified_structured_profile_v2"
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -4413,6 +5509,16 @@
         ]
       },
       "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -4466,6 +5572,16 @@
         ]
       },
       "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -4525,6 +5641,16 @@
         ]
       },
       "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -4584,6 +5710,16 @@
         ]
       },
       "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -4637,6 +5773,16 @@
         ]
       },
       "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   },
   {
@@ -4691,6 +5837,16 @@
         ]
       },
       "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
     }
   }
 ]
