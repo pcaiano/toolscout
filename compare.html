@@ -12,6 +12,16 @@ function pairSlug(a,b){return (String(a).slice(0,44)+'-vs-'+String(b).slice(0,44
 const comparisonDimensions=['price','ease','automation','integrations','sales','ai','marketing','seo','research','content','agency'];
 const dimensionLabel={price:'price',ease:'ease of use',automation:'automation',integrations:'integrations',sales:'sales workflows',ai:'AI capabilities',marketing:'marketing',seo:'SEO',research:'research',content:'content workflows',agency:'agency fit'};
 function listPhrase(items){const xs=(items||[]).filter(Boolean);if(xs.length<=1)return xs[0]||'workflow fit';if(xs.length===2)return xs[0]+' and '+xs[1];return xs.slice(0,-1).join(', ')+', and '+xs[xs.length-1]}
+function aiProfile(t){return t?.aiIntegration&&typeof t.aiIntegration==='object'?t.aiIntegration:{status:'unverified',tier:'unknown',assistants:[],mcp:'unknown'};}
+function aiTier(t){const p=aiProfile(t);if(p.status!=='verified')return'Not yet verified';return p.tier==='strong'?'Strong':p.tier==='moderate'?'Moderate':p.tier==='limited'?'Limited':'Verified'}
+function aiAssistants(t){const xs=aiProfile(t).assistants||[];return xs.length?listPhrase(xs):'No named assistant client recorded'}
+function aiMcp(t){const v=aiProfile(t).mcp;return v==='official'?'Official MCP':v==='community'?'Community MCP':'Not verified'}
+function aiComparisonSentence(a,b){
+  const ap=aiProfile(a),bp=aiProfile(b),rank={unknown:0,limited:1,moderate:2,strong:3},av=rank[ap.tier]||0,bv=rank[bp.tier]||0;
+  if(ap.status!=='verified'&&bp.status!=='verified')return'ToolScout has not yet verified AI assistant or agent interoperability for either product, so this factor should not be used to choose between them yet.';
+  if(av===bv)return aiTier(a)+' AI interoperability is recorded for '+a.name+' and '+aiTier(b).toLowerCase()+' for '+b.name+'. Check the named assistant and MCP routes against the workflow you plan to automate.';
+  const winner=av>bv?a:b,other=av>bv?b:a;return winner.name+' currently has the stronger verified AI interoperability profile. '+other.name+' may still fit better on product capability, price or workflow depth.';
+}
 function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function editorialConclusion(a,b){
   const aWins=comparisonDimensions.filter(key=>Number(a.scores?.[key]||0)>Number(b.scores?.[key]||0)).slice(0,3).map(key=>dimensionLabel[key]||key);
@@ -22,7 +32,8 @@ function editorialConclusion(a,b){
   const bFeatures=new Set((b.features||[]).map(v=>String(v).toLowerCase()));
   const overlap=(a.features||[]).filter(v=>bFeatures.has(String(v).toLowerCase())).slice(0,3);
   const third=overlap.length?'Because both list '+listPhrase(overlap)+', compare the depth of those shared capabilities against your workflow before choosing.':'Compare the products against your actual workflow, feature requirements and current commercial terms before choosing.';
-  return [first,second,third].filter(Boolean).join(' ');
+  const fourth=aiComparisonSentence(a,b);
+  return [first,second,third,fourth].filter(Boolean).join(' ');
 }
 function decisionGuidance(a,b){
   const ranked=comparisonDimensions
@@ -116,7 +127,7 @@ async function boot(){
     const x=tools.find(t=>t.slug===a.value),y=tools.find(t=>t.slug===b.value);if(!x||!y)return;
     updateUrl();
     const pair=pairSlug(x.slug,y.slug);pairNote.innerHTML='<div class="pairNote">Comparing <strong>'+x.name+'</strong> with <strong>'+y.name+'</strong>. Change either selector to explore another pair.</div>';
-    const rows=[['Category',x.category,y.category],['Pricing',x.pricing||'See vendor',y.pricing||'See vendor'],['Free plan',freeLabel(x),freeLabel(y)],['Features',(x.features||[]).join(', '),(y.features||[]).join(', ')],['Best for',(x.bestFor||[]).join(', '),(y.bestFor||[]).join(', ')],['Last verified',x.lastVerified||'Not recorded',y.lastVerified||'Not recorded']];
+    const rows=[['Category',x.category,y.category],['Pricing',x.pricing||'See vendor',y.pricing||'See vendor'],['Free plan',freeLabel(x),freeLabel(y)],['AI interoperability',aiTier(x),aiTier(y)],['AI assistants',aiAssistants(x),aiAssistants(y)],['Agent connectivity',aiMcp(x),aiMcp(y)],['Features',(x.features||[]).join(', '),(y.features||[]).join(', ')],['Best for',(x.bestFor||[]).join(', '),(y.bestFor||[]).join(', ')],['Last verified',x.lastVerified||'Not recorded',y.lastVerified||'Not recorded']];
     const head=t=>{const icon=iconSources(t,assets);const img=icon.src?'<img src="'+icon.src+'" data-first="'+icon.first+'" data-google="'+icon.google+'" data-stage="'+icon.stage+'" alt="'+t.name+' logo" width="25" height="25" loading="lazy" referrerpolicy="no-referrer" onerror="nextIcon(this)">':'';return '<div class="head"><div class="logo"><span class="logo-fallback">'+initials(t.name)+'</span>'+img+'</div>'+t.name+'</div>'};
     const cta=t=>'<div class="actions"><a class="btn secondary" href="./tools/'+encodeURIComponent(t.slug)+'">Profile</a><a class="btn" href="/go/'+encodeURIComponent(t.slug)+'?source=compare" target="_blank" rel="nofollow sponsored noopener">Visit '+t.name+'</a></div>';
     table.innerHTML='<div class="row"><div class="cell label">Compare</div><div class="cell">'+head(x)+cta(x)+'</div><div class="cell">'+head(y)+cta(y)+'</div></div>'+rows.map(r=>'<div class="row"><div class="cell label">'+r[0]+'</div><div class="cell value">'+r[1]+'</div><div class="cell value">'+r[2]+'</div></div>').join('');
