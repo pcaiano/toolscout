@@ -1,6 +1,6 @@
 # ToolScout redesign tooling
 
-Status: bootstrap prepared 2026-10-05.
+Status: installed and pinned 2026-10-05.
 
 ## Purpose
 
@@ -8,7 +8,7 @@ This tooling is for the visual and UX redesign of the existing ToolScout site. I
 
 ## Selected stack
 
-Project-scoped Codex skills:
+Project-scoped Codex skills, committed under `.agents/skills/`:
 
 1. `design-taste-frontend` for visual direction and anti-generic frontend decisions.
 2. `redesign-existing-projects` for an audit-first redesign of an existing site.
@@ -32,17 +32,19 @@ The bootstrap intentionally pins the upstream skill sources used for this redesi
 
 The pinned versions should be reviewed before any future upgrade.
 
-## Install
+## Install and refresh
 
-From the repository root:
+The selected skills are already present under `.agents/skills/`, so a fresh checkout can use them immediately.
+
+To restore or refresh the pinned copies from their upstream sources, run:
 
 ```bash
 bash scripts/setup-redesign-tooling.sh
 ```
 
-The skills are installed only for this repository under `.agents/skills/`.
+The bootstrap is repository-scoped and does not install global skills.
 
-Restart Codex after the first install so project skills are discovered at startup.
+Restart Codex after a first checkout or refresh so project skills are discovered at startup.
 
 ## Verify
 
@@ -69,3 +71,10 @@ Before changing production-facing UI:
 5. Prefer visual-system changes over framework migration.
 6. Verify changed surfaces in desktop and mobile-sized viewports.
 7. Do not call the redesign complete from repository state alone. Verify the deployed public experience.
+
+
+## Third-party handling
+
+The Taste Skill family is vendored from the pinned MIT-licensed upstream snapshot and its license is retained under `docs/third-party/`.
+
+The Web Design Guidelines skill is a ToolScout-specific wrapper that fetches the current Vercel Web Interface Guidelines at review time instead of vendoring Vercel's agent-skill wrapper.
