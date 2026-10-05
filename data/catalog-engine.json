@@ -173,7 +173,7 @@
   ],
   "discovery": {
     "useCompetitiveGapSignals": true,
-    "useAffiliatePipelineOnlyAsVendorRegistry": true,
+    "useAffiliatePipelineOnlyAsVendorRegistry": false,
     "affiliateStatusOrCommissionCannotIncreaseSelectionScore": true,
     "minimumIndependentMarketSignals": 2,
     "maxCompetitiveGapProfilesPerCycle": 3,
@@ -199,6 +199,8 @@
       "combinedAiAndAffiliateBonus": 35,
       "marketSignalPerSource": 6,
       "marketSignalCap": 24
-    }
+    },
+    "useAffiliatePipelineAsResearchPrioritySignal": true,
+    "affiliateStatusCannotAffectAdmissionOrRanking": true
   }
 }
