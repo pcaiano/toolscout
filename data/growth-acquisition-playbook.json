@@ -1,6 +1,6 @@
 {
-  "version": 2,
-  "objective": "Continuously acquire qualified human traffic from existing demand and borrowed audiences, convert that traffic into software decisions and monetized outbound, and reallocate resources only from measured outcomes.",
+  "version": 3,
+  "objective": "Consolidate the public ToolScout 2.0 surface, distribute Finder, Publisher Kit and evidence-rich editorial assets into existing demand and borrowed audiences, and grow qualified humans, independent referring domains and newsletter subscribers before further architecture expansion.",
   "rules": {
     "netNewIdeasRequired": true,
     "automationFirst": true,
@@ -8,7 +8,24 @@
     "noWaitForTrafficThreshold": true,
     "bindOnlyToCanonicalOpportunities": true,
     "scaleAndExploreInParallel": true,
-    "maxTargetsPerPlay": 3
+    "maxTargetsPerPlay": 3,
+    "architectureFreezeByDefault": true,
+    "architectureChangeExceptions": [
+      "production_incident",
+      "integrity_failure",
+      "public_regression",
+      "growth_blocker"
+    ],
+    "primaryGrowthOutcomes": [
+      "strict_verified_human_sessions",
+      "new_verified_referring_domains",
+      "newsletter_subscribers"
+    ],
+    "preferredDistributionAssets": [
+      "finder_embed",
+      "publisher_kit",
+      "editorial_content"
+    ]
   },
   "plays": [
     {
@@ -49,7 +66,12 @@
         "verify_backlink_acquisition",
         "execute_alternate_routes"
       ],
-      "expectedSignal": "new_verified_referring_domains"
+      "expectedSignal": "new_verified_referring_domains",
+      "preferredAssets": [
+        "publisher_kit",
+        "finder_embed",
+        "editorial_content"
+      ]
     },
     {
       "id": "surface-family-expansion",
@@ -68,7 +90,11 @@
         "execute_alternate_routes",
         "publisher_contact_discovery"
       ],
-      "expectedSignal": "new_external_executions_and_ga4_referral_sessions"
+      "expectedSignal": "new_external_executions_and_ga4_referral_sessions",
+      "preferredAssets": [
+        "finder_embed",
+        "publisher_kit"
+      ]
     },
     {
       "id": "vendor-distribution-flywheel",
@@ -107,7 +133,8 @@
         "content_amplification",
         "search_measurement"
       ],
-      "expectedSignal": "gsc_position_and_ga4_organic_sessions"
+      "expectedSignal": "gsc_position_and_ga4_organic_sessions",
+      "amplifyEditorialAssets": true
     },
     {
       "id": "news-demand-capture",
@@ -127,7 +154,8 @@
         "content_amplification",
         "vendor_amplification"
       ],
-      "expectedSignal": "ga4_sessions_from_timely_assets"
+      "expectedSignal": "ga4_sessions_from_timely_assets",
+      "captureNewsletterSubscribers": true
     },
     {
       "id": "index-recovery-amplification",
@@ -185,6 +213,8 @@
     "successChain": [
       "ga4_sessions",
       "strict_attributed_humans",
+      "new_verified_referring_domains",
+      "newsletter_subscribers",
       "verified_outbound",
       "monetized_outbound",
       "confirmed_revenue"
@@ -193,6 +223,19 @@
     "competitiveAcquisitionGap": true,
     "vendorAmplificationLoop": true,
     "channelKillScale": true,
-    "boundedResourceUse": true
+    "boundedResourceUse": true,
+    "operatingFocus": "post-redesign-growth-consolidation",
+    "publicSurfaceTarget": "100_percent_toolscout_2",
+    "primaryAssets": [
+      "finder_embed",
+      "publisher_kit",
+      "editorial_content"
+    ],
+    "primaryOutcomes": [
+      "strict_verified_human_sessions",
+      "new_verified_referring_domains",
+      "newsletter_subscribers"
+    ],
+    "architecturePolicy": "freeze_by_default_unless_incident_regression_or_growth_blocker"
   }
 }
