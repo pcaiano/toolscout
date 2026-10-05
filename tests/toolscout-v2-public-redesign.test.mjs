@@ -145,3 +145,15 @@ test('tools directory keeps the intro concise, shows catalog count and spaces AI
   assert.match(html,/tools? in catalog/);
   assert.match(html,/\.ai-badge\+\.tool-view\{margin-top:16px\}/);
 });
+
+
+test('shared public navigation is isolated from legacy nav CSS and matches homepage spacing',()=>{
+  const runtime=read('public-redesign-runtime.js');
+  assert.match(runtime,/class="ts2-links" role="navigation" aria-label="Primary"/);
+  assert.doesNotMatch(runtime,/<nav class="ts2-links"/);
+  assert.match(runtime,/justify-content:flex-start!important/);
+  assert.match(runtime,/flex:0 0 auto!important/);
+  assert.match(runtime,/height:84px;max-width:1440px/);
+  assert.match(runtime,/min-height:72px;padding:14px 20px 11px/);
+  assert.match(runtime,/font-size:12px;color:#BAC0BA/);
+});
