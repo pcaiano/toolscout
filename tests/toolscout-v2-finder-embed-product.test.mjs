@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {handleDistributionEmbedRoute} from '../distribution-embed-worker.js';
+import {handleDistributionLearningRoute} from '../distribution-learning-worker.js';
 
 const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const tools=read('data/tools.json');
@@ -60,7 +61,7 @@ test('embed telemetry is publisher-attributed and does not require raw queries',
       }
     }
   };
-  const response=await handleDistributionEmbedRoute(new Request('https://trytoolscout.org/api/distribution/embed-event',{
+  const response=await handleDistributionLearningRoute(new Request('https://trytoolscout.org/api/distribution/embed-event',{
     method:'POST',
     headers:{Origin:'https://publisher.example','Content-Type':'text/plain;charset=UTF-8'},
     body:JSON.stringify({embed_type:'finder',event:'results',publisher_id:'publisher-one',mode:'full',result_count:3,intent_slug:'seo-tools'})
