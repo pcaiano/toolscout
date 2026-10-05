@@ -101,3 +101,19 @@ test('tool directory exposes profile and vendor visit actions side by side',()=>
   assert.match(html,/class="tool-visit" href="\/go\/\$\{encodeURIComponent\(t\.slug\)\}\?source=tools-directory"/);
   assert.match(html,/Visit tool ↗/);
 });
+
+
+test('core public hubs do not append SEO link farms beneath the product UI',()=>{
+  const discovery=read('public-discovery-links.js');
+  const seo=read('seo-cloudflare-runtime-worker.js');
+  assert.match(discovery,/\['\/tools','\/guides','\/compare'\]\.includes\(path\)/);
+  assert.doesNotMatch(seo,/if\(\['\/guides','\/tools','\/compare'\]\.includes\(pathname\).*data-toolscout-index-recovery-links/);
+  assert.match(seo,/Do not append search-demand link farms to the visible page/);
+});
+
+test('public social footer stays compact in ToolScout 2.0',()=>{
+  const social=read('social-profiles.js');
+  assert.match(social,/ToolScout elsewhere/);
+  assert.match(social,/margin:24px auto 0/);
+  assert.doesNotMatch(social,/Follow ToolScout/);
+});
