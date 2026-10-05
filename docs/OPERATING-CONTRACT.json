@@ -150,7 +150,7 @@
     "only_operating_contract_listed_github_workflows_may_exist_on_main",
     "render_postgres_runtime_is_not_canonical_business_state",
     "dated_or_snapshot_bound_repair_workflows_cannot_reenter_main_without_contract_change",
-    "distribution_public_embed_owns_embed_assets_and_telemetry",
+    "distribution_public_embed_owns_embed_assets_and_distribution_learning_owns_embed_telemetry",
     "finder_embed_preserves_first_party_intent_and_broad_category_quality_gates",
     "embed_telemetry_never_stores_raw_finder_queries"
   ],
