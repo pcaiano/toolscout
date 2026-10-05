@@ -9,6 +9,7 @@ workers/
 docs/
 scripts/
 .github/
+.agents/
 reports/*
 !reports/gsc-signals.json
 !reports/editorial-authority-portfolio.json
