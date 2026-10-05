@@ -131,3 +131,17 @@ For ToolScout visual or UX redesign work, use the project-scoped redesign stack 
 5. Continue to use the existing Context7 and Chrome DevTools MCP policy above. The skills supplement those tools and do not replace browser verification.
 6. A redesign must preserve current public URLs, canonical behavior, indexed content, structured data, affiliate routes, measurement contracts, and verified acquisition assets unless a separate change to one of those contracts is explicitly approved.
 7. Do not introduce a framework migration merely to achieve the redesign. Prefer the smallest implementation that achieves the approved visual and UX system.
+
+
+## Redesign editorial homepage requirement
+
+For the ToolScout 2.0 homepage redesign, What's New is a first-class editorial surface, not a static gateway card.
+
+1. Use the canonical `data/software-updates.json` feed as the homepage source of truth for current stories.
+2. Surface the latest buyer-relevant updates directly on the homepage as a restrained Software Pulse / editorial feed.
+3. Do not hardcode a second independent story list into the homepage.
+4. Dynamic means fresh data first. Do not require an auto-rotating carousel. Any motion must respect focus, pause behavior and `prefers-reduced-motion`.
+5. Never leave a raw loading placeholder as the only editorial content. Provide a credible fallback state.
+6. Vendor logos may identify stories but must remain subordinate to ToolScout editorial hierarchy.
+7. Preserve affiliate neutrality: partner status must not affect inclusion, ordering or visual prominence.
+8. Detailed design contract: `docs/HOMEPAGE-REDESIGN-2.0.md`.
