@@ -178,3 +178,6 @@ When the operating architecture changes, update this file and the JSON contract 
 57. Public Finder, Compare and Pick embed assets are owned directly by `distribution_public_embed`, while `/api/distribution/embed-event` remains owned by `distribution_learning_runtime`. The Finder embed uses the same intent-recognition and broad-category quality gates as the first-party Finder, so a distributable widget may not introduce default scores or fake personalised precision. Embed telemetry records publisher adoption and interaction evidence without storing raw Finder queries.
 58. `public-visual-integrity.yml` is a daily CI and telemetry workflow for public redesign coverage. It is not a production scheduler and must remain declared in the operating contract while it exists on `main`.
 
+59. The global public navigation includes Tools, Guides, Compare, What's new, Trends and Publisher Kit. Software Trends must not render a second local navigation beneath the shared sticky header.
+60. The canonical sitemap must include both /software-trends-index and /distribution/publisher-kit. Software Trends uses the clean extensionless canonical. Publisher Kit is index,follow. Sitemap changes trigger the first-party Google Search Reality workflow, which includes sitemap URLs in URL Inspection coverage.
+
