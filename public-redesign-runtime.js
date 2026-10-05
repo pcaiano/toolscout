@@ -28,6 +28,19 @@ function publicSurface(pathname){
   if(p==='/distribution/publisher-kit')return'publisher-kit';
   return'public';
 }
+function stripLegacyNavigation(html,surface){
+  let out=String(html||'');
+  // Remove previously injected legacy global navigation. The ToolScout 2.0 shell is the sole primary nav owner.
+  out=out.replace(/<nav\b[^>]*class=["'][^"']*\bts-global-nav\b[^"']*["'][^>]*>[\s\S]*?<\/nav>/gi,'');
+  // Remove old branded nav blocks used by Tools, Compare and other pre-2.0 hubs.
+  out=out.replace(/<nav\b[^>]*>[\s\S]*?<a\b(?=[^>]*class=["']brand["'])(?=[^>]*href=["']\/["'])[^>]*>\s*ToolScout\s*<\/a>[\s\S]*?<\/nav>/gi,'');
+  // What's New and software-news pages used a .top wrapper containing the legacy brand/nav pair.
+  if(surface==='whats-new'||surface==='news'){
+    out=out.replace(/<div\b[^>]*class=["'][^"']*\btop\b[^"']*["'][^>]*>[\s\S]*?<a\b(?=[^>]*class=["']brand["'])(?=[^>]*href=["']\/["'])[^>]*>\s*ToolScout\s*<\/a>[\s\S]*?<\/div>/gi,'');
+  }
+  return out;
+}
+
 function stripCommercialVendorSourceLinks(html){
   let out=String(html||'');
   out=out.replace(/(<section\b[^>]*data-toolscout-editorial-evidence=["']1["'][^>]*>)([\s\S]*?)(<\/section>)/gi,(match,open,body,close)=>open+body.replace(/<a\b[^>]*href=["']https?:\/\/[^"']+["'][^>]*>([\s\S]*?)<\/a>/gi,'$1')+close);
@@ -253,9 +266,10 @@ export async function transformPublicRedesignResponse(request,response){
   if(!isPublicVisualPath(url.pathname))return response;
   let html=await response.text();
   if(!/<body\b/i.test(html))return response;
+  const surface=publicSurface(url.pathname);
+  html=stripLegacyNavigation(html,surface);
   if(isCommercialDecisionPath(url.pathname))html=stripCommercialVendorSourceLinks(html);
   if(!html.includes('data-toolscout-public-redesign="2"'))html=html.replace('</head>',styleTag()+'</head>');
-  const surface=publicSurface(url.pathname);
   if(!/<html\b[^>]*data-toolscout-redesign=["']2["']/i.test(html))html=html.replace(/<html\b([^>]*)>/i,(match,attrs)=>'<html'+attrs+' data-toolscout-redesign="2" data-toolscout-surface="'+surface+'">');
   else if(!/<html\b[^>]*data-toolscout-surface=/i.test(html))html=html.replace(/<html\b([^>]*)>/i,(match,attrs)=>'<html'+attrs+' data-toolscout-surface="'+surface+'">');
   if(!html.includes('class="ts2-global-nav"'))html=html.replace(/<body\b[^>]*>/i,m=>m+navHtml(url.pathname));
