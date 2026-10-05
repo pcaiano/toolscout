@@ -156,7 +156,12 @@ test('shared public navigation is isolated from legacy nav CSS and matches homep
   assert.match(runtime,/justify-content:flex-start!important/);
   assert.match(runtime,/flex:0 0 auto!important/);
   assert.match(runtime,/height:84px;max-width:1440px/);
+  assert.match(runtime,/\.ts2-global-nav\{position:sticky;top:0;z-index:1000/);
+  assert.match(runtime,/\.ts2-global-nav\.is-compact \.ts2-global-nav-inner\{height:64px\}/);
+  assert.match(runtime,/data-toolscout-sticky-nav="2"/);
+  assert.match(runtime,/classList\.toggle\('is-compact',delta>0\)/);
   assert.match(runtime,/min-height:72px;padding:14px 20px 11px/);
+  assert.match(runtime,/min-height:62px;padding:8px 20px 7px/);
   assert.match(runtime,/font-size:12px;color:#BAC0BA/);
 });
 
@@ -166,5 +171,11 @@ test('homepage header leaves the finder as the primary action',()=>{
   assert.doesNotMatch(html,/class="navCta"/);
   assert.doesNotMatch(html,/href="#finder">Find my tools/);
   assert.match(html,/id="need"/);
+  assert.match(html,/class="homeGlobalNav darkBand"/);
+  assert.match(html,/\.homeGlobalNav\{position:sticky;top:0;z-index:1000/);
+  assert.match(html,/\.homeGlobalNav\.is-compact nav\{height:64px\}/);
+  assert.match(html,/data-toolscout-sticky-nav="home"/);
+  assert.match(html,/classList\.toggle\('is-compact',delta>0\)/);
   assert.match(html,/min-height:64px;padding:12px 0 9px/);
+  assert.match(html,/min-height:58px;padding:7px 0 6px/);
 });
