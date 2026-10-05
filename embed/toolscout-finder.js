@@ -53,7 +53,7 @@
 
   shadow.innerHTML=`
     <style>
-      :host{all:initial}
+      :host{all:initial;display:block;width:100%;max-width:680px}
       *,*::before,*::after{box-sizing:border-box}
       .tsf{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:${palette.text};background:${palette.bg};border:1px solid ${palette.line};border-radius:20px;padding:18px;max-width:680px;box-shadow:0 16px 38px rgba(0,0,0,.12)}
       .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
