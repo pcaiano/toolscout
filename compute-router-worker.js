@@ -80,6 +80,7 @@ import {handleCatalogAutonomyRoute} from './catalog-autonomy-worker.js';
 import {handleFunnelRuntimeRoute} from './funnel-worker.js';
 import {handleDynamicRuntimeRoute} from './dynamic-worker.js';
 import {transformComparisonAiResponse} from './comparison-ai-runtime.js';
+import {transformPublicRedesignResponse} from './public-redesign-runtime.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 
@@ -105,6 +106,7 @@ async function publicAssetPipeline(request,env,ctx){
   response=await applyMarkedOwnerAnalytics(request,response);
   response=await transformSeoPublicPage(request,response,env);
   if(request.method==='GET')response=await transformComparisonAiResponse(request,response,env);
+  if(request.method==='GET')response=await transformPublicRedesignResponse(request,response);
   if(request.method==='GET')return injectToolScoutSocialFooter(response);
   return response;
 }
