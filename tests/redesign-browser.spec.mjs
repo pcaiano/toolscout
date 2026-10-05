@@ -36,7 +36,7 @@ test('generated Figma profile includes AI interoperability evidence',async({page
 test('public redesign transform gives internal pages the shared ToolScout 2.0 shell',async({page})=>{
   await page.goto(base+'/.browser-fixtures/figma-public.html',{waitUntil:'domcontentloaded'});
   await expect(page.locator('style[data-toolscout-public-redesign="2"]')).toHaveCount(1);
-  await expect(page.locator('body[data-toolscout-redesign="2"]')).toHaveCount(1);
+  await expect(page.locator('html[data-toolscout-redesign="2"]')).toHaveCount(1);
   await expect(page.locator('.ts2-global-nav')).toBeVisible();
   await expect(page.locator('.ts2-brand')).toHaveAttribute('href','/');
   await expect(page.getByRole('link',{name:'Compare'}).first()).toBeVisible();
