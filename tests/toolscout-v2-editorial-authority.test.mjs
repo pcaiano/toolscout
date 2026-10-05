@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import {
   scoreEditorialPage,
   authorityGapPriority,
@@ -76,7 +77,7 @@ test('page type model distinguishes hubs, policy and editorial research surfaces
 
 
 test('SEO hygiene owns category hub decision analysis so 95 reflects useful content',()=>{
-  const hygiene=read('../scripts/enforce-seo-hygiene.mjs');
+  const hygiene=fs.readFileSync(new URL('../scripts/enforce-seo-hygiene.mjs',import.meta.url),'utf8');
   assert.match(hygiene,/TOOLSCOUT_CATEGORY_ANALYSIS_START/);
   assert.match(hygiene,/How to choose SEO software/);
   assert.match(hygiene,/breadth versus specialist depth and price/);
