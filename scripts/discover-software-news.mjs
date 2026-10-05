@@ -21,7 +21,7 @@ const ageDays=date=>(Date.now()-Date.parse(date+'T12:00:00Z'))/86400000;
 const safeUrl=(u,base)=>{try{return new URL(u,base).href}catch{return null}};
 const hostOf=u=>{try{return new URL(u).hostname.toLowerCase().replace(/^www\./,'')}catch{return''}};
 const tag=(block,name)=>{const m=String(block).match(new RegExp('<'+name+'(?:\\s[^>]*)?>([\\s\\S]*?)<\\/'+name+'>','i'));return m?strip(m[1]):'';};
-const attr=(block,name,attrName)=>{const m=String(block).match(new RegExp('<'+name+'[^>]*\\s'+attrName+'=["\\']([^"\\']+)["\\'][^>]*>','i'));return m?m[1]:'';};
+const attr=(block,name,attrName)=>{const m=String(block).match(new RegExp("<"+name+"[^>]*\\s"+attrName+"=[\\\"']([^\\\"']+)[\\\"'][^>]*>","i"));return m?m[1]:'';};
 
 async function fetchText(url){
   const ctl=new AbortController();
