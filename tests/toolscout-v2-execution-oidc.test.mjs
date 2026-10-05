@@ -37,3 +37,10 @@ test('execution-scoped OIDC may refresh canonical opportunities but does not ope
   assert.match(src,/\/api\/growth\/opportunities\/refresh'.*POST.*executionAuth\(request,env\)/s);
   assert.match(src,/\/api\/growth\/supervisor\/audit'.*POST.*auth\(request,env\)/s);
 });
+
+
+test('repo-scoped GitHub OIDC can invoke only the bounded engine-health recovery route',()=>{
+  assert.match(src,/\/api\/growth\/engine-health\/public-reconcile'.*POST/s);
+  assert.match(src,/growthEscalationHandoffOk\(request\).*executionAuth\(request,env\)/s);
+  assert.match(src,/run\('networkCycle','distribution','network_cycle',20/);
+});
