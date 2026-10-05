@@ -284,8 +284,11 @@ jobs:
           node scripts/generate-comparisons.mjs
           node scripts/build-redesign-browser-fixture.mjs
 
-      - name: Install Chromium for redesign QA
-        run: npx --yes playwright@1.56.1 install --with-deps chromium
+      - name: Install Playwright and Chromium for redesign QA
+        run: |
+          set -euo pipefail
+          npm install --no-save --package-lock=false @playwright/test@1.56.1
+          npx playwright install --with-deps chromium
 
       - name: Browser smoke redesign desktop and mobile
         run: |
@@ -293,11 +296,13 @@ jobs:
           python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/toolscout-redesign-http.log 2>&1 &
           SERVER_PID=$!
           trap 'kill $SERVER_PID' EXIT
+          READY=0
           for i in {1..20}; do
-            if curl -fsS http://127.0.0.1:4173/tools.html >/dev/null; then break; fi
+            if curl -fsS http://127.0.0.1:4173/tools.html >/dev/null; then READY=1; break; fi
             sleep 1
           done
-          TOOLSCOUT_BROWSER_BASE=http://127.0.0.1:4173 npx --yes @playwright/test@1.56.1 test tests/redesign-browser.spec.mjs --workers=1 --reporter=line
+          test "$READY" = "1"
+          TOOLSCOUT_BROWSER_BASE=http://127.0.0.1:4173 npx playwright test tests/redesign-browser.spec.mjs --workers=1 --reporter=line
 
       - name: Probe live ToolScout 2.0 operational health
         run: node scripts/probe-v2-operational-health.mjs
