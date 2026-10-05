@@ -205,6 +205,7 @@
       "search-evidence-watchdog.yml",
       "seo-engine-v2.yml",
       "toolscout-v2-ci.yml",
+      "toolscout-v2-engine-health-recovery.yml",
       "toolscout-v2-integrity-audit.yml",
       "toolscout-v2-production-acceptance.yml"
     ],
