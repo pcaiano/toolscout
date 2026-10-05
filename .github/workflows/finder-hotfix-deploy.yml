@@ -1,0 +1,53 @@
+name: ToolScout Finder Hotfix Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/finder-hotfix-deploy.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: toolscout-finder-hotfix
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate Finder hotfix
+        run: |
+          set -euo pipefail
+          node --check app.js
+          node --test tests/finder-quality-contract.test.mjs
+          grep -q 'finder-category-calibration' index.html
+          grep -q 'broadCategoryQuery' app.js
+          grep -q 'Building your shortlist' app.js
+
+      - name: Deploy current main to Cloudflare
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: npx wrangler deploy --config wrangler.toml --latest
+
+      - name: Verify Finder hotfix is live
+        run: |
+          set -euo pipefail
+          curl -fsS --retry 4 --retry-delay 3 -H 'Cache-Control: no-cache' 'https://trytoolscout.org/?finder_hotfix=20261005' -o /tmp/home.html
+          curl -fsS --retry 4 --retry-delay 3 -H 'Cache-Control: no-cache' 'https://trytoolscout.org/app.js?finder_hotfix=20261005' -o /tmp/app.js
+          grep -q 'finder-category-calibration' /tmp/home.html
+          grep -q 'broadCategoryQuery' /tmp/app.js
+          grep -q 'Building your shortlist' /tmp/app.js
