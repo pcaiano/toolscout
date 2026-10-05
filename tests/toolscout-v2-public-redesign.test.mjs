@@ -202,6 +202,8 @@ test('public outbound policy removes direct external anchors but preserves inter
   assert.match(html,/>Source</);
   assert.match(html,/href="\/tools\/example"/);
   assert.match(html,/href="\/go\/example\?source=software-news"/);
+  const sameOrigin=await transformPublicOutboundPolicyResponse(new Request('https://trytoolscout.org/news/example-story'),new Response('<html><body><a href="https://trytoolscout.org/tools/example">Same origin</a></body></html>',{status:200,headers:{'content-type':'text/html'}}));
+  assert.match(await sameOrigin.text(),/href="https:\/\/trytoolscout\.org\/tools\/example"/);
 });
 
 test('public outbound policy also applies to the homepage while private surfaces remain untouched',async()=>{
