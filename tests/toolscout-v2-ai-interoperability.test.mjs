@@ -35,14 +35,24 @@ test('catalog cards and both comparison paths surface verified AI connectivity',
   const directory=read('tools.html');
   const dynamicCompare=read('compare.html');
   const staticCompare=read('scripts/generate-comparisons.mjs');
+  const indexedCompare=read('comparison-ai-runtime.js');
   assert.match(directory,/AI connected/);
   assert.match(directory,/aiIntegration/);
-  for(const src of [dynamicCompare,staticCompare]){
+  for(const src of [dynamicCompare,staticCompare,indexedCompare]){
     assert.match(src,/AI interoperability/);
     assert.match(src,/AI assistants/);
     assert.match(src,/Agent connectivity/);
     assert.match(src,/aiIntegration/);
   }
+});
+
+test('indexed comparison responses are enriched server-side without changing their canonical URL',()=>{
+  const runtime=read('comparison-ai-runtime.js');
+  const compute=read('compute-router-worker.js');
+  assert.match(runtime,/data-ai-comparison/);
+  assert.match(runtime,/data\/comparisons\.json/);
+  assert.match(runtime,/unknown.*excluded from the recommendation|excluded from the recommendation/i);
+  assert.match(compute,/transformComparisonAiResponse/);
 });
 
 test('buyer guides carry verified AI interoperability as evidence',()=>{
