@@ -9,12 +9,14 @@
   const host=clean(location.hostname.replace(/^www\./,''),120)||'embedded';
   const publisher=clean(current.dataset.publisher||host,120)||host;
   const mode=current.dataset.mode==='mini'?'mini':'full';
-  const theme=current.dataset.theme==='light'?'light':'dark';
+  const requestedTheme=String(current.dataset.theme||'graphite').toLowerCase();
+  const theme=requestedTheme==='paper'||requestedTheme==='light'?'paper':requestedTheme==='neutral'?'neutral':'graphite';
   const limit=mode==='mini'?1:Math.max(1,Math.min(3,Number.parseInt(current.dataset.limit||'3',10)||3));
   const shouldTrack=current.dataset.track!=='false';
   const root=document.createElement('div');
   root.setAttribute('data-toolscout-embed','finder');
   root.setAttribute('data-toolscout-mode',mode);
+  root.setAttribute('data-toolscout-theme',theme);
   const shadow=root.attachShadow({mode:'open'});
 
   const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[char]));
@@ -35,6 +37,7 @@
       publisher_host:host,
       asset_id:'finder',
       mode,
+      theme,
       ...fields
     };
     try{
@@ -47,9 +50,12 @@
     }catch{}
   };
 
-  const palette=theme==='light'
-    ?{bg:'#F3F5F1',panel:'#FFFFFF',text:'#0B0D0C',muted:'#5F665F',line:'#D9DED7',lime:'#86C900',limeText:'#0B0D0C'}
-    :{bg:'#0B0D0C',panel:'#141814',text:'#F3F5F1',muted:'#A8B0A6',line:'#2C332D',lime:'#B7FF3C',limeText:'#0B0D0C'};
+  const palettes={
+    graphite:{bg:'#0B0D0C',panel:'#141814',text:'#F3F5F1',muted:'#A8B0A6',line:'#2C332D',lime:'#B7FF3C',limeText:'#0B0D0C'},
+    paper:{bg:'#F3F5F1',panel:'#FFFFFF',text:'#0B0D0C',muted:'#5F665F',line:'#D9DED7',lime:'#86C900',limeText:'#0B0D0C'},
+    neutral:{bg:'#F8F9F6',panel:'#EEF0EB',text:'#232823',muted:'#667066',line:'#CCD2CA',lime:'#567A1F',limeText:'#FFFFFF'}
+  };
+  const palette=palettes[theme];
 
   shadow.innerHTML=`
     <style>
@@ -93,8 +99,8 @@
     </style>
     <section class="tsf" aria-label="ToolScout Software Finder">
       <div class="top"><span class="eyebrow">ToolScout Finder</span><span class="mode">${mode==='mini'?'Mini':'Full'}</span></div>
-      <h2>Find the right software for the job.</h2>
-      <p class="intro">Describe what you need. ToolScout narrows the market using workflow fit, constraints and verified catalog evidence.</p>
+      <h2>${mode==='mini'?'Find the right tool.':'Find the right software for the job.'}</h2>
+      <p class="intro">${mode==='mini'?'Describe the job. Get one focused match.':'Describe what you need. ToolScout narrows the market using workflow fit, constraints and verified catalog evidence.'}</p>
       <form novalidate>
         <input name="q" maxlength="300" required autocomplete="off" placeholder="e.g. CRM for a 5-person sales team" aria-label="Describe the software you need">
         <button type="submit">Find tools</button>
