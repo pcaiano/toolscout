@@ -1,0 +1,46 @@
+name: ToolScout 2.0 Public Visual Integrity
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 5 * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'public-redesign-runtime.js'
+      - 'scripts/verify-redesign-2-live.mjs'
+      - 'tests/toolscout-v2-public-redesign.test.mjs'
+      - 'sitemap.xml'
+      - 'wrangler.toml'
+      - 'methodology.html'
+      - 'affiliate-disclosure.html'
+      - 'privacy.html'
+      - 'categories.html'
+      - '*-tools.html'
+      - '.github/workflows/public-visual-integrity.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: toolscout-public-visual-integrity
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate public redesign contract
+        run: |
+          set -euo pipefail
+          node --check public-redesign-runtime.js
+          node --check scripts/verify-redesign-2-live.mjs
+          node --test tests/toolscout-v2-public-redesign.test.mjs
+      - name: Audit every live sitemap page
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        run: node scripts/verify-redesign-2-live.mjs
