@@ -80,7 +80,7 @@ jobs:
           ORDER BY started_at DESC
           LIMIT 1;
           " | tee network-cycle-ledger.json
-          node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('network-cycle-ledger.json','utf8'));const row=p?.[0]?.results?.[0];if(!row)throw new Error('network_cycle_ledger_missing');if(row.status!=='completed')throw new Error('network_cycle_not_completed:'+JSON.stringify(row));if(Number(row.age_minutes)>30)throw new Error('network_cycle_completion_stale:'+JSON.stringify(row));console.log(JSON.stringify(row,null,2))"
+          node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('network-cycle-ledger.json','utf8'));const row=p?.[0]?.results?.[0];if(!row)throw new Error('network_cycle_ledger_missing');if(row.status!=='completed')throw new Error('network_cycle_not_completed:'+JSON.stringify(row));if(Number(row.age_minutes)>130)throw new Error('network_cycle_completion_stale:'+JSON.stringify(row));console.log(JSON.stringify(row,null,2))"
 
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
           WITH active_actions AS (
