@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T11:05:26.569Z",
+  "generatedAt": "2026-10-05T11:19:11.679Z",
   "engine": "ToolScout Search Commercial Routing v1",
   "objective": "Route editorial, internal-linking and distribution work from observed Google demand while keeping affiliate economics separate from editorial ranking.",
   "rules": {
@@ -61,9 +61,9 @@
       "pathname": "/best-seo-tools-for-agencies",
       "type": "guide",
       "clicks": 0,
-      "impressions": 2278,
+      "impressions": 2312,
       "ctr": 0,
-      "position": 80.2441,
+      "position": 80.2366,
       "topQueries": [
         {
           "query": "best seo tools for agency",
@@ -86,20 +86,20 @@
         {
           "query": "seo tool for agencies",
           "clicks": 0,
-          "impressions": 116,
-          "position": 82.819
+          "impressions": 117,
+          "position": 82.8462
         },
         {
           "query": "seo agency tools",
           "clicks": 0,
-          "impressions": 102,
-          "position": 82.5784
+          "impressions": 104,
+          "position": 82.6154
         }
       ],
       "monetized": false,
       "monetizedSlugs": [],
       "lane": "relevance-and-authority",
-      "priorityScore": 133.85,
+      "priorityScore": 134.11,
       "actions": [
         "improve-query-intent-match",
         "deepen-evidence",
@@ -1047,15 +1047,15 @@
       "pathname": "/best-social-media-management-tools",
       "type": "guide",
       "clicks": 0,
-      "impressions": 174,
+      "impressions": 176,
       "ctr": 0,
-      "position": 62.7586,
+      "position": 62.1648,
       "topQueries": [
         {
           "query": "social media management tools",
           "clicks": 0,
-          "impressions": 58,
-          "position": 64.8793
+          "impressions": 59,
+          "position": 63.8814
         },
         {
           "query": "social media management tool",
@@ -1085,7 +1085,7 @@
       "monetized": false,
       "monetizedSlugs": [],
       "lane": "editorial-depth",
-      "priorityScore": 89.41,
+      "priorityScore": 89.61,
       "actions": [
         "deepen-decision-context",
         "align-copy-to-observed-queries",

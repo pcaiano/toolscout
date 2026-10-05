@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T11:03:46.248Z",
+  "generatedAt": "2026-10-05T11:17:10.103Z",
   "methodology": "Public sitemap URL patterns only, with robots.txt sitemap discovery, bounded recursive sitemap-index expansion and entity-level deduplication against the ToolScout catalog. Competitor content is not copied or used for editorial conclusions. Repeated URL themes are market-coverage signals and must pass first-party verification and ToolScout quality gates before publication.",
   "sources": [
     {
@@ -69,8 +69,8 @@
       "sampledUrls": 750
     }
   ],
-  "suppressedCovered": 38,
-  "count": 31,
+  "suppressedCovered": 45,
+  "count": 28,
   "gaps": [
     {
       "slug": "ai-background-remover",
@@ -199,48 +199,6 @@
       "exampleUrls": [
         "https://alternativeto.net/faq/",
         "https://futuretools.io/faq"
-      ]
-    },
-    {
-      "slug": "goenhance-ai",
-      "candidateType": "software-entity",
-      "entityKey": "goenhance",
-      "mentions": 2,
-      "sources": [
-        "Futurepedia",
-        "Aixploria"
-      ],
-      "exampleUrls": [
-        "https://www.futurepedia.io/tool/goenhance-ai",
-        "https://www.aixploria.com/goenhance-ai/"
-      ]
-    },
-    {
-      "slug": "lip-sync-ai",
-      "candidateType": "software-entity",
-      "entityKey": "lip-sync",
-      "mentions": 2,
-      "sources": [
-        "Aixploria",
-        "Dynamite AI"
-      ],
-      "exampleUrls": [
-        "https://www.aixploria.com/lip-sync-ai/",
-        "https://dynamite-ai.com/tools/lip-sync-ai"
-      ]
-    },
-    {
-      "slug": "lorka-ai",
-      "candidateType": "software-entity",
-      "entityKey": "lorka",
-      "mentions": 2,
-      "sources": [
-        "Futurepedia",
-        "Aixploria"
-      ],
-      "exampleUrls": [
-        "https://www.futurepedia.io/tool/lorka-ai",
-        "https://www.aixploria.com/lorka-ai/"
       ]
     },
     {

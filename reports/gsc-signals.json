@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T11:03:33.641Z",
+  "generatedAt": "2026-10-05T11:16:59.485Z",
   "source": "Google Search Console Search Analytics API",
   "property": "sc-domain:trytoolscout.org",
   "dataState": "all",
@@ -8,8 +8,8 @@
   "endDate": "2026-10-05",
   "siteTotals": {
     "clicks": 7,
-    "impressions": 6442,
-    "ctr": 0.1087
+    "impressions": 6480,
+    "ctr": 0.108
   },
   "pageTypeSummary": {
     "comparison": {
@@ -25,7 +25,7 @@
     "guide": {
       "pages": 39,
       "clicks": 0,
-      "impressions": 4139
+      "impressions": 4177
     },
     "home": {
       "pages": 1,
@@ -52,9 +52,9 @@
       "type": "guide",
       "intent": "best-seo-tools-for-agencies",
       "clicks": 0,
-      "impressions": 2278,
+      "impressions": 2312,
       "ctr": 0,
-      "position": 80.2441,
+      "position": 80.2366,
       "topQueries": [
         {
           "query": "best seo tools for agency",
@@ -77,26 +77,26 @@
         {
           "query": "seo tool for agencies",
           "clicks": 0,
-          "impressions": 116,
-          "position": 82.819
+          "impressions": 117,
+          "position": 82.8462
         },
         {
           "query": "seo agency tools",
           "clicks": 0,
-          "impressions": 102,
-          "position": 82.5784
+          "impressions": 104,
+          "position": 82.6154
         },
         {
           "query": "seo platform for agencies",
           "clicks": 0,
-          "impressions": 101,
-          "position": 85.0792
+          "impressions": 103,
+          "position": 84.5631
         },
         {
           "query": "seo tools for agencies",
           "clicks": 0,
-          "impressions": 97,
-          "position": 84.5155
+          "impressions": 98,
+          "position": 84.4694
         },
         {
           "query": "what is the best tool for seo agency",
@@ -113,8 +113,8 @@
         {
           "query": "best seo software for agencies",
           "clicks": 0,
-          "impressions": 72,
-          "position": 74.0694
+          "impressions": 73,
+          "position": 74.0411
         }
       ]
     },
@@ -417,15 +417,15 @@
       "type": "guide",
       "intent": "best-social-media-management-tools",
       "clicks": 0,
-      "impressions": 174,
+      "impressions": 176,
       "ctr": 0,
-      "position": 62.7586,
+      "position": 62.1648,
       "topQueries": [
         {
           "query": "social media management tools",
           "clicks": 0,
-          "impressions": 58,
-          "position": 64.8793
+          "impressions": 59,
+          "position": 63.8814
         },
         {
           "query": "social media management tool",
@@ -1294,9 +1294,9 @@
       "type": "guide",
       "intent": "best-crm-with-automation",
       "clicks": 0,
-      "impressions": 64,
+      "impressions": 65,
       "ctr": 0,
-      "position": 76.2969,
+      "position": 76.3846,
       "topQueries": [
         {
           "query": "crm with workflow automation",
@@ -1347,16 +1347,16 @@
           "position": 82
         },
         {
+          "query": "automated crm software",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 83.5
+        },
+        {
           "query": "what are the top crm platforms for improving sales workflows?",
           "clicks": 0,
           "impressions": 2,
           "position": 87.5
-        },
-        {
-          "query": "crm automation tool",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 89
         }
       ]
     },
@@ -3214,6 +3214,49 @@
       ]
     },
     {
+      "page": "https://trytoolscout.org/best-seo-tools",
+      "pathname": "/best-seo-tools",
+      "key": "best-seo-tools",
+      "type": "guide",
+      "intent": "best-seo-tools",
+      "clicks": 0,
+      "impressions": 8,
+      "ctr": 0,
+      "position": 47.875,
+      "topQueries": [
+        {
+          "query": "seo scout",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 62
+        },
+        {
+          "query": "seo-scout",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 63
+        },
+        {
+          "query": "bestseotools.com",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 66
+        },
+        {
+          "query": "best tool for seo",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 90
+        },
+        {
+          "query": "seo best tools",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 91
+        }
+      ]
+    },
+    {
       "page": "https://trytoolscout.org/tools/fillout",
       "pathname": "/tools/fillout",
       "key": "fillout",
@@ -3296,43 +3339,6 @@
           "clicks": 0,
           "impressions": 1,
           "position": 88
-        }
-      ]
-    },
-    {
-      "page": "https://trytoolscout.org/best-seo-tools",
-      "pathname": "/best-seo-tools",
-      "key": "best-seo-tools",
-      "type": "guide",
-      "intent": "best-seo-tools",
-      "clicks": 0,
-      "impressions": 7,
-      "ctr": 0,
-      "position": 41.8571,
-      "topQueries": [
-        {
-          "query": "seo scout",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 62
-        },
-        {
-          "query": "seo-scout",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 63
-        },
-        {
-          "query": "bestseotools.com",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 66
-        },
-        {
-          "query": "seo best tools",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 91
         }
       ]
     },
@@ -4481,9 +4487,9 @@
       "intent": "best-seo-tools-for-agencies",
       "page": "https://trytoolscout.org/best-seo-tools-for-agencies",
       "clicks": 0,
-      "impressions": 2278,
+      "impressions": 2312,
       "ctr": 0,
-      "position": 80.2441,
+      "position": 80.2366,
       "topQueries": [
         {
           "query": "best seo tools for agency",
@@ -4506,26 +4512,26 @@
         {
           "query": "seo tool for agencies",
           "clicks": 0,
-          "impressions": 116,
-          "position": 82.819
+          "impressions": 117,
+          "position": 82.8462
         },
         {
           "query": "seo agency tools",
           "clicks": 0,
-          "impressions": 102,
-          "position": 82.5784
+          "impressions": 104,
+          "position": 82.6154
         },
         {
           "query": "seo platform for agencies",
           "clicks": 0,
-          "impressions": 101,
-          "position": 85.0792
+          "impressions": 103,
+          "position": 84.5631
         },
         {
           "query": "seo tools for agencies",
           "clicks": 0,
-          "impressions": 97,
-          "position": 84.5155
+          "impressions": 98,
+          "position": 84.4694
         },
         {
           "query": "what is the best tool for seo agency",
@@ -4542,8 +4548,8 @@
         {
           "query": "best seo software for agencies",
           "clicks": 0,
-          "impressions": 72,
-          "position": 74.0694
+          "impressions": 73,
+          "position": 74.0411
         }
       ]
     },
@@ -4691,15 +4697,15 @@
       "intent": "best-social-media-management-tools",
       "page": "https://trytoolscout.org/best-social-media-management-tools",
       "clicks": 0,
-      "impressions": 174,
+      "impressions": 176,
       "ctr": 0,
-      "position": 62.7586,
+      "position": 62.1648,
       "topQueries": [
         {
           "query": "social media management tools",
           "clicks": 0,
-          "impressions": 58,
-          "position": 64.8793
+          "impressions": 59,
+          "position": 63.8814
         },
         {
           "query": "social media management tool",
@@ -5157,9 +5163,9 @@
       "intent": "best-crm-with-automation",
       "page": "https://trytoolscout.org/best-crm-with-automation",
       "clicks": 0,
-      "impressions": 64,
+      "impressions": 65,
       "ctr": 0,
-      "position": 76.2969,
+      "position": 76.3846,
       "topQueries": [
         {
           "query": "crm with workflow automation",
@@ -5210,16 +5216,16 @@
           "position": 82
         },
         {
+          "query": "automated crm software",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 83.5
+        },
+        {
           "query": "what are the top crm platforms for improving sales workflows?",
           "clicks": 0,
           "impressions": 2,
           "position": 87.5
-        },
-        {
-          "query": "crm automation tool",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 89
         }
       ]
     },
@@ -5874,6 +5880,46 @@
       ]
     },
     {
+      "intent": "best-seo-tools",
+      "page": "https://trytoolscout.org/best-seo-tools",
+      "clicks": 0,
+      "impressions": 8,
+      "ctr": 0,
+      "position": 47.875,
+      "topQueries": [
+        {
+          "query": "seo scout",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 62
+        },
+        {
+          "query": "seo-scout",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 63
+        },
+        {
+          "query": "bestseotools.com",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 66
+        },
+        {
+          "query": "best tool for seo",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 90
+        },
+        {
+          "query": "seo best tools",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 91
+        }
+      ]
+    },
+    {
       "intent": "best-all-in-one-business-tools",
       "page": "https://trytoolscout.org/best-all-in-one-business-tools",
       "clicks": 0,
@@ -5910,40 +5956,6 @@
           "clicks": 0,
           "impressions": 1,
           "position": 88
-        }
-      ]
-    },
-    {
-      "intent": "best-seo-tools",
-      "page": "https://trytoolscout.org/best-seo-tools",
-      "clicks": 0,
-      "impressions": 7,
-      "ctr": 0,
-      "position": 41.8571,
-      "topQueries": [
-        {
-          "query": "seo scout",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 62
-        },
-        {
-          "query": "seo-scout",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 63
-        },
-        {
-          "query": "bestseotools.com",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 66
-        },
-        {
-          "query": "seo best tools",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 91
         }
       ]
     },

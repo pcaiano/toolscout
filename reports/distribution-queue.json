@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T11:05:30.029Z",
+  "generatedAt": "2026-10-05T11:19:15.371Z",
   "count": 47,
   "policy": "Only editorially verified assets are eligible for distribution. Page-level Search Console demand chooses which existing pages deserve attention. Monetization can increase measurement urgency but never changes editorial ranking. Original research can be promoted to editorial, community and indexing surfaces, while product directories continue to receive the ToolScout product profile.",
   "items": [
@@ -348,9 +348,9 @@
       "priorityScore": 75,
       "demandBoost": 45,
       "searchDemand": {
-        "impressions": 2278,
+        "impressions": 2312,
         "clicks": 0,
-        "position": 80.2441,
+        "position": 80.2366,
         "lane": "relevance-and-authority",
         "monetized": false
       },
@@ -618,9 +618,9 @@
       "priorityScore": 57,
       "demandBoost": 27,
       "searchDemand": {
-        "impressions": 64,
+        "impressions": 65,
         "clicks": 0,
-        "position": 76.2969,
+        "position": 76.3846,
         "opportunity": "relevance-gap",
         "meaningfulSample": true
       },
@@ -678,9 +678,9 @@
       "priorityScore": 46,
       "demandBoost": 35,
       "searchDemand": {
-        "impressions": 174,
+        "impressions": 176,
         "clicks": 0,
-        "position": 62.7586,
+        "position": 62.1648,
         "lane": "editorial-depth",
         "monetized": false
       },
@@ -888,9 +888,9 @@
       "priorityScore": 35,
       "demandBoost": 5,
       "searchDemand": {
-        "impressions": 7,
+        "impressions": 8,
         "clicks": 0,
-        "position": 41.8571,
+        "position": 47.875,
         "opportunity": "insufficient-sample",
         "meaningfulSample": false
       },

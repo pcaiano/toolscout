@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T11:05:27.639Z",
+  "generatedAt": "2026-10-05T11:19:12.764Z",
   "engine": "ToolScout Content Intelligence v1.3",
   "objective": "Choose and test content opportunities using observed page-level search demand and likely-human social/commercial behavior without allowing affiliate economics to influence editorial recommendations.",
   "evidenceTier": "directional",
@@ -20,7 +20,7 @@
       "observedGscIntents": 39,
       "observedGscPages": 139,
       "searchClicks": 7,
-      "searchImpressions": 6442,
+      "searchImpressions": 6480,
       "organicAcquisitionStatus": "early-search-acquisition",
       "indexingRecovery": 1,
       "actionableOpportunities": 20,
@@ -31,7 +31,7 @@
       "strikingMeaningful": 0,
       "strikingLowSample": 1,
       "authorityDepthOpportunities": 13,
-      "competitorResearchCandidates": 31
+      "competitorResearchCandidates": 28
     },
     "routingSummary": {
       "pages": 139,
@@ -47,8 +47,8 @@
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 2278,
-        "position": 80.2441,
+        "impressions": 2312,
+        "position": 80.2366,
         "topTools": [
           "semrush",
           "ahrefs",
@@ -75,8 +75,8 @@
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 174,
-        "position": 62.7586,
+        "impressions": 176,
+        "position": 62.1648,
         "topTools": [
           "socialbee",
           "buffer",
@@ -144,8 +144,8 @@
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 64,
-        "position": 76.2969,
+        "impressions": 65,
+        "position": 76.3846,
         "topTools": [
           "close",
           "monday-crm",
@@ -175,10 +175,10 @@
         "pathname": "/best-seo-tools-for-agencies",
         "type": "guide",
         "lane": "relevance-and-authority",
-        "priorityScore": 133.85,
-        "impressions": 2278,
+        "priorityScore": 134.11,
+        "impressions": 2312,
         "clicks": 0,
-        "position": 80.2441,
+        "position": 80.2366,
         "monetized": false,
         "monetizedSlugs": [],
         "actions": [

@@ -318,5 +318,115 @@
       "categoryEvidenceScore": 3,
       "competitorContentUsedForEditorialFacts": false
     }
+  },
+  {
+    "slug": "paioclaw",
+    "name": "Paioclaw",
+    "category": "ai-assistant",
+    "description": "USE CASES Do more than humanly possible Agent that works like your second brain. Manage Calendar Your Claw takes every meeting request, reads the context, finds the right slot, and books it. You stop being the bottleneck for your own calendar. Assign a Task Drop anything on your mind and your Claw runs with it. [&hellip;]",
+    "sourceUrl": "https://paioclaw.ai/",
+    "features": [
+      "AI assistant",
+      "research",
+      "citations",
+      "voice",
+      "API",
+      "forms",
+      "design",
+      "deployment"
+    ],
+    "firstVerified": "2026-10-05",
+    "lastVerified": "2026-10-05",
+    "marketSignals": {
+      "count": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "exampleUrls": [
+        "https://www.futurepedia.io/tool/paioclaw",
+        "https://www.aixploria.com/paioclaw/"
+      ]
+    },
+    "verification": {
+      "mode": "competitive-gap-first-party",
+      "officialSourceDiscoveryScore": 12,
+      "officialSourceVotes": 1,
+      "categoryEvidenceScore": 1,
+      "competitorContentUsedForEditorialFacts": false
+    }
+  },
+  {
+    "slug": "pine-ai",
+    "name": "Pine AI",
+    "category": "ai-assistant",
+    "description": "Your AI assistant for life admin — Pine calls, negotiates, and gets things done for you.",
+    "sourceUrl": "https://www.19pine.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+    "features": [
+      "AI assistant",
+      "research",
+      "citations",
+      "summarization",
+      "forms",
+      "ecommerce"
+    ],
+    "firstVerified": "2026-10-05",
+    "lastVerified": "2026-10-05",
+    "marketSignals": {
+      "count": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "exampleUrls": [
+        "https://www.futurepedia.io/tool/pine-ai",
+        "https://www.aixploria.com/pine-ai/"
+      ]
+    },
+    "verification": {
+      "mode": "competitive-gap-first-party",
+      "officialSourceDiscoveryScore": 14,
+      "officialSourceVotes": 2,
+      "categoryEvidenceScore": 1,
+      "competitorContentUsedForEditorialFacts": false
+    }
+  },
+  {
+    "slug": "pixmax-ai",
+    "name": "Pixmax AI",
+    "category": "content",
+    "description": "Create AI-generated videos, images, and audio with Pixmax. An all-in-one platform with canvas workflow for storytelling, editing, and faster content production.",
+    "sourceUrl": "https://www.pixmax.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+    "features": [
+      "citations",
+      "image generation",
+      "video generation",
+      "voice",
+      "collaboration",
+      "automation",
+      "design",
+      "templates",
+      "ecommerce"
+    ],
+    "firstVerified": "2026-10-05",
+    "lastVerified": "2026-10-05",
+    "marketSignals": {
+      "count": 2,
+      "sources": [
+        "Futurepedia",
+        "Aixploria"
+      ],
+      "exampleUrls": [
+        "https://www.futurepedia.io/tool/pixmax-ai",
+        "https://www.aixploria.com/pixmax-ai/"
+      ]
+    },
+    "verification": {
+      "mode": "competitive-gap-first-party",
+      "officialSourceDiscoveryScore": 14,
+      "officialSourceVotes": 2,
+      "categoryEvidenceScore": 2,
+      "competitorContentUsedForEditorialFacts": false
+    }
   }
 ]

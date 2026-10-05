@@ -1,39 +1,39 @@
 {
-  "generatedAt": "2026-10-05T11:03:56.931Z",
+  "generatedAt": "2026-10-05T11:17:29.080Z",
   "policy": "Broaden the indexable catalog using verified first-party product facts and repeated market signals, while keeping ranking and comparison eligibility separate until stronger tool-specific editorial evidence exists.",
   "summary": {
-    "catalogTools": 115,
+    "catalogTools": 118,
     "promoted": 3,
-    "held": 6,
+    "held": 9,
     "maxPromotionsPerCycle": 5
   },
   "promoted": [
     {
-      "slug": "goenhance-ai",
-      "name": "Goenhance AI",
-      "category": "content",
-      "signals": 2,
-      "capabilities": 7,
-      "catalogTier": "coverage",
-      "rankingEligible": true,
-      "comparisonEligible": true
-    },
-    {
-      "slug": "lip-sync-ai",
-      "name": "Lip Sync AI",
-      "category": "developer",
-      "signals": 2,
-      "capabilities": 5,
-      "catalogTier": "coverage",
-      "rankingEligible": true,
-      "comparisonEligible": true
-    },
-    {
-      "slug": "lorka-ai",
-      "name": "Lorka AI",
+      "slug": "paioclaw",
+      "name": "Paioclaw",
       "category": "ai-assistant",
       "signals": 2,
-      "capabilities": 10,
+      "capabilities": 8,
+      "catalogTier": "coverage",
+      "rankingEligible": true,
+      "comparisonEligible": true
+    },
+    {
+      "slug": "pine-ai",
+      "name": "Pine AI",
+      "category": "ai-assistant",
+      "signals": 2,
+      "capabilities": 6,
+      "catalogTier": "coverage",
+      "rankingEligible": true,
+      "comparisonEligible": true
+    },
+    {
+      "slug": "pixmax-ai",
+      "name": "Pixmax AI",
+      "category": "content",
+      "signals": 2,
+      "capabilities": 9,
       "catalogTier": "coverage",
       "rankingEligible": true,
       "comparisonEligible": true
@@ -62,6 +62,18 @@
     },
     {
       "slug": "face-swap-ai",
+      "reason": "entity_already_in_catalog"
+    },
+    {
+      "slug": "goenhance-ai",
+      "reason": "entity_already_in_catalog"
+    },
+    {
+      "slug": "lip-sync-ai",
+      "reason": "entity_already_in_catalog"
+    },
+    {
+      "slug": "lorka-ai",
       "reason": "entity_already_in_catalog"
     }
   ]

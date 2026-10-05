@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T11:03:46.289Z",
+  "generatedAt": "2026-10-05T11:17:10.143Z",
   "objective": "Detect competitor coverage gaps, deduplicate against ToolScout, verify first-party sources, publish evidence-backed coverage profiles, submit them through the normal sitemap surface and measure Search Console outcomes on subsequent cycles.",
   "guardrails": [
     "Competitor pages are used only to discover market signals and possible official-source links.",
@@ -8,57 +8,58 @@
     "Unverified or thin candidates are held and retried instead of being published."
   ],
   "summary": {
-    "scannedGaps": 31,
-    "activeProfiles": 9,
+    "scannedGaps": 28,
+    "activeProfiles": 12,
     "newProfiles": 3,
     "resolvedAsExistingCoverage": 1,
-    "held": 27,
+    "held": 24,
     "contentResearch": 0,
     "searchVisibleProfiles": 0,
     "trafficObservedProfiles": 0
   },
   "admitted": [
     {
-      "slug": "goenhance-ai",
-      "sourceUrl": "https://www.goenhance.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
-      "category": "content",
-      "features": [
-        "multimodal",
-        "image generation",
-        "video generation",
-        "video editing",
-        "voice",
-        "API",
-        "design"
-      ]
-    },
-    {
-      "slug": "lip-sync-ai",
-      "sourceUrl": "https://lipsyncai.tools/?utm_source=dynamite_ai&amp;utm_medium=directory&amp;utm_campaign=launch_2026_07",
-      "category": "developer",
-      "features": [
-        "citations",
-        "voice",
-        "API",
-        "automation",
-        "forms"
-      ]
-    },
-    {
-      "slug": "lorka-ai",
-      "sourceUrl": "https://www.lorka.ai/",
+      "slug": "paioclaw",
+      "sourceUrl": "https://paioclaw.ai/",
       "category": "ai-assistant",
       "features": [
         "AI assistant",
-        "chatbot",
-        "conversational AI",
         "research",
         "citations",
-        "web search",
-        "analysis",
-        "writing",
+        "voice",
+        "API",
+        "forms",
+        "design",
+        "deployment"
+      ]
+    },
+    {
+      "slug": "pine-ai",
+      "sourceUrl": "https://www.19pine.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+      "category": "ai-assistant",
+      "features": [
+        "AI assistant",
+        "research",
+        "citations",
+        "summarization",
+        "forms",
+        "ecommerce"
+      ]
+    },
+    {
+      "slug": "pixmax-ai",
+      "sourceUrl": "https://www.pixmax.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+      "category": "content",
+      "features": [
+        "citations",
         "image generation",
-        "summarization"
+        "video generation",
+        "voice",
+        "collaboration",
+        "automation",
+        "design",
+        "templates",
+        "ecommerce"
       ]
     }
   ],
@@ -112,32 +113,21 @@
     },
     {
       "slug": "makiverse",
-      "reason": "cycle-admission-cap",
-      "retry": "next-cycle"
+      "reason": "first-party-evidence-too-thin",
+      "sourceUrl": "https://makiverse.com/",
+      "descriptionLength": 139,
+      "verifiedCapabilities": 1
     },
     {
       "slug": "maxaeo",
-      "reason": "cycle-admission-cap",
-      "retry": "next-cycle"
+      "reason": "first-party-evidence-too-thin",
+      "sourceUrl": "https://maxaeo.ai/diagnosis-report-v2/?brand_id=115",
+      "descriptionLength": 10,
+      "verifiedCapabilities": 0
     },
     {
       "slug": "no-code",
-      "reason": "cycle-admission-cap",
-      "retry": "next-cycle"
-    },
-    {
-      "slug": "paioclaw",
-      "reason": "cycle-admission-cap",
-      "retry": "next-cycle"
-    },
-    {
-      "slug": "pine-ai",
-      "reason": "cycle-admission-cap",
-      "retry": "next-cycle"
-    },
-    {
-      "slug": "pixmax-ai",
-      "reason": "cycle-admission-cap",
+      "reason": "official-source-not-resolved",
       "retry": "next-cycle"
     },
     {
@@ -274,6 +264,30 @@
     },
     {
       "slug": "lorka-ai",
+      "clicks": 0,
+      "impressions": 0,
+      "ctr": 0,
+      "position": 0,
+      "status": "not-observed"
+    },
+    {
+      "slug": "paioclaw",
+      "clicks": 0,
+      "impressions": 0,
+      "ctr": 0,
+      "position": 0,
+      "status": "not-observed"
+    },
+    {
+      "slug": "pine-ai",
+      "clicks": 0,
+      "impressions": 0,
+      "ctr": 0,
+      "position": 0,
+      "status": "not-observed"
+    },
+    {
+      "slug": "pixmax-ai",
       "clicks": 0,
       "impressions": 0,
       "ctr": 0,

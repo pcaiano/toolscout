@@ -2,16 +2,16 @@
   "version": 4,
   "edition": "2026-10",
   "editionLabel": "October 2026",
-  "publishedAt": "2026-10-05T11:03:35.487Z",
+  "publishedAt": "2026-10-05T11:17:00.649Z",
   "scope": "ToolScout first-party editorial dataset of public software product changes selected for buyer relevance. It is not a measure of global market share.",
   "updatedThrough": "2026-10-05",
   "sourceMethod": "Primary vendor documentation, changelogs, release notes and official product announcements. ToolScout classifies buyer impact independently of affiliate status.",
   "primarySourceCount": 12,
   "searchVisibility": {
     "source": "Google Search Console",
-    "impressions": 6442,
+    "impressions": 6480,
     "clicks": 7,
-    "ctr": 0.1087,
+    "ctr": 0.108,
     "position": 0
   },
   "editorialPolicy": "Updates are selected for buyer relevance. Affiliate status, commission and partner relationships do not influence inclusion or placement.",
@@ -23,8 +23,7 @@
       "evidence": [
         "github-selected-models-in-github-copilot-deprecated",
         "github-copilot-sandboxing-observability",
-        "notion-mail-shuts-down",
-        "zapier-next-gen-zaps-mcp"
+        "notion-mail-shuts-down"
       ]
     },
     {
@@ -41,9 +40,7 @@
       "summary": "More software updates are designed to reduce the handoff between understanding what happened and taking the next operational action.",
       "evidence": [
         "github-proof-of-presence-enterprise",
-        "notion-mail-shuts-down",
-        "zapier-next-gen-zaps-mcp",
-        "github-actions-workflow-execution-protections-ga"
+        "notion-mail-shuts-down"
       ]
     }
   ],
@@ -63,16 +60,42 @@
           "type": "profile",
           "url": "/tools/chatgpt",
           "label": "ChatGPT profile"
-        },
-        {
-          "type": "guide",
-          "url": "/best-ai-assistants",
-          "label": "Best AI Assistants"
         }
       ],
       "articleUrl": "/news/chatgpt-building-advertising-for-the-way-people-use-ai.html",
       "sourceName": "OpenAI",
       "sourceUrl": "https://openai.com/index/new-chatgpt-ads-format-and-measurement"
+    },
+    {
+      "id": "github-new-fields-for-securityadvisory-graphql-api",
+      "publishedAt": "2026-10-02",
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "label": "Security update",
+      "title": "New fields for SecurityAdvisory GraphQL API",
+      "summary": "You can now read more of the GitHub Advisory Database directly from the GraphQL API without falling back to the REST API.",
+      "changeType": "security_governance",
+      "buyerImpact": "GitHub buyers should verify whether the new controls change authentication, administration or security requirements for their team.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/github",
+          "label": "GitHub profile"
+        },
+        {
+          "type": "guide",
+          "url": "/best-developer-tools",
+          "label": "Best Developer Tools"
+        },
+        {
+          "type": "guide",
+          "url": "/best-ai-coding-tools",
+          "label": "Best AI Coding Tools"
+        }
+      ],
+      "articleUrl": "/news/github-new-fields-for-securityadvisory-graphql-api.html",
+      "sourceName": "GitHub Changelog",
+      "sourceUrl": "https://github.blog/changelog/2026-10-02-new-fields-for-securityadvisory-graphql-api"
     },
     {
       "id": "github-selected-models-in-github-copilot-deprecated",
@@ -151,11 +174,6 @@
           "type": "profile",
           "url": "/tools/chatgpt",
           "label": "ChatGPT profile"
-        },
-        {
-          "type": "guide",
-          "url": "/best-ai-assistants",
-          "label": "Best AI Assistants"
         }
       ],
       "articleUrl": "/news/chatgpt-introducing-gpt-6-1-sol.html",
@@ -208,11 +226,6 @@
           "type": "profile",
           "url": "/tools/chatgpt",
           "label": "ChatGPT profile"
-        },
-        {
-          "type": "guide",
-          "url": "/best-ai-assistants",
-          "label": "Best AI Assistants"
         }
       ],
       "articleUrl": "/news/chatgpt-images-2-5.html",
@@ -282,6 +295,27 @@
       "sourceUrl": "https://github.blog/changelog/2026-09-22-security-improvements-for-ssh/"
     },
     {
+      "id": "chatgpt-introducing-gpt-6-sol-and-luna",
+      "publishedAt": "2026-09-22",
+      "toolSlug": "chatgpt",
+      "toolName": "ChatGPT",
+      "label": "AI and automation update",
+      "title": "Introducing GPT-6 Sol and Luna",
+      "summary": "Meet GPT-6 Sol and Luna, two models that bring frontier intelligence to everyday work with different balances of capability and cost.",
+      "changeType": "ai_automation",
+      "buyerImpact": "ChatGPT buyers should verify how the new AI or automation capability changes workflow scope, governance and implementation effort.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/chatgpt",
+          "label": "ChatGPT profile"
+        }
+      ],
+      "articleUrl": "/news/chatgpt-introducing-gpt-6-sol-and-luna.html",
+      "sourceName": "OpenAI",
+      "sourceUrl": "https://openai.com/index/introducing-gpt-6-sol-and-luna"
+    },
+    {
       "id": "notion-mail-shuts-down",
       "publishedAt": "2026-09-22",
       "toolSlug": "notion",
@@ -327,78 +361,11 @@
           "type": "profile",
           "url": "/tools/chatgpt",
           "label": "ChatGPT profile"
-        },
-        {
-          "type": "guide",
-          "url": "/best-ai-assistants",
-          "label": "Best AI Assistants"
         }
       ],
       "articleUrl": "/news/chatgpt-word-microsoft-office.html",
       "sourceName": "OpenAI ChatGPT release notes",
       "sourceUrl": "https://help.openai.com/en/articles/6825453-chatgpt-release-notes"
-    },
-    {
-      "id": "zapier-next-gen-zaps-mcp",
-      "publishedAt": "2026-09-20",
-      "toolSlug": "zapier",
-      "toolName": "Zapier",
-      "label": "Official product update",
-      "title": "Zapier expands Next Gen Zaps with branching, recovery and agentic management",
-      "summary": "Next Gen Zaps adds richer branching, nested loops, resilient error handling, human pauses and agent managed diagnosis and repair to Zapier's new automation model.",
-      "changeType": "ai_automation",
-      "buyerImpact": "Zapier buyers should verify how the new AI or automation capability changes workflow scope, governance and implementation effort.",
-      "decisionPages": [
-        {
-          "type": "profile",
-          "url": "/tools/zapier",
-          "label": "Zapier profile"
-        },
-        {
-          "type": "comparison",
-          "url": "/make-vs-zapier",
-          "label": "make vs zapier"
-        },
-        {
-          "type": "guide",
-          "url": "/best-workflow-automation-tools",
-          "label": "Best Workflow Automation Tools"
-        }
-      ],
-      "articleUrl": "/news/zapier-next-gen-zaps-mcp.html",
-      "sourceName": "Zapier Product Updates",
-      "sourceUrl": "https://community.zapier.com/product-updates/the-next-generation-of-zaps-is-here-53832"
-    },
-    {
-      "id": "github-actions-workflow-execution-protections-ga",
-      "publishedAt": "2026-09-17",
-      "toolSlug": "github",
-      "toolName": "GitHub",
-      "label": "Official product update",
-      "title": "GitHub Actions adds stronger controls over who can run workflows",
-      "summary": "GitHub Actions workflow execution protections are now generally available, adding workflow-specific targeting, policy insights, REST APIs and safer defaults for public repositories.",
-      "changeType": "ai_automation",
-      "buyerImpact": "GitHub buyers should verify how the new AI or automation capability changes workflow scope, governance and implementation effort.",
-      "decisionPages": [
-        {
-          "type": "profile",
-          "url": "/tools/github",
-          "label": "GitHub profile"
-        },
-        {
-          "type": "guide",
-          "url": "/best-developer-tools",
-          "label": "Best Developer Tools"
-        },
-        {
-          "type": "guide",
-          "url": "/best-ai-coding-tools",
-          "label": "Best AI Coding Tools"
-        }
-      ],
-      "articleUrl": "/news/github-actions-workflow-execution-protections-ga.html",
-      "sourceName": "GitHub Changelog",
-      "sourceUrl": "https://github.blog/changelog/2026-09-17-workflow-execution-protections-in-github-actions-generally-available/"
     }
   ],
   "pageUrl": "https://trytoolscout.org/software-trends-index.html",

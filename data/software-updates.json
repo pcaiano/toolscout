@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-10-05T11:03:35.487Z",
+  "updatedAt": "2026-10-05T11:17:00.649Z",
   "editorialPolicy": "Updates are selected for buyer relevance. Affiliate status, commission and partner relationships do not influence inclusion or placement.",
   "items": [
     {
@@ -15,6 +15,22 @@
       "sourceUrl": "https://openai.com/index/new-chatgpt-ads-format-and-measurement",
       "articleUrl": "/news/chatgpt-building-advertising-for-the-way-people-use-ai.html",
       "profileUrl": "/news/chatgpt-building-advertising-for-the-way-people-use-ai.html",
+      "outboundUrl": null,
+      "outboundLabel": null,
+      "partnerUpdate": false
+    },
+    {
+      "id": "github-new-fields-for-securityadvisory-graphql-api",
+      "publishedAt": "2026-10-02",
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "label": "Security update",
+      "title": "New fields for SecurityAdvisory GraphQL API",
+      "summary": "You can now read more of the GitHub Advisory Database directly from the GraphQL API without falling back to the REST API.",
+      "sourceName": "GitHub Changelog",
+      "sourceUrl": "https://github.blog/changelog/2026-10-02-new-fields-for-securityadvisory-graphql-api",
+      "articleUrl": "/news/github-new-fields-for-securityadvisory-graphql-api.html",
+      "profileUrl": "/news/github-new-fields-for-securityadvisory-graphql-api.html",
       "outboundUrl": null,
       "outboundLabel": null,
       "partnerUpdate": false
@@ -127,6 +143,22 @@
       "sourceUrl": "https://github.blog/changelog/2026-09-22-security-improvements-for-ssh/",
       "articleUrl": "/news/github-ssh-security-changes-2026.html",
       "profileUrl": "/news/github-ssh-security-changes-2026.html",
+      "outboundUrl": null,
+      "outboundLabel": null,
+      "partnerUpdate": false
+    },
+    {
+      "id": "chatgpt-introducing-gpt-6-sol-and-luna",
+      "publishedAt": "2026-09-22",
+      "toolSlug": "chatgpt",
+      "toolName": "ChatGPT",
+      "label": "AI and automation update",
+      "title": "Introducing GPT-6 Sol and Luna",
+      "summary": "Meet GPT-6 Sol and Luna, two models that bring frontier intelligence to everyday work with different balances of capability and cost.",
+      "sourceName": "OpenAI",
+      "sourceUrl": "https://openai.com/index/introducing-gpt-6-sol-and-luna",
+      "articleUrl": "/news/chatgpt-introducing-gpt-6-sol-and-luna.html",
+      "profileUrl": "/news/chatgpt-introducing-gpt-6-sol-and-luna.html",
       "outboundUrl": null,
       "outboundLabel": null,
       "partnerUpdate": false

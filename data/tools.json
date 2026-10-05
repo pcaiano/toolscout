@@ -6047,5 +6047,205 @@
       "verifiedAt": null,
       "sources": []
     }
+  },
+  {
+    "affiliateUrl": "",
+    "slug": "paioclaw",
+    "name": "Paioclaw",
+    "category": "ai-assistant",
+    "description": "USE CASES Do more than humanly possible Agent that works like your second brain. Manage Calendar Your Claw takes every meeting request, reads the context, finds the right slot, and books it. You stop being the bottleneck for your own calendar. Assign a Task Drop anything on your mind and your Claw runs with it. [&hellip;]",
+    "pricing": "See vendor for current pricing",
+    "freePlan": true,
+    "freePlanKnown": false,
+    "features": [
+      "AI assistant",
+      "research",
+      "citations",
+      "voice",
+      "API",
+      "forms",
+      "design",
+      "deployment"
+    ],
+    "bestFor": [
+      "knowledge workers",
+      "teams evaluating general AI assistants"
+    ],
+    "affiliateProgram": "Not evaluated for catalog admission",
+    "commission": "Commercial terms are separate from editorial selection",
+    "sourceUrl": "https://paioclaw.ai/",
+    "lastVerified": "2026-10-05",
+    "scores": {
+      "price": 5,
+      "ease": 5,
+      "automation": 5,
+      "integrations": 5,
+      "sales": 5,
+      "ai": 5,
+      "marketing": 5,
+      "seo": 5,
+      "research": 5,
+      "content": 5,
+      "agency": 5
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current ChatGPT, Claude, Gemini, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
+    },
+    "catalogTier": "coverage",
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "provenance": {
+      "mode": "verified_competitive_gap_coverage",
+      "admittedAt": "2026-10-05T11:17:29.080Z",
+      "source": "competitive-gap-loop",
+      "marketSignals": {
+        "count": 2,
+        "sources": [
+          "Futurepedia",
+          "Aixploria"
+        ]
+      },
+      "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
+    }
+  },
+  {
+    "affiliateUrl": "",
+    "slug": "pine-ai",
+    "name": "Pine AI",
+    "category": "ai-assistant",
+    "description": "Your AI assistant for life admin — Pine calls, negotiates, and gets things done for you.",
+    "pricing": "See vendor for current pricing",
+    "freePlan": false,
+    "freePlanKnown": false,
+    "features": [
+      "AI assistant",
+      "research",
+      "citations",
+      "summarization",
+      "forms",
+      "ecommerce"
+    ],
+    "bestFor": [
+      "knowledge workers",
+      "teams evaluating general AI assistants"
+    ],
+    "affiliateProgram": "Not evaluated for catalog admission",
+    "commission": "Commercial terms are separate from editorial selection",
+    "sourceUrl": "https://www.19pine.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+    "lastVerified": "2026-10-05",
+    "scores": {
+      "price": 5,
+      "ease": 5,
+      "automation": 5,
+      "integrations": 5,
+      "sales": 5,
+      "ai": 5,
+      "marketing": 5,
+      "seo": 5,
+      "research": 5,
+      "content": 5,
+      "agency": 5
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current ChatGPT, Claude, Gemini, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
+    },
+    "catalogTier": "coverage",
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "provenance": {
+      "mode": "verified_competitive_gap_coverage",
+      "admittedAt": "2026-10-05T11:17:29.080Z",
+      "source": "competitive-gap-loop",
+      "marketSignals": {
+        "count": 2,
+        "sources": [
+          "Futurepedia",
+          "Aixploria"
+        ]
+      },
+      "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
+    }
+  },
+  {
+    "affiliateUrl": "",
+    "slug": "pixmax-ai",
+    "name": "Pixmax AI",
+    "category": "content",
+    "description": "Create AI-generated videos, images, and audio with Pixmax. An all-in-one platform with canvas workflow for storytelling, editing, and faster content production.",
+    "pricing": "See vendor for current pricing",
+    "freePlan": false,
+    "freePlanKnown": false,
+    "features": [
+      "citations",
+      "image generation",
+      "video generation",
+      "voice",
+      "collaboration",
+      "automation",
+      "design",
+      "templates",
+      "ecommerce"
+    ],
+    "bestFor": [
+      "content teams",
+      "creators evaluating content production software"
+    ],
+    "affiliateProgram": "Not evaluated for catalog admission",
+    "commission": "Commercial terms are separate from editorial selection",
+    "sourceUrl": "https://www.pixmax.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
+    "lastVerified": "2026-10-05",
+    "scores": {
+      "price": 5,
+      "ease": 5,
+      "automation": 5,
+      "integrations": 5,
+      "sales": 5,
+      "ai": 5,
+      "marketing": 5,
+      "seo": 5,
+      "research": 5,
+      "content": 5,
+      "agency": 5
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "ToolScout has not yet verified this tool's current ChatGPT, Claude, Gemini, MCP or agent integration options.",
+      "verifiedAt": null,
+      "sources": []
+    },
+    "catalogTier": "coverage",
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "provenance": {
+      "mode": "verified_competitive_gap_coverage",
+      "admittedAt": "2026-10-05T11:17:29.080Z",
+      "source": "competitive-gap-loop",
+      "marketSignals": {
+        "count": 2,
+        "sources": [
+          "Futurepedia",
+          "Aixploria"
+        ]
+      },
+      "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
+    }
   }
 ]

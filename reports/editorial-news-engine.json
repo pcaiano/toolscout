@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T11:03:35.489Z",
+  "generatedAt": "2026-10-05T11:17:00.650Z",
   "engine": "ToolScout Editorial News Engine v1",
   "lookbackDays": 14,
   "maxPerRun": 4,
@@ -41,19 +41,19 @@
   "candidates": 2,
   "published": [
     {
-      "id": "chatgpt-building-advertising-for-the-way-people-use-ai",
-      "date": "2026-10-05",
-      "toolSlug": "chatgpt",
-      "title": "Building advertising for the way people use AI",
-      "sourceUrl": "https://openai.com/index/new-chatgpt-ads-format-and-measurement",
-      "score": 5
-    },
-    {
-      "id": "github-selected-models-in-github-copilot-deprecated",
+      "id": "github-new-fields-for-securityadvisory-graphql-api",
       "date": "2026-10-02",
       "toolSlug": "github",
-      "title": "Selected models in GitHub Copilot deprecated",
-      "sourceUrl": "https://github.blog/changelog/2026-10-02-selected-models-in-github-copilot-deprecated",
+      "title": "New fields for SecurityAdvisory GraphQL API",
+      "sourceUrl": "https://github.blog/changelog/2026-10-02-new-fields-for-securityadvisory-graphql-api",
+      "score": 7
+    },
+    {
+      "id": "chatgpt-introducing-gpt-6-sol-and-luna",
+      "date": "2026-09-22",
+      "toolSlug": "chatgpt",
+      "title": "Introducing GPT-6 Sol and Luna",
+      "sourceUrl": "https://openai.com/index/introducing-gpt-6-sol-and-luna",
       "score": 7
     }
   ],
