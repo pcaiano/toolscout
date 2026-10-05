@@ -216,6 +216,22 @@ test('software news receives the ToolScout 2.0 news surface',async()=>{
   assert.match(html,/\.ts2-global-nav \+ \.wrap > \.top:first-child\{display:none!important\}/);
 });
 
+test('ToolScout 2.0 emits one primary navigation and removes legacy branded navigation variants',async()=>{
+  const cases=[
+    ['/tools','<!doctype html><html><head></head><body><div class="wrap"><nav><a class="brand" href="/">ToolScout</a><div class="links"><a href="/tools">Tools</a></div></nav><main><h1>Tools</h1></main></div></body></html>'],
+    ['/compare','<!doctype html><html><head></head><body><div class="wrap"><nav><a class="brand" href="/">ToolScout</a><div class="links"><a href="/compare">Compare</a></div></nav><main><h1>Compare</h1></main></div></body></html>'],
+    ['/whats-new','<!doctype html><html><head></head><body><div class="wrap"><div class="top"><a class="brand" href="/">ToolScout</a><nav><a href="/tools">Tools</a><a href="/guides">Guides</a></nav></div><main><h1>What\'s new</h1></main></div></body></html>']
+  ];
+  for(const [path,source] of cases){
+    const out=await transformPublicRedesignResponse(new Request('https://trytoolscout.org'+path),new Response(source,{status:200,headers:{'content-type':'text/html; charset=UTF-8'}}));
+    const html=await out.text();
+    assert.equal((html.match(/class="ts2-global-nav"/g)||[]).length,1,path);
+    assert.doesNotMatch(html,/<nav\b[^>]*>[\s\S]*?<a\b[^>]*class=["']brand["'][^>]*>\s*ToolScout\s*<\/a>[\s\S]*?<\/nav>/i,path);
+    assert.doesNotMatch(html,/<div\b[^>]*class=["'][^"']*\btop\b[^"']*["'][^>]*>[\s\S]*?<a\b[^>]*class=["']brand["'][^>]*>\s*ToolScout\s*<\/a>/i,path);
+    assert.doesNotMatch(html,/class=["'][^"']*\bts-global-nav\b/i,path);
+  }
+});
+
 test('public outbound policy removes direct external anchors but preserves internal profile, monetizable CTA routes and marked official social profiles',async()=>{
   const source='<!doctype html><html><head></head><body><a href="https://vendor.example/source">Source</a><a href="/tools/example">Profile</a><a href="/go/example?source=software-news">Visit example</a><a href="https://x.com/trytoolscout" data-toolscout-social-link="1" data-social-network="x">Follow on X</a><a href="https://x.com/someone-else">Unmarked X</a><a href="https://evil.example/fake" data-toolscout-social-link="1">Fake social</a></body></html>';
   const response=new Response(source,{status:200,headers:{'content-type':'text/html; charset=UTF-8'}});
