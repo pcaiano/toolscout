@@ -58,7 +58,15 @@ jobs:
             | tee engine-health-recovery.json
           node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync('engine-health-recovery.json','utf8'));const n=d?.results?.networkCycle;if(!n||n.ok===false)throw new Error('network_cycle_recovery_failed:'+JSON.stringify(n));console.log(JSON.stringify({ok:d.ok,networkCycle:n},null,2))"
 
-      - name: Verify network cycle ledger is closed
+          curl -fsSL --retry 3 --retry-delay 2 \
+            -X POST \
+            -H "Authorization: Bearer ${TOKEN}" \
+            -H "Content-Type: application/json" \
+            https://trytoolscout.org/api/growth/execution/dispatch \
+            | tee execution-contract-recovery.json
+          node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync('execution-contract-recovery.json','utf8'));if(!d||d.status==='failed'||d.error)throw new Error('execution_contract_recovery_failed:'+JSON.stringify(d));console.log(JSON.stringify({status:d.status||null,ok:d.ok??null,preExecutionCoordination:d.preExecutionCoordination||null},null,2))"
+
+      - name: Verify network cycle and execution contract integrity
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
@@ -72,3 +80,20 @@ jobs:
           LIMIT 1;
           " | tee network-cycle-ledger.json
           node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('network-cycle-ledger.json','utf8'));const row=p?.[0]?.results?.[0];if(!row)throw new Error('network_cycle_ledger_missing');if(row.status!=='completed')throw new Error('network_cycle_not_completed:'+JSON.stringify(row));if(Number(row.age_minutes)>30)throw new Error('network_cycle_completion_stale:'+JSON.stringify(row));console.log(JSON.stringify(row,null,2))"
+
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          WITH active_actions AS (
+            SELECT g.opportunity_key,j.value action
+            FROM growth_opportunity_state g,json_each(g.action_json) j
+            WHERE g.status='active'
+              AND j.value NOT IN ('distribution_measurement','search_measurement')
+          )
+          SELECT COUNT(*) missing_contracts
+          FROM active_actions a
+          LEFT JOIN growth_execution_contract c
+            ON c.source_kind='opportunity'
+           AND c.source_id=a.opportunity_key
+           AND c.action=a.action
+          WHERE c.task_id IS NULL;
+          " | tee execution-contract-integrity.json
+          node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('execution-contract-integrity.json','utf8'));const row=p?.[0]?.results?.[0];if(!row)throw new Error('execution_contract_integrity_missing');if(Number(row.missing_contracts)!==0)throw new Error('active_actions_without_execution_contracts:'+JSON.stringify(row));console.log(JSON.stringify(row,null,2))"
