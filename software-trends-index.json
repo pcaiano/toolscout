@@ -3,10 +3,18 @@
   "edition": "2026-10",
   "editionLabel": "October 2026",
   "publishedAt": "2026-10-05T15:53:54.130Z",
-  "scope": "ToolScout first-party editorial dataset of public software product changes selected for buyer relevance. It is not a measure of global market share.",
+  "scope": "ToolScout rolling 30 day editorial dataset of public software product changes selected for buyer relevance. It is not a measure of global market share.",
+  "windowStart": "2026-09-06T15:53:54.130Z",
+  "windowEnd": "2026-10-05T15:53:54.130Z",
   "updatedThrough": "2026-10-05",
-  "sourceMethod": "Primary vendor documentation, changelogs, release notes and official product announcements. ToolScout aggregates observed changes into trend categories and keeps affiliate status out of selection.",
-  "primarySourceCount": 12,
+  "sourceMethod": "Primary vendor documentation, changelogs, release notes and official product announcements from the rolling 30 day window. ToolScout aggregates observed changes into trend categories and keeps affiliate status out of selection.",
+  "primarySourceCount": 20,
+  "metrics": {
+    "observedUpdates": 20,
+    "vendors": 5,
+    "trendCategories": 6,
+    "primarySources": 20
+  },
   "searchVisibility": {
     "source": "Google Search Console",
     "impressions": 6725,
@@ -22,10 +30,37 @@
       "summary": "Recent product releases point toward reusable skills, shared AI behaviour and repeatable agent workflows instead of isolated prompting.",
       "evidence": [
         "github-selected-models-in-github-copilot-deprecated",
-        "github-copilot-sandboxing-observability"
+        "github-copilot-sandboxing-observability",
+        "notion-mail-shuts-down",
+        "zapier-next-gen-zaps-mcp",
+        "notion-3-7-agent-skills"
       ],
       "vendors": [
-        "GitHub"
+        "GitHub",
+        "Notion",
+        "Zapier"
+      ]
+    },
+    {
+      "id": "connected-software",
+      "title": "Business software is opening up to agent connections",
+      "summary": "MCP, APIs and related integration layers are making software easier for AI tools to read from and act on with explicit permissions.",
+      "evidence": [
+        "github-repository-security-advisory-comments-api-in-public-preview",
+        "github-new-fields-for-securityadvisory-graphql-api",
+        "github-copilot-code-review-api-support-and-new-default-effort-level",
+        "chatgpt-introducing-gpt-6-1-sol",
+        "notion-mail-shuts-down",
+        "zapier-next-gen-zaps-mcp",
+        "github-actions-workflow-execution-protections-ga",
+        "hubspot-mcp-server-update"
+      ],
+      "vendors": [
+        "GitHub",
+        "ChatGPT",
+        "Notion",
+        "Zapier",
+        "HubSpot"
       ]
     },
     {
@@ -33,11 +68,322 @@
       "title": "Analysis and execution are moving closer together",
       "summary": "More software updates are designed to reduce the handoff between understanding what happened and taking the next operational action.",
       "evidence": [
-        "github-proof-of-presence-enterprise"
+        "github-proof-of-presence-enterprise",
+        "notion-mail-shuts-down",
+        "zapier-next-gen-zaps-mcp",
+        "github-actions-workflow-execution-protections-ga",
+        "hubspot-mcp-server-update"
       ],
       "vendors": [
-        "GitHub"
+        "GitHub",
+        "Notion",
+        "Zapier",
+        "HubSpot"
       ]
+    }
+  ],
+  "trendBreakdown": [
+    {
+      "id": "security_governance",
+      "label": "Security and governance",
+      "note": "Authentication, access, vulnerability and administrative controls.",
+      "count": 7,
+      "share": 35,
+      "vendors": [
+        "GitHub"
+      ],
+      "latestPublishedAt": "2026-10-02",
+      "evidence": [
+        "github-confidential-comments-on-repository-security-advisories",
+        "github-repository-security-advisory-comments-api-in-public-preview",
+        "github-new-fields-for-securityadvisory-graphql-api",
+        "github-rate-limits-for-private-vulnerability-reports",
+        "github-proof-of-presence-enterprise",
+        "github-ssh-security-changes-2026",
+        "github-ai-scan-codeql-setup"
+      ]
+    },
+    {
+      "id": "ai_automation",
+      "label": "AI and automation",
+      "note": "Agent, model and workflow capability changes.",
+      "count": 4,
+      "share": 20,
+      "vendors": [
+        "ChatGPT",
+        "GitHub",
+        "Notion"
+      ],
+      "latestPublishedAt": "2026-10-05",
+      "evidence": [
+        "chatgpt-building-advertising-for-the-way-people-use-ai",
+        "github-copilot-sandboxing-observability",
+        "chatgpt-introducing-gpt-6-sol-and-luna",
+        "notion-3-7-agent-skills"
+      ]
+    },
+    {
+      "id": "integrations_connectivity",
+      "label": "Integrations and connectivity",
+      "note": "APIs, MCP, connectors and connected workflow changes.",
+      "count": 4,
+      "share": 20,
+      "vendors": [
+        "GitHub",
+        "Zapier",
+        "HubSpot"
+      ],
+      "latestPublishedAt": "2026-10-02",
+      "evidence": [
+        "github-copilot-code-review-api-support-and-new-default-effort-level",
+        "zapier-next-gen-zaps-mcp",
+        "github-actions-workflow-execution-protections-ga",
+        "hubspot-mcp-server-update"
+      ]
+    },
+    {
+      "id": "pricing_packaging",
+      "label": "Pricing and packaging",
+      "note": "Plan, billing and commercial packaging changes.",
+      "count": 2,
+      "share": 10,
+      "vendors": [
+        "ChatGPT"
+      ],
+      "latestPublishedAt": "2026-09-29",
+      "evidence": [
+        "chatgpt-introducing-gpt-6-1-sol",
+        "chatgpt-word-microsoft-office"
+      ]
+    },
+    {
+      "id": "product_retirement",
+      "label": "Retirements and migrations",
+      "note": "Shutdowns, deprecations and continuity changes.",
+      "count": 2,
+      "share": 10,
+      "vendors": [
+        "GitHub",
+        "Notion"
+      ],
+      "latestPublishedAt": "2026-10-02",
+      "evidence": [
+        "github-selected-models-in-github-copilot-deprecated",
+        "notion-mail-shuts-down"
+      ]
+    },
+    {
+      "id": "product_capability",
+      "label": "Product capability",
+      "note": "Material product changes outside the categories above.",
+      "count": 1,
+      "share": 5,
+      "vendors": [
+        "ChatGPT"
+      ],
+      "latestPublishedAt": "2026-09-26",
+      "evidence": [
+        "chatgpt-images-2-5"
+      ]
+    }
+  ],
+  "vendorActivity": [
+    {
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "count": 11,
+      "latestPublishedAt": "2026-10-02",
+      "changeTypes": [
+        "security_governance",
+        "product_retirement",
+        "integrations_connectivity",
+        "ai_automation"
+      ],
+      "evidence": [
+        "github-confidential-comments-on-repository-security-advisories",
+        "github-repository-security-advisory-comments-api-in-public-preview",
+        "github-new-fields-for-securityadvisory-graphql-api",
+        "github-selected-models-in-github-copilot-deprecated",
+        "github-copilot-code-review-api-support-and-new-default-effort-level",
+        "github-rate-limits-for-private-vulnerability-reports",
+        "github-copilot-sandboxing-observability",
+        "github-proof-of-presence-enterprise",
+        "github-ssh-security-changes-2026",
+        "github-actions-workflow-execution-protections-ga",
+        "github-ai-scan-codeql-setup"
+      ]
+    },
+    {
+      "toolSlug": "chatgpt",
+      "toolName": "ChatGPT",
+      "count": 5,
+      "latestPublishedAt": "2026-10-05",
+      "changeTypes": [
+        "ai_automation",
+        "pricing_packaging",
+        "product_capability"
+      ],
+      "evidence": [
+        "chatgpt-building-advertising-for-the-way-people-use-ai",
+        "chatgpt-introducing-gpt-6-1-sol",
+        "chatgpt-images-2-5",
+        "chatgpt-introducing-gpt-6-sol-and-luna",
+        "chatgpt-word-microsoft-office"
+      ]
+    },
+    {
+      "toolSlug": "notion",
+      "toolName": "Notion",
+      "count": 2,
+      "latestPublishedAt": "2026-09-22",
+      "changeTypes": [
+        "product_retirement",
+        "ai_automation"
+      ],
+      "evidence": [
+        "notion-mail-shuts-down",
+        "notion-3-7-agent-skills"
+      ]
+    },
+    {
+      "toolSlug": "zapier",
+      "toolName": "Zapier",
+      "count": 1,
+      "latestPublishedAt": "2026-09-20",
+      "changeTypes": [
+        "integrations_connectivity"
+      ],
+      "evidence": [
+        "zapier-next-gen-zaps-mcp"
+      ]
+    },
+    {
+      "toolSlug": "hubspot",
+      "toolName": "HubSpot",
+      "count": 1,
+      "latestPublishedAt": "2026-09-15",
+      "changeTypes": [
+        "integrations_connectivity"
+      ],
+      "evidence": [
+        "hubspot-mcp-server-update"
+      ]
+    }
+  ],
+  "evidenceHighlights": [
+    {
+      "id": "chatgpt-building-advertising-for-the-way-people-use-ai",
+      "publishedAt": "2026-10-05",
+      "toolSlug": "chatgpt",
+      "toolName": "ChatGPT",
+      "label": "AI and automation update",
+      "title": "Building advertising for the way people use AI",
+      "summary": "OpenAI introduces a new visual ad format in ChatGPT and expands measurement tools, attribution partnerships, and brand suitability for advertisers.",
+      "changeType": "ai_automation",
+      "buyerImpact": "ChatGPT buyers should verify how the new AI or automation capability changes workflow scope, governance and implementation effort.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/chatgpt",
+          "label": "ChatGPT profile"
+        }
+      ],
+      "articleUrl": "/news/chatgpt-building-advertising-for-the-way-people-use-ai.html",
+      "sourceName": "OpenAI",
+      "sourceUrl": "https://openai.com/index/new-chatgpt-ads-format-and-measurement"
+    },
+    {
+      "id": "github-confidential-comments-on-repository-security-advisories",
+      "publishedAt": "2026-10-02",
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "label": "Security update",
+      "title": "Confidential comments on repository security advisories",
+      "summary": "You can now post confidential comments on repository security advisories.",
+      "changeType": "security_governance",
+      "buyerImpact": "GitHub buyers should verify whether the new controls change authentication, administration or security requirements for their team.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/github",
+          "label": "GitHub profile"
+        },
+        {
+          "type": "guide",
+          "url": "/best-developer-tools",
+          "label": "Best Developer Tools"
+        },
+        {
+          "type": "guide",
+          "url": "/best-ai-coding-tools",
+          "label": "Best AI Coding Tools"
+        }
+      ],
+      "articleUrl": "/news/github-confidential-comments-on-repository-security-advisories.html",
+      "sourceName": "GitHub Changelog",
+      "sourceUrl": "https://github.blog/changelog/2026-10-02-confidential-comments-on-repository-security-advisories"
+    },
+    {
+      "id": "github-selected-models-in-github-copilot-deprecated",
+      "publishedAt": "2026-10-02",
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "label": "Product retirement",
+      "title": "Selected models in GitHub Copilot deprecated",
+      "summary": "As of today, October 2, 2026, we have deprecated the following models across all GitHub Copilot experiences (including Copilot Chat, inline edits, ask and agent modes, and code completions).",
+      "changeType": "product_retirement",
+      "buyerImpact": "GitHub buyers should review migration, continuity and replacement requirements before relying on the affected workflow.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/github",
+          "label": "GitHub profile"
+        },
+        {
+          "type": "guide",
+          "url": "/best-developer-tools",
+          "label": "Best Developer Tools"
+        },
+        {
+          "type": "guide",
+          "url": "/best-ai-coding-tools",
+          "label": "Best AI Coding Tools"
+        }
+      ],
+      "articleUrl": "/news/github-selected-models-in-github-copilot-deprecated.html",
+      "sourceName": "GitHub Changelog",
+      "sourceUrl": "https://github.blog/changelog/2026-10-02-selected-models-in-github-copilot-deprecated"
+    },
+    {
+      "id": "github-copilot-code-review-api-support-and-new-default-effort-level",
+      "publishedAt": "2026-10-02",
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "label": "Integration update",
+      "title": "Copilot code review: API support and new default effort level",
+      "summary": "You can now request a GitHub Copilot code review through the REST and GraphQL APIs and set the review effort level for each request.",
+      "changeType": "integrations_connectivity",
+      "buyerImpact": "GitHub buyers should reassess integration depth and automation architecture if connected workflows are central to the purchase decision.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/github",
+          "label": "GitHub profile"
+        },
+        {
+          "type": "guide",
+          "url": "/best-developer-tools",
+          "label": "Best Developer Tools"
+        },
+        {
+          "type": "guide",
+          "url": "/best-ai-coding-tools",
+          "label": "Best AI Coding Tools"
+        }
+      ],
+      "articleUrl": "/news/github-copilot-code-review-api-support-and-new-default-effort-level.html",
+      "sourceName": "GitHub Changelog",
+      "sourceUrl": "https://github.blog/changelog/2026-10-02-copilot-code-review-api-support-and-new-default-effort-level"
     }
   ],
   "updates": [
@@ -382,159 +728,15 @@
       "articleUrl": "/news/github-ssh-security-changes-2026.html",
       "sourceName": "GitHub Changelog",
       "sourceUrl": "https://github.blog/changelog/2026-09-22-security-improvements-for-ssh/"
-    }
-  ],
-  "pageUrl": "https://trytoolscout.org/software-trends-index.html",
-  "dataUrl": "https://trytoolscout.org/software-trends-index.json",
-  "metrics": {
-    "observedUpdates": 12,
-    "vendors": 2,
-    "trendCategories": 6,
-    "primarySources": 12
-  },
-  "trendBreakdown": [
-    {
-      "id": "security_governance",
-      "label": "Security and governance",
-      "note": "Authentication, access, vulnerability and administrative controls.",
-      "count": 6,
-      "share": 50,
-      "vendors": [
-        "GitHub"
-      ],
-      "latestPublishedAt": "2026-10-02",
-      "evidence": [
-        "github-confidential-comments-on-repository-security-advisories",
-        "github-repository-security-advisory-comments-api-in-public-preview",
-        "github-new-fields-for-securityadvisory-graphql-api",
-        "github-rate-limits-for-private-vulnerability-reports",
-        "github-proof-of-presence-enterprise",
-        "github-ssh-security-changes-2026"
-      ]
     },
     {
-      "id": "ai_automation",
-      "label": "AI and automation",
-      "note": "Agent, model and workflow capability changes.",
-      "count": 2,
-      "share": 16.7,
-      "vendors": [
-        "ChatGPT",
-        "GitHub"
-      ],
-      "latestPublishedAt": "2026-10-05",
-      "evidence": [
-        "chatgpt-building-advertising-for-the-way-people-use-ai",
-        "github-copilot-sandboxing-observability"
-      ]
-    },
-    {
-      "id": "integrations_connectivity",
-      "label": "Integrations and connectivity",
-      "note": "APIs, MCP, connectors and connected workflow changes.",
-      "count": 1,
-      "share": 8.3,
-      "vendors": [
-        "GitHub"
-      ],
-      "latestPublishedAt": "2026-10-02",
-      "evidence": [
-        "github-copilot-code-review-api-support-and-new-default-effort-level"
-      ]
-    },
-    {
-      "id": "pricing_packaging",
-      "label": "Pricing and packaging",
-      "note": "Plan, billing and commercial packaging changes.",
-      "count": 1,
-      "share": 8.3,
-      "vendors": [
-        "ChatGPT"
-      ],
-      "latestPublishedAt": "2026-09-29",
-      "evidence": [
-        "chatgpt-introducing-gpt-6-1-sol"
-      ]
-    },
-    {
-      "id": "product_capability",
-      "label": "Product capability",
-      "note": "Material product changes outside the categories above.",
-      "count": 1,
-      "share": 8.3,
-      "vendors": [
-        "ChatGPT"
-      ],
-      "latestPublishedAt": "2026-09-26",
-      "evidence": [
-        "chatgpt-images-2-5"
-      ]
-    },
-    {
-      "id": "product_retirement",
-      "label": "Retirements and migrations",
-      "note": "Shutdowns, deprecations and continuity changes.",
-      "count": 1,
-      "share": 8.3,
-      "vendors": [
-        "GitHub"
-      ],
-      "latestPublishedAt": "2026-10-02",
-      "evidence": [
-        "github-selected-models-in-github-copilot-deprecated"
-      ]
-    }
-  ],
-  "vendorActivity": [
-    {
-      "toolSlug": "github",
-      "toolName": "GitHub",
-      "count": 9,
-      "latestPublishedAt": "2026-10-02",
-      "changeTypes": [
-        "security_governance",
-        "product_retirement",
-        "integrations_connectivity",
-        "ai_automation"
-      ],
-      "evidence": [
-        "github-confidential-comments-on-repository-security-advisories",
-        "github-repository-security-advisory-comments-api-in-public-preview",
-        "github-new-fields-for-securityadvisory-graphql-api",
-        "github-selected-models-in-github-copilot-deprecated",
-        "github-copilot-code-review-api-support-and-new-default-effort-level",
-        "github-rate-limits-for-private-vulnerability-reports",
-        "github-copilot-sandboxing-observability",
-        "github-proof-of-presence-enterprise",
-        "github-ssh-security-changes-2026"
-      ]
-    },
-    {
-      "toolSlug": "chatgpt",
-      "toolName": "ChatGPT",
-      "count": 3,
-      "latestPublishedAt": "2026-10-05",
-      "changeTypes": [
-        "ai_automation",
-        "pricing_packaging",
-        "product_capability"
-      ],
-      "evidence": [
-        "chatgpt-building-advertising-for-the-way-people-use-ai",
-        "chatgpt-introducing-gpt-6-1-sol",
-        "chatgpt-images-2-5"
-      ]
-    }
-  ],
-  "evidenceHighlights": [
-    {
-      "id": "chatgpt-building-advertising-for-the-way-people-use-ai",
-      "publishedAt": "2026-10-05",
+      "id": "chatgpt-introducing-gpt-6-sol-and-luna",
+      "publishedAt": "2026-09-22",
       "toolSlug": "chatgpt",
       "toolName": "ChatGPT",
       "label": "AI and automation update",
-      "title": "Building advertising for the way people use AI",
-      "summary": "OpenAI introduces a new visual ad format in ChatGPT and expands measurement tools, attribution partnerships, and brand suitability for advertisers.",
+      "title": "Introducing GPT-6 Sol and Luna",
+      "summary": "Meet GPT-6 Sol and Luna, two models that bring frontier intelligence to everyday work with different balances of capability and cost.",
       "changeType": "ai_automation",
       "buyerImpact": "ChatGPT buyers should verify how the new AI or automation capability changes workflow scope, governance and implementation effort.",
       "decisionPages": [
@@ -544,80 +746,81 @@
           "label": "ChatGPT profile"
         }
       ],
-      "articleUrl": "/news/chatgpt-building-advertising-for-the-way-people-use-ai.html",
+      "articleUrl": "/news/chatgpt-introducing-gpt-6-sol-and-luna.html",
       "sourceName": "OpenAI",
-      "sourceUrl": "https://openai.com/index/new-chatgpt-ads-format-and-measurement"
+      "sourceUrl": "https://openai.com/index/introducing-gpt-6-sol-and-luna"
     },
     {
-      "id": "github-confidential-comments-on-repository-security-advisories",
-      "publishedAt": "2026-10-02",
-      "toolSlug": "github",
-      "toolName": "GitHub",
-      "label": "Security update",
-      "title": "Confidential comments on repository security advisories",
-      "summary": "You can now post confidential comments on repository security advisories.",
-      "changeType": "security_governance",
-      "buyerImpact": "GitHub buyers should verify whether the new controls change authentication, administration or security requirements for their team.",
-      "decisionPages": [
-        {
-          "type": "profile",
-          "url": "/tools/github",
-          "label": "GitHub profile"
-        },
-        {
-          "type": "guide",
-          "url": "/best-developer-tools",
-          "label": "Best Developer Tools"
-        },
-        {
-          "type": "guide",
-          "url": "/best-ai-coding-tools",
-          "label": "Best AI Coding Tools"
-        }
-      ],
-      "articleUrl": "/news/github-confidential-comments-on-repository-security-advisories.html",
-      "sourceName": "GitHub Changelog",
-      "sourceUrl": "https://github.blog/changelog/2026-10-02-confidential-comments-on-repository-security-advisories"
-    },
-    {
-      "id": "github-selected-models-in-github-copilot-deprecated",
-      "publishedAt": "2026-10-02",
-      "toolSlug": "github",
-      "toolName": "GitHub",
+      "id": "notion-mail-shuts-down",
+      "publishedAt": "2026-09-22",
+      "toolSlug": "notion",
+      "toolName": "Notion",
       "label": "Product retirement",
-      "title": "Selected models in GitHub Copilot deprecated",
-      "summary": "As of today, October 2, 2026, we have deprecated the following models across all GitHub Copilot experiences (including Copilot Chat, inline edits, ask and agent modes, and code completions).",
+      "title": "Notion Mail shuts down as Notion shifts email workflows to AI",
+      "summary": "Notion Mail shuts down across all plans on 22 September while Gmail-connected AI features and agent email tools remain available.",
       "changeType": "product_retirement",
-      "buyerImpact": "GitHub buyers should review migration, continuity and replacement requirements before relying on the affected workflow.",
+      "buyerImpact": "Notion buyers should review migration, continuity and replacement requirements before relying on the affected workflow.",
       "decisionPages": [
         {
           "type": "profile",
-          "url": "/tools/github",
-          "label": "GitHub profile"
-        },
-        {
-          "type": "guide",
-          "url": "/best-developer-tools",
-          "label": "Best Developer Tools"
-        },
-        {
-          "type": "guide",
-          "url": "/best-ai-coding-tools",
-          "label": "Best AI Coding Tools"
+          "url": "/tools/notion",
+          "label": "Notion profile"
         }
       ],
-      "articleUrl": "/news/github-selected-models-in-github-copilot-deprecated.html",
-      "sourceName": "GitHub Changelog",
-      "sourceUrl": "https://github.blog/changelog/2026-10-02-selected-models-in-github-copilot-deprecated"
+      "articleUrl": "/news/notion-mail-shuts-down.html",
+      "sourceName": "Notion Help Center",
+      "sourceUrl": "https://www.notion.com/help/notion-mail-inbox-is-going-away-what-to-do-next"
     },
     {
-      "id": "github-copilot-code-review-api-support-and-new-default-effort-level",
-      "publishedAt": "2026-10-02",
+      "id": "chatgpt-word-microsoft-office",
+      "publishedAt": "2026-09-21",
+      "toolSlug": "chatgpt",
+      "toolName": "ChatGPT",
+      "label": "Official product update",
+      "title": "ChatGPT arrives in Microsoft Word across all plans",
+      "summary": "OpenAI has added ChatGPT to Microsoft Word, bringing drafting, summarization, revision and document formatting into the Word sidebar across all ChatGPT plans.",
+      "changeType": "pricing_packaging",
+      "buyerImpact": "ChatGPT buyers should re-check total cost and plan eligibility because packaging changes can alter the economics of an existing shortlist.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/chatgpt",
+          "label": "ChatGPT profile"
+        }
+      ],
+      "articleUrl": "/news/chatgpt-word-microsoft-office.html",
+      "sourceName": "OpenAI ChatGPT release notes",
+      "sourceUrl": "https://help.openai.com/en/articles/6825453-chatgpt-release-notes"
+    },
+    {
+      "id": "zapier-next-gen-zaps-mcp",
+      "publishedAt": "2026-09-20",
+      "toolSlug": "zapier",
+      "toolName": "Zapier",
+      "label": "Official product update",
+      "title": "Zapier expands Next Gen Zaps with branching, recovery and agentic management",
+      "summary": "Next Gen Zaps adds richer branching, nested loops, resilient error handling, human pauses and agent managed diagnosis and repair to Zapier's new automation model.",
+      "changeType": "integrations_connectivity",
+      "buyerImpact": "Zapier buyers should reassess integration depth and automation architecture if connected workflows are central to the purchase decision.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/zapier",
+          "label": "Zapier profile"
+        }
+      ],
+      "articleUrl": "/news/zapier-next-gen-zaps-mcp.html",
+      "sourceName": "Zapier Product Updates",
+      "sourceUrl": "https://community.zapier.com/product-updates/the-next-generation-of-zaps-is-here-53832"
+    },
+    {
+      "id": "github-actions-workflow-execution-protections-ga",
+      "publishedAt": "2026-09-17",
       "toolSlug": "github",
       "toolName": "GitHub",
-      "label": "Integration update",
-      "title": "Copilot code review: API support and new default effort level",
-      "summary": "You can now request a GitHub Copilot code review through the REST and GraphQL APIs and set the review effort level for each request.",
+      "label": "Official product update",
+      "title": "GitHub Actions adds stronger controls over who can run workflows",
+      "summary": "GitHub Actions workflow execution protections are now generally available, adding workflow-specific targeting, policy insights, REST APIs and safer defaults for public repositories.",
       "changeType": "integrations_connectivity",
       "buyerImpact": "GitHub buyers should reassess integration depth and automation architecture if connected workflows are central to the purchase decision.",
       "decisionPages": [
@@ -625,21 +828,76 @@
           "type": "profile",
           "url": "/tools/github",
           "label": "GitHub profile"
-        },
-        {
-          "type": "guide",
-          "url": "/best-developer-tools",
-          "label": "Best Developer Tools"
-        },
-        {
-          "type": "guide",
-          "url": "/best-ai-coding-tools",
-          "label": "Best AI Coding Tools"
         }
       ],
-      "articleUrl": "/news/github-copilot-code-review-api-support-and-new-default-effort-level.html",
+      "articleUrl": "/news/github-actions-workflow-execution-protections-ga.html",
       "sourceName": "GitHub Changelog",
-      "sourceUrl": "https://github.blog/changelog/2026-10-02-copilot-code-review-api-support-and-new-default-effort-level"
+      "sourceUrl": "https://github.blog/changelog/2026-09-17-workflow-execution-protections-in-github-actions-generally-available/"
+    },
+    {
+      "id": "github-ai-scan-codeql-setup",
+      "publishedAt": "2026-09-16",
+      "toolSlug": "github",
+      "toolName": "GitHub",
+      "label": "Official product update",
+      "title": "GitHub removes a setup barrier for AI Scan in pull requests",
+      "summary": "GitHub AI Scan can now check pull requests without requiring CodeQL default setup first, reducing configuration friction for eligible GitHub Advanced Security customers.",
+      "changeType": "security_governance",
+      "buyerImpact": "GitHub buyers should verify whether the new controls change authentication, administration or security requirements for their team.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/github",
+          "label": "GitHub profile"
+        }
+      ],
+      "articleUrl": "/news/github-ai-scan-codeql-setup.html",
+      "sourceName": "GitHub Changelog",
+      "sourceUrl": "https://github.blog/changelog/2026-09-16-code-scanning-ai-scan-no-longer-requires-codeql-default-setup/"
+    },
+    {
+      "id": "notion-3-7-agent-skills",
+      "publishedAt": "2026-09-15",
+      "toolSlug": "notion",
+      "toolName": "Notion",
+      "label": "Official release",
+      "title": "Notion 3.7 turns team prompts into reusable Agent skills",
+      "summary": "Notion 3.7 adds reusable team skills, a shared skills library and portability to external AI coding agents.",
+      "changeType": "ai_automation",
+      "buyerImpact": "Notion buyers should verify how the new AI or automation capability changes workflow scope, governance and implementation effort.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/notion",
+          "label": "Notion profile"
+        }
+      ],
+      "articleUrl": "/news/notion-3-7-agent-skills.html",
+      "sourceName": "Notion release notes",
+      "sourceUrl": "https://www.notion.com/en-gb/releases/2026-09-15"
+    },
+    {
+      "id": "hubspot-mcp-server-update",
+      "publishedAt": "2026-09-15",
+      "toolSlug": "hubspot",
+      "toolName": "HubSpot",
+      "label": "Official product update",
+      "title": "HubSpot expands its MCP server from insight to action",
+      "summary": "HubSpot is broadening what teams can do with CRM data and actions from AI conversations through its MCP server and Claude connector.",
+      "changeType": "integrations_connectivity",
+      "buyerImpact": "HubSpot buyers should reassess integration depth and automation architecture if connected workflows are central to the purchase decision.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/hubspot",
+          "label": "HubSpot profile"
+        }
+      ],
+      "articleUrl": "/news/hubspot-mcp-server-updates.html",
+      "sourceName": "HubSpot Releases and Updates",
+      "sourceUrl": "https://community.hubspot.com/t/spotlight-feature-hubspot-mcp-server-updates/156456"
     }
-  ]
+  ],
+  "pageUrl": "https://trytoolscout.org/software-trends-index.html",
+  "dataUrl": "https://trytoolscout.org/software-trends-index.json"
 }
