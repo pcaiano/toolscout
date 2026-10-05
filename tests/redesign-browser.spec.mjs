@@ -2,7 +2,21 @@ import {test,expect} from '@playwright/test';
 
 const base=process.env.TOOLSCOUT_BROWSER_BASE||'http://127.0.0.1:4173';
 
-test('tool directory renders the redesigned catalog and AI signals',async({page})=>{
+test('homepage implements the ToolScout 2.0 editorial direction',async({page})=>{
+  await page.goto(base+'/index.html',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('body.ts-home')).toHaveCount(1);
+  await expect(page.locator('.brand')).toHaveAttribute('href','/');
+  await expect(page.locator('.brand img')).toHaveAttribute('src','/favicon.svg');
+  await expect(page.getByRole('heading',{level:1})).toContainText('Find the');
+  await expect(page.getByRole('heading',{level:1})).toContainText('Faster.');
+  await expect(page.locator('.decisionDoors .door')).toHaveCount(3);
+  await expect(page.locator('#softwarePulse')).toBeVisible();
+  await expect(page.locator('#pulseTitle')).not.toHaveText('');
+  await expect(page.getByText('Independent. No sponsored rankings.')).toBeVisible();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2)).toBeTruthy();
+});
+
+test('tool directory renders the catalog and AI signals',async({page})=>{
   await page.goto(base+'/tools.html',{waitUntil:'domcontentloaded'});
   await page.waitForSelector('.tool');
   const count=await page.locator('.tool').count();
@@ -19,11 +33,30 @@ test('generated Figma profile includes AI interoperability evidence',async({page
   await expect(page.locator('[data-ai-interoperability="1"]')).toContainText('MCP');
 });
 
+test('public redesign transform gives internal pages the shared ToolScout 2.0 shell',async({page})=>{
+  await page.goto(base+'/.browser-fixtures/figma-public.html',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('style[data-toolscout-public-redesign="2"]')).toHaveCount(1);
+  await expect(page.locator('body[data-toolscout-redesign="2"]')).toHaveCount(1);
+  await expect(page.locator('.ts2-global-nav')).toBeVisible();
+  await expect(page.locator('.ts2-brand')).toHaveAttribute('href','/');
+  await expect(page.getByRole('link',{name:'Compare'}).first()).toBeVisible();
+  await expect(page.getByRole('link',{name:"What's new"}).first()).toBeVisible();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2)).toBeTruthy();
+});
+
 test('generated comparison includes AI decision dimensions',async({page})=>{
   await page.goto(base+'/make-vs-zapier.html',{waitUntil:'domcontentloaded'});
   await expect(page.locator('body')).toContainText('AI interoperability');
   await expect(page.locator('body')).toContainText('AI assistants');
   await expect(page.locator('body')).toContainText('Agent connectivity');
+});
+
+test('transformed comparison keeps the canonical page and gains the shared visual shell',async({page})=>{
+  await page.goto(base+'/.browser-fixtures/comparison-public.html',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('.ts2-global-nav')).toBeVisible();
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href','https://trytoolscout.org/make-vs-zapier');
+  await expect(page.locator('body')).toContainText('Make');
+  await expect(page.locator('body')).toContainText('Zapier');
 });
 
 test('Command Center redesign fixture exposes GA4 and GSC explorers',async({page})=>{
@@ -39,10 +72,10 @@ test('Command Center redesign fixture exposes GA4 and GSC explorers',async({page
 
 test.describe('mobile release smoke',()=>{
   test.use({viewport:{width:390,height:844}});
-  test('catalog, comparison and Command Center avoid page-level horizontal overflow',async({page})=>{
-    for(const path of ['/tools.html','/make-vs-zapier.html','/.browser-fixtures/analytics.html']){
+  test('public redesign and Command Center avoid page-level horizontal overflow',async({page})=>{
+    for(const path of ['/index.html','/tools.html','/make-vs-zapier.html','/.browser-fixtures/figma-public.html','/.browser-fixtures/comparison-public.html','/.browser-fixtures/analytics.html']){
       await page.goto(base+path,{waitUntil:'domcontentloaded'});
-      await page.waitForTimeout(100);
+      await page.waitForTimeout(120);
       const overflow=await page.evaluate(()=>{
         const viewport=window.innerWidth,doc=document.documentElement.scrollWidth;
         const offenders=[...document.querySelectorAll('body *')].map(el=>{
@@ -57,9 +90,15 @@ test.describe('mobile release smoke',()=>{
   });
 });
 
-test('reduced-motion contract is present in the Command Center redesign',async({page})=>{
+test('reduced-motion contracts cover public and private redesigns',async({page})=>{
   await page.emulateMedia({reducedMotion:'reduce'});
+  await page.goto(base+'/index.html',{waitUntil:'domcontentloaded'});
+  const homeCss=await page.locator('style').allTextContents();
+  expect(homeCss.join('\n')).toContain('@media(prefers-reduced-motion:reduce)');
+  await page.goto(base+'/.browser-fixtures/figma-public.html',{waitUntil:'domcontentloaded'});
+  const publicCss=await page.locator('style[data-toolscout-public-redesign="2"]').textContent();
+  expect(publicCss).toContain('@media(prefers-reduced-motion:reduce)');
   await page.goto(base+'/.browser-fixtures/analytics.html',{waitUntil:'domcontentloaded'});
-  const css=await page.locator('style[data-toolscout-command-center-redesign="2"]').textContent();
-  expect(css).toContain('@media(prefers-reduced-motion:reduce)');
+  const privateCss=await page.locator('style[data-toolscout-command-center-redesign="2"]').textContent();
+  expect(privateCss).toContain('@media(prefers-reduced-motion:reduce)');
 });
