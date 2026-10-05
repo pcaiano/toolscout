@@ -73,3 +73,12 @@ test('page type model distinguishes hubs, policy and editorial research surfaces
   assert.equal(pageTypeForPath('/tools'),'hub');
   assert.equal(pageTypeForPath('/software-trends-index'),'proprietary_dataset');
 });
+
+
+test('SEO hygiene owns category hub decision analysis so 95 reflects useful content',()=>{
+  const hygiene=read('../scripts/enforce-seo-hygiene.mjs');
+  assert.match(hygiene,/TOOLSCOUT_CATEGORY_ANALYSIS_START/);
+  assert.match(hygiene,/How to choose SEO software/);
+  assert.match(hygiene,/breadth versus specialist depth and price/);
+  assert.match(hygiene,/How to choose CRM software/);
+});
