@@ -1,0 +1,53 @@
+name: ToolScout Sticky Header Production Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/sticky-header-production-deploy.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: toolscout-sticky-header-production-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    if: contains(github.event.head_commit.message, 'Deploy sticky header production')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate sticky header release
+        run: |
+          set -euo pipefail
+          node --check public-redesign-runtime.js
+          node --test tests/toolscout-v2-public-redesign.test.mjs
+
+      - name: Deploy current main to Cloudflare
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: npx wrangler deploy --config wrangler.toml --latest
+
+      - name: Verify sticky header live
+        run: |
+          set -euo pipefail
+          curl -fsS --retry 6 --retry-delay 3 -H 'Cache-Control: no-cache' 'https://trytoolscout.org/?sticky_header=ce00a768' -o /tmp/home.html
+          curl -fsS --retry 6 --retry-delay 3 -H 'Cache-Control: no-cache' 'https://trytoolscout.org/tools.html?sticky_header=ce00a768' -o /tmp/tools.html
+          grep -q 'homeGlobalNav' /tmp/home.html
+          grep -q 'data-toolscout-sticky-nav="home"' /tmp/home.html
+          grep -q 'position:sticky;top:0;z-index:1000' /tmp/home.html
+          grep -q 'data-toolscout-sticky-nav="2"' /tmp/tools.html
+          grep -q 'position:sticky;top:0;z-index:1000' /tmp/tools.html
