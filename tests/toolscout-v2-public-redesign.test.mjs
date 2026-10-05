@@ -67,6 +67,7 @@ test('public redesign removes direct vendor source links from commercial decisio
   const html=await out.text();
   assert.doesNotMatch(html,/https:\/\/vendor\.example/);
   assert.doesNotMatch(html,/Official product source|Primary sources:/);
+  assert.match(html,/Editorial evidence:/);
   assert.match(html,/href="\/go\/example"/);
 });
 
