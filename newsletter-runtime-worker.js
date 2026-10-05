@@ -193,8 +193,19 @@ async function subscribe(request,env,ctx){
     crm_status:env.HUBSPOT_ACCESS_TOKEN?'syncing':'configuration_required'
   },{headers:JSON_H});
 }
+async function newsletterHealth(env){
+  const configured=Boolean(env.HUBSPOT_ACCESS_TOKEN);
+  if(!configured)return{ok:false,crm:'hubspot',configured:false,status:'configuration_required',subscription_name:HUBSPOT_SUBSCRIPTION_NAME};
+  try{
+    const subscription=await resolveHubSpotSubscriptionType(env);
+    return{ok:true,crm:'hubspot',configured:true,status:'ready',subscription_name:subscription.name};
+  }catch(error){
+    return{ok:false,crm:'hubspot',configured:true,status:'provider_unavailable',subscription_name:HUBSPOT_SUBSCRIPTION_NAME,error:String(error?.message||error).slice(0,240)};
+  }
+}
 export async function handleNewsletterRoute(request,env,ctx){
   const url=new URL(request.url);
+  if(request.method==='GET'&&url.pathname==='/api/newsletter/health')return Response.json(await newsletterHealth(env),{headers:JSON_H});
   if(request.method==='POST'&&url.pathname==='/api/newsletter/subscribe')return subscribe(request,env,ctx);
   if(request.method==='POST'&&url.pathname==='/api/newsletter/sync'){
     const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
