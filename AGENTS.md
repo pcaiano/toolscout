@@ -159,3 +159,16 @@ ToolScout 2.0 motion is functional, not decorative.
 6. What's New should prioritize content freshness over auto-rotation.
 7. Respect `prefers-reduced-motion` and preserve full meaning without motion.
 8. Avoid continuous decorative motion, large parallax, bouncing, spinning vendor logos, animated gradients and AI-style particle effects.
+
+
+## Private surface redesign requirement
+
+ToolScout 2.0 redesign scope includes both public and owner-only surfaces.
+
+1. The Command Center, admin/operational views, human-action workflows, affiliate/distribution workflows and other private owner surfaces must use the same ToolScout 2.0 visual system, adapted for higher information density.
+2. The Command Center is the canonical private business operating surface. It should prioritize business outcomes, source freshness, Growth Brain decisions and actionable exceptions over raw engine counters.
+3. GA4 and Google Search Console areas should behave as report explorers with switchable reports/metrics where canonical first-party data is available.
+4. Do not create a second analytics truth to support the redesign. Extend existing GA4, GSC, server outbound and business-truth contracts.
+5. Unavailable or stale sources must remain visibly unavailable or stale. Never substitute zeros.
+6. Private-surface motion follows `docs/MOTION-SYSTEM-2.0.md`.
+7. Command Center implementation contract: `docs/COMMAND-CENTER-REDESIGN-2.0.md` when present on the active redesign branch.
