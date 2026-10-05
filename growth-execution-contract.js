@@ -144,7 +144,7 @@ export function executorTaskOrderSql(executor){
   if(executor==='catalog_cycle')return "CASE WHEN subject_type='catalog_gap' THEN 0 WHEN subject_type='news_update' AND action='catalog_impact_review' THEN 1 ELSE 2 END";
   return "CASE WHEN action IS NULL THEN 0 ELSE 0 END";
 }
-const MAKE_SENDER_READY_CONDITION=`(
+export const MAKE_SENDER_READY_CONDITION=`(
   (
     growth_execution_contract.subject_type='tool'
     AND EXISTS (
