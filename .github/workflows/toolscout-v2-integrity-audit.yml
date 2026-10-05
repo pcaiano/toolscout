@@ -59,6 +59,8 @@ jobs:
             tests/toolscout-v2-search-evidence-watchdog.test.mjs
 
       - name: Audit production closed-loop truth
+        id: production_audit
+        continue-on-error: true
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
@@ -172,4 +174,30 @@ jobs:
           LIMIT 30;
           "
 
-          node scripts/evaluate-v2-integrity-audit.mjs integrity.json
+          node scripts/evaluate-v2-integrity-audit.mjs integrity.json integrity-report.json
+
+      - name: Persist Integrity Audit outcome
+        if: always()
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ ! -f integrity-report.json ]; then
+            node -e "const fs=require('fs');fs.writeFileSync('integrity-report.json',JSON.stringify({ok:false,code:'audit_execution_failure',message:'Integrity Audit production step failed before a structured report was produced.',checked_at:new Date().toISOString()},null,2)+'\\n')"
+          fi
+          cat integrity-report.json
+          node scripts/persist-v2-integrity-report.mjs integrity-report.json integrity-incident.sql
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --file integrity-incident.sql
+          {
+            echo "## ToolScout 2.0 Integrity Audit"
+            echo
+            echo '```json'
+            cat integrity-report.json
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Enforce Integrity Audit result
+        if: steps.production_audit.outcome != 'success'
+        run: |
+          echo "Integrity Audit failed. The failure has been persisted to the Growth Brain incident queue."
+          exit 1
