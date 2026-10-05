@@ -118,3 +118,16 @@ ToolScout vendor amplification is autonomous and does not require owner approval
 4. Keep the scheduled batch limit at a maximum of 3 vendor emails per execution unless the owner explicitly changes it.
 5. Record successful sends back into the Distribution Engine so duplicate outreach is not repeated.
 6. Vendor outreach must remain informational and independent. Affiliate status or outreach must never change ToolScout rankings, scores, comparison outcomes, or recommendation eligibility.
+
+
+## Redesign tooling policy
+
+For ToolScout visual or UX redesign work, use the project-scoped redesign stack documented in `docs/REDESIGN-TOOLING.md`.
+
+1. If any required redesign skill is missing under `.agents/skills/`, run `bash scripts/setup-redesign-tooling.sh` before substantial redesign implementation.
+2. Use `redesign-existing-projects` before implementation to audit the current interface.
+3. Use `design-taste-frontend` for visual-system decisions and `image-to-code` only after a reference direction is approved.
+4. Run `web-design-guidelines` as a review pass before a redesigned surface is considered ready.
+5. Continue to use the existing Context7 and Chrome DevTools MCP policy above. The skills supplement those tools and do not replace browser verification.
+6. A redesign must preserve current public URLs, canonical behavior, indexed content, structured data, affiliate routes, measurement contracts, and verified acquisition assets unless a separate change to one of those contracts is explicitly approved.
+7. Do not introduce a framework migration merely to achieve the redesign. Prefer the smallest implementation that achieves the approved visual and UX system.
