@@ -157,3 +157,12 @@ test('shared public navigation is isolated from legacy nav CSS and matches homep
   assert.match(runtime,/min-height:72px;padding:14px 20px 11px/);
   assert.match(runtime,/font-size:12px;color:#BAC0BA/);
 });
+
+
+test('homepage header leaves the finder as the primary action',()=>{
+  const html=read('index.html');
+  assert.doesNotMatch(html,/class="navCta"/);
+  assert.doesNotMatch(html,/href="#finder">Find my tools/);
+  assert.match(html,/id="need"/);
+  assert.match(html,/min-height:64px;padding:12px 0 9px/);
+});
