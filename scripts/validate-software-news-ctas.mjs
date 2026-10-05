@@ -17,7 +17,12 @@ const newsFiles = fs.readdirSync(newsDir)
 for (const file of newsFiles) {
   const rel = path.relative(ROOT, file).replaceAll('\\', '/');
   const html = fs.readFileSync(file, 'utf8');
-  const hrefs = [...html.matchAll(/href=["']([^"']+)["']/gi)].map(match => match[1]);
+  const hrefs = [...html.matchAll(/<a\b[^>]*href=["']([^"']+)["'][^>]*>/gi)].map(match => match[1]);
+  const directExternalLinks = hrefs.filter(href => /^https?:\/\//i.test(href) && !/^https?:\/\/(?:www\.)?trytoolscout\.org(?:[\/:?#]|$)/i.test(href));
+
+  if (directExternalLinks.length > 0) {
+    failures.push(`${rel}: direct external links are not allowed; use internal ToolScout routes and /go/<slug> for vendor CTAs`);
+  }
 
   const profileLinks = hrefs
     .map(href => href.match(/^\/tools\/([a-z0-9-]+)\.html(?:[?#].*)?$/i))
