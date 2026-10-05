@@ -79,6 +79,7 @@ import {handleAudienceRoute} from './audience-worker.js';
 import {handleCatalogAutonomyRoute} from './catalog-autonomy-worker.js';
 import {handleFunnelRuntimeRoute} from './funnel-worker.js';
 import {handleDynamicRuntimeRoute} from './dynamic-worker.js';
+import {transformComparisonAiResponse} from './comparison-ai-runtime.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store'};
 
@@ -103,6 +104,7 @@ async function publicAssetPipeline(request,env,ctx){
   response=await transformPublicCanonicalResponse(request,response);
   response=await applyMarkedOwnerAnalytics(request,response);
   response=await transformSeoPublicPage(request,response,env);
+  if(request.method==='GET')response=await transformComparisonAiResponse(request,response,env);
   if(request.method==='GET')return injectToolScoutSocialFooter(response);
   return response;
 }
@@ -2530,16 +2532,12 @@ export default{
       });
       const combined=(async()=>{
         await Promise.allSettled([growth,authority,primary,seo]);
-        // The named sender-drain owner must claim/dispatch executable make_sender
-        // work before the closed loop observes handoff state. Otherwise a pending,
-        // ready task can appear runnable while public-candidates correctly sees no
-        // claimed task and the authority recovery reports a false failure.
-        await runAuthorityDrainScheduled(scheduledEvent,env,ctx).catch(async error=>{
-          await event(env,'authority_drain_scheduler_failed','failed',safe(error?.message||error,800)).catch(()=>{});
-          return null;
-        });
         await runGrowthClosedLoopScheduled(scheduledEvent,env,ctx).catch(async error=>{
           await event(env,'authority_closed_loop_scheduler_failed','failed',safe(error?.message||error,800)).catch(()=>{});
+          return null;
+        });
+        await runAuthorityDrainScheduled(scheduledEvent,env,ctx).catch(async error=>{
+          await event(env,'authority_drain_scheduler_failed','failed',safe(error?.message||error,800)).catch(()=>{});
           return null;
         });
       })();
