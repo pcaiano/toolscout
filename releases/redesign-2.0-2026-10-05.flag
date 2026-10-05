@@ -1,4 +1,0 @@
-ToolScout 2.0 redesign release marker
-Date: 2026-10-05
-Purpose: trigger production acceptance and Cloudflare deployment after merge to main.
-Release gate: CI green before merge; production acceptance validates preservation, deploys, then runs live smoke and operational probes.
