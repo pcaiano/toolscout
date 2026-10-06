@@ -212,6 +212,19 @@ test('commercial source cleanup leaves readable verification wording',async()=>{
 });
 
 
+test('core public sources and guide generator no longer carry pre-2.0 navigation',()=>{
+  const tools=read('tools.html');
+  const guides=read('guides.html');
+  const compare=read('compare.html');
+  const whatsNew=read('whats-new.html');
+  const generator=read('scripts/generate-seo-pages.mjs');
+  assert.doesNotMatch(tools,/<nav><a class="brand"/);
+  assert.doesNotMatch(guides,/<a class="brand" href="\.\/">ToolScout<\/a>/);
+  assert.doesNotMatch(compare,/<nav><a class="brand"/);
+  assert.doesNotMatch(whatsNew,/<div class="top"><a class="brand"/);
+  assert.doesNotMatch(generator,/<div class="wrap"><a class="brand" href="\/">ToolScout<\/a><main class="hero">/);
+});
+
 test('tools directory keeps the intro concise, shows catalog count and spaces AI editorial copy',()=>{
   const html=read('tools.html');
   assert.match(html,/Use the directory to narrow the decision\./);
