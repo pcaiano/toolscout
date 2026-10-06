@@ -39,7 +39,9 @@ const guideAnalysisV2=(toolsForPage,intent)=>{
   const leadEdge=deltas.find(x=>x.diff>0),runnerEdge=deltas.find(x=>x.diff<0);
   const leaderFeatures=(leader.features||[]).slice(0,3);
   const runnerFeatures=(runner?.features||[]).slice(0,3);
-  const first=runner&&leadEdge?`${leader.name} leads this shortlist because ${label(leadEdge.key)} carries more weight in this job and its catalog score is ${scoreFor(leader,leadEdge.key)} versus ${scoreFor(runner,leadEdge.key)} for ${runner.name}.`:`${leader.name} sits first because its recorded capabilities align most closely with the constraints behind this guide.`;
+  const guideName=titleFromIntent(intent);
+  const leadFeature=leaderFeatures[0]||leader.category;
+  const first=runner&&leadEdge?`For ${guideName}, ${leader.name} moves ahead on ${label(leadEdge.key)}: ${scoreFor(leader,leadEdge.key)} versus ${scoreFor(runner,leadEdge.key)} for ${runner.name}, with ${leadFeature} reinforcing that fit.`:`In ${guideName}, ${leader.name} takes the first position because ${leadFeature} and its recorded capability mix fit this specific job better than the other eligible options.`;
   const second=runnerEdge?`${runner.name} is not simply a weaker version of the same choice: it scores better on ${label(runnerEdge.key)}, which can reverse the decision when that matters more than the headline ranking.`:runner?`${runner.name} remains the closest alternative, with ${runnerFeatures.join(', ')||runner.category} giving buyers a materially different route into the same job.`:'';
   const third=leaderFeatures.length?`For ${leader.name}, the useful evidence is ${leaderFeatures.join(', ')}. The ranking should therefore be read as a workflow recommendation, not as a generic popularity table.`:'The ranking should be read as a workflow recommendation rather than a generic popularity table.';
   return `<section class="section editorial-analysis" data-toolscout-analysis="1"><h2>ToolScout analysis</h2><p>${esc([first,second,third].filter(Boolean).join(' '))}</p></section>`;
