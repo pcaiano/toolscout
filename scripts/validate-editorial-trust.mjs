@@ -10,6 +10,7 @@ const tools=read('data/tools.json',[]);
 const freshness=read('data/catalog-freshness-state.json',{tools:{}});
 const engine=read('data/organic-growth-engine.json',{editorialGates:{}});
 const minRelevance=Number(engine?.editorialGates?.minimumLexicalRelevance||0.75);
+const editorialQuality=engine?.editorialQuality||{};
 const toolBySlug=new Map(tools.map(x=>[x.slug,x]));
 const errors=[];
 const warnings=[];
@@ -20,6 +21,9 @@ function trust(tool,{strict=false}={}){
 }
 function error(code,detail){errors.push({code,detail});}
 function rankedToolSlugs(html){return [...new Set([...String(html||'').matchAll(/href=["']\/tools\/([a-z0-9-]+)(?:\.html)?(?:[?#][^"']*)?["']/gi)].map(m=>m[1]))];}
+function plain(html){return String(html||'').replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/&[^;]+;/g,' ').replace(/\s+/g,' ').trim();}
+function wordSet(text){return new Set(plain(text).toLowerCase().match(/[a-z0-9]+/g)||[]);}
+function jaccard(a,b){const A=wordSet(a),B=wordSet(b);if(!A.size||!B.size)return 0;let hit=0;for(const x of A)if(B.has(x))hit++;return hit/(A.size+B.size-hit);}
 
 for(const tool of tools){
   const t=trust(tool);
@@ -92,6 +96,24 @@ if(!catalogOnly){
     for(const pattern of positiveUnsupported)if(pattern.test(html))error('unsupported_market_claim',String(pattern));
     if(/[\u2013\u2014]/.test(html))error('forbidden_long_dash','software-trends-index.html');
   }
+  if(editorialQuality.rollout==='pilot'){
+    const forbidden=editorialQuality?.validation?.rejectGenericAnalysisPhrases||[];
+    for(const rel of editorialQuality.pilotPaths||[]){
+      const file=path.join(ROOT,rel);
+      if(!fs.existsSync(file)){error('editorial_quality_pilot_missing',rel);continue;}
+      const html=fs.readFileSync(file,'utf8');
+      if(!html.includes('data-editorial-quality="pilot"'))error('editorial_quality_marker_missing',rel);
+      if(/[\u2013\u2014]/.test(html))error('editorial_quality_forbidden_long_dash',rel);
+      for(const phrase of forbidden)if(plain(html).toLowerCase().includes(String(phrase).toLowerCase()))error('editorial_quality_generic_phrase',`${rel}:${phrase}`);
+      if(rel.startsWith('news/')){
+        const lead=html.match(/<p class="lead">([\s\S]*?)<\/p>/i)?.[1]||'';
+        const changed=html.match(/<\/header>\s*<h2[^>]*>[^<]*<\/h2>\s*<p[^>]*>([\s\S]*?)<\/p>/i)?.[1]||'';
+        if(!lead||!changed)error('editorial_quality_news_structure_missing',rel);
+        else if(jaccard(lead,changed)>=0.72)error('editorial_quality_news_lead_repetition',`${rel}:${jaccard(lead,changed).toFixed(2)}`);
+      }
+    }
+  }
+
 }
 
 fs.mkdirSync(path.join(ROOT,'reports'),{recursive:true});
