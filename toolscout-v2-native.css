@@ -1,0 +1,291 @@
+/* ToolScout 2.0 native public surfaces
+   Canonical visual language shared with the homepage and Publisher Kit. */
+:root{
+  --ts2-g:#0B0D0C;--ts2-c:#141715;--ts2-off:#F3F5F1;--ts2-soft:#F8F9F6;
+  --ts2-muted:#90978F;--ts2-muted-dark:#646B64;--ts2-line:#DDE2DC;--ts2-lime:#B7FF3C;
+  --ts2-fast:140ms;--ts2-ease:cubic-bezier(.2,.7,.2,1)
+}
+html[data-toolscout-redesign="2"] body{background:var(--ts2-off)!important;color:var(--ts2-g)!important}
+html[data-toolscout-redesign="2"] body>.wrap{max-width:1248px!important;margin:0 auto!important;padding:0 24px 96px!important}
+html[data-toolscout-redesign="2"] .eyebrow,
+html[data-toolscout-redesign="2"] .meta{font-size:10px!important;letter-spacing:.11em!important;text-transform:uppercase!important;font-weight:850!important;color:#747C74!important}
+html[data-toolscout-redesign="2"] h1{letter-spacing:-.06em!important}
+html[data-toolscout-redesign="2"] h2{letter-spacing:-.045em!important}
+html[data-toolscout-redesign="2"] p{color:#626962}
+html[data-toolscout-redesign="2"] .btn,
+html[data-toolscout-redesign="2"] .cta,
+html[data-toolscout-redesign="2"] .compareBtn{border-radius:7px!important;box-shadow:none!important}
+html[data-toolscout-redesign="2"] .ts2-global-nav{border-bottom:1px solid rgba(243,245,241,.1)!important}
+
+/* full-bleed editorial hero */
+html[data-toolscout-surface="tools"] .intro,
+html[data-toolscout-surface="guides"] .hero,
+html[data-toolscout-surface="compare"] .intro,
+html[data-toolscout-surface="whats-new"] .hero,
+html[data-toolscout-surface="tool-profile"] .hero,
+html[data-toolscout-surface="guide-detail"] .hero{
+  max-width:none!important;
+  margin:0!important;
+  padding:50px 0 46px!important;
+  background:var(--ts2-g)!important;
+  box-shadow:0 0 0 100vmax var(--ts2-g);
+  clip-path:inset(0 -100vmax);
+  border:0!important;
+}
+html[data-toolscout-surface="tools"] .intro .eyebrow,
+html[data-toolscout-surface="guides"] .hero .eyebrow,
+html[data-toolscout-surface="compare"] .intro .eyebrow,
+html[data-toolscout-surface="whats-new"] .hero .eyebrow,
+html[data-toolscout-surface="tool-profile"] .hero .eyebrow,
+html[data-toolscout-surface="guide-detail"] .hero .eyebrow{color:var(--ts2-lime)!important}
+html[data-toolscout-surface="tools"] .intro h1,
+html[data-toolscout-surface="guides"] .hero h1,
+html[data-toolscout-surface="compare"] .intro h1,
+html[data-toolscout-surface="whats-new"] .hero h1,
+html[data-toolscout-surface="tool-profile"] .hero h1,
+html[data-toolscout-surface="guide-detail"] .hero h1{
+  color:var(--ts2-off)!important;
+  max-width:920px!important;
+  margin:12px 0 18px!important;
+  font-size:clamp(54px,6vw,82px)!important;
+  line-height:.94!important;
+}
+html[data-toolscout-surface="tools"] .intro p,
+html[data-toolscout-surface="guides"] .hero p,
+html[data-toolscout-surface="compare"] .intro p,
+html[data-toolscout-surface="whats-new"] .hero p,
+html[data-toolscout-surface="tool-profile"] .hero .lead,
+html[data-toolscout-surface="guide-detail"] .hero .lead,
+html[data-toolscout-surface="guide-detail"] .hero .sub{
+  color:#C8CDC7!important;
+  max-width:820px!important;
+  font-size:17px!important;
+  line-height:1.58!important;
+}
+
+/* TOOLS */
+html[data-toolscout-surface="tools"] .editorial-guide{
+  display:grid!important;grid-template-columns:5fr 7fr!important;gap:56px!important;
+  margin:42px 0 30px!important;padding:32px 0!important;
+  background:transparent!important;border:0!important;border-top:1px solid var(--ts2-g)!important;border-bottom:1px solid var(--ts2-line)!important;border-radius:0!important
+}
+html[data-toolscout-surface="tools"] .editorial-guide h2{font-size:30px!important;line-height:1.08!important;margin:7px 0 0!important}
+html[data-toolscout-surface="tools"] .editorial-guide p{margin:0!important;font-size:15px!important}
+html[data-toolscout-surface="tools"] .search{margin:28px 0 24px!important}
+html[data-toolscout-surface="tools"] .search input{
+  min-height:54px!important;padding:0 16px!important;background:var(--ts2-soft)!important;
+  border:1px solid #BBC2BA!important;border-radius:8px!important;box-shadow:none!important
+}
+html[data-toolscout-surface="tools"] .search input:focus{border-color:var(--ts2-g)!important;box-shadow:0 0 0 2px rgba(11,13,12,.06)!important}
+html[data-toolscout-surface="tools"] .catalog-count{margin-top:28px!important;padding-top:18px!important;border-top:1px solid var(--ts2-g)!important}
+html[data-toolscout-surface="tools"] #grid.grid{display:block!important;border-top:1px solid var(--ts2-line)!important}
+html[data-toolscout-surface="tools"] .tool{
+  display:grid!important;grid-template-columns:minmax(0,1fr) 260px!important;column-gap:34px!important;
+  padding:27px 0!important;margin:0!important;background:transparent!important;
+  border:0!important;border-bottom:1px solid var(--ts2-line)!important;border-radius:0!important;box-shadow:none!important
+}
+html[data-toolscout-surface="tools"] .tool:hover{transform:none!important;background:rgba(255,255,255,.32)!important}
+html[data-toolscout-surface="tools"] .tool-head,
+html[data-toolscout-surface="tools"] .tool-summary,
+html[data-toolscout-surface="tools"] .tool-view,
+html[data-toolscout-surface="tools"] .tool>.ai-badge,
+html[data-toolscout-surface="tools"] .tool>.chips{grid-column:1!important}
+html[data-toolscout-surface="tools"] .tool-head{gap:14px!important}
+html[data-toolscout-surface="tools"] .tool-logo{width:48px!important;height:48px!important;flex-basis:48px!important;border-radius:9px!important;background:#fff!important}
+html[data-toolscout-surface="tools"] .tool h2{font-size:25px!important;line-height:1.05!important}
+html[data-toolscout-surface="tools"] .tool-summary{max-width:760px!important;margin:14px 0 6px!important}
+html[data-toolscout-surface="tools"] .tool-view{max-width:760px!important;margin:6px 0 0!important}
+html[data-toolscout-surface="tools"] .ai-badge{width:max-content!important;border-radius:6px!important;background:var(--ts2-g)!important;color:var(--ts2-lime)!important;border:0!important}
+html[data-toolscout-surface="tools"] .ai-badge::before{background:var(--ts2-lime)!important;color:var(--ts2-g)!important}
+html[data-toolscout-surface="tools"] .tool .chip{border-radius:6px!important;background:var(--ts2-soft)!important}
+html[data-toolscout-surface="tools"] .tool-footer{
+  grid-column:2!important;grid-row:1 / span 6!important;align-self:center!important;
+  display:flex!important;flex-direction:column!important;align-items:flex-end!important;justify-content:center!important;
+  gap:10px!important;margin:0!important;padding:0!important;border:0!important
+}
+html[data-toolscout-surface="tools"] .tool-actions{display:grid!important;grid-template-columns:1fr!important;gap:8px!important;width:190px!important}
+html[data-toolscout-surface="tools"] .tool-link,
+html[data-toolscout-surface="tools"] .tool-visit{width:100%!important;min-height:39px!important;border-radius:7px!important}
+html[data-toolscout-surface="tools"] .tool-link{background:transparent!important;border:1px solid #BBC2BA!important;color:var(--ts2-g)!important}
+html[data-toolscout-surface="tools"] .tool-visit{background:var(--ts2-g)!important;border-color:var(--ts2-g)!important;color:#fff!important}
+html[data-toolscout-surface="tools"] .crawl-index{
+  margin-top:28px!important;padding:18px 0!important;background:transparent!important;border:0!important;
+  border-top:1px solid var(--ts2-g)!important;border-bottom:1px solid var(--ts2-line)!important;border-radius:0!important
+}
+
+/* GUIDES */
+html[data-toolscout-surface="guides"] .section{margin-top:46px!important;padding-top:24px!important;border-top:1px solid var(--ts2-g)!important}
+html[data-toolscout-surface="guides"] .section h2{font-size:34px!important;line-height:1.05!important;margin:7px 0 18px!important}
+html[data-toolscout-surface="guides"] .grid{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:0 34px!important;border-top:1px solid var(--ts2-line)!important
+}
+html[data-toolscout-surface="guides"] .card{
+  min-height:66px!important;padding:18px 0!important;background:transparent!important;border:0!important;
+  border-bottom:1px solid var(--ts2-line)!important;border-radius:0!important;box-shadow:none!important
+}
+html[data-toolscout-surface="guides"] .card:hover{transform:none!important;padding-left:6px!important;background:transparent!important}
+html[data-toolscout-surface="guides"] .card strong{font-size:17px!important}
+html[data-toolscout-surface="guides"] .card span{color:#6E766E!important;font-size:11px!important;font-weight:800!important;text-transform:uppercase!important;letter-spacing:.07em!important}
+
+/* COMPARE HUB + INDIVIDUAL COMPARISONS */
+html[data-toolscout-surface="compare"] .selectors{
+  margin:34px 0 18px!important;padding:22px 0!important;
+  border-top:1px solid var(--ts2-g)!important;border-bottom:1px solid var(--ts2-line)!important;gap:20px!important
+}
+html[data-toolscout-surface="compare"] .selectors label{font-size:10px!important;color:#737B73!important}
+html[data-toolscout-surface="compare"] .selectors select{
+  min-height:52px!important;margin-top:7px!important;padding:0 14px!important;
+  border:1px solid #BBC2BA!important;border-radius:8px!important;background:var(--ts2-soft)!important;box-shadow:none!important
+}
+html[data-toolscout-surface="compare"] .pairNote{
+  margin:20px 0 0!important;padding:0!important;background:transparent!important;border:0!important;color:#626962!important;font-size:12px!important
+}
+html[data-toolscout-surface="compare"] .table{
+  margin-top:24px!important;background:transparent!important;border:0!important;border-top:1px solid var(--ts2-g)!important;
+  border-bottom:1px solid var(--ts2-line)!important;border-radius:0!important;box-shadow:none!important
+}
+html[data-toolscout-surface="compare"] .row{border-bottom:1px solid var(--ts2-line)!important}
+html[data-toolscout-surface="compare"] .cell{padding:18px 16px!important}
+html[data-toolscout-surface="compare"] .analysis{
+  margin-top:42px!important;padding:30px 0!important;background:transparent!important;border:0!important;
+  border-top:1px solid var(--ts2-g)!important;border-bottom:1px solid var(--ts2-line)!important;border-radius:0!important;box-shadow:none!important
+}
+html[data-toolscout-surface="compare"] .analysis h2{font-size:32px!important;line-height:1.06!important;margin:7px 0 14px!important}
+html[data-toolscout-surface="compare"] .suggestions{margin-top:42px!important;padding-top:26px!important;border-top:1px solid var(--ts2-g)!important}
+html[data-toolscout-surface="compare"] .suggestion-grid{gap:0 28px!important}
+html[data-toolscout-surface="compare"] .suggestion-card{
+  padding:18px 0!important;background:transparent!important;border:0!important;border-bottom:1px solid var(--ts2-line)!important;
+  border-radius:0!important;box-shadow:none!important
+}
+html[data-toolscout-surface="compare"] .suggestion-card:hover{transform:none!important;padding-left:5px!important}
+
+/* WHAT'S NEW */
+html[data-toolscout-surface="whats-new"] .grid{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:0 34px!important;
+  margin-top:42px!important;border-top:1px solid var(--ts2-g)!important
+}
+html[data-toolscout-surface="whats-new"] .card{
+  padding:24px 0!important;background:transparent!important;border:0!important;border-bottom:1px solid var(--ts2-line)!important;
+  border-radius:0!important;box-shadow:none!important
+}
+html[data-toolscout-surface="whats-new"] .card:hover{transform:none!important;background:transparent!important;padding-left:5px!important}
+html[data-toolscout-surface="whats-new"] .card:first-child{
+  grid-column:1/-1!important;min-height:0!important;padding:32px 0 34px!important;border-bottom:1px solid var(--ts2-g)!important
+}
+html[data-toolscout-surface="whats-new"] .card:first-child h2{max-width:880px!important;font-size:42px!important;line-height:1.04!important}
+html[data-toolscout-surface="whats-new"] .card h2{font-size:24px!important;line-height:1.1!important;margin:10px 0 8px!important}
+html[data-toolscout-surface="whats-new"] .card p{font-size:14px!important;line-height:1.55!important;margin:0 0 14px!important}
+html[data-toolscout-surface="whats-new"] .more{font-size:10px!important;text-transform:uppercase!important;letter-spacing:.1em!important}
+html[data-toolscout-surface="whats-new"] .policy{
+  margin-top:44px!important;padding:28px 0!important;background:transparent!important;border:0!important;border-top:1px solid var(--ts2-g)!important;border-radius:0!important
+}
+
+/* TOOL PROFILES */
+html[data-toolscout-surface="tool-profile"] .crumbs{
+  margin:0!important;padding:22px 0 0!important;background:var(--ts2-g)!important;
+  box-shadow:0 0 0 100vmax var(--ts2-g);clip-path:inset(0 -100vmax);color:#959C95!important;font-size:12px!important
+}
+html[data-toolscout-surface="tool-profile"] .crumbs a{color:#CDD2CC!important;text-decoration:none!important}
+html[data-toolscout-surface="tool-profile"] .hero{padding-top:30px!important}
+html[data-toolscout-surface="tool-profile"] .heroHead{display:flex!important;align-items:center!important;gap:18px!important}
+html[data-toolscout-surface="tool-profile"] .toolLogo,
+html[data-toolscout-surface="tool-profile"] .logoFallback{
+  width:64px!important;height:64px!important;flex:0 0 64px!important;border-radius:11px!important;
+  background:#fff!important;border:1px solid rgba(243,245,241,.22)!important;box-shadow:none!important;padding:9px!important
+}
+html[data-toolscout-surface="tool-profile"] .editorialIntro{
+  display:grid!important;grid-template-columns:180px minmax(0,1fr)!important;gap:34px!important;
+  margin:0!important;padding:32px 0!important;background:transparent!important;border:0!important;
+  border-bottom:1px solid var(--ts2-line)!important;border-radius:0!important
+}
+html[data-toolscout-surface="tool-profile"] .editorialIntro p{margin:0!important;font-size:16px!important;line-height:1.68!important}
+html[data-toolscout-surface="tool-profile"] .grid{
+  display:grid!important;grid-template-columns:1.15fr .85fr!important;gap:0 34px!important;
+  margin-top:38px!important;border-top:1px solid var(--ts2-g)!important
+}
+html[data-toolscout-surface="tool-profile"] .panel{
+  padding:26px 0!important;background:transparent!important;border:0!important;border-bottom:1px solid var(--ts2-line)!important;border-radius:0!important;box-shadow:none!important
+}
+html[data-toolscout-surface="tool-profile"] .panel+ .panel{padding-left:30px!important;border-left:1px solid var(--ts2-line)!important}
+html[data-toolscout-surface="tool-profile"] .panel h2{font-size:27px!important;margin:0 0 13px!important}
+html[data-toolscout-surface="tool-profile"] .panel h2:not(:first-child){margin-top:30px!important}
+html[data-toolscout-surface="tool-profile"] .chips span{border:1px solid var(--ts2-line)!important;border-radius:6px!important;background:var(--ts2-soft)!important}
+html[data-toolscout-surface="tool-profile"] .section{
+  margin-top:48px!important;padding-top:27px!important;border-top:1px solid var(--ts2-g)!important
+}
+html[data-toolscout-surface="tool-profile"] .section h2{font-size:34px!important;line-height:1.07!important;margin:6px 0 14px!important}
+html[data-toolscout-surface="tool-profile"] .aiFacts span{background:var(--ts2-soft)!important;border:1px solid var(--ts2-line)!important;border-radius:6px!important}
+html[data-toolscout-surface="tool-profile"] .relatedGrid,
+html[data-toolscout-surface="tool-profile"] [data-toolscout-related-tools="1"]>div{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:0 28px!important;border-top:1px solid var(--ts2-line)!important
+}
+html[data-toolscout-surface="tool-profile"] .relatedCard,
+html[data-toolscout-surface="tool-profile"] [data-toolscout-related-tools="1"]>div>a{
+  padding:18px 0!important;background:transparent!important;border:0!important;border-bottom:1px solid var(--ts2-line)!important;border-radius:0!important
+}
+html[data-toolscout-surface="tool-profile"] details{
+  padding:17px 0!important;background:transparent!important;border:0!important;border-bottom:1px solid var(--ts2-line)!important;border-radius:0!important
+}
+html[data-toolscout-surface="tool-profile"] .qualityActions{
+  margin-top:28px!important;padding-top:20px!important;border-top:1px solid var(--ts2-line)!important
+}
+
+/* BUYING GUIDE DETAILS */
+html[data-toolscout-surface="guide-detail"] body>.wrap>.grid{
+  display:block!important;margin-top:38px!important;border-top:1px solid var(--ts2-g)!important
+}
+html[data-toolscout-surface="guide-detail"] body>.wrap>.grid>.card{
+  position:relative!important;padding:28px 0 30px 70px!important;background:transparent!important;
+  border:0!important;border-bottom:1px solid var(--ts2-line)!important;border-radius:0!important;box-shadow:none!important
+}
+html[data-toolscout-surface="guide-detail"] body>.wrap>.grid>.card:hover{transform:none!important;background:transparent!important}
+html[data-toolscout-surface="guide-detail"] .card .rank{
+  position:absolute!important;left:0!important;top:30px!important;width:42px!important;height:28px!important;
+  display:grid!important;place-items:center!important;border:1px solid var(--ts2-g)!important;border-radius:5px!important;font-size:11px!important;font-weight:900!important
+}
+html[data-toolscout-surface="guide-detail"] .card h2{font-size:29px!important;line-height:1.08!important;margin:5px 0 10px!important}
+html[data-toolscout-surface="guide-detail"] .editorial-analysis,
+html[data-toolscout-surface="guide-detail"] .section{
+  margin-top:46px!important;padding-top:28px!important;background:transparent!important;border:0!important;border-top:1px solid var(--ts2-g)!important;border-radius:0!important
+}
+html[data-toolscout-surface="guide-detail"] .related{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:0 28px!important;border-top:1px solid var(--ts2-line)!important
+}
+html[data-toolscout-surface="guide-detail"] .related-card{
+  padding:18px 0!important;background:transparent!important;border:0!important;border-bottom:1px solid var(--ts2-line)!important;border-radius:0!important
+}
+
+/* mobile */
+@media(max-width:760px){
+  html[data-toolscout-redesign="2"] body>.wrap{padding-left:18px!important;padding-right:18px!important;padding-bottom:72px!important}
+  html[data-toolscout-surface="tools"] .intro,
+  html[data-toolscout-surface="guides"] .hero,
+  html[data-toolscout-surface="compare"] .intro,
+  html[data-toolscout-surface="whats-new"] .hero,
+  html[data-toolscout-surface="tool-profile"] .hero,
+  html[data-toolscout-surface="guide-detail"] .hero{padding:40px 0 34px!important}
+  html[data-toolscout-surface="tools"] .intro h1,
+  html[data-toolscout-surface="guides"] .hero h1,
+  html[data-toolscout-surface="compare"] .intro h1,
+  html[data-toolscout-surface="whats-new"] .hero h1,
+  html[data-toolscout-surface="tool-profile"] .hero h1,
+  html[data-toolscout-surface="guide-detail"] .hero h1{font-size:48px!important}
+  html[data-toolscout-surface="tools"] .editorial-guide{grid-template-columns:1fr!important;gap:12px!important;padding:24px 0!important}
+  html[data-toolscout-surface="tools"] .tool{grid-template-columns:1fr!important;gap:14px!important}
+  html[data-toolscout-surface="tools"] .tool-footer{grid-column:1!important;grid-row:auto!important;align-items:flex-start!important}
+  html[data-toolscout-surface="tools"] .tool-actions{width:100%!important;grid-template-columns:1fr 1fr!important}
+  html[data-toolscout-surface="guides"] .grid,
+  html[data-toolscout-surface="whats-new"] .grid,
+  html[data-toolscout-surface="tool-profile"] .grid,
+  html[data-toolscout-surface="tool-profile"] .relatedGrid,
+  html[data-toolscout-surface="tool-profile"] [data-toolscout-related-tools="1"]>div,
+  html[data-toolscout-surface="guide-detail"] .related{grid-template-columns:1fr!important;gap:0!important}
+  html[data-toolscout-surface="tool-profile"] .panel+ .panel{padding-left:0!important;border-left:0!important}
+  html[data-toolscout-surface="tool-profile"] .editorialIntro{grid-template-columns:1fr!important;gap:10px!important}
+  html[data-toolscout-surface="whats-new"] .card:first-child{grid-column:auto!important}
+  html[data-toolscout-surface="whats-new"] .card:first-child h2{font-size:30px!important}
+  html[data-toolscout-surface="compare"] .selectors{grid-template-columns:1fr!important}
+  html[data-toolscout-surface="guide-detail"] body>.wrap>.grid>.card{padding-left:54px!important}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
