@@ -114,7 +114,7 @@ function editorialViewLegacy(tool){
   return clean(`${fit} ${strengths}${tradeoff} ${commercial} Shortlist ${tool.name} when those priorities match your workflow, then verify current limits, integrations and pricing.`);
 }
 function editorialFrame(tool){
-  return [...String(tool.slug||tool.name||'')].reduce((sum,ch)=>sum+ch.charCodeAt(0),0)%4;
+  return [...String(tool.slug||tool.name||'')].reduce((sum,ch)=>sum+ch.charCodeAt(0),0)%12;
 }
 function editorialViewV2(tool){
   const audience=(tool.bestFor||[]).slice(0,3);
@@ -124,11 +124,22 @@ function editorialViewV2(tool){
   const topScore=strongest[0]?.score??0;
   const weakestLabel=weakest?(scoreLabels[weakest.key]||weakest.key):null;
   const frame=editorialFrame(tool);
+  const strengthPhrase=listPhrase(strong.length?strong:capabilities.slice(0,2));
+  const audiencePhrase=listPhrase(audience.length?audience:['buyers in this category']);
+  const capabilityPhrase=listPhrase(capabilities.length?capabilities.slice(0,3):strong);
   const openings=[
-    `${tool.name}'s strongest case is not that it does everything, but that it brings ${listPhrase(strong.length?strong:capabilities.slice(0,2))} into one buying decision.`,
-    `For ${listPhrase(audience.length?audience:['buyers in this category'])}, the useful question is where ${tool.name} changes the workflow rather than how long its feature list is.`,
-    `Look past the category label and ${tool.name} is easiest to understand through the jobs it is strongest at: ${listPhrase(capabilities.length?capabilities.slice(0,3):strong)}.`,
-    `${tool.name} belongs on the shortlist when the decision turns on ${listPhrase(strong.length?strong:capabilities.slice(0,2))}, not simply because it is a familiar name in ${tool.category}.`
+    `${tool.name}'s buying case starts with ${strengthPhrase}, not with the length of its feature list.`,
+    `For ${audiencePhrase}, the useful question is where ${tool.name} changes the workflow rather than how many features it can claim.`,
+    `Look past the category label: ${tool.name} is easiest to understand through ${capabilityPhrase}.`,
+    `${tool.name} belongs on the shortlist when ${strengthPhrase} are central to the decision, not simply because it is familiar in ${tool.category}.`,
+    `The reason to shortlist ${tool.name} is concentrated in ${strengthPhrase}; that is where its current profile is most persuasive.`,
+    `Buyers in ${tool.category} should read ${tool.name} through ${capabilityPhrase}, which define the practical shape of the product more clearly than the category name.`,
+    `In the current ToolScout profile, ${tool.name} stands out first for ${strengthPhrase}.`,
+    `What separates ${tool.name} in this profile is the combination of ${strengthPhrase}, rather than one isolated headline feature.`,
+    `${tool.name} is easiest to justify when ${strengthPhrase} are non-negotiable in the workflow.`,
+    `The buying case for ${tool.name} begins with ${strengthPhrase}, then depends on how well the surrounding workflow matches.`,
+    `Among ${tool.category} options, ${tool.name}'s clearest recorded strengths are ${strengthPhrase}.`,
+    `${tool.name} makes the most sense for ${audiencePhrase} when ${capabilityPhrase} are the jobs that actually need solving.`
   ];
   const evidence=strong.length?`ToolScout's recorded scores put ${listPhrase(strong)} at the top of its profile.`:'';
   const fit=audience.length?`That makes it particularly relevant to ${listPhrase(audience)}.`:'';
