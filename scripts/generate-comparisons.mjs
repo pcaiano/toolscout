@@ -11,6 +11,10 @@ const compareTemplate=fs.readFileSync(path.join(ROOT,'compare.html'),'utf8');
 const assetData=JSON.parse(fs.readFileSync(path.join(ROOT,'data','tool-assets.json'),'utf8'));
 const assets=assetData?.assets||{};
 const config=JSON.parse(fs.readFileSync(path.join(ROOT,'data','organic-growth-engine.json'),'utf8'));
+const searchRoutingPath=path.join(ROOT,'data','search-commercial-routing.json');
+const searchRouting=fs.existsSync(searchRoutingPath)?JSON.parse(fs.readFileSync(searchRoutingPath,'utf8')):{priorities:[]};
+const searchPriorityByPath=new Map((searchRouting.priorities||[]).map(row=>[String(row.pathname||''),Number(row.priorityScore||0)]));
+const searchPriorityForPath=pathname=>Number(searchPriorityByPath.get(String(pathname||''))||0);
 const editorialQuality=config?.editorialQuality||{};
 const editorialQualityFor=pagePath=>editorialQuality.rollout==='full'||(editorialQuality.rollout==='pilot'&&(editorialQuality.pilotPaths||[]).includes(pagePath));
 const bySlug=new Map(tools.map(t=>[t.slug,t]));
@@ -29,7 +33,7 @@ function assertToolData(tool,pairSlug){
 }
 
 const intentScore=(tool,intent)=>{const weights=intent.weights||{};let total=0,weight=0;for(const[key,raw]of Object.entries(weights)){const w=Number(raw)||0;if(!w)continue;let value=key==='freePlan'?(tool.freePlan?10:0):key==='simplicity'?Number(tool.scores?.ease||0):Number(tool.scores?.[key]||0);total+=value*w;weight+=w;}return weight?total/weight:0;};
-const relatedGuides=(a,b)=>intents.map(intent=>({intent,score:Math.max(intentScore(a,intent),intentScore(b,intent))+(intent.category===a.category||intent.category===b.category?2:0)})).filter(x=>x.intent?.slug&&x.score>0).sort((x,y)=>y.score-x.score).slice(0,3).map(x=>x.intent);
+const relatedGuides=(a,b)=>intents.map(intent=>{const score=Math.max(intentScore(a,intent),intentScore(b,intent))+(intent.category===a.category||intent.category===b.category?2:0);const demand=searchPriorityForPath('/'+intent.slug);return{intent,score,demand,authorityScore:score+Math.min(8,demand/20)};}).filter(x=>x.intent?.slug&&x.score>0).sort((x,y)=>y.authorityScore-x.authorityScore||y.demand-x.demand).slice(0,3).map(x=>x.intent);
 
 const dimensionLabel={price:'price',ease:'ease of use',automation:'automation',integrations:'integrations',sales:'sales workflows',ai:'AI capabilities',marketing:'marketing',seo:'SEO',research:'research',content:'content workflows',agency:'agency fit'};
 function listPhrase(items){const xs=(items||[]).filter(Boolean);if(xs.length<=1)return xs[0]||'workflow fit';if(xs.length===2)return `${xs[0]} and ${xs[1]}`;return `${xs.slice(0,-1).join(', ')}, and ${xs[xs.length-1]}`;}
