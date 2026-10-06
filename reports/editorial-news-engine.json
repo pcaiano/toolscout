@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-06T11:04:39.531Z",
+  "generatedAt": "2026-10-06T11:29:17.949Z",
   "engine": "ToolScout Editorial News Engine v2",
   "lookbackDays": 14,
   "maxPerRun": 4,
@@ -9,7 +9,7 @@
       "status": "ok",
       "fetched": "https://github.blog/changelog/feed/",
       "parsed": 10,
-      "recent": 1
+      "recent": 0
     },
     {
       "id": "openai-news",
@@ -38,18 +38,9 @@
       "recent": 0
     }
   ],
-  "candidates": 1,
-  "published": [
-    {
-      "id": "github-code-scanning-ai-scan-enablement-status-in-security-overview",
-      "date": "2026-10-06",
-      "toolSlug": "github",
-      "title": "Code scanning AI Scan enablement status in security overview",
-      "sourceUrl": "https://github.blog/changelog/2026-10-06-code-scanning-ai-scan-enablement-status-in-security-overview",
-      "score": 7
-    }
-  ],
-  "refreshedArchive": 20,
+  "candidates": 0,
+  "published": [],
+  "refreshedArchive": 18,
   "lastPublishedAt": "2026-10-06",
   "status": "healthy"
 }

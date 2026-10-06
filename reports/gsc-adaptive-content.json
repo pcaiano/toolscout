@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-06T11:06:46.525Z",
-  "gscGeneratedAt": "2026-10-06T11:04:38.589Z",
+  "generatedAt": "2026-10-06T11:31:40.307Z",
+  "gscGeneratedAt": "2026-10-06T11:29:16.798Z",
   "minimumImpressionsForHighConfidenceAction": 20,
   "rule": "Observed GSC demand may trigger additive factual decision depth. Low-sample first-page pages are protected from aggressive adaptive changes. Query strings must pass safety and intent-alignment checks before they can trigger adaptation.",
   "adaptiveApplied": 0,

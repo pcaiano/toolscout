@@ -1,23 +1,9 @@
 {
-  "generatedAt": "2026-10-06T11:06:46.148Z",
+  "generatedAt": "2026-10-06T11:31:39.832Z",
   "engine": "ToolScout Organic Growth Engine v4",
   "brain": "shared-growth-v3",
-  "brainDirectivesGeneratedAt": "2026-10-06T11:06:46.071Z",
-  "newInterventions": [
-    {
-      "intent": "best-team-collaboration-tools",
-      "variant": "decision-depth-v1",
-      "lane": "seo-authority-depth",
-      "priorityScore": 100,
-      "impressions": 42,
-      "position": 80.5476,
-      "brainOpportunity": "search:best-team-collaboration-tools",
-      "brainActions": [
-        "content_amplification",
-        "search_measurement"
-      ]
-    }
-  ],
+  "brainDirectivesGeneratedAt": "2026-10-06T11:31:39.721Z",
+  "newInterventions": [],
   "activeOptimizations": [
     {
       "intent": "best-seo-tools-for-agencies",
@@ -27,7 +13,7 @@
         "ctr": 0,
         "position": 80.3275
       },
-      "lastSeenAt": "2026-10-06T11:06:46.148Z",
+      "lastSeenAt": "2026-10-06T11:31:39.832Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T10:07:59.605Z",
       "baseline": {
@@ -47,7 +33,7 @@
         "ctr": 0,
         "position": 45.8271
       },
-      "lastSeenAt": "2026-10-06T11:06:46.148Z",
+      "lastSeenAt": "2026-10-06T11:31:39.832Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T10:07:59.605Z",
       "baseline": {
@@ -67,7 +53,7 @@
         "ctr": 0,
         "position": 76.9762
       },
-      "lastSeenAt": "2026-10-06T11:06:46.148Z",
+      "lastSeenAt": "2026-10-06T11:31:39.832Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T10:07:59.605Z",
       "baseline": {
@@ -87,7 +73,7 @@
         "ctr": 0,
         "position": 59
       },
-      "lastSeenAt": "2026-10-06T11:06:46.148Z",
+      "lastSeenAt": "2026-10-06T11:31:39.832Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T12:15:28.070Z",
       "baseline": {
@@ -107,7 +93,7 @@
         "ctr": 0,
         "position": 74.8605
       },
-      "lastSeenAt": "2026-10-06T11:06:46.148Z",
+      "lastSeenAt": "2026-10-06T11:31:39.832Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T12:15:28.070Z",
       "baseline": {
@@ -154,7 +140,7 @@
         "ctr": 0,
         "position": 76.1667
       },
-      "lastSeenAt": "2026-10-06T11:06:46.148Z",
+      "lastSeenAt": "2026-10-06T11:31:39.832Z",
       "contentOptimizationSuspended": false,
       "indexing": null,
       "activeVariant": "decision-depth-v1",
@@ -174,7 +160,7 @@
         "ctr": 0,
         "position": 75.5256
       },
-      "lastSeenAt": "2026-10-06T11:06:46.148Z",
+      "lastSeenAt": "2026-10-06T11:31:39.832Z",
       "contentOptimizationSuspended": false,
       "indexing": null,
       "activeVariant": "decision-depth-v1",
@@ -194,7 +180,7 @@
         "ctr": 0,
         "position": 76.5666
       },
-      "lastSeenAt": "2026-10-06T11:06:46.148Z",
+      "lastSeenAt": "2026-10-06T11:31:39.832Z",
       "contentOptimizationSuspended": false,
       "indexing": null,
       "activeVariant": "decision-depth-v1",
@@ -214,7 +200,7 @@
         "ctr": 0,
         "position": 80.5476
       },
-      "lastSeenAt": "2026-10-06T11:06:46.148Z",
+      "lastSeenAt": "2026-10-06T11:31:39.832Z",
       "contentOptimizationSuspended": false,
       "indexing": null,
       "activeVariant": "decision-depth-v1",
@@ -234,7 +220,7 @@
         "ctr": 0,
         "position": 66.2754
       },
-      "lastSeenAt": "2026-10-06T11:06:46.148Z",
+      "lastSeenAt": "2026-10-06T11:31:39.832Z",
       "contentOptimizationSuspended": false,
       "indexing": null,
       "activeVariant": "decision-depth-v1",
@@ -254,7 +240,7 @@
         "ctr": 0,
         "position": 60.7322
       },
-      "lastSeenAt": "2026-10-06T11:06:46.148Z",
+      "lastSeenAt": "2026-10-06T11:31:39.832Z",
       "contentOptimizationSuspended": false,
       "indexing": null,
       "activeVariant": "decision-depth-v1",
@@ -276,7 +262,7 @@
         "ctr": 0,
         "position": 75.2
       },
-      "lastSeenAt": "2026-10-06T11:06:46.148Z",
+      "lastSeenAt": "2026-10-06T11:31:39.832Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-10-05T08:37:44.412Z",
       "baseline": {
@@ -296,7 +282,7 @@
         "ctr": 0,
         "position": 80.42
       },
-      "lastSeenAt": "2026-10-06T11:06:46.148Z",
+      "lastSeenAt": "2026-10-06T11:31:39.832Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-10-05T08:37:44.412Z",
       "baseline": {

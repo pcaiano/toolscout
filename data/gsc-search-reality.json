@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-06T11:04:38.586Z",
+  "generatedAt": "2026-10-06T11:29:16.795Z",
   "source": "Google Search Console first-party APIs",
   "property": "sc-domain:trytoolscout.org",
   "authorizationScope": "https://www.googleapis.com/auth/webmasters.readonly",
@@ -188,13 +188,19 @@
     "robotsBlocked": 0,
     "noindexBlocked": 0,
     "fetchIssues": 1,
-    "note": "Primary index-health metrics use canonical URLs in the current ToolScout sitemap. Legacy or alternate URLs observed in Search Analytics are inspected separately and do not count as canonical index failures."
+    "note": "Primary index-health metrics use canonical URLs in the current ToolScout sitemap. Legacy or alternate URLs observed in Search Analytics are inspected separately and do not count as canonical index failures.",
+    "preservedFromPrevious": true,
+    "preservedFromGeneratedAt": "2026-10-06T11:04:38.586Z",
+    "lastInspectionAttemptAt": "2026-10-06T11:29:16.795Z",
+    "lastInspectionAttemptCoveragePct": 6.6,
+    "lastInspectionAttemptErrors": 204,
+    "quotaLimited": true
   },
   "sitemaps": {
     "apiOk": true,
     "apiStatus": 200,
     "apiError": null,
-    "localSitemapUrls": 211,
+    "localSitemapUrls": 212,
     "submittedCount": 1,
     "items": [
       {
@@ -221,7 +227,7 @@
       "top": []
     },
     "index_recovery": {
-      "count": 54,
+      "count": 35,
       "top": [
         {
           "page": "/news/chatgpt-word-microsoft-office",
@@ -326,7 +332,7 @@
       ]
     },
     "ranking_opportunities": {
-      "count": 28,
+      "count": 14,
       "top": [
         {
           "page": "/best-seo-tools-for-agencies",
@@ -421,7 +427,7 @@
       ]
     },
     "protect": {
-      "count": 3,
+      "count": 1,
       "top": [
         {
           "page": "/",
@@ -430,24 +436,6 @@
           "score": 79.7,
           "impressions": 85,
           "position": 7.6588,
-          "action": "protect_current_ranking"
-        },
-        {
-          "page": "/news/zapier-next-gen-zaps-mcp",
-          "url": "https://trytoolscout.org/news/zapier-next-gen-zaps-mcp",
-          "kind": "protect",
-          "score": 75.6,
-          "impressions": 31,
-          "position": 7.4194,
-          "action": "protect_current_ranking"
-        },
-        {
-          "page": "/news/github-actions-workflow-execution-protections-ga",
-          "url": "https://trytoolscout.org/news/github-actions-workflow-execution-protections-ga",
-          "kind": "protect",
-          "score": 72.5,
-          "impressions": 13,
-          "position": 6.9231,
           "action": "protect_current_ranking"
         }
       ]
@@ -5803,14 +5791,15 @@
   "limitations": [
     "Search Analytics returns top rows and is not guaranteed to include every row available in Search Console.",
     "URL Inspection describes the version in the Google index and does not perform a live indexability test.",
-    "The current inspection run covered the full canonical sitemap universe."
+    "Canonical index health is based on the inspected sitemap sample shown in this report.",
+    "This URL Inspection attempt did not meet the 80% coverage quality gate. The previous healthy index-health snapshot was preserved while Search Analytics was refreshed."
   ],
   "inspectionRun": {
-    "attempted": 211,
-    "succeeded": 211,
-    "errors": 0,
-    "coveragePct": 100,
-    "quotaLimited": false,
-    "preservedPriorHealthySnapshot": false
+    "attempted": 218,
+    "succeeded": 14,
+    "errors": 204,
+    "coveragePct": 6.6,
+    "quotaLimited": true,
+    "preservedPriorHealthySnapshot": true
   }
 }
