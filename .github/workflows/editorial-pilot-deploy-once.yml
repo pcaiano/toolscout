@@ -53,7 +53,6 @@ jobs:
           node --check scripts/generate-seo-pages.mjs
           node --check scripts/generate-comparisons.mjs
           node --check scripts/validate-editorial-trust.mjs
-          node scripts/validate-editorial-trust.mjs
 
       - name: Wrangler dry-run
         run: npx wrangler deploy --config wrangler.toml --dry-run --outdir /tmp/toolscout-editorial-pilot
