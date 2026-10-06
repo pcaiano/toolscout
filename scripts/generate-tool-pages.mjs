@@ -123,15 +123,18 @@ function editorialViewV2(tool){
   const strong=strongest.map(x=>scoreLabels[x.key]||x.key);
   const topScore=strongest[0]?.score??0;
   const weakestLabel=weakest?(scoreLabels[weakest.key]||weakest.key):null;
+  const primary=capabilities[0]||tool.category;
+  const secondary=capabilities[1]||strong[0]||'workflow depth';
+  const buyer=audience[0]||`${tool.category} buyers`;
   const frame=editorialFrame(tool);
   const openings=[
-    `${tool.name}'s strongest case is not that it does everything, but that it brings ${listPhrase(strong.length?strong:capabilities.slice(0,2))} into one buying decision.`,
-    `For ${listPhrase(audience.length?audience:['buyers in this category'])}, the useful question is where ${tool.name} changes the workflow rather than how long its feature list is.`,
-    `Look past the category label and ${tool.name} is easiest to understand through the jobs it is strongest at: ${listPhrase(capabilities.length?capabilities.slice(0,3):strong)}.`,
-    `${tool.name} belongs on the shortlist when the decision turns on ${listPhrase(strong.length?strong:capabilities.slice(0,2))}, not simply because it is a familiar name in ${tool.category}.`
+    `${primary} is the clearest entry point into ${tool.name}: it pairs ${secondary} with strong recorded scores for ${listPhrase(strong.length?strong:capabilities.slice(0,2))}, which matters most for ${buyer}.`,
+    `For ${buyer}, ${tool.name} is easiest to justify when ${primary} and ${secondary} need to live in the same workflow, rather than when the decision is based on category recognition alone.`,
+    `${tool.name} makes its case through ${primary} first, then ${secondary}; ToolScout's scores reinforce that positioning with ${listPhrase(strong.length?strong:capabilities.slice(0,2))} among its strongest dimensions.`,
+    `The practical reason to shortlist ${tool.name} is ${primary}, especially when ${secondary} also matters to ${buyer}; the rest of the profile should be read against that use case.`
   ];
   const evidence=strong.length?`ToolScout's recorded scores put ${listPhrase(strong)} at the top of its profile.`:'';
-  const fit=audience.length?`That makes it particularly relevant to ${listPhrase(audience)}.`:'';
+  const fit=audience.length?`The recorded audience fit includes ${listPhrase(audience)}.`:'';
   const tradeoff=weakestLabel&&topScore-Number(weakest?.score||0)>=2?`The counterweight is ${weakestLabel}, where the catalog score is meaningfully lower, so buyers who care heavily about that dimension should compare alternatives before committing.`:'The catalog does not show a single large score weakness, so the decision should turn on workflow depth, current limits and implementation fit.';
   const commercial=tool.freePlanKnown===false?'ToolScout has not yet verified the current free-plan position.':tool.freePlan?'A recorded free plan lowers the cost of testing the fit with a real workflow.':'With no recorded free plan, the product deserves a clearer use-case check before a paid commitment.';
   return clean([openings[frame],evidence,fit,tradeoff,commercial].filter(Boolean).join(' '));
