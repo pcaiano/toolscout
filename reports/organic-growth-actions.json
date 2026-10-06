@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-06T15:56:26.357Z",
+  "generatedAt": "2026-10-06T16:04:52.727Z",
   "engine": "ToolScout Organic Growth Engine v4",
   "brain": "shared-growth-v3",
-  "brainDirectivesGeneratedAt": "2026-10-06T15:56:26.226Z",
+  "brainDirectivesGeneratedAt": "2026-10-06T16:04:52.632Z",
   "newInterventions": [],
   "activeOptimizations": [
     {
@@ -13,7 +13,7 @@
         "ctr": 0,
         "position": 80.3477
       },
-      "lastSeenAt": "2026-10-06T15:56:26.357Z",
+      "lastSeenAt": "2026-10-06T16:04:52.727Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T10:07:59.605Z",
       "baseline": {
@@ -33,7 +33,7 @@
         "ctr": 0,
         "position": 45.9254
       },
-      "lastSeenAt": "2026-10-06T15:56:26.357Z",
+      "lastSeenAt": "2026-10-06T16:04:52.727Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T10:07:59.605Z",
       "baseline": {
@@ -53,7 +53,7 @@
         "ctr": 0,
         "position": 76.9762
       },
-      "lastSeenAt": "2026-10-06T15:56:26.357Z",
+      "lastSeenAt": "2026-10-06T16:04:52.727Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T10:07:59.605Z",
       "baseline": {
@@ -73,7 +73,7 @@
         "ctr": 0,
         "position": 59.2031
       },
-      "lastSeenAt": "2026-10-06T15:56:26.357Z",
+      "lastSeenAt": "2026-10-06T16:04:52.727Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T12:15:28.070Z",
       "baseline": {
@@ -93,7 +93,7 @@
         "ctr": 0,
         "position": 74.8605
       },
-      "lastSeenAt": "2026-10-06T15:56:26.357Z",
+      "lastSeenAt": "2026-10-06T16:04:52.727Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-09-13T12:15:28.070Z",
       "baseline": {
@@ -140,7 +140,7 @@
         "ctr": 0,
         "position": 76.2561
       },
-      "lastSeenAt": "2026-10-06T15:56:26.357Z",
+      "lastSeenAt": "2026-10-06T16:04:52.727Z",
       "contentOptimizationSuspended": false,
       "indexing": null,
       "activeVariant": "decision-depth-v1",
@@ -160,7 +160,7 @@
         "ctr": 0,
         "position": 75.5256
       },
-      "lastSeenAt": "2026-10-06T15:56:26.357Z",
+      "lastSeenAt": "2026-10-06T16:04:52.727Z",
       "contentOptimizationSuspended": false,
       "indexing": null,
       "activeVariant": "decision-depth-v1",
@@ -180,7 +180,7 @@
         "ctr": 0,
         "position": 76.6
       },
-      "lastSeenAt": "2026-10-06T15:56:26.357Z",
+      "lastSeenAt": "2026-10-06T16:04:52.727Z",
       "contentOptimizationSuspended": false,
       "indexing": null,
       "activeVariant": "decision-depth-v1",
@@ -200,7 +200,7 @@
         "ctr": 0,
         "position": 80.5476
       },
-      "lastSeenAt": "2026-10-06T15:56:26.357Z",
+      "lastSeenAt": "2026-10-06T16:04:52.727Z",
       "contentOptimizationSuspended": false,
       "indexing": null,
       "activeVariant": "decision-depth-v1",
@@ -220,7 +220,7 @@
         "ctr": 0,
         "position": 66.2754
       },
-      "lastSeenAt": "2026-10-06T15:56:26.357Z",
+      "lastSeenAt": "2026-10-06T16:04:52.727Z",
       "contentOptimizationSuspended": false,
       "indexing": null,
       "activeVariant": "decision-depth-v1",
@@ -240,7 +240,7 @@
         "ctr": 0,
         "position": 60.7322
       },
-      "lastSeenAt": "2026-10-06T15:56:26.357Z",
+      "lastSeenAt": "2026-10-06T16:04:52.727Z",
       "contentOptimizationSuspended": false,
       "indexing": null,
       "activeVariant": "decision-depth-v1",
@@ -262,7 +262,7 @@
         "ctr": 0,
         "position": 75.6494
       },
-      "lastSeenAt": "2026-10-06T15:56:26.357Z",
+      "lastSeenAt": "2026-10-06T16:04:52.727Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-10-05T08:37:44.412Z",
       "baseline": {
@@ -282,7 +282,7 @@
         "ctr": 0,
         "position": 80.42
       },
-      "lastSeenAt": "2026-10-06T15:56:26.357Z",
+      "lastSeenAt": "2026-10-06T16:04:52.727Z",
       "activeVariant": "decision-depth-v1",
       "lastInterventionAt": "2026-10-05T08:37:44.412Z",
       "baseline": {

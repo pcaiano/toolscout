@@ -1,9 +1,9 @@
 {
   "version": 1,
-  "generatedAt": "2026-10-06T15:54:36.409Z",
+  "generatedAt": "2026-10-06T16:02:54.415Z",
   "tools": {
     "systeme-io": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://systeme.io/",
       "evidenceUrls": [
@@ -38,14 +38,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "beehiiv": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.beehiiv.com/",
       "evidenceUrls": [
@@ -53,7 +53,7 @@
         "https://www.beehiiv.com/pricing",
         "https://www.beehiiv.com/newsletter-platform"
       ],
-      "pageFingerprint": "fce8ec42cfd1250ea0c6c5b0",
+      "pageFingerprint": "4b7f106bd2bb1b6bcc328f70",
       "volatile": {
         "freePlan": {
           "value": true,
@@ -61,13 +61,12 @@
           "reason": "official_source_explicit_free_plan"
         },
         "pricingTokens": [
-          "$ 0",
-          "$ 49",
-          "$ 95",
+          "$32",
           "$0",
           "$49 /mo",
           "$39/mo",
           "$95 /mo",
+          "$12",
           "$0.30 per"
         ],
         "trialDays": [],
@@ -79,14 +78,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "hubspot": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.hubspot.com/",
       "evidenceUrls": [
@@ -117,14 +116,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "jotform": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.jotform.com/",
       "evidenceUrls": [
@@ -132,7 +131,7 @@
         "https://www.jotform.com/pricing/",
         "https://www.jotform.com/enterprise/pricing/"
       ],
-      "pageFingerprint": "fe5d475b123fe7af0b58c542",
+      "pageFingerprint": "654dffa4d789766dd67b199a",
       "volatile": {
         "freePlan": {
           "value": true,
@@ -152,13 +151,13 @@
       },
       "fieldVerifiedAt": {
         "pricing": null,
-        "freePlan": "2026-10-06T15:54:36.409Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "adcreative-ai": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.adcreative.ai/",
       "evidenceUrls": [
@@ -216,14 +215,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "pipedrive": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.pipedrive.com/",
       "evidenceUrls": [
@@ -251,12 +250,12 @@
       "fieldVerifiedAt": {
         "pricing": null,
         "freePlan": null,
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "semrush": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.semrush.com/",
       "evidenceUrls": [
@@ -301,14 +300,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "jasper": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.jasper.ai/",
       "evidenceUrls": [
@@ -341,14 +340,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "brevo": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.brevo.com/",
       "evidenceUrls": [
@@ -377,14 +376,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "activecampaign": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.activecampaign.com/",
       "evidenceUrls": [
@@ -392,7 +391,7 @@
         "https://www.activecampaign.com/pricing",
         "https://www.activecampaign.com/pricing/contact/"
       ],
-      "pageFingerprint": "51be2048ec5c5dca0d0403cc",
+      "pageFingerprint": "8366768a56579c3d668027de",
       "volatile": {
         "freePlan": {
           "value": false,
@@ -414,14 +413,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "mailchimp": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://mailchimp.com/",
       "evidenceUrls": [
@@ -429,7 +428,7 @@
         "https://mailchimp.com/pricing/marketing/",
         "https://mailchimp.com/pricing/marketing/compare-plans/"
       ],
-      "pageFingerprint": "c16cb38f271fd6be61b1c30a",
+      "pageFingerprint": "27ad96f5d35e4ccd98e2dfef",
       "volatile": {
         "freePlan": {
           "value": true,
@@ -458,14 +457,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "zapier": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://zapier.com/",
       "evidenceUrls": [
@@ -506,19 +505,19 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "make": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "http_403",
       "sourceUrl": "https://www.make.com/"
     },
     "zoho-crm": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.zoho.com/en-us/crm/",
       "evidenceUrls": [
@@ -543,14 +542,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "monday-crm": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://monday.com/",
       "evidenceUrls": [
@@ -609,14 +608,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "typeform": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.typeform.com/",
       "evidenceUrls": [
@@ -668,14 +667,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "tally": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://tally.so/",
       "evidenceUrls": [
@@ -708,14 +707,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "ahrefs": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://ahrefs.com/",
       "evidenceUrls": [
@@ -723,7 +722,7 @@
         "https://ahrefs.com/pricing",
         "https://ahrefs.com/pricing?utm_source=homepage"
       ],
-      "pageFingerprint": "d322f6ded0ba3ac5eac3345b",
+      "pageFingerprint": "d4ebc92b1bdf80d8f0709802",
       "volatile": {
         "freePlan": {
           "value": true,
@@ -755,14 +754,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "se-ranking": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://seranking.com/",
       "evidenceUrls": [
@@ -800,14 +799,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "clickup": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://clickup.com/",
       "evidenceUrls": [
@@ -847,19 +846,19 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "claude": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "http_403",
       "sourceUrl": "https://claude.ai/"
     },
     "calendly": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://calendly.com/",
       "evidenceUrls": [
@@ -892,14 +891,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "posthog": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://posthog.com/",
       "evidenceUrls": [
@@ -938,14 +937,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "notion": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.notion.com/",
       "evidenceUrls": [
@@ -980,14 +979,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "asana": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://asana.com/",
       "evidenceUrls": [
@@ -995,7 +994,7 @@
         "https://asana.com/pricing",
         "https://asana.com/product/ai"
       ],
-      "pageFingerprint": "f12ffc303f9c79684cc5e560",
+      "pageFingerprint": "56e586d5b53da7a298be576d",
       "volatile": {
         "freePlan": {
           "value": true,
@@ -1009,7 +1008,6 @@
           "$13.49",
           "$30.49",
           "$0.50 per",
-          "$5.99 per",
           "$0.60 per",
           "$300,00"
         ],
@@ -1027,14 +1025,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "trello": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://trello.com/",
       "evidenceUrls": [
@@ -1071,14 +1069,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "airtable": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.airtable.com/",
       "evidenceUrls": [
@@ -1086,7 +1084,7 @@
         "https://airtable.com/pricing",
         "https://www.airtable.com/platform"
       ],
-      "pageFingerprint": "37ba878e99d3bb675d6eeff6",
+      "pageFingerprint": "82f04bfb0d4b87ff0add2f9d",
       "volatile": {
         "freePlan": {
           "value": true,
@@ -1094,28 +1092,6 @@
           "reason": "official_source_explicit_free_plan"
         },
         "pricingTokens": [
-          "$4",
-          "$600",
-          "$1.7",
-          "$3",
-          "$500",
-          "$1",
-          "$8.4",
-          "$750",
-          "$200",
-          "$285",
-          "$2.1",
-          "$1.1",
-          "$132",
-          "$48",
-          "$20,10",
-          "$25,31",
-          "$29,04",
-          "$44,75",
-          "$14,49",
-          "$13,79",
-          "$56,01",
-          "$48,13",
           "$20/",
           "$45/"
         ],
@@ -1132,14 +1108,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "n8n": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://n8n.io/",
       "evidenceUrls": [
@@ -1171,14 +1147,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "apollo": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.apollo.io/",
       "evidenceUrls": [
@@ -1205,14 +1181,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "lemlist": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.lemlist.com/",
       "evidenceUrls": [
@@ -1257,14 +1233,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "intercom": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.intercom.com/",
       "evidenceUrls": [
@@ -1272,7 +1248,7 @@
         "https://www.intercom.com/pricing",
         "https://www.intercom.com/solutions/technology"
       ],
-      "pageFingerprint": "0d155e5946f3706a1ee630e1",
+      "pageFingerprint": "f3e3875b982056fee94f40cf",
       "volatile": {
         "freePlan": {
           "value": false,
@@ -1282,16 +1258,16 @@
         "pricingTokens": [
           "$19 per",
           "$0.99 per",
+          "$29 per",
           "$85 per",
           "$10",
           "$132 per",
           "$90.09 /mo",
-          "$19.00 /mo",
-          "$109.09 /mo",
+          "$29.00 /mo",
+          "$119.09 /mo",
           "$33/mo",
           "$1.99 per",
           "$99 per",
-          "$29 per",
           "$99/month",
           "$35 per",
           "$0.01 per"
@@ -1312,14 +1288,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "zendesk": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.zendesk.com/",
       "evidenceUrls": [
@@ -1366,14 +1342,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "instantly": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://instantly.ai/",
       "evidenceUrls": [
@@ -1419,19 +1395,19 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "kit": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "http_403",
       "sourceUrl": "https://kit.com/"
     },
     "klaviyo": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.klaviyo.com/",
       "evidenceUrls": [
@@ -1462,19 +1438,19 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "canva": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "http_403",
       "sourceUrl": "https://www.canva.com/"
     },
     "figma": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.figma.com/",
       "evidenceUrls": [
@@ -1508,14 +1484,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "grammarly": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.grammarly.com/",
       "evidenceUrls": [
@@ -1550,14 +1526,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": "2026-10-06T13:04:01.473Z",
         "trial": "2026-10-06T13:04:01.473Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "buffer": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://buffer.com/",
       "evidenceUrls": [
@@ -1565,7 +1541,7 @@
         "https://buffer.com/pricing?cta=bufferSite-globalNav-pricing-pricing-1",
         "https://buffer.com/transparent-pricing"
       ],
-      "pageFingerprint": "9a0c7e3b7071942a1154174c",
+      "pageFingerprint": "3986099e2ad4cc039b58790b",
       "volatile": {
         "freePlan": {
           "value": true,
@@ -1592,14 +1568,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "webflow": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://webflow.com/",
       "evidenceUrls": [
@@ -1627,14 +1603,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "surfer": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://surferseo.com/",
       "evidenceUrls": [
@@ -1642,7 +1618,7 @@
         "https://surferseo.com/pricing/",
         "https://surferseo.com/solutions/marketing-manager/"
       ],
-      "pageFingerprint": "d335285d92d932603f6470c0",
+      "pageFingerprint": "a473b206eb2a3294936c2718",
       "volatile": {
         "freePlan": {
           "value": null,
@@ -1674,14 +1650,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "mixpanel": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://mixpanel.com/home/",
       "evidenceUrls": [
@@ -1713,14 +1689,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "freshdesk": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.freshworks.com/freshdesk/",
       "evidenceUrls": [
@@ -1762,14 +1738,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "framer": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.framer.com/",
       "evidenceUrls": [
@@ -1810,19 +1786,19 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "perplexity": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "http_403",
       "sourceUrl": "https://www.perplexity.ai/"
     },
     "slack": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://slack.com/",
       "evidenceUrls": [
@@ -1830,7 +1806,7 @@
         "https://slack.com/pricing",
         "https://slack.com/pricing/paid-vs-free"
       ],
-      "pageFingerprint": "d89079e1379e3fe16724b111",
+      "pageFingerprint": "026bce9cbe5ab9da9c05ff0f",
       "volatile": {
         "freePlan": {
           "value": true,
@@ -1846,7 +1822,6 @@
           "$18",
           "$9",
           "$15",
-          "$45",
           "$2.1",
           "$8.75 per",
           "$9 per"
@@ -1865,14 +1840,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "cursor": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://cursor.com/",
       "evidenceUrls": [
@@ -1897,14 +1872,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "shopify": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.shopify.com/",
       "evidenceUrls": [
@@ -1961,14 +1936,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "loom": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.loom.com/",
       "evidenceUrls": [
@@ -2003,14 +1978,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "miro": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://miro.com/",
       "evidenceUrls": [
@@ -2045,14 +2020,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "hootsuite": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.hootsuite.com/",
       "evidenceUrls": [
@@ -2086,14 +2061,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "sprout-social": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://sproutsocial.com/",
       "evidenceUrls": [
@@ -2128,14 +2103,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "later": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://later.com/",
       "evidenceUrls": [
@@ -2170,14 +2145,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "socialbee": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://socialbee.com/",
       "evidenceUrls": [
@@ -2235,14 +2210,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "hotjar": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://contentsquare.com/hotjar/?utm_campaign=exp__hj_hp_redirection",
       "evidenceUrls": [
@@ -2270,13 +2245,13 @@
       },
       "fieldVerifiedAt": {
         "pricing": "2026-10-06T15:49:50.511Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "amplitude": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://amplitude.com/",
       "evidenceUrls": [
@@ -2305,14 +2280,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "plausible": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://plausible.io/",
       "evidenceUrls": [
@@ -2343,14 +2318,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "matomo": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://matomo.org/",
       "evidenceUrls": [
@@ -2358,7 +2333,7 @@
         "https://matomo.org/firebase-vs-matomo-features-pricing-and-key-differences/",
         "https://matomo.org/support-plans/"
       ],
-      "pageFingerprint": "9a8892b069767d3ffcc389ac",
+      "pageFingerprint": "bdf493e8b4c151cf677e6d62",
       "volatile": {
         "freePlan": {
           "value": true,
@@ -2382,14 +2357,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "github": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://github.com/",
       "evidenceUrls": [
@@ -2440,14 +2415,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "gitlab": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://about.gitlab.com/",
       "evidenceUrls": [
@@ -2483,14 +2458,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "replit": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://replit.com/",
       "evidenceUrls": [
@@ -2521,14 +2496,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "vercel": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://vercel.com/",
       "evidenceUrls": [
@@ -2583,14 +2558,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "netlify": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.netlify.com/",
       "evidenceUrls": [
@@ -2623,14 +2598,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "sentry": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://sentry.io/welcome/",
       "evidenceUrls": [
@@ -2669,24 +2644,24 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "chatgpt": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "http_403",
       "sourceUrl": "https://chatgpt.com/"
     },
     "gemini": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "network_error",
       "sourceUrl": "https://gemini.google.com/"
     },
     "notebooklm": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://notebook.google.com/",
       "evidenceUrls": [
@@ -2709,11 +2684,11 @@
         "pricing": null,
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "copy-ai": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.copy.ai/",
       "evidenceUrls": [
@@ -2739,14 +2714,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "moz-pro": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://moz.com/products/pro",
       "evidenceUrls": [
@@ -2754,7 +2729,7 @@
         "https://moz.com/products/api/pricing",
         "https://moz.com/products/pro/pricing"
       ],
-      "pageFingerprint": "83548846ed6bf618455ef079",
+      "pageFingerprint": "df7953c1120b1a828c075989",
       "volatile": {
         "freePlan": {
           "value": true,
@@ -2776,6 +2751,9 @@
           "$20 /",
           "$ 500",
           "$10 /",
+          "$2,00",
+          "$ 2,00",
+          "0 usd /",
           "$0",
           "$75",
           "$250",
@@ -2788,10 +2766,7 @@
           "$238/yr",
           "$ 79",
           "$950",
-          "$ 179",
-          "$143/mo",
-          "$429/yr",
-          "$ 143"
+          "$ 179"
         ],
         "trialDays": [],
         "observedCatalogFeatures": [
@@ -2800,19 +2775,19 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "ubersuggest": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "http_403",
       "sourceUrl": "https://neilpatel.com/ubersuggest/"
     },
     "mangools": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://mangools.com/",
       "evidenceUrls": [
@@ -2841,11 +2816,11 @@
         "pricing": null,
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "screaming-frog": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.screamingfrog.co.uk/seo-spider/",
       "evidenceUrls": [
@@ -2853,7 +2828,7 @@
         "https://www.screamingfrog.co.uk/seo-spider/pricing/",
         "https://www.screamingfrog.co.uk/log-file-analyser/pricing/"
       ],
-      "pageFingerprint": "3e7de863932ea3504b4a0c72",
+      "pageFingerprint": "c7fbbe97cc3f336ea7524728",
       "volatile": {
         "freePlan": {
           "value": null,
@@ -2861,6 +2836,7 @@
           "reason": "no_decisive_first_party_free_plan_signal"
         },
         "pricingTokens": [
+          "€245 per year",
           "£199 per year"
         ],
         "trialDays": [],
@@ -2871,14 +2847,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "wix": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.wix.com/",
       "evidenceUrls": [
@@ -2912,14 +2888,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "squarespace": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.squarespace.com/",
       "evidenceUrls": [
@@ -2965,14 +2941,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "wordpress-com": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://wordpress.com/",
       "evidenceUrls": [
@@ -3023,14 +2999,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "help-scout": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.helpscout.com/",
       "evidenceUrls": [
@@ -3081,14 +3057,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "gorgias": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.gorgias.com/",
       "evidenceUrls": [
@@ -3143,14 +3119,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "crisp": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://crisp.chat/en/",
       "evidenceUrls": [
@@ -3187,14 +3163,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "salesforce": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.salesforce.com/?bc=DB",
       "evidenceUrls": [
@@ -3251,14 +3227,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "close": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://close.com/",
       "evidenceUrls": [
@@ -3313,14 +3289,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "copper": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.copper.com/",
       "evidenceUrls": [
@@ -3355,14 +3331,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "freshsales": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.freshworks.com/crm/sales/",
       "evidenceUrls": [
@@ -3394,14 +3370,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "attio": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://attio.com/",
       "evidenceUrls": [
@@ -3454,14 +3430,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "mailerlite": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.mailerlite.com/",
       "evidenceUrls": [
@@ -3497,14 +3473,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "getresponse": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.getresponse.com/",
       "evidenceUrls": [
@@ -3550,14 +3526,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "omnisend": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.omnisend.com/",
       "evidenceUrls": [
@@ -3614,19 +3590,19 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "constant-contact": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "http_403",
       "sourceUrl": "https://www.constantcontact.com/"
     },
     "basecamp": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://basecamp.com/",
       "evidenceUrls": [
@@ -3662,22 +3638,22 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "wrike": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.wrike.com/",
       "evidenceUrls": [
         "https://www.wrike.com/",
         "https://www.wrike.com/support-packages/",
-        "https://www.wrike.com/ai/features/"
+        "https://www.wrike.com/ai/features-vbx/"
       ],
-      "pageFingerprint": "ceeacdf2f8d1c721470ee968",
+      "pageFingerprint": "bb81f9f32c70c3e87c6fac3d",
       "volatile": {
         "freePlan": {
           "value": null,
@@ -3698,11 +3674,11 @@
         "pricing": null,
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "linear": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://linear.app/",
       "evidenceUrls": [
@@ -3732,14 +3708,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "jira": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.atlassian.com/software/jira",
       "evidenceUrls": [
@@ -3766,14 +3742,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": "2026-10-05T15:54:23.011Z",
         "trial": "2026-10-05T15:54:23.011Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "pabbly-connect": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.pabbly.com/connect/",
       "evidenceUrls": [
@@ -3804,14 +3780,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "integrately": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://integrately.com/",
       "evidenceUrls": [
@@ -3846,14 +3822,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "workato": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.workato.com/",
       "evidenceUrls": [
@@ -3881,11 +3857,11 @@
         "pricing": null,
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "paperform": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://paperform.co/",
       "evidenceUrls": [
@@ -3930,14 +3906,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "fillout": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.fillout.com/",
       "evidenceUrls": [
@@ -3972,14 +3948,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "bigcommerce": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.bigcommerce.com/",
       "evidenceUrls": [
@@ -4034,14 +4010,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "woocommerce": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://woocommerce.com/",
       "evidenceUrls": [
@@ -4049,12 +4025,12 @@
         "https://woocommerce.com/pricing/",
         "https://woocommerce.com/products/"
       ],
-      "pageFingerprint": "280e4938d62d60fd21169e25",
+      "pageFingerprint": "a02828921eab1c981b123549",
       "volatile": {
         "freePlan": {
-          "value": true,
-          "confidence": "explicit",
-          "reason": "official_source_explicit_free_plan"
+          "value": null,
+          "confidence": "unknown",
+          "reason": "no_decisive_first_party_free_plan_signal"
         },
         "pricingTokens": [
           "$25",
@@ -4097,14 +4073,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": "2026-10-06T15:54:36.409Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "adobe-express": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.adobe.com/express/",
       "evidenceUrls": [
@@ -4130,12 +4106,12 @@
       "fieldVerifiedAt": {
         "pricing": null,
         "freePlan": null,
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "descript": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.descript.com/",
       "evidenceUrls": [
@@ -4170,14 +4146,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "podia": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.podia.com/",
       "evidenceUrls": [
@@ -4215,14 +4191,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "unbounce": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://unbounce.com/",
       "evidenceUrls": [
@@ -4261,19 +4237,19 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "character-ai": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "http_403",
       "sourceUrl": "https://character.ai/"
     },
     "google-ai-studio": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://aistudio.google.com/welcome",
       "evidenceUrls": [
@@ -4298,7 +4274,7 @@
       }
     },
     "kling-ai": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://kling.ai/",
       "evidenceUrls": [
@@ -4324,11 +4300,11 @@
         "pricing": null,
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "otter-ai": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://otter.ai/",
       "evidenceUrls": [
@@ -4369,14 +4345,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
-        "trial": "2026-10-06T15:54:36.409Z",
-        "features": "2026-10-06T15:54:36.409Z"
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
+        "trial": "2026-10-06T16:02:54.415Z",
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "anijam-ai": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.anijam.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
       "evidenceUrls": [
@@ -4412,14 +4388,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "chatzy-ai": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://chatzy.ai/",
       "evidenceUrls": [
@@ -4443,13 +4419,13 @@
       },
       "fieldVerifiedAt": {
         "pricing": null,
-        "freePlan": "2026-10-06T15:54:36.409Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "cosupport-ai": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://cosupport.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
       "evidenceUrls": [
@@ -4495,14 +4471,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "davinci-ai": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://davinci.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
       "evidenceUrls": [
@@ -4534,14 +4510,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "deep-swap-ai": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://deepswapai.com/",
       "evidenceUrls": [
@@ -4575,14 +4551,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "face-swap-ai": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://faceswapai.com/",
       "evidenceUrls": [
@@ -4615,14 +4591,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "goenhance-ai": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.goenhance.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
       "evidenceUrls": [
@@ -4650,13 +4626,13 @@
       },
       "fieldVerifiedAt": {
         "pricing": null,
-        "freePlan": "2026-10-06T15:54:36.409Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "lip-sync-ai": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://lipsyncai.tools/?utm_source=dynamite_ai&amp;utm_medium=directory&amp;utm_campaign=launch_2026_07",
       "evidenceUrls": [
@@ -4690,14 +4666,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "lorka-ai": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.lorka.ai/",
       "evidenceUrls": [
@@ -4736,14 +4712,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "paioclaw": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://paioclaw.ai/",
       "evidenceUrls": [
@@ -4789,14 +4765,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "pine-ai": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.19pine.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
       "evidenceUrls": [
@@ -4833,14 +4809,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "pixmax-ai": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.pixmax.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
       "evidenceUrls": [
@@ -4870,11 +4846,11 @@
         "pricing": null,
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "questie-ai": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.questie.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
       "evidenceUrls": [
@@ -4882,7 +4858,7 @@
         "https://www.questie.ai/profile/billing",
         "https://www.questie.ai/pricing"
       ],
-      "pageFingerprint": "526572beb5bc7a26702114a7",
+      "pageFingerprint": "2b4fb721f53c3dabfd4d6b27",
       "volatile": {
         "freePlan": {
           "value": false,
@@ -4919,14 +4895,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "resume-ai": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://resume-ai.com/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
       "evidenceUrls": [
@@ -4970,14 +4946,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "talkpix-ai": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.talkpix.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
       "evidenceUrls": [
@@ -5022,14 +4998,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "teachquill": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://teachquill.com/",
       "evidenceUrls": [
@@ -5063,14 +5039,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
-        "freePlan": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
+        "freePlan": "2026-10-06T16:02:54.415Z",
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "typli-ai": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://typli.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
       "evidenceUrls": [
@@ -5116,14 +5092,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "vidflux-ai": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://vidflux.ai/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
       "evidenceUrls": [
@@ -5168,14 +5144,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "vmaker-ai": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.vmaker.com/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
       "evidenceUrls": [
@@ -5209,14 +5185,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "weryai": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://www.weryai.com/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
       "evidenceUrls": [
@@ -5256,14 +5232,14 @@
         ]
       },
       "fieldVerifiedAt": {
-        "pricing": "2026-10-06T15:54:36.409Z",
+        "pricing": "2026-10-06T16:02:54.415Z",
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     },
     "wondershare-repairit": {
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourceStatus": "ok",
       "sourceUrl": "https://repairit.wondershare.com/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
       "evidenceUrls": [
@@ -5294,7 +5270,7 @@
         "pricing": null,
         "freePlan": null,
         "trial": null,
-        "features": "2026-10-06T15:54:36.409Z"
+        "features": "2026-10-06T16:02:54.415Z"
       }
     }
   }

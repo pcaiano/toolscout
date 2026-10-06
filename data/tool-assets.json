@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-06T15:54:36.409Z",
+  "generatedAt": "2026-10-06T16:02:54.415Z",
   "assets": {
     "pabbly-connect": {
       "url": "https://www.pabbly.com/assets/images/brand-assets/Pabbly-connect.png",
       "provenance": "first-party-brand-asset",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourcePage": "https://www.pabbly.com/brand-assets/"
     },
     "pipedrive": {
@@ -14,7 +14,7 @@
       "provenance": "first-party-high-resolution-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z",
+      "checkedAt": "2026-10-06T16:02:54.415Z",
       "sourcePage": "https://www.pipedrive.com/",
       "width": 196,
       "height": 196
@@ -24,805 +24,805 @@
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "beehiiv": {
       "url": "https://beehiiv-marketing-images.s3.amazonaws.com/Redesign2023/favicon.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "hubspot": {
       "url": "https://www.hubspot.com/hubfs/HubSpot_Logos/HubSpot-Inversed-Favicon.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "jotform": {
       "url": "https://cdn.jotfor.ms/assets/img/favicons/favicon-2021-light.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "adcreative-ai": {
       "url": "https://cdn.prod.website-files.com/661ce890f68a1d352ebbed35/66aa46775426ae4873c2f43c_32.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "semrush": {
       "url": "https://www.semrush.com/__static__/apple-touch-icon.fe16ae843d17.png",
       "provenance": "first-party-apple-touch-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "jasper": {
       "url": "https://cdn.prod.website-files.com/6807ee8d73c233fb82842313/681e121b52f97ed0b2098aab_Favicon.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "brevo": {
       "url": "https://www.brevo.com/favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/vnd.microsoft.icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "activecampaign": {
       "url": "https://www.activecampaign.com/dist/favicon-32x32.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "mailchimp": {
       "url": "https://mailchimp.com/release/plums/3a3e92cfc284c7bc.ico",
       "provenance": "first-party-icon",
       "contentType": "image/vnd.microsoft.icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "zapier": {
       "url": "https://zapier.com/favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/x-icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "zoho-crm": {
       "url": "https://www.zohowebstatic.com/sites/zweb/images/favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/x-icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "monday-crm": {
       "url": "https://cdn.prod.website-files.com/656da6fea306219773d04208/65af6bd29fc8bb3d3d4ea39a_6464d702c3ac5c56000c2438_favicon-monday5-32.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "typeform": {
       "url": "https://cdn.prod.website-files.com/66ffe2174aa8e8d5661c2708/68b6f02860110a77834d228b_favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/vnd.microsoft.icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "tally": {
       "url": "https://tally.so/tally-square.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "ahrefs": {
       "url": "https://static.ahrefs.com/safari-pinned-tab.svg?v=2",
       "provenance": "first-party-icon",
       "contentType": "image/svg+xml",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "se-ranking": {
       "url": "https://seranking.com/wp-content/themes/se_theme/images/favicons/favicon_48x48.svg?v=2",
       "provenance": "first-party-icon",
       "contentType": "image/svg+xml",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "clickup": {
       "url": "https://clickup.com/favicons/apple-touch-icon.png",
       "provenance": "first-party-apple-touch-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "calendly": {
       "url": "https://calendly.com/media/favicon/icon.svg",
       "provenance": "first-party-icon",
       "contentType": "image/svg+xml",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "posthog": {
       "url": "https://posthog.com/favicon-32x32.png?v=6e5ac8d4a5b381b5caa29396fbf7c955",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "notion": {
       "url": "https://www.notion.com/front-static/favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/vnd.microsoft.icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "asana": {
       "url": "https://asana.com/assets/img/brand/asana-logo-favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/vnd.microsoft.icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "trello": {
       "url": "https://trello.com/favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/vnd.microsoft.icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "airtable": {
       "url": "https://www.airtable.com/favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/vnd.microsoft.icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "n8n": {
       "url": "https://n8n.io/favicon.ico",
       "provenance": "first-party-root-favicon",
       "contentType": "image/vnd.microsoft.icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "apollo": {
       "url": "https://www.apollo.io/favicon.ico?favicon.0wfmd_usg2d_3.ico",
       "provenance": "first-party-icon",
       "contentType": "image/x-icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "lemlist": {
       "url": "https://www.lemlist.com/favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/vnd.microsoft.icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "intercom": {
       "url": "https://www.intercom.com/intercom-marketing-site/favicons/favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/vnd.microsoft.icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "zendesk": {
       "url": "https://d1eipm3vz40hy0.cloudfront.net/images/logos/favicons/zendesk-icon.svg",
       "provenance": "first-party-icon",
       "contentType": "image/svg+xml",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "instantly": {
       "url": "https://cdn.prod.website-files.com/63860c8c65e7bef4a1eeebeb/63f62e4f7dc7e3426e9b7874_cleaned_rounded_favicon.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "klaviyo": {
       "url": "https://www.klaviyo.com/icons/icon-32x32.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "figma": {
       "url": "https://static.figma.com/app/icon/2/icon-128.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "grammarly": {
       "url": "https://static-web.grammarly.com/cms/master/public/favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/vnd.microsoft.icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "buffer": {
       "url": "https://buffer.com/icons/favicon-32x32.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "webflow": {
       "url": "https://cdn.prod.website-files.com/686294e263eb7e215bd232f7/686d53ceda66a40cb6b6d546_favicon.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "surfer": {
       "url": "https://marketing-assets.surferseo.art/wf-cdn/62666115cfab458794bd512f/65eafaead35ce9113800c953_favicon-32.ico",
       "provenance": "first-party-icon",
       "contentType": "image/x-icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "mixpanel": {
       "url": "https://framerusercontent.com/images/a4xoKYdwVP5A9yUo6k7AYtct5sQ.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "freshdesk": {
       "url": "https://www.freshworks.com/favicons/favicon-32x32.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "framer": {
       "url": "https://framerusercontent.com/images/Io89FonxEaWg4nxvQQllVLwPUUI.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "slack": {
       "url": "https://a.slack-edge.com/9cc0056/img/icons/favicon-32.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "cursor": {
       "url": "https://cursor.com/marketing-static/favicon-light.ico",
       "provenance": "first-party-icon",
       "contentType": "image/vnd.microsoft.icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "shopify": {
       "url": "https://cdn.shopify.com/b/shopify-brochure2-assets/61cc781fe73f11e9d4bd160d27cc627b.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "loom": {
       "url": "https://cdn.loom.com/assets/favicons-loom/favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/vnd.microsoft.icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "miro": {
       "url": "https://framerusercontent.com/images/6FBG66PBxjV2QFaDfIdUi5mi9A.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "hootsuite": {
       "url": "https://www.hootsuite.com/images/favicon-hs.ico",
       "provenance": "first-party-icon",
       "contentType": "image/vnd.microsoft.icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "sprout-social": {
       "url": "https://media.sproutsocial.com/uploads/favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/x-icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "later": {
       "url": "https://later.com/images/favicons/favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/vnd.microsoft.icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "socialbee": {
       "url": "https://socialbee.com/wp-content/uploads/2022/09/cropped-favicon-32x32.png",
       "provenance": "first-party-icon",
       "contentType": "image/webp",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "hotjar": {
       "url": "https://contentsquare.com/favicons/apple-touch-icon.png",
       "provenance": "first-party-apple-touch-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "amplitude": {
       "url": "https://amplitude.com/nextjs-public/favicon/favicon-32x32.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "plausible": {
       "url": "https://plausible.io/assets/images/icon/apple-touch-icon.png",
       "provenance": "first-party-apple-touch-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "matomo": {
       "url": "https://m-img.org/spai/q_lossless+ret_img+to_webp/matomo.org/wp-content/uploads/2026/04/favicon-matomo-2026-150x150.png",
       "provenance": "first-party-icon",
       "contentType": "image/webp",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "github": {
       "url": "https://github.com/fluidicon.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "gitlab": {
       "url": "https://about.gitlab.com/images/ico/favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/vnd.microsoft.icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "replit": {
       "url": "https://replit.com/public/icons/favicon-prompt-192-rebrand.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "vercel": {
       "url": "https://assets.vercel.com/image/upload/q_auto/front/favicon/vercel/favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/x-icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "netlify": {
       "url": "https://www.netlify.com/favicon/favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/vnd.microsoft.icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "sentry": {
       "url": "https://sentry.io/favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/vnd.microsoft.icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "notebooklm": {
       "url": "https://www.gstatic.com/tailwind/_/static/branding/v6/light_mode/favicon/favicon.svg",
       "provenance": "first-party-icon",
       "contentType": "image/svg+xml",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "copy-ai": {
       "url": "https://cdn.prod.website-files.com/628288c5cd3e8411b90a36a4/6793eea386b5ac27242bb8eb_favicon_32x32px%20(1).png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "moz-pro": {
       "url": "https://moz.com/favicon.ico",
       "provenance": "first-party-root-favicon",
       "contentType": "image/x-icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "mangools": {
       "url": "https://mangools.com/assets/favicon-6342da3a449ee0b19d7ebce289df47b67e93ba255ee58b8e5c02fa28d6a058b6.ico",
       "provenance": "first-party-icon",
       "contentType": "image/x-icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "screaming-frog": {
       "url": "https://www.screamingfrog.co.uk/wp-content/themes/screamingfrog/public/images/favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/x-icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "wix": {
       "url": "https://www.wix.com/favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/x-icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "squarespace": {
       "url": "https://images.squarespace-cdn.com/content/5134cbefe4b0c6fb04df8065/1541453017272-VW5DX9K6F21C7VZZTZYR/sqsp-favicon.ico?content-type=image%2Fx-icon",
       "provenance": "first-party-icon",
       "contentType": "image/x-icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "wordpress-com": {
       "url": "https://s1.wp.com/i/favicon.ico?v=1713425267",
       "provenance": "first-party-icon",
       "contentType": "image/x-icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "help-scout": {
       "url": "https://www.helpscout.com/images/favicon/favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/vnd.microsoft.icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "gorgias": {
       "url": "https://cdn.prod.website-files.com/5e4ff204e7b6f80e402d407a/655f0a6ab7ecc73b0e8cbcad_Favicon%201.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "crisp": {
       "url": "https://crisp.chat/favicons/favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/vnd.microsoft.icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "salesforce": {
       "url": "https://www.salesforce.com/c2/public/app/favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/x-icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "close": {
       "url": "https://close.com/favicon.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "copper": {
       "url": "https://cdn.prod.website-files.com/69bdc11d6d8dca48c8a32ff4/6a68aa724b83a163fe44856a_copper-logo-icon-32x32.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "freshsales": {
       "url": "https://www.freshworks.com/favicons/favicon-32x32.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "attio": {
       "url": "https://attio.com/favicon.ico?favicon.0t61hvyp-jaev.ico",
       "provenance": "first-party-icon",
       "contentType": "image/vnd.microsoft.icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "mailerlite": {
-      "url": "https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://www.mailerlite.com&size=128",
+      "url": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://www.mailerlite.com&size=128",
       "provenance": "google-favicon-fallback",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "getresponse": {
       "url": "https://www.getresponse.com/global/favicons/apple-touch-icon-57x57.png",
       "provenance": "first-party-apple-touch-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "omnisend": {
       "url": "https://www.omnisend.com/wp-content/uploads/2022/07/cropped-favi-32x32.png",
       "provenance": "first-party-icon",
       "contentType": "image/webp",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "basecamp": {
       "url": "https://basecamp.com/assets/images/general/favicon.svg?v=1.6.1",
       "provenance": "first-party-icon",
       "contentType": "image/svg+xml",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "wrike": {
       "url": "https://www.wrike.com/tp/static/favicon.ico?v8",
       "provenance": "first-party-icon",
       "contentType": "image/x-icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "linear": {
       "url": "https://linear.app/favicon.ico?v=2",
       "provenance": "first-party-icon",
       "contentType": "image/x-icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "jira": {
       "url": "https://www.atlassian.com/favicon.ico",
       "provenance": "first-party-root-favicon",
       "contentType": "image/x-icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "integrately": {
       "url": "https://integrately.com/images/fav/favicon-32x32.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "workato": {
       "url": "https://www.workato.com/favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/x-icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "paperform": {
       "url": "https://paperform.co/favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/vnd.microsoft.icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "fillout": {
       "url": "https://www.fillout.com/favicon.ico",
       "provenance": "first-party-root-favicon",
       "contentType": "image/vnd.microsoft.icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "bigcommerce": {
       "url": "https://www.bigcommerce.com/mm/icons/favicon-16x16.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "woocommerce": {
       "url": "https://woocommerce.com/wp-content/uploads/2024/12/cropped-logo-w-favicon.png?w=32",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "adobe-express": {
       "url": "https://www.adobe.com/favicon.ico",
       "provenance": "first-party-root-favicon",
       "contentType": "image/x-icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "descript": {
       "url": "https://static-cdn.descript.com/web/icons/favicon-96x96.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "podia": {
       "url": "https://www.podia.com/Podia-Favicon.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "unbounce": {
       "url": "https://unbounce.com/photos/cropped-unbounce-favicon-2-32x32.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "google-ai-studio": {
       "url": "https://www.gstatic.com/images/branding/productlogos/ai_studio/v1/web-32dp/logo_ai_studio_color_1x_web_32dp.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "kling-ai": {
       "url": "https://s16-kling.klingai.com/kos/s101/nlav112918/kling-homepage-aio/favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/x-icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "otter-ai": {
       "url": "https://cdn.prod.website-files.com/618e9316785b3582a5178502/618e94bcbca88b51e2ad81f7_favicon.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "anijam-ai": {
       "url": "https://staticglobal.anijam.ai/resources/global/favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/vnd.microsoft.icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "chatzy-ai": {
       "url": "https://chatzy.ai/favicon.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "cosupport-ai": {
       "url": "https://cosupport.ai/favicon.ico",
       "provenance": "first-party-root-favicon",
       "contentType": "image/x-icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "davinci-ai": {
       "url": "https://davinci.ai/favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/x-icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "deep-swap-ai": {
       "url": "https://deepswapai.com/icon-192.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "face-swap-ai": {
       "url": "https://faceswapai.com/favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/x-icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "goenhance-ai": {
       "url": "https://cdn.goenhance.ai/cdn-cgi/image/format=auto/images/static/sites/goenhance-logo-drak-200.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "lip-sync-ai": {
       "url": "https://lipsyncai.tools/favicon-32x32.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "lorka-ai": {
       "url": "https://www.lorka.ai/favicon-48.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "paioclaw": {
       "url": "https://images.paioclaw.ai/2026/05/cropped-favicon-48x48-1-32x32.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "pine-ai": {
       "url": "https://www.19pine.ai/favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/vnd.microsoft.icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "pixmax-ai": {
       "url": "https://www.pixmax.ai/favicon-logo.svg",
       "provenance": "first-party-icon",
       "contentType": "image/svg+xml",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "questie-ai": {
       "url": "https://www.questie.ai/icon.png?73c152c06b911d61",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "resume-ai": {
       "url": "https://resume-ai.com/favicon.ico",
       "provenance": "first-party-root-favicon",
       "contentType": "image/vnd.microsoft.icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "talkpix-ai": {
       "url": "https://www.talkpix.ai/favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/x-icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "teachquill": {
       "url": "https://teachquill.com/favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/x-icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "typli-ai": {
       "url": "https://typli.ai/favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/vnd.microsoft.icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "vidflux-ai": {
       "url": "https://vidflux.ai/favicon-32x32.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "vmaker-ai": {
       "url": "https://www.vmaker.com/static/img/vmakerhomenew/favicon.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "weryai": {
       "url": "https://www.weryai.com/weryai_48.png",
       "provenance": "first-party-icon",
       "contentType": "image/png",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     },
     "wondershare-repairit": {
       "url": "https://images.wondershare.com/repairit/favicon.ico",
       "provenance": "first-party-icon",
       "contentType": "image/x-icon",
       "httpStatus": 200,
-      "checkedAt": "2026-10-06T15:54:36.409Z"
+      "checkedAt": "2026-10-06T16:02:54.415Z"
     }
   }
 }

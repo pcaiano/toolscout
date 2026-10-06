@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-06T15:56:29.891Z",
+  "generatedAt": "2026-10-06T16:04:56.370Z",
   "model": "toolscout-editorial-authority-v2",
   "objective": "Keep the full indexable ToolScout surface at a minimum editorial floor of 90, target 95 by default, and use Search Console demand to prioritize work. Once on-page quality is healthy, diagnose search fit, internal authority and off-page authority instead of adding content indefinitely.",
   "hardFloorScore": 90,
