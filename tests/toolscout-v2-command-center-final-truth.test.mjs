@@ -59,9 +59,12 @@ test('critical Command Center assets ship and runtime truth has a bounded static
 });
 
 
-test('fresh service-account GSC evidence suppresses stale legacy refresh errors',()=>{
-  assert.match(truth,/runtimeOk:gscEvidenceAvailable\?\(gscEvidenceFresh\?true:gh\?\.ok===true\):false/);
-  assert.match(truth,/runtimeStatus:gscEvidenceAvailable\?\(gscEvidenceFresh\?'service_account_evidence_fresh'/);
+test('GSC freshness follows the 30h service-account cadence and never falls back to legacy reauthorization state',()=>{
+  assert.match(truth,/const GSC_EVIDENCE_FRESHNESS_HOURS=30/);
+  assert.match(truth,/gscEvidenceAgeHours<=GSC_EVIDENCE_FRESHNESS_HOURS/);
+  assert.match(truth,/runtimeOk:gscEvidenceAvailable\?gscEvidenceFresh:false/);
+  assert.match(truth,/runtimeStatus:gscEvidenceAvailable\?\(gscEvidenceFresh\?'service_account_evidence_fresh':'service_account_evidence_stale'\):'unavailable'/);
+  assert.doesNotMatch(truth,/runtimeStatus:gscEvidenceAvailable\?\(gscEvidenceFresh\?'service_account_evidence_fresh':\(gh\?\.status/);
   assert.match(view,/g\.status==='stale'&&g\.runtimeOk===false/);
 });
 
