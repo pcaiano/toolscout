@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-06T13:05:28.186Z",
+  "generatedAt": "2026-10-06T15:51:20.072Z",
   "methodology": "Search impressions are visibility, not traffic. First-page visibility is always a strategic opportunity. Low-sample first-page signals are protected and measured; they are not discarded and they are not treated as high-confidence CTR evidence. Automatic ranking conclusions require at least 20 impressions unless a click is observed. Tool eligibility requires an allowed category, capability fit where defined, hard attribute constraints where defined, and semantic relevance. ToolScout 2.0 adds an editorial-authority gap signal so observed-demand pages with weak primary-source evidence, buyer analysis or information gain are deepened before new surface is created.",
   "gsc": {
     "available": true,
@@ -10,8 +10,8 @@
     "dataState": "all",
     "siteTotals": {
       "clicks": 7,
-      "impressions": 6859,
-      "ctr": 0.1021
+      "impressions": 6892,
+      "ctr": 0.1016
     },
     "reason": "Google Search Console signals drive growth prioritization. First-page and striking-distance visibility is always retained as a strategic opportunity. Samples below 20 impressions are protected and measured rather than aggressively rewritten. Meaningful weak rankings are treated as relevance or authority problems."
   },
@@ -40,10 +40,10 @@
       "affiliateSignal": 0,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 2672,
+        "impressions": 2698,
         "clicks": 0,
         "ctr": 0,
-        "position": 80.3275,
+        "position": 80.3328,
         "opportunity": "relevance-gap",
         "opportunityScore": 32,
         "meaningfulSample": true,
@@ -233,10 +233,10 @@
       "affiliateSignal": 5,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 162,
+        "impressions": 163,
         "clicks": 0,
         "ctr": 0,
-        "position": 76.1667,
+        "position": 76.2025,
         "opportunity": "relevance-gap",
         "opportunityScore": 22,
         "meaningfulSample": true,
@@ -381,10 +381,10 @@
       "affiliateSignal": 0,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 75,
+        "impressions": 77,
         "clicks": 0,
         "ctr": 0,
-        "position": 75.2,
+        "position": 75.6494,
         "opportunity": "relevance-gap",
         "opportunityScore": 19,
         "meaningfulSample": true,
@@ -1851,10 +1851,10 @@
       "affiliateSignal": 0,
       "searchSignal": {
         "source": "gsc",
-        "impressions": 9,
+        "impressions": 10,
         "clicks": 0,
         "ctr": 0,
-        "position": 45.4444,
+        "position": 48.2,
         "opportunity": "insufficient-sample",
         "opportunityScore": 12,
         "meaningfulSample": false,
