@@ -55,18 +55,30 @@ function editorialConclusionLegacy(a,b){
   const third=overlap.length?`Because both list ${listPhrase(overlap)}, compare the depth of those shared capabilities against your workflow before choosing.`:'Compare the products against your actual workflow, feature requirements and current commercial terms before choosing.';
   return clean([first,second,third,aiComparisonSentence(a,b)].filter(Boolean).join(' '));
 }
+function comparisonKey(a,b){return [String(a?.slug||''),String(b?.slug||'')].sort().join('|');}
+function editorialOverride(a,b){return editorialQuality?.comparisonOverrides?.[comparisonKey(a,b)]||null;}
 function editorialConclusionV2(a,b){
   const deltas=dimensions.map(key=>({key,diff:Number(a.scores?.[key]||0)-Number(b.scores?.[key]||0)})).filter(x=>x.diff!==0).sort((x,y)=>Math.abs(y.diff)-Math.abs(x.diff));
-  const aEdge=deltas.find(x=>x.diff>0),bEdge=deltas.find(x=>x.diff<0);
+  const aEdges=deltas.filter(x=>x.diff>0),bEdges=deltas.filter(x=>x.diff<0),aEdge=aEdges[0],bEdge=bEdges[0];
   const aOnly=(a.features||[]).filter(v=>!(b.features||[]).map(x=>String(x).toLowerCase()).includes(String(v).toLowerCase())).slice(0,2);
   const bOnly=(b.features||[]).filter(v=>!(a.features||[]).map(x=>String(x).toLowerCase()).includes(String(v).toLowerCase())).slice(0,2);
   const sharedBest=shared(a.bestFor,b.bestFor).slice(0,2);
-  const first=aEdge&&bEdge?`This is a genuine trade-off rather than a cosmetic tie. ${a.name} has the larger recorded edge in ${dimensionLabel[aEdge.key]||aEdge.key}, while ${b.name} answers back most clearly on ${dimensionLabel[bEdge.key]||bEdge.key}.`:aEdge?`${a.name} owns the clearest numerical edge, led by ${dimensionLabel[aEdge.key]||aEdge.key}; ${b.name} needs to win on workflow fit rather than headline score.`:bEdge?`${b.name} owns the clearest numerical edge, led by ${dimensionLabel[bEdge.key]||bEdge.key}; ${a.name} needs to win on workflow fit rather than headline score.`:`The scorecard is effectively level, so the useful distinction has to come from workflow and product scope.`;
-  const second=aOnly.length&&bOnly.length?`${a.name}'s distinctive recorded capabilities include ${listPhrase(aOnly)}, whereas ${b.name} adds ${listPhrase(bOnly)}. Those differences are more decision-useful than counting the features both products share.`:aOnly.length?`${a.name}'s distinctive recorded capabilities include ${listPhrase(aOnly)}, which is where its case becomes more specific.`:bOnly.length?`${b.name}'s distinctive recorded capabilities include ${listPhrase(bOnly)}, which is where its case becomes more specific.`:'';
-  const third=sharedBest.length?`Both are aimed at ${listPhrase(sharedBest)}, so audience labels alone will not settle this comparison. Test the higher-priority workflow in each product before choosing.`:`Their recorded audiences differ enough that fit should be judged against the actual team and job rather than the category label.`;
+  let first='';
+  if(aEdge&&bEdge){
+    const aMag=Math.abs(aEdge.diff),bMag=Math.abs(bEdge.diff);
+    if(aMag>bMag)first=`${a.name}'s clearest numerical separation is ${dimensionLabel[aEdge.key]||aEdge.key}, where it scores ${Number(a.scores?.[aEdge.key]||0)} against ${Number(b.scores?.[aEdge.key]||0)} for ${b.name}. ${b.name}'s strongest counterweight is ${dimensionLabel[bEdge.key]||bEdge.key}.`;
+    else if(bMag>aMag)first=`${b.name}'s strongest score advantage is ${dimensionLabel[bEdge.key]||bEdge.key}, at ${Number(b.scores?.[bEdge.key]||0)} versus ${Number(a.scores?.[bEdge.key]||0)}. ${a.name} answers with smaller advantages led by ${dimensionLabel[aEdge.key]||aEdge.key}.`;
+    else first=`${a.name} and ${b.name} separate on different priorities: ${a.name} is stronger on ${dimensionLabel[aEdge.key]||aEdge.key}, while ${b.name} is stronger on ${dimensionLabel[bEdge.key]||bEdge.key}.`;
+  }else if(aEdge)first=`${a.name} has the clearer score profile, led by ${dimensionLabel[aEdge.key]||aEdge.key}; ${b.name}'s case has to come from product fit rather than a higher recorded score.`;
+  else if(bEdge)first=`${b.name} has the clearer score profile, led by ${dimensionLabel[bEdge.key]||bEdge.key}; ${a.name}'s case has to come from product fit rather than a higher recorded score.`;
+  else first=`The scorecard does not create a meaningful numerical gap between ${a.name} and ${b.name}, so product scope and workflow fit have to do the separating.`;
+  const second=aOnly.length&&bOnly.length?`${a.name} adds ${listPhrase(aOnly)} to the comparison, while ${b.name} brings ${listPhrase(bOnly)}.`:aOnly.length?`${a.name}'s more distinctive recorded capabilities include ${listPhrase(aOnly)}.`:bOnly.length?`${b.name}'s more distinctive recorded capabilities include ${listPhrase(bOnly)}.`:'';
+  const third=sharedBest.length?`Both target ${listPhrase(sharedBest)}, so audience labels alone are not enough to settle the choice.`:`Their recorded audiences differ enough that the buyer profile should carry real weight in the decision.`;
   return clean([first,second,third,aiComparisonSentence(a,b)].filter(Boolean).join(' '));
 }
 function editorialConclusion(a,b){
+  const override=editorialOverride(a,b);
+  if(override?.analysis)return clean(override.analysis);
   return editorialQualityFor(`${a.slug}-vs-${b.slug}.html`)||editorialQualityFor(`${b.slug}-vs-${a.slug}.html`)?editorialConclusionV2(a,b):editorialConclusionLegacy(a,b);
 }
 function decisionGuidanceLegacy(a,b){
@@ -93,6 +105,8 @@ function decisionGuidanceV2(a,b){
   return clean(`There is no defensible score winner here. Choose ${a.name} for the workflow that better matches ${aFit}, and ${b.name} where ${bFit} is the more accurate description of the buyer.`);
 }
 function decisionGuidance(a,b){
+  const override=editorialOverride(a,b);
+  if(override?.decision)return clean(override.decision);
   return editorialQualityFor(`${a.slug}-vs-${b.slug}.html`)||editorialQualityFor(`${b.slug}-vs-${a.slug}.html`)?decisionGuidanceV2(a,b):decisionGuidanceLegacy(a,b);
 }
 function comparisonMethodology(){
