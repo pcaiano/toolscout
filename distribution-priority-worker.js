@@ -22,6 +22,22 @@ function externalValue(row){return row?.externalValue||expectedHumanValue(row);}
 function authorized(request,env){const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(env.ADMIN_TOKEN&&token===env.ADMIN_TOKEN);}
 function number(v,fallback=0){const n=Number(v);return Number.isFinite(n)?n:fallback;}
 function gradeRank(v){return({none:0,directional:1,emerging:2,strong:3,revenue_confirmed:4})[String(v||'none')]??0;}
+function hostOf(value){try{return new URL(String(value||'')).hostname.toLowerCase().replace(/^www\./,'')}catch{return''}}
+function sameHostFamily(a,b){const x=hostOf('https://'+String(a||'').replace(/^https?:\/\//,'')),y=hostOf('https://'+String(b||'').replace(/^https?:\/\//,''));return Boolean(x&&y&&(x===y||x.endsWith('.'+y)||y.endsWith('.'+x)))}
+async function currentAuthorityDomains(env){
+  try{
+    const r=await env.ASSETS.fetch(new Request('https://trytoolscout.org/data/se-ranking-backlink-truth.json'));
+    if(!r.ok)return new Set();
+    const x=await r.json();
+    return new Set((x.referringDomains||[]).map(row=>hostOf('https://'+String(row?.domain||''))).filter(Boolean));
+  }catch{return new Set()}
+}
+function authorityDiversity(row,knownDomains){
+  const host=hostOf(row?.live_url||row?.action_url);
+  const existing=Boolean(host&&[...knownDomains].some(domain=>sameHostFamily(host,domain)));
+  const quality=number(row?.authority)>=50&&number(row?.backlink_value)>=50;
+  return {host,existing,quality,newIndependentDomain:Boolean(host&&!existing&&quality),bonus:host&&!existing&&quality?12:0};
+}
 
 export function operatingDecision(row){
   if(TERMINAL.has(String(row?.status||'')))return{s:'suspend',reason:`Surface status ${row.status} blocks or closes further automatic distribution.`};
@@ -76,14 +92,15 @@ export async function rebalanceDistributionPriorities(env){
   try{const row=await env.DB.prepare(`SELECT status,directive,directive_json FROM growth_supervisor_state WHERE engine='distribution'`).first();if(row){let config={};try{config=JSON.parse(row.directive_json||'{}')}catch{}supervisor={status:row.status,directive:row.directive,config}}}catch{}
   let rows=[];
   try{
-    const q=await env.DB.prepare(`SELECT o.surface_slug,o.surface_name,o.surface_type,o.status,o.human_required,o.distribution_score,o.live_url,o.last_checked_at,o.updated_at,o.audience_fit,o.authority,o.traffic_potential,o.backlink_value,o.acceptance_probability,o.automation_potential,o.effort_cost,o.external_value_score,o.external_value_tier,o.external_value_reason,o.value_model_version,l.baseline_score,l.learned_score,l.economic_boost,l.evidence_grade,l.paid_policy_decision,l.browser_confirmed_sessions_30d,l.outbound_clicks_30d,l.monetized_outbound_30d,l.confirmed_revenue_30d,c.cost_amount,c.currency AS cost_currency,EXISTS(SELECT 1 FROM distribution_submissions ds WHERE ds.surface_slug=o.surface_slug AND ds.status='submitted') AS already_submitted,EXISTS(SELECT 1 FROM distribution_submissions ds WHERE ds.surface_slug=o.surface_slug AND ds.status IN ('auth_required','adapter_missing','policy_blocked','setup_required','human_required')) AS submission_blocked FROM distribution_opportunities o LEFT JOIN distribution_economic_learning l ON l.surface_slug=o.surface_slug LEFT JOIN distribution_surface_costs c ON c.surface_slug=o.surface_slug WHERE o.surface_slug IS NOT NULL`).all();
+    const q=await env.DB.prepare(`SELECT o.surface_slug,o.surface_name,o.surface_type,o.status,o.human_required,o.distribution_score,o.live_url,o.action_url,o.last_checked_at,o.updated_at,o.audience_fit,o.authority,o.traffic_potential,o.backlink_value,o.acceptance_probability,o.automation_potential,o.effort_cost,o.external_value_score,o.external_value_tier,o.external_value_reason,o.value_model_version,l.baseline_score,l.learned_score,l.economic_boost,l.evidence_grade,l.paid_policy_decision,l.browser_confirmed_sessions_30d,l.outbound_clicks_30d,l.monetized_outbound_30d,l.confirmed_revenue_30d,c.cost_amount,c.currency AS cost_currency,EXISTS(SELECT 1 FROM distribution_submissions ds WHERE ds.surface_slug=o.surface_slug AND ds.status='submitted') AS already_submitted,EXISTS(SELECT 1 FROM distribution_submissions ds WHERE ds.surface_slug=o.surface_slug AND ds.status IN ('auth_required','adapter_missing','policy_blocked','setup_required','human_required')) AS submission_blocked FROM distribution_opportunities o LEFT JOIN distribution_economic_learning l ON l.surface_slug=o.surface_slug LEFT JOIN distribution_surface_costs c ON c.surface_slug=o.surface_slug WHERE o.surface_slug IS NOT NULL`).all();
     rows=q.results||[];
   }catch(error){return{ok:false,updated:0,reason:'operating_decision_schema_unavailable',detail:String(error?.message||error).slice(0,500)};}
 
-  const staged=rows.map(row=>{const value=expectedHumanValue(row);const enriched={...row,externalValue:value};return{...enriched,decision:operatingDecision(enriched)};});
+  const knownAuthorityDomains=await currentAuthorityDomains(env);
+  const staged=rows.map(row=>{const value=expectedHumanValue(row);const enriched={...row,externalValue:value};return{...enriched,authorityDiversity:authorityDiversity(enriched,knownAuthorityDomains),decision:operatingDecision(enriched)};});
   const supervisorSlots=Math.max(0,Math.min(3,number(supervisor?.config?.exploration_slots,0)));
   const explorationLimit=Math.max(1,Math.min(3,supervisorSlots||HUMAN_ACQUISITION_SPRINT.explorationSlots));
-  const explorationCandidates=staged.filter(eligibleForExploration).sort(oldestFirst).slice(0,explorationLimit);
+  const explorationCandidates=staged.filter(eligibleForExploration).sort((a,b)=>Number(Boolean(b.authorityDiversity?.newIndependentDomain))-Number(Boolean(a.authorityDiversity?.newIndependentDomain))||number(b.backlink_value)-number(a.backlink_value)||oldestFirst(a,b)).slice(0,explorationLimit);
   const explorationSlugs=new Set(explorationCandidates.map(x=>x.surface_slug));
 
   let evaluated=0,updated=0,paidBlocked=0;
@@ -97,11 +114,13 @@ export async function rebalanceDistributionPriorities(env){
     const explorationSlot=explorationSlugs.has(row.surface_slug);
     const basePriority=priorityWeight(row,decision,{explorationSlot});
     const supervisorBoost=Math.max(0,Math.min(25,number(supervisor?.config?.priority_boost,0)));
-    const priority=Number(Math.min(100,basePriority+(decision==='scale'?Math.min(10,supervisorBoost):supervisorBoost)).toFixed(2));
+    const diversityBoost=['explore','measure'].includes(decision)?number(row.authorityDiversity?.bonus):0;
+    const priority=Number(Math.min(100,basePriority+(decision==='scale'?Math.min(10,supervisorBoost):supervisorBoost)+diversityBoost).toFixed(2));
     const isPaid=number(row.cost_amount)>0;
     const chairmanRequired=number(row.human_required)>0||row.status==='approval_required'||isPaid;
     const supervisorReason=supervisor?.directive?` Growth Supervisor: ${supervisor.directive}.`:'';
-    const reason=(explorationSlot?`${row.decision.reason} Reserved as this cycle's bounded acquisition exploration slot.`:row.decision.reason)+supervisorReason;
+    const diversityReason=row.authorityDiversity?.newIndependentDomain?` New independent referring-domain candidate (${row.authorityDiversity.host}) receives a bounded diversification boost.`:'';
+    const reason=(explorationSlot?`${row.decision.reason} Reserved as this cycle's bounded acquisition exploration slot.`:row.decision.reason)+diversityReason+supervisorReason;
     const baseline=number(row.baseline_score,row.distribution_score);
     const learned=number(row.learned_score,row.distribution_score);
     const decisionStmt=env.DB.prepare(`INSERT INTO distribution_economic_learning(surface_slug,baseline_score,learned_score,operating_decision,priority_weight,decision_reason,chairman_required,decided_at,created_at,updated_at)
