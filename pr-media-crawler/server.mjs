@@ -369,6 +369,7 @@ server.listen(PORT, "0.0.0.0", () => {
         }));
       }
     })();
+  }
 
   const muckrackEntries = String(process.env.MUCKRACK_OUTLETS || "")
     .split(",")
@@ -401,6 +402,5 @@ server.listen(PORT, "0.0.0.0", () => {
         console.error("PR_MUCKRACK_BATCH_ERROR " + JSON.stringify({batch_id: batchId, error: String(err?.stack || err)}));
       }
     })();
-  }
   }
 });
