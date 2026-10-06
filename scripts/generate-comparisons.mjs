@@ -10,6 +10,9 @@ const PAIRS=JSON.parse(fs.readFileSync(path.join(ROOT,'data','comparisons.json')
 const compareTemplate=fs.readFileSync(path.join(ROOT,'compare.html'),'utf8');
 const assetData=JSON.parse(fs.readFileSync(path.join(ROOT,'data','tool-assets.json'),'utf8'));
 const assets=assetData?.assets||{};
+const config=JSON.parse(fs.readFileSync(path.join(ROOT,'data','organic-growth-engine.json'),'utf8'));
+const editorialQuality=config?.editorialQuality||{};
+const editorialQualityFor=pagePath=>editorialQuality.rollout==='full'||(editorialQuality.rollout==='pilot'&&(editorialQuality.pilotPaths||[]).includes(pagePath));
 const bySlug=new Map(tools.map(t=>[t.slug,t]));
 const clean=v=>String(v??'').replace(/[\u2014\u2013]/g,'-').replace(/verify current pricing before publication/gi,'See vendor for current pricing').replace(/verify before publication/gi,'See vendor for current details').replace(/pending verification/gi,'See vendor for current details').replace(/\s+/g,' ').trim();
 const esc=v=>clean(v).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
@@ -41,7 +44,7 @@ function aiComparisonSentence(a,b){
   const winner=av>bv?a:b,other=av>bv?b:a;
   return `${winner.name} currently has the stronger verified AI interoperability profile. ${other.name} may still fit better on product capability, price or workflow depth.`;
 }
-function editorialConclusion(a,b){
+function editorialConclusionLegacy(a,b){
   const aWins=dimensions.filter(key=>Number(a.scores?.[key]||0)>Number(b.scores?.[key]||0)).slice(0,3).map(key=>dimensionLabel[key]||key);
   const bWins=dimensions.filter(key=>Number(b.scores?.[key]||0)>Number(a.scores?.[key]||0)).slice(0,3).map(key=>dimensionLabel[key]||key);
   const first=aWins.length&&bWins.length?`${a.name} scores higher on ${listPhrase(aWins)}, while ${b.name} scores higher on ${listPhrase(bWins)}.`:aWins.length?`${a.name} has the clearer score advantage on ${listPhrase(aWins)}, while the remaining decision still depends on fit and current product terms.`:bWins.length?`${b.name} has the clearer score advantage on ${listPhrase(bWins)}, while the remaining decision still depends on fit and current product terms.`:`ToolScout scores do not separate ${a.name} and ${b.name} clearly enough to support a general winner.`;
@@ -52,7 +55,21 @@ function editorialConclusion(a,b){
   const third=overlap.length?`Because both list ${listPhrase(overlap)}, compare the depth of those shared capabilities against your workflow before choosing.`:'Compare the products against your actual workflow, feature requirements and current commercial terms before choosing.';
   return clean([first,second,third,aiComparisonSentence(a,b)].filter(Boolean).join(' '));
 }
-function decisionGuidance(a,b){
+function editorialConclusionV2(a,b){
+  const deltas=dimensions.map(key=>({key,diff:Number(a.scores?.[key]||0)-Number(b.scores?.[key]||0)})).filter(x=>x.diff!==0).sort((x,y)=>Math.abs(y.diff)-Math.abs(x.diff));
+  const aEdge=deltas.find(x=>x.diff>0),bEdge=deltas.find(x=>x.diff<0);
+  const aOnly=(a.features||[]).filter(v=>!(b.features||[]).map(x=>String(x).toLowerCase()).includes(String(v).toLowerCase())).slice(0,2);
+  const bOnly=(b.features||[]).filter(v=>!(a.features||[]).map(x=>String(x).toLowerCase()).includes(String(v).toLowerCase())).slice(0,2);
+  const sharedBest=shared(a.bestFor,b.bestFor).slice(0,2);
+  const first=aEdge&&bEdge?`This is a genuine trade-off rather than a cosmetic tie. ${a.name} has the larger recorded edge in ${dimensionLabel[aEdge.key]||aEdge.key}, while ${b.name} answers back most clearly on ${dimensionLabel[bEdge.key]||bEdge.key}.`:aEdge?`${a.name} owns the clearest numerical edge, led by ${dimensionLabel[aEdge.key]||aEdge.key}; ${b.name} needs to win on workflow fit rather than headline score.`:bEdge?`${b.name} owns the clearest numerical edge, led by ${dimensionLabel[bEdge.key]||bEdge.key}; ${a.name} needs to win on workflow fit rather than headline score.`:`The scorecard is effectively level, so the useful distinction has to come from workflow and product scope.`;
+  const second=aOnly.length&&bOnly.length?`${a.name}'s distinctive recorded capabilities include ${listPhrase(aOnly)}, whereas ${b.name} adds ${listPhrase(bOnly)}. Those differences are more decision-useful than counting the features both products share.`:aOnly.length?`${a.name}'s distinctive recorded capabilities include ${listPhrase(aOnly)}, which is where its case becomes more specific.`:bOnly.length?`${b.name}'s distinctive recorded capabilities include ${listPhrase(bOnly)}, which is where its case becomes more specific.`:'';
+  const third=sharedBest.length?`Both are aimed at ${listPhrase(sharedBest)}, so audience labels alone will not settle this comparison. Test the higher-priority workflow in each product before choosing.`:`Their recorded audiences differ enough that fit should be judged against the actual team and job rather than the category label.`;
+  return clean([first,second,third,aiComparisonSentence(a,b)].filter(Boolean).join(' '));
+}
+function editorialConclusion(a,b){
+  return editorialQualityFor(`${a.slug}-vs-${b.slug}.html`)||editorialQualityFor(`${b.slug}-vs-${a.slug}.html`)?editorialConclusionV2(a,b):editorialConclusionLegacy(a,b);
+}
+function decisionGuidanceLegacy(a,b){
   const ranked=dimensions
     .map(key=>({key,diff:Number(a.scores?.[key]||0)-Number(b.scores?.[key]||0)}))
     .sort((x,y)=>Math.abs(y.diff)-Math.abs(x.diff));
@@ -65,6 +82,18 @@ function decisionGuidance(a,b){
   const aFit=(a.bestFor||[])[0]||a.category||'your workflow';
   const bFit=(b.bestFor||[])[0]||b.category||'your workflow';
   return clean(`Choose ${a.name} if ${aFit} better matches your workflow; choose ${b.name} when ${bFit} is the closer fit.`);
+}
+function decisionGuidanceV2(a,b){
+  const ranked=dimensions.map(key=>({key,diff:Number(a.scores?.[key]||0)-Number(b.scores?.[key]||0)})).filter(x=>x.diff!==0).sort((x,y)=>Math.abs(y.diff)-Math.abs(x.diff));
+  const aEdge=ranked.find(x=>x.diff>0),bEdge=ranked.find(x=>x.diff<0);
+  const aFit=(a.bestFor||[])[0]||a.category||'this workflow',bFit=(b.bestFor||[])[0]||b.category||'this workflow';
+  if(aEdge&&bEdge)return clean(`Choose ${a.name} when ${dimensionLabel[aEdge.key]||aEdge.key} matters more and the buyer looks like ${aFit}; choose ${b.name} when ${dimensionLabel[bEdge.key]||bEdge.key} is the harder requirement and ${bFit} is the closer operating context.`);
+  if(aEdge)return clean(`${a.name} is the stronger default on the recorded scorecard, especially for ${dimensionLabel[aEdge.key]||aEdge.key}; choose ${b.name} only where its product scope or ${bFit} audience fit is more important than that edge.`);
+  if(bEdge)return clean(`${b.name} is the stronger default on the recorded scorecard, especially for ${dimensionLabel[bEdge.key]||bEdge.key}; choose ${a.name} only where its product scope or ${aFit} audience fit is more important than that edge.`);
+  return clean(`There is no defensible score winner here. Choose ${a.name} for the workflow that better matches ${aFit}, and ${b.name} where ${bFit} is the more accurate description of the buyer.`);
+}
+function decisionGuidance(a,b){
+  return editorialQualityFor(`${a.slug}-vs-${b.slug}.html`)||editorialQualityFor(`${b.slug}-vs-${a.slug}.html`)?decisionGuidanceV2(a,b):decisionGuidanceLegacy(a,b);
 }
 function comparisonMethodology(){
   return 'ToolScout compares catalog-backed pricing, capabilities, use cases and score dimensions using first-party vendor sources and recorded verification dates. The conclusion is a workflow fit judgment, not a universal product claim, and affiliate relationships do not influence the comparison.';
@@ -154,7 +183,7 @@ function render(a,b){
   html=html.replace(/<meta property="og:description" content="[^"]*">/,`<meta property="og:description" content="${esc(desc)}">`);
   html=html.replace(/<meta property="og:url" content="[^"]*">/,`<meta property="og:url" content="${BASE}/${slug}">`);
   html=html.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/,`<script type="application/ld+json">${JSON.stringify(schema).replaceAll('<','\\u003c')}</script>`);
-  html=html.replace('<body data-default-a="" data-default-b="">',`<body data-default-a="${esc(a.slug)}" data-default-b="${esc(b.slug)}">`);
+  html=html.replace('<body data-default-a="" data-default-b=""${editorialQualityFor(`${a.slug}-vs-${b.slug}.html`)?` data-editorial-quality="${editorialQuality.rollout==='pilot'?'pilot':'full'}"`:''}>',`<body data-default-a="${esc(a.slug)}" data-default-b="${esc(b.slug)}">`);
   html=html.replace('<div id="pairNote"></div>',`<div id="pairNote"><div class="pairNote">Comparing <strong>${esc(a.name)}</strong> with <strong>${esc(b.name)}</strong>. Change either selector to explore another pair.</div></div>`);
   html=html.replace('<div id="table" class="table"></div>',`<div id="table" class="table">${initialTable(a,b)}</div>`);
   html=html.replace('<section id="analysis" class="analysis" aria-live="polite"></section>',`<section id="analysis" class="analysis" aria-live="polite"><div class="meta">ToolScout analysis</div><h2>What this comparison means in practice</h2><p>${esc(editorialConclusion(a,b))}</p><p class="decision"><strong>Decision:</strong> ${esc(decisionGuidance(a,b))}</p><h3>How this comparison works</h3><p>${esc(comparisonMethodology())}</p><p class="source-note"><strong>Editorial evidence:</strong> first-party vendor sources are recorded in the ToolScout catalog. Catalog evidence last checked ${esc(a.lastVerified||'not recorded')} and ${esc(b.lastVerified||'not recorded')} respectively.</p></section>`);
