@@ -11,6 +11,9 @@ test('linkable assets sync has direct ToolScout 2.0 ownership',()=>{
   const compute=read('compute-router-worker.js');
   assert.match(compute,/ownership\.owner==='distribution_linkable_assets'/);
   assert.match(compute,/handleLinkableAssetsRoute\(request,env\)/);
+  assert.match(compute,/syncLinkableAssets/);
+  assert.match(compute,/linkableResearch=Promise\.resolve\(syncLinkableAssets\(env\)\)/);
+  assert.match(compute,/newsletterSync,linkableResearch/);
 });
 
 test('direct linkable assets owner preserves authorization',async()=>{
