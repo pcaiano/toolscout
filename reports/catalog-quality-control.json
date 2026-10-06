@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-10-06T16:02:54.415Z",
+  "generatedAt": "2026-10-06T16:06:52.725Z",
   "methodology": "Field-level first-party quality control for volatile catalog facts plus validated visual asset resolution. Ambiguous changes are reported, not silently rewritten.",
   "summary": {
     "tools": 127,
     "critical": 0,
-    "high": 14,
-    "medium": 7,
+    "high": 15,
+    "medium": 4,
     "low": 0,
     "autoCorrections": 0,
-    "assetsResolved": 117
+    "assetsResolved": 116
   },
   "corrections": [],
   "findings": [
@@ -122,50 +122,16 @@
       "detail": "http_403"
     },
     {
-      "slug": "ubersuggest",
+      "slug": "resume-ai",
       "severity": "high",
       "type": "official_source_unavailable",
       "detail": "http_403"
     },
     {
-      "slug": "airtable",
-      "severity": "medium",
-      "type": "pricing_evidence_changed",
-      "previous": [
-        "$4",
-        "$600",
-        "$1.7",
-        "$3",
-        "$500",
-        "$1",
-        "$8.4",
-        "$750",
-        "$200",
-        "$285",
-        "$2.1",
-        "$1.1",
-        "$132",
-        "$48",
-        "$20,10",
-        "$25,31",
-        "$29,04",
-        "$44,75",
-        "$14,49",
-        "$13,79",
-        "$56,01",
-        "$48,13",
-        "$20/",
-        "$45/"
-      ],
-      "current": [
-        "$20/",
-        "$45/"
-      ],
-      "evidenceUrls": [
-        "https://www.airtable.com/",
-        "https://airtable.com/pricing",
-        "https://www.airtable.com/platform"
-      ]
+      "slug": "ubersuggest",
+      "severity": "high",
+      "type": "official_source_unavailable",
+      "detail": "http_403"
     },
     {
       "slug": "asana",
@@ -178,7 +144,6 @@
         "$13.49",
         "$30.49",
         "$0.50 per",
-        "$5.99 per",
         "$0.60 per",
         "$300,00"
       ],
@@ -189,6 +154,7 @@
         "$13.49",
         "$30.49",
         "$0.50 per",
+        "$5.99 per",
         "$0.60 per",
         "$300,00"
       ],
@@ -199,56 +165,10 @@
       ]
     },
     {
-      "slug": "beehiiv",
-      "severity": "medium",
-      "type": "pricing_evidence_changed",
-      "previous": [
-        "$ 0",
-        "$ 49",
-        "$ 95",
-        "$0",
-        "$49 /mo",
-        "$39/mo",
-        "$95 /mo",
-        "$0.30 per"
-      ],
-      "current": [
-        "$32",
-        "$0",
-        "$49 /mo",
-        "$39/mo",
-        "$95 /mo",
-        "$12",
-        "$0.30 per"
-      ],
-      "evidenceUrls": [
-        "https://www.beehiiv.com/",
-        "https://www.beehiiv.com/pricing",
-        "https://www.beehiiv.com/newsletter-platform"
-      ]
-    },
-    {
       "slug": "intercom",
       "severity": "medium",
       "type": "pricing_evidence_changed",
       "previous": [
-        "$19 per",
-        "$0.99 per",
-        "$85 per",
-        "$10",
-        "$132 per",
-        "$90.09 /mo",
-        "$19.00 /mo",
-        "$109.09 /mo",
-        "$33/mo",
-        "$1.99 per",
-        "$99 per",
-        "$29 per",
-        "$99/month",
-        "$35 per",
-        "$0.01 per"
-      ],
-      "current": [
         "$19 per",
         "$0.99 per",
         "$29 per",
@@ -265,6 +185,23 @@
         "$35 per",
         "$0.01 per"
       ],
+      "current": [
+        "$19 per",
+        "$0.99 per",
+        "$85 per",
+        "$10",
+        "$132 per",
+        "$90.09 /mo",
+        "$19.00 /mo",
+        "$109.09 /mo",
+        "$33/mo",
+        "$1.99 per",
+        "$99 per",
+        "$29 per",
+        "$99/month",
+        "$35 per",
+        "$0.01 per"
+      ],
       "evidenceUrls": [
         "https://www.intercom.com/",
         "https://www.intercom.com/pricing",
@@ -276,38 +213,6 @@
       "severity": "medium",
       "type": "pricing_evidence_changed",
       "previous": [
-        "$20/month",
-        "$20",
-        "$75/month",
-        "$ 20",
-        "$ 75",
-        "$5 /",
-        "$125",
-        "$500/month",
-        "$ 125",
-        "$25 /",
-        "$ 250",
-        "$20 /",
-        "$ 500",
-        "$10 /",
-        "$0",
-        "$75",
-        "$250",
-        "$500",
-        "$5",
-        "$25",
-        "$10",
-        "$ 99",
-        "$79/mo",
-        "$238/yr",
-        "$ 79",
-        "$950",
-        "$ 179",
-        "$143/mo",
-        "$429/yr",
-        "$ 143"
-      ],
-      "current": [
         "$20/month",
         "$20",
         "$75/month",
@@ -339,27 +244,42 @@
         "$950",
         "$ 179"
       ],
+      "current": [
+        "$20/month",
+        "$20",
+        "$75/month",
+        "$ 20",
+        "$ 75",
+        "$5 /",
+        "$125",
+        "$500/month",
+        "$ 125",
+        "$25 /",
+        "$ 250",
+        "$20 /",
+        "$ 500",
+        "$10 /",
+        "$0",
+        "$75",
+        "$250",
+        "$500",
+        "$5",
+        "$25",
+        "$10",
+        "$ 99",
+        "$79/mo",
+        "$238/yr",
+        "$ 79",
+        "$950",
+        "$ 179",
+        "$143/mo",
+        "$429/yr",
+        "$ 143"
+      ],
       "evidenceUrls": [
         "https://moz.com/products/pro",
         "https://moz.com/products/api/pricing",
         "https://moz.com/products/pro/pricing"
-      ]
-    },
-    {
-      "slug": "screaming-frog",
-      "severity": "medium",
-      "type": "pricing_evidence_changed",
-      "previous": [
-        "£199 per year"
-      ],
-      "current": [
-        "€245 per year",
-        "£199 per year"
-      ],
-      "evidenceUrls": [
-        "https://www.screamingfrog.co.uk/seo-spider/",
-        "https://www.screamingfrog.co.uk/seo-spider/pricing/",
-        "https://www.screamingfrog.co.uk/log-file-analyser/pricing/"
       ]
     },
     {
@@ -375,7 +295,6 @@
         "$18",
         "$9",
         "$15",
-        "$45",
         "$2.1",
         "$8.75 per",
         "$9 per"
@@ -389,6 +308,7 @@
         "$18",
         "$9",
         "$15",
+        "$45",
         "$2.1",
         "$8.75 per",
         "$9 per"
