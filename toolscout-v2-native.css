@@ -289,3 +289,50 @@ html[data-toolscout-surface="guide-detail"] .related-card{
   html[data-toolscout-surface="guide-detail"] body>.wrap>.grid>.card{padding-left:54px!important}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+
+/* High-specificity neutralization of the pre-2.0 card skin.
+   The legacy runtime deliberately uses !important, so native surfaces must
+   explicitly win rather than inherit rounded white panels. */
+html[data-toolscout-redesign="2"][data-toolscout-surface="tools"] body .tool,
+html[data-toolscout-redesign="2"][data-toolscout-surface="guides"] body .card,
+html[data-toolscout-redesign="2"][data-toolscout-surface="whats-new"] body .card,
+html[data-toolscout-redesign="2"][data-toolscout-surface="tool-profile"] body .panel,
+html[data-toolscout-redesign="2"][data-toolscout-surface="tool-profile"] body .editorialIntro,
+html[data-toolscout-redesign="2"][data-toolscout-surface="tool-profile"] body details,
+html[data-toolscout-redesign="2"][data-toolscout-surface="tool-profile"] body .relatedCard,
+html[data-toolscout-redesign="2"][data-toolscout-surface="tool-profile"] body .related-card,
+html[data-toolscout-redesign="2"][data-toolscout-surface="tool-profile"] body .links a,
+html[data-toolscout-redesign="2"][data-toolscout-surface="guide-detail"] body .card,
+html[data-toolscout-redesign="2"][data-toolscout-surface="guide-detail"] body .related-card{
+  background:transparent!important;
+  border-radius:0!important;
+  box-shadow:none!important
+}
+html[data-toolscout-redesign="2"][data-toolscout-surface="tools"] body .tool,
+html[data-toolscout-redesign="2"][data-toolscout-surface="guides"] body .card,
+html[data-toolscout-redesign="2"][data-toolscout-surface="whats-new"] body .card,
+html[data-toolscout-redesign="2"][data-toolscout-surface="tool-profile"] body .relatedCard,
+html[data-toolscout-redesign="2"][data-toolscout-surface="tool-profile"] body .related-card,
+html[data-toolscout-redesign="2"][data-toolscout-surface="tool-profile"] body .links a,
+html[data-toolscout-redesign="2"][data-toolscout-surface="guide-detail"] body .card,
+html[data-toolscout-redesign="2"][data-toolscout-surface="guide-detail"] body .related-card{
+  border-left:0!important;border-right:0!important
+}
+html[data-toolscout-redesign="2"][data-toolscout-surface="tools"] body .tool:hover,
+html[data-toolscout-redesign="2"][data-toolscout-surface="guides"] body .card:hover,
+html[data-toolscout-redesign="2"][data-toolscout-surface="whats-new"] body .card:hover,
+html[data-toolscout-redesign="2"][data-toolscout-surface="tool-profile"] body .relatedCard:hover,
+html[data-toolscout-redesign="2"][data-toolscout-surface="guide-detail"] body .card:hover{
+  background:rgba(255,255,255,.28)!important;
+  box-shadow:none!important
+}
+html[data-toolscout-redesign="2"][data-toolscout-surface="tool-profile"] body .editorialIntro{
+  border-left:0!important;border-right:0!important;border-top:0!important
+}
+html[data-toolscout-redesign="2"][data-toolscout-surface="tool-profile"] body .panel{
+  border-left:0!important;border-right:0!important;border-top:0!important
+}
+html[data-toolscout-redesign="2"][data-toolscout-surface="tool-profile"] body .panel + .panel{
+  border-left:1px solid var(--ts2-line)!important
+}
