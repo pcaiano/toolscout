@@ -70,6 +70,17 @@ test('commercial detail families are owned by explicit ToolScout 2.0 surfaces',a
   assert.match(runtime,/data-toolscout-surface="tools"\] \.tool-visit/);
 });
 
+test('public redesign is idempotent and collapses duplicate current and legacy navigation',async()=>{
+  const source='<!doctype html><html><head><style data-toolscout-public-redesign="2"></style></head><body><header class="ts2-global-nav"><div>Old v2 A</div></header><script data-toolscout-sticky-nav="2">void 0</script><header class="ts2-global-nav"><div>Old v2 B</div></header><nav><a class="brand" href="./">ToolScout</a><div class="links"><a href="./tools">Tools</a></div></nav><div class="wrap"><main><h1>Compare</h1></main></div></body></html>';
+  const first=await transformPublicRedesignResponse(new Request('https://trytoolscout.org/compare'),new Response(source,{status:200,headers:{'content-type':'text/html; charset=UTF-8'}}));
+  const second=await transformPublicRedesignResponse(new Request('https://trytoolscout.org/compare'),first);
+  const html=await second.text();
+  assert.equal((html.match(/class="ts2-global-nav"/g)||[]).length,1);
+  assert.equal((html.match(/data-toolscout-sticky-nav="2"/g)||[]).length,1);
+  assert.doesNotMatch(html,/<nav\b[^>]*>[\s\S]*?<a\b[^>]*class=["']brand["'][^>]*>\s*ToolScout\s*<\/a>[\s\S]*?<\/nav>/i);
+  assert.doesNotMatch(html,/Old v2 A|Old v2 B/);
+});
+
 test('public redesign injects the shared shell without changing canonical content',async()=>{
   const source='<!doctype html><html><head><link rel="canonical" href="https://trytoolscout.org/tools/figma"></head><body><div class="wrap"><a class="brand" href="/">ToolScout</a><main><h1>Figma</h1></main></div></body></html>';
   const response=new Response(source,{status:200,headers:{'content-type':'text/html; charset=UTF-8'}});
