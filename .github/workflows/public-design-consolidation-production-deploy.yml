@@ -1,5 +1,5 @@
 name: Deploy Public Design Consolidation Production
-# one-time production consolidation final
+# one-time production consolidation final acceptance
 
 on:
   push:
