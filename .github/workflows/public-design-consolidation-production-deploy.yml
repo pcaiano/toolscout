@@ -1,0 +1,42 @@
+name: Deploy Public Design Consolidation Production
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/public-design-consolidation-production-deploy.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: toolscout-public-design-consolidation-production
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    if: contains(github.event.head_commit.message, 'Deploy public design consolidation production')
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate public design consolidation
+        run: |
+          set -euo pipefail
+          node --check public-redesign-runtime.js
+          node --check scripts/verify-redesign-2-live.mjs
+          node --test tests/toolscout-v2-public-redesign.test.mjs
+      - name: Deploy current main to Cloudflare
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: npx wrangler deploy --config wrangler.toml --latest
+      - name: Verify all public sitemap pages live
+        run: node scripts/verify-redesign-2-live.mjs
