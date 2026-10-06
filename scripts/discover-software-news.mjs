@@ -10,6 +10,9 @@ const NEWS_DIR=path.join(ROOT,'news');
 const BASE='https://trytoolscout.org';
 const LOOKBACK_DAYS=14;
 const MAX_TOTAL=4;
+const organicConfig=readJson(path.join(ROOT,'data','organic-growth-engine.json'),{});
+const editorialQuality=organicConfig?.editorialQuality||{};
+const editorialQualityFor=pagePath=>editorialQuality.rollout==='full'||(editorialQuality.rollout==='pilot'&&(editorialQuality.pilotPaths||[]).includes(pagePath));
 
 const readJson=(file,fallback)=>{try{return JSON.parse(fs.readFileSync(file,'utf8'));}catch{return fallback;}};
 const esc=v=>String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#39;");
@@ -97,7 +100,7 @@ function materiality(item,source){
   return score;
 }
 
-function editorialText(type,tool,item){
+function editorialTextLegacy(type,tool,item){
   const changed=item.description&&item.description.length>=55
     ? item.description
     : `${tool} published an official product update titled "${item.title}". ToolScout records the primary source internally for editorial verification.`;
@@ -117,6 +120,25 @@ function editorialText(type,tool,item){
   return {changed,why,availability};
 }
 
+function editorialTextV2(type,tool,item){
+  const detail=item.description&&item.description.length>=55?item.description:`${tool} published an official update titled "${item.title}".`;
+  const lower=(item.title+' '+item.description).toLowerCase();
+  const angle=/advertis|attribution|brand suitab/.test(lower)?'For software buyers, the notable shift is that the product is becoming a commercial surface as well as a working tool.':/shut down|retir|deprecat/.test(lower)?'The important point is continuity: buyers need to separate the capability that is disappearing from the workflows the vendor is keeping alive.':/branch|recovery|error|human reply|agentic/.test(lower)?'The meaningful change is execution depth rather than another layer of AI branding.':/mcp|connector|integration|api/.test(lower)?'The buyer question is interoperability: this update changes how the product can fit into an existing stack.':'The useful reading of this release is what it changes in the buying decision, not the announcement itself.';
+  const changed=cleanNews(`${angle} ${detail}`);
+  const whyMap={
+    product_retirement:`For teams already using ${tool}, this changes migration and continuity risk. For new buyers, it removes a use case that should no longer influence the shortlist.`,
+    pricing_packaging:`The product may now fit a different budget or customer segment, so previous pricing assumptions should not be carried into a new evaluation.`,
+    security_governance:`This matters most where deployment depends on permissions, sensitive data, auditability or regulated workflows.`,
+    integrations_connectivity:`Integration architecture affects switching cost and the amount of custom work required to make the product useful in a real stack.`,
+    ai_automation:`The release expands what ${tool} can potentially do, but the decision still depends on control, reliability, rollout status and whether the capability is available on the plan being evaluated.`,
+    product_capability:`The update can move ${tool} up or down a shortlist if the changed capability is central to the workflow being bought.`
+  };
+  const preview=/public preview|beta|early access/i.test(item.title+' '+item.description);
+  const availability=preview?`This is not a reason to treat the capability as production-ready by default. Buyers should test the specific workflow, confirm plan access and understand what is still preview-only before relying on it.`:`Buyers should verify the current rollout, plan eligibility and implementation details against the vendor documentation before changing a production workflow.`;
+  return {changed,why:whyMap[type],availability};
+}
+function cleanNews(v){return String(v??'').replace(/[\u2013\u2014]/g,'-').replace(/\s+/g,' ').trim();}
+function editorialText(type,tool,item,pagePath){return editorialQualityFor(pagePath)?editorialTextV2(type,tool,item):editorialTextLegacy(type,tool,item);}
 function labelFor(type){
   return {
     product_retirement:'Product retirement',
@@ -132,10 +154,11 @@ function renderArticle({id,item,source,type,summary}){
   const tool=source.toolName;
   const articleUrl=`${BASE}/news/${id}.html`;
   const profile=`/tools/${source.toolSlug}.html`;
-  const t=editorialText(type,tool,item);
+  const pagePath=`news/${id}.html`;
+  const t=editorialText(type,tool,item,pagePath);
   const dateLabel=new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(item.date+'T12:00:00Z'));
   const schema={'@context':'https://schema.org','@type':'NewsArticle',headline:item.title,description:summary,datePublished:item.date,dateModified:item.date,mainEntityOfPage:articleUrl,publisher:{'@type':'Organization',name:'ToolScout',url:BASE+'/'},about:{'@type':'SoftwareApplication',name:tool,url:BASE+profile}};
-  return `<!doctype html><html lang="en"><head><link rel="icon" href="/favicon.svg" type="image/svg+xml"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(item.title)} | ToolScout</title><meta name="description" content="${esc(summary)}"><link rel="canonical" href="${articleUrl}"><meta name="robots" content="index,follow"><script type="application/ld+json">${JSON.stringify(schema).replaceAll('<','\\u003c')}</script><style>:root{font-family:Inter,system-ui,sans-serif;color:#101828;background:#f5f7fb;line-height:1.6}body{margin:0}.wrap{max-width:850px;margin:auto;padding:28px 22px 84px}.top{display:flex;justify-content:space-between;gap:18px}.brand{font-size:23px;font-weight:850;color:#101828;text-decoration:none}.top nav{display:flex;gap:12px;flex-wrap:wrap}.top nav a{font-size:13px;color:#667085;text-decoration:none}.hero{padding:70px 0 24px}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.13em;color:#667085;font-weight:800}h1{font-size:clamp(42px,7vw,68px);line-height:1;letter-spacing:-.055em;margin:14px 0 18px}.lead{font-size:19px;color:#667085}.article h2{font-size:28px;margin:38px 0 8px}.article p{font-size:17px;color:#475467;line-height:1.75}.actions{display:flex;gap:10px;flex-wrap:wrap;margin:34px 0}.btn{display:inline-flex;padding:11px 14px;border-radius:11px;text-decoration:none;font-weight:800;font-size:13px;background:#101828;color:#fff}.btn.secondary{background:#fff;color:#101828;border:1px solid #dfe4ea}.source{margin-top:42px;padding-top:24px;border-top:1px solid #e4e7ec;color:#667085;font-size:13px}.source a{color:#344054;font-weight:750}.back{display:inline-block;margin-top:30px;color:#475467;text-decoration:none;font-weight:750}</style></head><body><div class="wrap article"><div class="top"><a class="brand" href="/">ToolScout</a><nav><a href="/whats-new.html">What's new</a><a href="/software-trends-index.html">Software trends</a><a href="/compare.html">Compare</a><a href="/tools.html">Tools</a></nav></div><main><header class="hero"><div class="eyebrow">${esc(labelFor(type))} · ${esc(dateLabel)}</div><h1>${esc(item.title)}</h1><p class="lead">${esc(summary)}</p></header><h2>What changed</h2><p>${esc(t.changed)}</p><h2>Why it matters</h2><p>${esc(t.why)}</p><h2>Buyer takeaway</h2><p>${esc(t.availability)}</p><div class="actions"><a class="btn secondary" href="${profile}">${esc(tool)} profile</a><a class="btn" href="/go/${esc(source.toolSlug)}?source=software-news" target="_blank" rel="nofollow sponsored noopener">Visit ${esc(tool)}</a></div><div class="source">Primary source: ${esc(source.sourceName)}. ToolScout selects updates for buyer relevance and writes independent analysis. Affiliate relationships do not determine coverage.</div><a class="back" href="/whats-new.html">More software news</a></main></div></body></html>`;
+  return `<!doctype html><html lang="en"><head><link rel="icon" href="/favicon.svg" type="image/svg+xml"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(item.title)} | ToolScout</title><meta name="description" content="${esc(summary)}"><link rel="canonical" href="${articleUrl}"><meta name="robots" content="index,follow"><script type="application/ld+json">${JSON.stringify(schema).replaceAll('<','\\u003c')}</script><style>:root{font-family:Inter,system-ui,sans-serif;color:#101828;background:#f5f7fb;line-height:1.6}body{margin:0}.wrap{max-width:850px;margin:auto;padding:28px 22px 84px}.top{display:flex;justify-content:space-between;gap:18px}.brand{font-size:23px;font-weight:850;color:#101828;text-decoration:none}.top nav{display:flex;gap:12px;flex-wrap:wrap}.top nav a{font-size:13px;color:#667085;text-decoration:none}.hero{padding:70px 0 24px}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.13em;color:#667085;font-weight:800}h1{font-size:clamp(42px,7vw,68px);line-height:1;letter-spacing:-.055em;margin:14px 0 18px}.lead{font-size:19px;color:#667085}.article h2{font-size:28px;margin:38px 0 8px}.article p{font-size:17px;color:#475467;line-height:1.75}.actions{display:flex;gap:10px;flex-wrap:wrap;margin:34px 0}.btn{display:inline-flex;padding:11px 14px;border-radius:11px;text-decoration:none;font-weight:800;font-size:13px;background:#101828;color:#fff}.btn.secondary{background:#fff;color:#101828;border:1px solid #dfe4ea}.source{margin-top:42px;padding-top:24px;border-top:1px solid #e4e7ec;color:#667085;font-size:13px}.source a{color:#344054;font-weight:750}.back{display:inline-block;margin-top:30px;color:#475467;text-decoration:none;font-weight:750}</style></head><body${editorialQualityFor(pagePath)?` data-editorial-quality="${editorialQuality.rollout==='pilot'?'pilot':'full'}"`:''}><div class="wrap article"><div class="top"><a class="brand" href="/">ToolScout</a><nav><a href="/whats-new.html">What's new</a><a href="/software-trends-index.html">Software trends</a><a href="/compare.html">Compare</a><a href="/tools.html">Tools</a></nav></div><main><header class="hero"><div class="eyebrow">${esc(labelFor(type))} · ${esc(dateLabel)}</div><h1>${esc(item.title)}</h1><p class="lead">${esc(summary)}</p></header><h2>What changed</h2><p>${esc(t.changed)}</p><h2>Why it matters</h2><p>${esc(t.why)}</p><h2>Buyer takeaway</h2><p>${esc(t.availability)}</p><div class="actions"><a class="btn secondary" href="${profile}">${esc(tool)} profile</a><a class="btn" href="/go/${esc(source.toolSlug)}?source=software-news" target="_blank" rel="nofollow sponsored noopener">Visit ${esc(tool)}</a></div><div class="source">Primary source: ${esc(source.sourceName)}. ToolScout selects updates for buyer relevance and writes independent analysis. Affiliate relationships do not determine coverage.</div><a class="back" href="/whats-new.html">More software news</a></main></div></body></html>`;
 }
 
 function renderWhatsNew(feed){

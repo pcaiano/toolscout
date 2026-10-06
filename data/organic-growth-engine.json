@@ -249,5 +249,39 @@
     "excellenceScore": 98,
     "enforceAcrossIndexableSurface": true,
     "diagnoseOffPageWhenOnPageHealthy": true
+  },
+  "editorialQuality": {
+    "rollout": "pilot",
+    "objective": "Make every ToolScout page read like a distinct specialist editorial piece while preserving SEO, GEO, AEO, structured data and evidence contracts.",
+    "rules": {
+      "editorialAngleBeforeKeywords": true,
+      "seoAsEnhancementNotTemplate": true,
+      "subtitleAndOpeningMustDoDifferentJobs": true,
+      "evidenceLedAnalysis": true,
+      "avoidInterchangeableConclusions": true,
+      "avoidRepeatedSentenceArchitecture": true,
+      "forbidLongDashes": true
+    },
+    "pilotPaths": [
+      "news/chatgpt-building-advertising-for-the-way-people-use-ai.html",
+      "news/notion-mail-shuts-down.html",
+      "news/zapier-next-gen-zaps-mcp.html",
+      "tools/hubspot.html",
+      "tools/notion.html",
+      "tools/semrush.html",
+      "best-seo-tools-for-agencies.html",
+      "best-workflow-automation-tools.html",
+      "activecampaign-vs-mailchimp.html",
+      "webflow-vs-framer.html"
+    ],
+    "validation": {
+      "marker": "data-editorial-quality=\"pilot\"",
+      "rejectLeadBodyDuplication": true,
+      "rejectGenericAnalysisPhrases": [
+        "is the strongest general fit in the current ToolScout catalog",
+        "is a practical fit for",
+        "Treat the order as a decision aid rather than a universal winner"
+      ]
+    }
   }
 }
