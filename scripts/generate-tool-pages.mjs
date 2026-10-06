@@ -10,6 +10,9 @@ const intents=loadSeoIntents(ROOT).filter(intent=>intent?.slug&&fs.existsSync(pa
 const pairs=read('data/comparisons.json',[]);
 const assets=read('data/tool-assets.json',{assets:{}})?.assets||{};
 const config=read('data/organic-growth-engine.json',{editorialGates:{}});
+const searchRouting=read('data/search-commercial-routing.json',{priorities:[]});
+const searchPriorityByPath=new Map((searchRouting.priorities||[]).map(row=>[String(row.pathname||''),Number(row.priorityScore||0)]));
+const searchPriorityForPath=pathname=>Number(searchPriorityByPath.get(String(pathname||''))||0);
 const MIN_RELEVANCE=Number(config?.editorialGates?.minimumLexicalRelevance||0.75);
 const editorialQuality=config?.editorialQuality||{};
 const editorialQualityFor=pagePath=>editorialQuality.rollout==='full'||(editorialQuality.rollout==='pilot'&&(editorialQuality.pilotPaths||[]).includes(pagePath));
@@ -39,9 +42,9 @@ function relationScore(a,b){
 function relatedTools(tool){
   if(!canCompare(tool))return[];
   return tools.filter(other=>other.slug!==tool.slug&&canCompare(other)&&validTool(other))
-    .map(other=>({tool:other,score:relationScore(tool,other)}))
+    .map(other=>({tool:other,score:relationScore(tool,other),demand:searchPriorityForPath('/tools/'+other.slug)}))
     .filter(x=>x.score>0)
-    .sort((a,b)=>b.score-a.score||String(a.tool.name).localeCompare(String(b.tool.name)))
+    .sort((a,b)=>b.score-a.score||b.demand-a.demand||String(a.tool.name).localeCompare(String(b.tool.name)))
     .slice(0,4).map(x=>x.tool);
 }
 function freePlanLabel(tool){
@@ -146,7 +149,7 @@ function editorialView(tool){
 }
 function render(tool){
   const url=`${BASE}/tools/${tool.slug}`,pageTitle=`${tool.name} Tool Profile: Features, Pricing, AI Integrations and Best For`,description=`ToolScout profile for ${tool.name}, covering recorded use cases, key capabilities, pricing, AI interoperability and relevant software comparisons.`,brandLogo=logoUrl(tool);
-  const guides=intents.map(intent=>({intent,eligible:editorialEligibility(tool,intent,MIN_RELEVANCE).eligible,score:score(tool,intent)})).filter(x=>x.eligible).sort((a,b)=>b.score-a.score).slice(0,4).map(x=>x.intent);
+  const guides=intents.map(intent=>({intent,eligible:editorialEligibility(tool,intent,MIN_RELEVANCE).eligible,score:score(tool,intent),demand:searchPriorityForPath('/'+intent.slug)})).filter(x=>x.eligible).sort((a,b)=>(b.score+Math.min(10,b.demand/15))-(a.score+Math.min(10,a.demand/15))||b.demand-a.demand).slice(0,4).map(x=>x.intent);
   const comparisons=pairs.filter(([a,b])=>a===tool.slug||b===tool.slug).map(([a,b])=>({slug:`${a}-vs-${b}`,names:[tools.find(x=>x.slug===a)?.name,tools.find(x=>x.slug===b)?.name]})).filter(x=>x.names.every(Boolean)&&fs.existsSync(path.join(ROOT,`${x.slug}.html`)));
   const related=relatedTools(tool);
   const verificationDate=tool.sourceCheckedOn||tool.lastVerified||null;
