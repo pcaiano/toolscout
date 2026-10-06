@@ -28,16 +28,20 @@ jobs:
           fetch-depth: 0
 
       - name: Refresh SE Ranking authority truth
+        id: refresh
         env:
           SE_RANKING_API_KEY: ${{ secrets.SE_RANKING_API_KEY }}
         run: |
           if [ -z "$SE_RANKING_API_KEY" ]; then
-            echo "::error::SE_RANKING_API_KEY secret is missing"
-            exit 1
+            echo "::notice::SE_RANKING_API_KEY is not configured in GitHub; external authority refresh is skipped without carrying forward a fake live measurement."
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
           node scripts/sync-se-ranking-authority.mjs
+          echo "available=true" >> "$GITHUB_OUTPUT"
 
       - name: Validate fresh snapshot
+        if: steps.refresh.outputs.available == 'true'
         run: |
           node - <<'NODE'
           const fs=require('fs');
@@ -50,6 +54,7 @@ jobs:
           NODE
 
       - name: Commit refreshed authority truth
+        if: steps.refresh.outputs.available == 'true'
         run: |
           if git diff --quiet -- data/se-ranking-backlink-truth.json data/authority-truth.json; then
             echo "SE Ranking authority truth unchanged"
