@@ -33,20 +33,23 @@ function publicSurface(pathname){
 }
 function stripLegacyNavigation(html,surface){
   let out=String(html||'');
+  // Normalize the ToolScout 2.0 shell itself first. Some public routes can be
+  // transformed more than once upstream; removing any existing v2 shell makes
+  // this transform idempotent and guarantees exactly one canonical header.
+  out=out.replace(/<header\b[^>]*class=["'][^"']*\bts2-global-nav\b[^"']*["'][^>]*>[\s\S]*?<\/header>/gi,'');
+  out=out.replace(/<script\b[^>]*data-toolscout-sticky-nav=["']2["'][^>]*>[\s\S]*?<\/script>/gi,'');
   // Remove previously injected legacy global navigation. The ToolScout 2.0 shell is the sole primary nav owner.
   out=out.replace(/<nav\b[^>]*class=["'][^"']*\bts-global-nav\b[^"']*["'][^>]*>[\s\S]*?<\/nav>/gi,'');
   // Remove old branded nav blocks used by Tools, Compare and other pre-2.0 hubs.
-  out=out.replace(/<nav\b[^>]*>[\s\S]*?<a\b(?=[^>]*class=["']brand["'])(?=[^>]*href=["']\/["'])[^>]*>\s*ToolScout\s*<\/a>[\s\S]*?<\/nav>/gi,'');
+  out=out.replace(/<nav\b[^>]*>[\s\S]*?<a\b(?=[^>]*class=["']brand["'])(?=[^>]*href=["'](?:\.\/|\/)["'])[^>]*>\s*ToolScout\s*<\/a>[\s\S]*?<\/nav>/gi,'');
   // What's New and software-news pages used a .top wrapper containing the legacy brand/nav pair.
   if(surface==='whats-new'||surface==='news'){
-    out=out.replace(/<div\b[^>]*class=["'][^"']*\btop\b[^"']*["'][^>]*>[\s\S]*?<a\b(?=[^>]*class=["']brand["'])(?=[^>]*href=["']\/["'])[^>]*>\s*ToolScout\s*<\/a>[\s\S]*?<\/div>/gi,'');
+    out=out.replace(/<div\b[^>]*class=["'][^"']*\btop\b[^"']*["'][^>]*>[\s\S]*?<a\b(?=[^>]*class=["']brand["'])(?=[^>]*href=["'](?:\.\/|\/)["'])[^>]*>\s*ToolScout\s*<\/a>[\s\S]*?<\/div>/gi,'');
   }
   // Generated tool profiles used a standalone pre-2.0 ToolScout brand link above breadcrumbs.
   // The shared ToolScout 2.0 header owns brand identity, so remove the duplicate at runtime
   // for already-generated profiles as well as preventing it at generation time.
-  if(surface==='tool-profile'||surface==='guide-detail'){
-    out=out.replace(/<a\b(?=[^>]*class=["'][^"']*\bbrand\b[^"']*["'])(?=[^>]*href=["'](?:\.\/|\/)["'])[^>]*>\s*ToolScout\s*<\/a>/gi,'');
-  }
+  out=out.replace(/<a\b(?=[^>]*class=["'][^"']*\bbrand\b[^"']*["'])(?=[^>]*href=["'](?:\.\/|\/)["'])[^>]*>\s*ToolScout\s*<\/a>/gi,'');
   return out;
 }
 
@@ -378,7 +381,7 @@ export async function transformPublicRedesignResponse(request,response){
   if(!html.includes('data-toolscout-public-redesign="2"'))html=html.replace('</head>',styleTag()+'</head>');
   if(!/<html\b[^>]*data-toolscout-redesign=["']2["']/i.test(html))html=html.replace(/<html\b([^>]*)>/i,(match,attrs)=>'<html'+attrs+' data-toolscout-redesign="2" data-toolscout-surface="'+surface+'">');
   else if(!/<html\b[^>]*data-toolscout-surface=/i.test(html))html=html.replace(/<html\b([^>]*)>/i,(match,attrs)=>'<html'+attrs+' data-toolscout-surface="'+surface+'">');
-  if(!html.includes('class="ts2-global-nav"'))html=html.replace(/<body\b[^>]*>/i,m=>m+navHtml(url.pathname));
+  html=html.replace(/<body\b[^>]*>/i,m=>m+navHtml(url.pathname));
   const headers=new Headers(response.headers);headers.delete('Content-Length');headers.delete('Content-Encoding');headers.set('Vary',headers.get('Vary')||'Accept-Encoding');
   return new Response(html,{status:response.status,statusText:response.statusText,headers});
 }
