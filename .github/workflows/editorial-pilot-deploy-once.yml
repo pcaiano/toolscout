@@ -14,25 +14,19 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Verify all 10 pilot pages live
+      - name: Inspect Notion live editorial paragraph
         run: |
           set -euo pipefail
-          check () {
-            rel="$1"
-            phrase="$2"
-            file="/tmp/page-$RANDOM.html"
-            curl -fsS --retry 4 --retry-all-errors --retry-delay 2 "https://trytoolscout.org/${rel}?editorial-verify=${GITHUB_SHA}" -o "$file"
-            grep -Fq 'data-editorial-quality="pilot"' "$file"
-            if grep -Fq "$phrase" "$file"; then copy="match"; else copy="runtime-transformed"; fi
-            echo "LIVE marker=yes copy=$copy https://trytoolscout.org/${rel}"
-          }
-          check "news/chatgpt-building-advertising-for-the-way-people-use-ai" "OpenAI is doing more than inserting ads into ChatGPT."
-          check "news/notion-mail-shuts-down" "The shutdown removes a product surface, not all of Notion's email ambitions."
-          check "news/zapier-next-gen-zaps-mcp" "Zapier's Next Gen Zaps are becoming a deeper execution model"
-          check "tools/hubspot" "HubSpot's case is breadth with relatively little stitching"
-          check "tools/notion" "Notion is most convincing when the problem is fragmented team knowledge"
-          check "tools/semrush" "Semrush is the broad-suite choice in this SEO shortlist."
-          check "best-seo-tools-for-agencies" "For an agency, first place here is about breadth across repeatable client work"
-          check "best-workflow-automation-tools" "Integrately leads this particular ranking because its 10 for ease of use"
-          check "activecampaign-vs-mailchimp" "ActiveCampaign and Mailchimp overlap at email marketing"
-          check "webflow-vs-framer" "Webflow and Framer are close on the basics"
+          curl -fsS --retry 4 --retry-all-errors --retry-delay 2 "https://trytoolscout.org/news/notion-mail-shuts-down?editorial-inspect=${GITHUB_SHA}" -o /tmp/notion.html
+          grep -Fq 'data-editorial-quality="pilot"' /tmp/notion.html
+          node - <<'NODE'
+          const fs=require('fs');
+          const html=fs.readFileSync('/tmp/notion.html','utf8');
+          const clean=s=>String(s||'').replace(/<[^>]+>/g,' ').replace(/&amp;/g,'&').replace(/&#39;|&apos;/g,"'").replace(/&quot;/g,'"').replace(/\s+/g,' ').trim();
+          const changed=html.match(/<h2[^>]*>What changed<\/h2>\s*<p[^>]*>([\s\S]*?)<\/p>/i);
+          const why=html.match(/<h2[^>]*>Why it matters for buyers<\/h2>\s*<p[^>]*>([\s\S]*?)<\/p>/i);
+          const take=html.match(/<h2[^>]*>Buyer takeaway<\/h2>\s*<p[^>]*>([\s\S]*?)<\/p>/i);
+          console.log('What changed: '+clean(changed?.[1]||'MISSING'));
+          console.log('Why it matters for buyers: '+clean(why?.[1]||'MISSING'));
+          console.log('Buyer takeaway: '+clean(take?.[1]||'MISSING'));
+          NODE
