@@ -164,7 +164,8 @@ function extractStructuredPeople(html, url, domain) {
   const out = [];
   const seen = new Set();
   const add = (name, role, profileUrl) => {
-    const n = String(name || "").replace(/\s+/g, " ").trim();
+    let n = String(name || "").replace(/\s+/g, " ").trim();
+    n = n.replace(/\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\.?$/i, "").trim();
     if (!looksLikePersonName(n)) return;
     const k = n.toLowerCase();
     if (seen.has(k)) return;
