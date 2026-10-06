@@ -138,6 +138,67 @@ function looksLikePersonName(text) {
   return parts.every(p => /^[A-ZÀ-ÖØ-Ý][A-Za-zÀ-ÿ'’.\-]+$/.test(p) || /^[A-Z]{2,}$/.test(p));
 }
 
+
+function extractArticleLinks(html, base) {
+  const out = new Set();
+  const baseHost = new URL(base).hostname.replace(/^www\./, "");
+  const re = /<a\b[^>]*href=["']([^"'#]+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+  for (const m of String(html || "").matchAll(re)) {
+    let u;
+    try { u = new URL(decodeEntities(m[1]), base); } catch { continue; }
+    if (u.hostname.replace(/^www\./, "") !== baseHost) continue;
+    const p = u.pathname;
+    if (/\/(about|contact|team|staff|author|authors|profile|people|contributors?|category|tag|topic|privacy|terms|login|signup|subscribe|advertis|jobs?|careers?)\b/i.test(p)) continue;
+    const anchor = stripHtml(m[2]).replace(/\s+/g, " ").trim();
+    const articleish = /\/20\d{2}\/(?:0?[1-9]|1[0-2])\//.test(p) ||
+      (p.split("/").filter(Boolean).length >= 2 && /-[a-z0-9]+-[a-z0-9]+/i.test(p));
+    if (!articleish || anchor.length < 20) continue;
+    u.hash = ""; u.search = "";
+    out.add(u.toString());
+    if (out.size >= 20) break;
+  }
+  return [...out];
+}
+
+function extractStructuredPeople(html, url, domain) {
+  const out = [];
+  const seen = new Set();
+  const add = (name, role, profileUrl) => {
+    const n = String(name || "").replace(/\s+/g, " ").trim();
+    if (!looksLikePersonName(n)) return;
+    const k = n.toLowerCase();
+    if (seen.has(k)) return;
+    seen.add(k);
+    out.push({domain, name:n, role:role || "Journalist / Author", source_url:profileUrl || url});
+  };
+
+  const scripts = String(html || "").matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi);
+  const walk = (node) => {
+    if (!node) return;
+    if (Array.isArray(node)) { for (const x of node) walk(x); return; }
+    if (typeof node !== "object") return;
+    for (const key of ["author","creator","editor"]) {
+      const v=node[key];
+      const vals=Array.isArray(v)?v:[v];
+      for(const person of vals){
+        if(person && typeof person==="object"){
+          add(person.name, person.jobTitle || (key==="editor"?"Editor":"Journalist / Author"), person.url);
+        } else if(typeof person==="string") add(person, key==="editor"?"Editor":"Journalist / Author", url);
+      }
+    }
+    for(const v of Object.values(node)) if(v && typeof v==="object") walk(v);
+  };
+  for(const m of scripts){
+    try { walk(JSON.parse(decodeEntities(m[1]))); } catch {}
+  }
+
+  const text=stripHtml(html);
+  for(const m of text.matchAll(/\b(?:By|Written by|Author:)\s+([A-ZÀ-ÖØ-Ý][A-Za-zÀ-ÿ'’.-]+(?:\s+[A-ZÀ-ÖØ-Ý][A-Za-zÀ-ÿ'’.-]+){1,3})\b/g)){
+    add(m[1],"Journalist / Author",url);
+  }
+  return out.slice(0,60);
+}
+
 function extractAuthorLinks(html, base) {
   const out = new Map();
   const re = /<a\b[^>]*href=["']([^"'#]+)["'][^>]*>([\s\S]*?)<\/a>/gi;
@@ -191,7 +252,7 @@ function extractContacts(html, url, domain) {
 
   const out = [];
   for (let email of emails) {
-    email = email.replace(/[),.;:]+$/g, "").toLowerCase();
+    email = email.split("?")[0].replace(/[),.;:]+$/g, "").toLowerCase();
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) continue;
     const emailDomain = email.split("@")[1].toLowerCase();
     if (/^(example\.com|company\.com|sentry\.io)$/.test(emailDomain)) continue;
@@ -245,14 +306,17 @@ async function crawlDomain(domain) {
   const contacts = [];
   const people = [];
   const authorLinks = new Map();
+  const articleLinks = new Set();
 
   function absorbPage(page) {
     fetched.push(page.url);
     contacts.push(...extractContacts(page.html, page.url, domain));
     people.push(...extractPeopleFromText(page.html, page.url, domain));
+    people.push(...extractStructuredPeople(page.html, page.url, domain));
     for (const a of extractAuthorLinks(page.html, page.url)) {
       if (!authorLinks.has(a.url)) authorLinks.set(a.url, a);
     }
+    for (const u of extractArticleLinks(page.html, page.url)) articleLinks.add(u);
   }
 
   const first = await fetchPage(`https://${domain}/`);
@@ -273,7 +337,19 @@ async function crawlDomain(domain) {
   });
   await Promise.all(workers);
 
-  const authorTargets = [...authorLinks.values()].slice(0, 35);
+  const articleTargets = [...articleLinks].slice(0, 12);
+  cursor = 0;
+  const articleWorkers = Array.from({ length: 6 }, async () => {
+    while (cursor < articleTargets.length) {
+      const i = cursor++;
+      const page = await fetchPage(articleTargets[i]);
+      if (!page.ok) continue;
+      absorbPage(page);
+    }
+  });
+  await Promise.all(articleWorkers);
+
+  const authorTargets = [...authorLinks.values()].slice(0, 45);
   cursor = 0;
   const authorWorkers = Array.from({ length: 6 }, async () => {
     while (cursor < authorTargets.length) {
