@@ -229,6 +229,65 @@ async function crawlDomain(domain) {
   };
 }
 
+
+function parseMuckrackJournalists(html, outletSlug, outletDomain) {
+  const reserved = new Set([
+    "media-outlet","search","trends","blog","about","pricing","login","logout",
+    "signup","settings","messages","saved","topics","campaigns","lists",
+    "dashboard","account"
+  ]);
+  const out = [];
+  const seen = new Set();
+  const re = /<a\b[^>]*href=["']\/([A-Za-z0-9_-]+)\/?["'][^>]*>([\s\S]*?)<\/a>/gi;
+  for (const m of String(html || "").matchAll(re)) {
+    const slug = m[1];
+    if (reserved.has(slug.toLowerCase()) || slug.toLowerCase() === String(outletSlug).toLowerCase()) continue;
+    let name = stripHtml(m[2]).trim();
+    if (!name || name.length < 3 || name.length > 70) continue;
+    if (!name.includes(" ") && !name.includes(",")) continue;
+    if (/^(sign in|log in|learn more|contact us|read more|view profile|follow us)$/i.test(name)) continue;
+    if (name.includes(",")) {
+      const parts = name.split(",", 2).map(x => x.trim());
+      if (parts[0] && parts[1]) name = parts[1] + " " + parts[0];
+    }
+    if (seen.has(slug)) continue;
+    seen.add(slug);
+    out.push({
+      journalist: name,
+      muckrack_slug: slug,
+      muckrack_url: "https://muckrack.com/" + slug,
+      outlet_slug: outletSlug,
+      outlet_domain: outletDomain
+    });
+  }
+  return out.slice(0, 60);
+}
+
+async function discoverMuckrackOutlet(outletSlug, outletDomain) {
+  const url = "https://muckrack.com/media-outlet/" + outletSlug;
+  const page = await fetchPage(url);
+  if (!page.ok) return { outlet_slug: outletSlug, outlet_domain: outletDomain, status: page.status || 0, journalists: [] };
+  return {
+    outlet_slug: outletSlug,
+    outlet_domain: outletDomain,
+    status: page.status,
+    journalists: parseMuckrackJournalists(page.html, outletSlug, outletDomain)
+  };
+}
+
+async function discoverMuckrackMany(entries) {
+  const results = [];
+  let cursor = 0;
+  const workers = Array.from({ length: 3 }, async () => {
+    while (cursor < entries.length) {
+      const i = cursor++;
+      results[i] = await discoverMuckrackOutlet(entries[i].slug, entries[i].domain);
+    }
+  });
+  await Promise.all(workers);
+  return results;
+}
+
 async function crawlMany(domains) {
   const results = [];
   let cursor = 0;
@@ -310,5 +369,38 @@ server.listen(PORT, "0.0.0.0", () => {
         }));
       }
     })();
+
+  const muckrackEntries = String(process.env.MUCKRACK_OUTLETS || "")
+    .split(",")
+    .map(x => x.trim())
+    .filter(Boolean)
+    .map(x => {
+      const parts = x.split("|").map(y => y.trim());
+      const domain = normalizeDomain(parts[1] || parts[0]);
+      const slug = (parts[0] || "").replace(/^https?:\/\//, "").replace(/^www\./, "").split(/[/.]/)[0].toLowerCase();
+      return { slug, domain };
+    })
+    .filter(x => x.slug && x.domain)
+    .slice(0, 40);
+
+  if (muckrackEntries.length) {
+    (async () => {
+      const batchId = process.env.MUCKRACK_BATCH_ID || new Date().toISOString();
+      console.log("PR_MUCKRACK_BATCH_START " + JSON.stringify({batch_id: batchId, outlets: muckrackEntries}));
+      try {
+        const results = await discoverMuckrackMany(muckrackEntries);
+        const journalists = results.flatMap(r => r.journalists);
+        console.log("PR_MUCKRACK_BATCH_RESULT " + JSON.stringify({
+          batch_id: batchId,
+          outlets_requested: muckrackEntries.length,
+          outlets_with_results: results.filter(r => r.journalists.length).length,
+          journalists_found: journalists.length,
+          results
+        }));
+      } catch (err) {
+        console.error("PR_MUCKRACK_BATCH_ERROR " + JSON.stringify({batch_id: batchId, error: String(err?.stack || err)}));
+      }
+    })();
+  }
   }
 });
