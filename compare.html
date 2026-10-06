@@ -23,7 +23,9 @@ function aiComparisonSentence(a,b){
   const winner=av>bv?a:b,other=av>bv?b:a;return winner.name+' currently has the stronger verified AI interoperability profile. '+other.name+' may still fit better on product capability, price or workflow depth.';
 }
 function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-function editorialPilotPair(a,b){
+let comparisonEditorialRollout='pilot';
+function editorialQualityPair(a,b){
+  if(comparisonEditorialRollout==='full')return true;
   const key=[String(a?.slug||''),String(b?.slug||'')].sort().join('|');
   return new Set(['activecampaign|mailchimp','framer|webflow']).has(key);
 }
@@ -60,7 +62,7 @@ function editorialConclusionV2(a,b){
   const third=sharedBest.length?'Both target '+listPhrase(sharedBest)+', so audience labels alone are not enough to settle the choice.':'Their recorded audiences differ enough that the buyer profile should carry real weight in the decision.';
   return [first,second,third,aiComparisonSentence(a,b)].filter(Boolean).join(' ');
 }
-function editorialConclusion(a,b){const override=editorialOverride(a,b);if(override?.analysis)return override.analysis;return editorialPilotPair(a,b)?editorialConclusionV2(a,b):editorialConclusionLegacy(a,b)}
+function editorialConclusion(a,b){const override=editorialOverride(a,b);if(override?.analysis)return override.analysis;return editorialQualityPair(a,b)?editorialConclusionV2(a,b):editorialConclusionLegacy(a,b)}
 function decisionGuidanceLegacy(a,b){
   const ranked=comparisonDimensions.map(key=>({key,diff:Number(a.scores?.[key]||0)-Number(b.scores?.[key]||0)})).sort((x,y)=>Math.abs(y.diff)-Math.abs(x.diff));
   const lead=ranked.find(item=>item.diff!==0);
@@ -76,7 +78,7 @@ function decisionGuidanceV2(a,b){
   if(bEdge)return b.name+' is the stronger default on the recorded scorecard, especially for '+(dimensionLabel[bEdge.key]||bEdge.key)+'; choose '+a.name+' only where its product scope or '+aFit+' audience fit is more important than that edge.';
   return 'There is no defensible score winner here. Choose '+a.name+' for the workflow that better matches '+aFit+', and '+b.name+' where '+bFit+' is the more accurate description of the buyer.';
 }
-function decisionGuidance(a,b){const override=editorialOverride(a,b);if(override?.decision)return override.decision;return editorialPilotPair(a,b)?decisionGuidanceV2(a,b):decisionGuidanceLegacy(a,b)}
+function decisionGuidance(a,b){const override=editorialOverride(a,b);if(override?.decision)return override.decision;return editorialQualityPair(a,b)?decisionGuidanceV2(a,b):decisionGuidanceLegacy(a,b)}
 function comparisonMethodology(){
   return 'ToolScout compares catalog-backed pricing, capabilities, use cases and score dimensions using first-party vendor sources and recorded verification dates. The conclusion is a workflow fit judgment, not a universal product claim, and affiliate relationships do not influence the comparison.';
 }
@@ -139,6 +141,7 @@ async function boot(){
   const [all,assetData,organicConfig]=await Promise.all([loadJson('./data/tools.json',[]),loadJson('./data/tool-assets.json',{assets:{}}),loadJson('./data/organic-growth-engine.json',{})]);
   const assets=assetData?.assets||{};
   comparisonEditorialOverrides=organicConfig?.editorialQuality?.comparisonOverrides||{};
+  comparisonEditorialRollout=organicConfig?.editorialQuality?.rollout||'pilot';
   const tools=all.filter(t=>t.comparisonEligible!==false);
   const a=document.getElementById('a'),b=document.getElementById('b'),table=document.getElementById('table'),pairNote=document.getElementById('pairNote'),analysis=document.getElementById('analysis'),suggestions=document.getElementById('suggestions');
   if(tools.length<2){table.innerHTML='<div class="empty">Not enough verified tools are available for comparison yet.</div>';return}

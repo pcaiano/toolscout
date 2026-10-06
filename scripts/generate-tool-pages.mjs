@@ -137,6 +137,8 @@ function editorialViewV2(tool){
   return clean([openings[frame],evidence,fit,tradeoff,commercial].filter(Boolean).join(' '));
 }
 function editorialView(tool){
+  const override=editorialQuality?.profileOverrides?.[tool.slug];
+  if(override)return clean(override);
   return editorialQualityFor(`tools/${tool.slug}.html`)?editorialViewV2(tool):editorialViewLegacy(tool);
 }
 function render(tool){
