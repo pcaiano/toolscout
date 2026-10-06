@@ -7,6 +7,7 @@ import {rebalanceDistributionPriorities} from './distribution-priority-worker.js
 import {growthSupervisorDirective,runGrowthSupervisorAudit} from './growth-supervisor.js';
 import {syncAgentReadyVerified} from './machine-discovery-extension.js';
 import {TOOLSCOUT_CRONS} from './runtime-schedule-contract.js';
+import {syncLinkableAssets} from './distribution-linkable-assets-worker.js';
 
 async function missionNeedsRecovery(env,engine,mission,maxAgeMinutes=0){
   try{
@@ -76,6 +77,7 @@ export async function runGrowthScheduler(event,env,ctx,{delegate=null}={}){
     if(twoHourly){
       const networkCycle=missionCycleContext('distribution','network_cycle',Number(event?.scheduledTime)||Date.now());
       scheduleTask(ctx,runWithLedger(env,{engine:'distribution',mission:'network_cycle',triggerName:trigger,singleFlightMinutes:20,cycleContext:networkCycle,cycleOwner:'growth_scheduler'},()=>runDistributionNetworkCycle(env)));
+      scheduleTask(ctx,syncLinkableAssets(env));
       const affiliateRecovery=await missionNeedsRecovery(env,'affiliate','coverage_cycle');
       if(!affiliateMaintenance||twelveHourly||affiliateRecovery){
         scheduleTask(ctx,runAuditedAffiliateCoverageCycle(env,affiliateRecovery?trigger+':recovery':trigger));

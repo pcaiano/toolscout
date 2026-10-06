@@ -7,6 +7,7 @@ import {handleDistributionLearningRoute} from '../distribution-learning-worker.j
 const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const tools=read('data/tools.json');
 const intents=read('data/intents.json');
+const publisherKit=read('distribution/publisher-kit.html');
 
 function assetEnv(){
   return {
@@ -15,6 +16,7 @@ function assetEnv(){
         const path=new URL(request.url).pathname;
         if(path==='/data/tools.json')return new Response(tools,{status:200,headers:{'content-type':'application/json'}});
         if(path==='/data/intents.json')return new Response(intents,{status:200,headers:{'content-type':'application/json'}});
+        if(path==='/distribution/publisher-kit.html')return new Response(publisherKit,{status:200,headers:{'content-type':'text/html; charset=UTF-8'}});
         return new Response('not found',{status:404});
       }
     }
@@ -99,7 +101,7 @@ test('Finder supports three public colour themes with backwards-compatible alias
 });
 
 test('publisher kit leads with Finder Full and Mini plus a non-tracking live demo',async()=>{
-  const response=await handleDistributionEmbedRoute(new Request('https://trytoolscout.org/distribution/publisher-kit'),{});
+  const response=await handleDistributionEmbedRoute(new Request('https://trytoolscout.org/distribution/publisher-kit'),assetEnv());
   assert.equal(response.status,200);
   const html=await response.text();
   assert.match(html,/Add software discovery to your site\./);

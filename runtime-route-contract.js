@@ -51,7 +51,7 @@ export const ROUTE_GROUPS=Object.freeze([
   {id:'analytics_human_action_mutations',owner:'analytics_human_actions_mutation',plane:'executor',methods:['POST'],exact:['/analytics/api/human-actions/credential','/analytics/api/human-actions/gate','/analytics/api/human-actions/editorial']},
   {id:'command_center_schema_reconcile',owner:'command_center_schema_control',plane:'control',methods:['POST'],exact:['/api/command-center-business-truth/reconcile-affiliate-schema']},
   {id:'public_editorial_news',owner:'public_editorial_site',plane:'public_site',methods:['GET'],prefixes:['/news/']},
-  {id:'public_editorial_trends',owner:'public_editorial_site',plane:'public_site',methods:['GET'],exact:['/software-trends-index','/software-trends-index/','/software-trends-index.html','/software-trends-index.json']},
+  {id:'public_editorial_trends',owner:'public_editorial_site',plane:'public_site',methods:['GET'],exact:['/software-trends-index','/software-trends-index/','/software-trends-index.html','/software-trends-index.json','/software-trends-index.csv','/software-trends-index-share.svg']},
   {id:'public_analytics_consent',owner:'public_analytics_consent',plane:'public_site',methods:['GET'],exact:['/analytics-consent']},
   {id:'command_center_local_login',owner:'command_center_local_login',plane:'control',methods:['GET'],exact:['/analytics/login','/analytics/login/']},
   {id:'command_center_growth_actions',owner:'command_center_growth_actions',plane:'executor',methods:['POST'],exact:['/analytics/api/reputation-review','/analytics/api/distribution-human-action']},

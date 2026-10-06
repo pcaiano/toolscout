@@ -4,6 +4,7 @@ import path from 'node:path';
 const clamp=(v,min=0,max=100)=>Math.max(min,Math.min(max,Number(v)||0));
 const countMatches=(text,re)=>[...String(text||'').matchAll(re)].length;
 const words=text=>String(text||'').replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/&[a-z#0-9]+;/gi,' ').split(/\s+/).filter(Boolean).length;
+const cleanMetaText=text=>String(text||'').replace(/&[a-z#0-9]+;/gi,' ').replace(/\s+/g,' ').trim();
 
 export function pageTypeForPath(page){
   const p=String(page||'').replace(/\.html$/i,'')||'/';
@@ -13,6 +14,7 @@ export function pageTypeForPath(page){
   if(/-vs-/.test(p))return'comparison';
   if(/^\/best-/.test(p))return'guide';
   if(p==='/software-trends-index')return'proprietary_dataset';
+  if(p==='/distribution/publisher-kit')return'publisher_asset';
   if(p==='/privacy'||p==='/affiliate-disclosure')return'policy';
   if(p==='/methodology')return'methodology';
   if(p==='/compare')return'interactive';
@@ -28,11 +30,14 @@ export function fileForPublicPath(root,page){
 }
 
 function externalEvidenceLinks(html){
-  const hrefs=[...String(html||'').matchAll(/href=["'](https:\/\/[^"'#]+)["']/gi)].map(m=>m[1]);
-  return hrefs.filter(url=>{
+  const text=String(html||'');
+  const hrefs=[...text.matchAll(/href=["'](https:\/\/[^"'#]+)["']/gi)].map(m=>m[1]);
+  const structured=[...text.matchAll(/"(?:citation|isBasedOn)"\s*:\s*"((?:https:\/\/)[^"]+)"/gi)].map(m=>m[1]);
+  const urls=[...new Set([...hrefs,...structured])];
+  return urls.filter(url=>{
     try{
       const u=new URL(url);
-      return u.hostname!=='trytoolscout.org'&&!u.hostname.endsWith('.trytoolscout.org')&&!/google\.com\/s2\/favicons/i.test(url);
+      return u.hostname!=='trytoolscout.org'&&!u.hostname.endsWith('.trytoolscout.org')&&!/google\.com\/s2\/favicons/i.test(url)&&u.hostname!=='schema.org';
     }catch{return false}
   }).length;
 }
@@ -43,10 +48,15 @@ export function scoreEditorialPage(html,{pageType='other',hasFreshUpdate=false}=
   const hasAnalysis=/(ToolScout analysis|ToolScout view|editorial view|what this means|in practice|buyer impact|why it matters|decision)/i.test(html);
   const hasTradeoffs=/(trade[- ]?off|limitation|not ideal|best for|before choosing|compare the depth|who should)/i.test(html);
   const hasVerification=/(last verified|verified on|last checked|checked\s+20\d{2}|methodology)/i.test(html);
-  const hasDisclosure=/(affiliate compensation|affiliate commission|sponsored|affiliate disclosure)/i.test(html);
+  const hasDisclosure=/(affiliate compensation|affiliate commission|affiliate status|may earn (?:affiliate )?commissions?|sponsored|affiliate disclosure)/i.test(html);
   const hasCanonical=/<link[^>]+rel=["']canonical["']/i.test(html);
   const hasTitle=/<title>[^<]{3,}<\/title>/i.test(html);
-  const hasMetaDescription=/<meta[^>]+name=["']description["'][^>]+content=["'][^"']{20,}["']/i.test(html)||/<meta[^>]+content=["'][^"']{20,}["'][^>]+name=["']description["']/i.test(html);
+  const metaTags=[...String(html||'').matchAll(/<meta\b[^>]*>/gi)].map(m=>m[0]);
+  const hasMetaDescription=metaTags.some(tag=>{
+    if(!/\bname=["']description["']/i.test(tag))return false;
+    const match=tag.match(/\bcontent=(["'])([\s\S]*?)\1/i);
+    return cleanMetaText(match?.[2]||'').length>=20;
+  });
   const hasRobots=/<meta[^>]+name=["']robots["']/i.test(html);
   const hasH1=/<h1(?:\s[^>]*)?>[\s\S]*?<\/h1>/i.test(html);
   const internalLinks=countMatches(html,/href=["']\/(?!\/)/gi);
@@ -84,6 +94,18 @@ export function scoreEditorialPage(html,{pageType='other',hasFreshUpdate=false}=
     if(hasH1)score+=5;
     if(hasMetaDescription)score+=5;
     if(wc>=900)score+=20;else if(wc>=500)score+=12;else if(wc>=250)score+=8;
+  }else if(pageType==='publisher_asset'){
+    score=10;
+    if(hasTitle)score+=10;
+    if(hasMetaDescription)score+=10;
+    if(hasCanonical)score+=10;
+    if(hasRobots)score+=5;
+    if(hasH1)score+=10;
+    if(hasStructuredData)score+=10;
+    if(wc>=500)score+=15;else if(wc>=300)score+=10;
+    if(internalLinks>=5)score+=10;else if(internalLinks>=2)score+=5;
+    if(hasDisclosure)score+=5;
+    if(hasVerification||dated)score+=5;
   }else if(pageType==='policy'){
     score=10;
     if(hasTitle)score+=15;

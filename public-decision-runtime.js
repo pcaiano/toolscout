@@ -13,6 +13,19 @@ function route(pathname){
   return null;
 }
 
+
+async function consolidatedGuideTarget(env,request,slug){
+  if(!env?.ASSETS?.fetch||!slug)return null;
+  try{
+    const u=new URL(request.url);u.pathname='/data/seo-consolidations.json';u.search='';
+    const response=await env.ASSETS.fetch(new Request(u.toString(),{method:'GET',headers:{Accept:'application/json'}}));
+    if(!response?.ok)return null;
+    const map=await response.json();
+    const target=String(map?.[slug]||'').trim().toLowerCase();
+    return /^best-[a-z0-9-]+$/.test(target)?target:null;
+  }catch{return null}
+}
+
 async function assetHtml(env,request,canonical){
   if(!env?.ASSETS?.fetch)return null;
   const candidates=[canonical,canonical+'.html'];
@@ -45,6 +58,15 @@ export async function renderPublicDecisionPage(request,env){
   if(request.method!=='GET')return null;
   const r=route(new URL(request.url).pathname);
   if(!r)return null;
+
+  if(r.kind==='guide'){
+    const consolidated=await consolidatedGuideTarget(env,request,r.slug);
+    if(consolidated&&consolidated!==r.slug){
+      const target=new URL(request.url);
+      target.pathname='/'+consolidated;
+      return Response.redirect(target.toString(),308);
+    }
+  }
 
   // Existing static/indexed pages are sovereign. Runtime catalog content is
   // creation-only fallback for genuinely new tool/guide surfaces.
