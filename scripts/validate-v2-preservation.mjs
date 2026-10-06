@@ -7,6 +7,7 @@ const git=(...args)=>execFileSync('git',args,{encoding:'utf8',stdio:['ignore','p
 const readBase=file=>{try{return git('show',`${BASE}:${file}`)}catch{return null}};
 const listBase=()=>git('ls-tree','-r','--name-only',BASE).split(/\r?\n/).filter(Boolean);
 const canonical=html=>String(html||'').match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["']/i)?.[1]||String(html||'').match(/<link[^>]+href=["']([^"']+)["'][^>]+rel=["']canonical["']/i)?.[1]||null;
+const canonicalIdentity=value=>{try{const u=new URL(String(value||''));let p=u.pathname||'/';if(p==='/index.html')p='/';else if(/\.html$/i.test(p))p=p.replace(/\.html$/i,'');if(p.length>1)p=p.replace(/\/+$/,'');return u.origin+p}catch{return String(value||'').replace(/\.html$/i,'').replace(/\/+$/,'')}};
 const sitemapUrls=xml=>new Set([...String(xml||'').matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>m[1].trim()).filter(Boolean));
 
 const errors=[],warnings=[];
@@ -24,7 +25,7 @@ for(const file of baseFiles){
   const after=readCurrent(file);
   if(after===null){errors.push({code:'public_html_removed',file});continue;}
   const beforeCanonical=canonical(before),afterCanonical=canonical(after);
-  if(beforeCanonical&&afterCanonical!==beforeCanonical)errors.push({code:'canonical_changed',file,before:beforeCanonical,after:afterCanonical});
+  if(beforeCanonical&&canonicalIdentity(afterCanonical)!==canonicalIdentity(beforeCanonical))errors.push({code:'canonical_changed',file,before:beforeCanonical,after:afterCanonical});
 }
 
 // 3. Preserve active affiliate routes and destinations.
