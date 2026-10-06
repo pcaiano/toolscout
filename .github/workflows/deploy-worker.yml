@@ -3,12 +3,6 @@ name: ToolScout Worker Recovery Fallback
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/deploy-worker.yml'
-      - 'command-center-business-truth-runtime.js'
-      - 'tests/toolscout-v2-command-center-final-truth.test.mjs'
 
 permissions:
   contents: read
@@ -19,7 +13,6 @@ concurrency:
 
 jobs:
   deploy:
-    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, 'Deploy GSC freshness correction')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout current main
