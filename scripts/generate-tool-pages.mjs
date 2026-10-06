@@ -11,6 +11,8 @@ const pairs=read('data/comparisons.json',[]);
 const assets=read('data/tool-assets.json',{assets:{}})?.assets||{};
 const config=read('data/organic-growth-engine.json',{editorialGates:{}});
 const MIN_RELEVANCE=Number(config?.editorialGates?.minimumLexicalRelevance||0.75);
+const editorialQuality=config?.editorialQuality||{};
+const editorialQualityFor=pagePath=>editorialQuality.rollout==='full'||(editorialQuality.rollout==='pilot'&&(editorialQuality.pilotPaths||[]).includes(pagePath));
 const out=path.join(ROOT,'tools');fs.mkdirSync(out,{recursive:true});
 const clean=v=>String(v??'').replace(/[\u2014\u2013]/g,'-').replace(/verify current pricing before publication/gi,'See vendor for current pricing').replace(/verify before publication/gi,'See vendor for current details').replace(/pending verification/gi,'See vendor for current details').replace(/\s+/g,' ').trim();
 const esc=v=>clean(v).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
@@ -99,7 +101,7 @@ function editorialDimensions(tool){
   const ranked=keys.map(key=>({key,score:Number(tool.scores[key])})).sort((a,b)=>b.score-a.score||a.key.localeCompare(b.key));
   return {strongest:ranked.slice(0,2),weakest:ranked.at(-1)||null};
 }
-function editorialView(tool){
+function editorialViewLegacy(tool){
   const audience=(tool.bestFor||[]).slice(0,3);
   const capabilities=(tool.features||[]).slice(0,3);
   const {strongest,weakest}=editorialDimensions(tool);
@@ -110,6 +112,32 @@ function editorialView(tool){
   const tradeoff=weakest&&topScore-weakest.score>=2&&!strongest.some(x=>x.key===weakest.key)?` ${scoreLabels[weakest.key]||weakest.key} is the clearest recorded trade-off, so compare alternatives if that requirement is critical.`:'';
   const commercial=tool.freePlanKnown===false?'The current free-plan position is not yet verified.':tool.freePlan?'A recorded free plan makes it easier to test before committing.':'It is recorded as a paid product, so validate the use case before committing.';
   return clean(`${fit} ${strengths}${tradeoff} ${commercial} Shortlist ${tool.name} when those priorities match your workflow, then verify current limits, integrations and pricing.`);
+}
+function editorialFrame(tool){
+  return [...String(tool.slug||tool.name||'')].reduce((sum,ch)=>sum+ch.charCodeAt(0),0)%4;
+}
+function editorialViewV2(tool){
+  const audience=(tool.bestFor||[]).slice(0,3);
+  const capabilities=(tool.features||[]).slice(0,4);
+  const {strongest,weakest}=editorialDimensions(tool);
+  const strong=strongest.map(x=>scoreLabels[x.key]||x.key);
+  const topScore=strongest[0]?.score??0;
+  const weakestLabel=weakest?(scoreLabels[weakest.key]||weakest.key):null;
+  const frame=editorialFrame(tool);
+  const openings=[
+    `${tool.name}'s strongest case is not that it does everything, but that it brings ${listPhrase(strong.length?strong:capabilities.slice(0,2))} into one buying decision.`,
+    `For ${listPhrase(audience.length?audience:['buyers in this category'])}, the useful question is where ${tool.name} changes the workflow rather than how long its feature list is.`,
+    `Look past the category label and ${tool.name} is easiest to understand through the jobs it is strongest at: ${listPhrase(capabilities.length?capabilities.slice(0,3):strong)}.`,
+    `${tool.name} belongs on the shortlist when the decision turns on ${listPhrase(strong.length?strong:capabilities.slice(0,2))}, not simply because it is a familiar name in ${tool.category}.`
+  ];
+  const evidence=strong.length?`ToolScout's recorded scores put ${listPhrase(strong)} at the top of its profile.`:'';
+  const fit=audience.length?`That makes it particularly relevant to ${listPhrase(audience)}.`:'';
+  const tradeoff=weakestLabel&&topScore-Number(weakest?.score||0)>=2?`The counterweight is ${weakestLabel}, where the catalog score is meaningfully lower, so buyers who care heavily about that dimension should compare alternatives before committing.`:'The catalog does not show a single large score weakness, so the decision should turn on workflow depth, current limits and implementation fit.';
+  const commercial=tool.freePlanKnown===false?'ToolScout has not yet verified the current free-plan position.':tool.freePlan?'A recorded free plan lowers the cost of testing the fit with a real workflow.':'With no recorded free plan, the product deserves a clearer use-case check before a paid commitment.';
+  return clean([openings[frame],evidence,fit,tradeoff,commercial].filter(Boolean).join(' '));
+}
+function editorialView(tool){
+  return editorialQualityFor(`tools/${tool.slug}.html`)?editorialViewV2(tool):editorialViewLegacy(tool);
 }
 function render(tool){
   const url=`${BASE}/tools/${tool.slug}`,pageTitle=`${tool.name} Tool Profile: Features, Pricing, AI Integrations and Best For`,description=`ToolScout profile for ${tool.name}, covering recorded use cases, key capabilities, pricing, AI interoperability and relevant software comparisons.`,brandLogo=logoUrl(tool);
