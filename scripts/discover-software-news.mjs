@@ -10,11 +10,10 @@ const NEWS_DIR=path.join(ROOT,'news');
 const BASE='https://trytoolscout.org';
 const LOOKBACK_DAYS=14;
 const MAX_TOTAL=4;
+const readJson=(file,fallback)=>{try{return JSON.parse(fs.readFileSync(file,'utf8'));}catch{return fallback;}};
 const organicConfig=readJson(path.join(ROOT,'data','organic-growth-engine.json'),{});
 const editorialQuality=organicConfig?.editorialQuality||{};
 const editorialQualityFor=pagePath=>editorialQuality.rollout==='full'||(editorialQuality.rollout==='pilot'&&(editorialQuality.pilotPaths||[]).includes(pagePath));
-
-const readJson=(file,fallback)=>{try{return JSON.parse(fs.readFileSync(file,'utf8'));}catch{return fallback;}};
 const esc=v=>String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#39;");
 const strip=v=>String(v??'').replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g,'$1').replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/&nbsp;/gi,' ').replace(/&amp;/gi,'&').replace(/&quot;/gi,'"').replace(/&#39;|&apos;/gi,"'").replace(/&lt;/gi,'<').replace(/&gt;/gi,'>').replace(/\s+/g,' ').trim();
 const slugify=v=>strip(v).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,92).replace(/-$/,'');
@@ -138,7 +137,7 @@ function editorialTextV2(type,tool,item){
   return {changed,why:whyMap[type],availability};
 }
 function cleanNews(v){return String(v??'').replace(/[\u2013\u2014]/g,'-').replace(/\s+/g,' ').trim();}
-function editorialText(type,tool,item,pagePath){return editorialQualityFor(pagePath)?editorialTextV2(type,tool,item):editorialTextLegacy(type,tool,item);}
+function editorialText(type,tool,item,pagePath){const override=editorialQuality?.newsOverrides?.[pagePath];if(override)return {changed:cleanNews(override.changed),why:cleanNews(override.why),availability:cleanNews(override.availability)};return editorialQualityFor(pagePath)?editorialTextV2(type,tool,item):editorialTextLegacy(type,tool,item);}
 function labelFor(type){
   return {
     product_retirement:'Product retirement',
@@ -175,6 +174,22 @@ const existingUrls=new Set((feed.items||[]).map(x=>String(x.sourceUrl||'')).filt
 const existingIds=new Set((feed.items||[]).map(x=>String(x.id||'')).filter(Boolean));
 const sourceResults=[];
 const candidates=[];
+
+let refreshedArchive=0;
+if(editorialQuality.rollout==='full'){
+  fs.mkdirSync(NEWS_DIR,{recursive:true});
+  for(const row of feed.items||[]){
+    const rel=String(row.articleUrl||'').replace(/^\//,'');
+    if(!/^news\/[a-z0-9-]+\.html$/i.test(rel))continue;
+    const id=path.basename(rel,'.html');
+    const source={toolName:row.toolName,toolSlug:row.toolSlug,sourceName:row.sourceName||'Official vendor source'};
+    const item={title:row.title,date:row.publishedAt,description:row.summary||'',url:row.sourceUrl||''};
+    const type=classify(row.title+' '+(row.summary||''));
+    const html=renderArticle({id,item,source,type,summary:row.summary||sentence(row.title)});
+    const file=path.join(ROOT,rel);
+    if(!fs.existsSync(file)||fs.readFileSync(file,'utf8')!==html){fs.writeFileSync(file,html,'utf8');refreshedArchive++;}
+  }
+}
 
 for(const source of sources){
   try{
@@ -218,6 +233,6 @@ fs.writeFileSync(FEED_FILE,JSON.stringify(feed,null,2)+'\n');
 fs.writeFileSync(WHATS_NEW_FILE,renderWhatsNew(feed),'utf8');
 fs.mkdirSync(path.dirname(REPORT_FILE),{recursive:true});
 const lastNews=(feed.items||[]).filter(x=>/^\/news\//.test(String(x.articleUrl||''))).sort((a,b)=>String(b.publishedAt||'').localeCompare(String(a.publishedAt||'')))[0]||null;
-const report={generatedAt:new Date().toISOString(),engine:'ToolScout Editorial News Engine v1',lookbackDays:LOOKBACK_DAYS,maxPerRun:MAX_TOTAL,sources:sourceResults,candidates:candidates.length,published,lastPublishedAt:lastNews?.publishedAt||null,status:sourceResults.some(x=>x.status==='ok')?'healthy':'degraded'};
+const report={generatedAt:new Date().toISOString(),engine:'ToolScout Editorial News Engine v2',lookbackDays:LOOKBACK_DAYS,maxPerRun:MAX_TOTAL,sources:sourceResults,candidates:candidates.length,published,refreshedArchive,lastPublishedAt:lastNews?.publishedAt||null,status:sourceResults.some(x=>x.status==='ok')?'healthy':'degraded'};
 fs.writeFileSync(REPORT_FILE,JSON.stringify(report,null,2)+'\n');
 console.log(JSON.stringify(report,null,2));
