@@ -8,6 +8,9 @@ on:
   push:
     paths:
       - '.github/workflows/seo-engine-v2.yml'
+      - 'scripts/generate-seo-pages.mjs'
+      - 'scripts/generate-tool-pages.mjs'
+      - 'scripts/generate-comparisons.mjs'
 
 permissions:
   contents: write
