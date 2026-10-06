@@ -9,8 +9,9 @@ if(!token) throw new Error('SE_RANKING_API_KEY is required');
 async function api(path, params={}){
   const url=new URL(API+path);
   for(const [k,v] of Object.entries(params)) if(v!==undefined&&v!==null) url.searchParams.set(k,String(v));
+  url.searchParams.set('apikey',token);
   url.searchParams.set('output','json');
-  const res=await fetch(url,{headers:{Authorization:`Token ${token}`,Accept:'application/json'}});
+  const res=await fetch(url,{headers:{Accept:'application/json'}});
   const text=await res.text();
   let body={};
   try{body=JSON.parse(text)}catch{}
