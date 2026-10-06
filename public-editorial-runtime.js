@@ -11,6 +11,8 @@ function editorialRoute(pathname){
     return{kind:'html',canonical,redirect:/\.html\/?$/i.test(p),surface:'news'};
   }
   if(p==='/software-trends-index.json')return{kind:'json',canonical:p,redirect:false,surface:'software_trends_dataset'};
+  if(p==='/software-trends-index.csv')return{kind:'csv',canonical:p,redirect:false,surface:'software_trends_dataset'};
+  if(p==='/software-trends-index-share.svg')return{kind:'svg',canonical:p,redirect:false,surface:'software_trends_chart'};
   if(['/software-trends-index','/software-trends-index/','/software-trends-index.html'].includes(p)){
     return{kind:'html',canonical:'/software-trends-index',redirect:p==='/software-trends-index.html',surface:'software_trends'};
   }
@@ -37,11 +39,12 @@ export async function handlePublicEditorialRoute(request,env){
   const asset=await env.ASSETS.fetch(request);
   if(!asset?.ok)return null;
 
-  if(route.kind==='json'){
+  if(['json','csv','svg'].includes(route.kind)){
     const headers=new Headers(asset.headers);
-    headers.set('Content-Type','application/json; charset=UTF-8');
+    headers.set('Content-Type',route.kind==='json'?'application/json; charset=UTF-8':route.kind==='csv'?'text/csv; charset=UTF-8':'image/svg+xml; charset=UTF-8');
     headers.set('Cache-Control','public, max-age=300');
     headers.set('X-ToolScout-Public-Plane','editorial-v1');
+    headers.set('X-ToolScout-Editorial-Surface',route.surface);
     headers.set('X-ToolScout-Route-Contract','v2');
     headers.delete('Content-Length');
     return new Response(asset.body,{status:asset.status,statusText:asset.statusText,headers});
