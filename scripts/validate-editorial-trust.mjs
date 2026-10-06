@@ -96,24 +96,65 @@ if(!catalogOnly){
     for(const pattern of positiveUnsupported)if(pattern.test(html))error('unsupported_market_claim',String(pattern));
     if(/[\u2013\u2014]/.test(html))error('forbidden_long_dash','software-trends-index.html');
   }
-  if(editorialQuality.rollout==='pilot'){
+  if(['pilot','full'].includes(editorialQuality.rollout)){
     const forbidden=editorialQuality?.validation?.rejectGenericAnalysisPhrases||[];
-    for(const rel of editorialQuality.pilotPaths||[]){
+    const editorialFiles=[];
+    if(editorialQuality.rollout==='pilot'){
+      editorialFiles.push(...(editorialQuality.pilotPaths||[]));
+    }else{
+      for(const intent of intents){
+        const rel=`${intent.slug}.html`;
+        if(fs.existsSync(path.join(ROOT,rel)))editorialFiles.push(rel);
+      }
+      const toolRoot=path.join(ROOT,'tools');
+      if(fs.existsSync(toolRoot))for(const file of fs.readdirSync(toolRoot).filter(x=>x.endsWith('.html')))editorialFiles.push(`tools/${file}`);
+      for(const file of fs.readdirSync(ROOT).filter(x=>/^[a-z0-9-]+-vs-[a-z0-9-]+\.html$/i.test(x)))editorialFiles.push(file);
+      const newsRoot=path.join(ROOT,'news');
+      if(fs.existsSync(newsRoot))for(const file of fs.readdirSync(newsRoot).filter(x=>x.endsWith('.html')))editorialFiles.push(`news/${file}`);
+    }
+    const expectedMarker=`data-editorial-quality="${editorialQuality.rollout}"`;
+    const skeletons=new Map();
+    const sentence=value=>plain(value).split(/(?<=[.!?])\s+/)[0]||'';
+    const skeleton=value=>{
+      let out=sentence(value).toLowerCase();
+      for(const tool of [...tools].sort((a,b)=>String(b.name||'').length-String(a.name||'').length)){
+        const name=String(tool.name||'').trim();
+        if(!name)continue;
+        out=out.replaceAll(name.toLowerCase(),'{tool}');
+      }
+      return out.replace(/\b\d+(?:\.\d+)?\b/g,'{n}').replace(/\s+/g,' ').trim();
+    };
+    const editorialSegment=(rel,html)=>{
+      if(rel.startsWith('tools/'))return html.match(/<section class=["']editorialIntro["'][^>]*>[\s\S]*?<p>([\s\S]*?)<\/p>/i)?.[1]||'';
+      if(rel.startsWith('news/'))return html.match(/<h2>What changed<\/h2>\s*<p>([\s\S]*?)<\/p>/i)?.[1]||'';
+      if(/-vs-/.test(rel))return html.match(/<section id=["']analysis["'][^>]*>[\s\S]*?<p>([\s\S]*?)<\/p>/i)?.[1]||'';
+      return html.match(/<section class=["'][^"']*editorial-analysis[^"']*["'][^>]*>[\s\S]*?<p>([\s\S]*?)<\/p>/i)?.[1]||'';
+    };
+    for(const rel of [...new Set(editorialFiles)]){
       const file=path.join(ROOT,rel);
-      if(!fs.existsSync(file)){error('editorial_quality_pilot_missing',rel);continue;}
+      if(!fs.existsSync(file)){error('editorial_quality_page_missing',rel);continue;}
       const html=fs.readFileSync(file,'utf8');
-      if(!html.includes('data-editorial-quality="pilot"'))error('editorial_quality_marker_missing',rel);
+      if(!html.includes(expectedMarker))error('editorial_quality_marker_missing',rel);
       if(/[\u2013\u2014]/.test(html))error('editorial_quality_forbidden_long_dash',rel);
       for(const phrase of forbidden)if(plain(html).toLowerCase().includes(String(phrase).toLowerCase()))error('editorial_quality_generic_phrase',`${rel}:${phrase}`);
+      const segment=editorialSegment(rel,html);
+      if(!segment)error('editorial_quality_analysis_missing',rel);
+      else{
+        const key=skeleton(segment);
+        if(key){
+          if(!skeletons.has(key))skeletons.set(key,[]);
+          skeletons.get(key).push(rel);
+        }
+      }
       if(rel.startsWith('news/')){
-        const lead=html.match(/<p class="lead">([\s\S]*?)<\/p>/i)?.[1]||'';
-        const changed=html.match(/<\/header>\s*<h2[^>]*>[^<]*<\/h2>\s*<p[^>]*>([\s\S]*?)<\/p>/i)?.[1]||'';
+        const lead=html.match(/<p class=["']lead["']>([\s\S]*?)<\/p>/i)?.[1]||'';
+        const changed=html.match(/<h2>What changed<\/h2>\s*<p>([\s\S]*?)<\/p>/i)?.[1]||'';
         if(!lead||!changed)error('editorial_quality_news_structure_missing',rel);
         else if(jaccard(lead,changed)>=0.72)error('editorial_quality_news_lead_repetition',`${rel}:${jaccard(lead,changed).toFixed(2)}`);
       }
     }
+    for(const [shape,pages] of skeletons)if(pages.length>=4)warnings.push({code:'editorial_quality_repeated_sentence_shape',pages,shape});
   }
-
 }
 
 fs.mkdirSync(path.join(ROOT,'reports'),{recursive:true});
