@@ -120,7 +120,8 @@ if(!catalogOnly){
       for(const tool of [...tools].sort((a,b)=>String(b.name||'').length-String(a.name||'').length)){
         const name=String(tool.name||'').trim();
         if(!name)continue;
-        out=out.replaceAll(name.toLowerCase(),'{tool}');
+        const escaped=name.toLowerCase().replace(/[.*+?^$()|[\]\\]/g,'\\        out=out.replaceAll(name.toLowerCase(),'{tool}');');
+        out=out.replace(new RegExp('(^|[^a-z0-9])'+escaped+'(?=$|[^a-z0-9])','g'),(match,prefix)=>prefix+'{tool}');
       }
       return out.replace(/\b\d+(?:\.\d+)?\b/g,'{n}').replace(/\s+/g,' ').trim();
     };
