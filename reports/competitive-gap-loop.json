@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-06T15:49:42.669Z",
+  "generatedAt": "2026-10-06T15:54:27.026Z",
   "objective": "Detect competitor coverage gaps, deduplicate against ToolScout, verify first-party sources, publish evidence-backed coverage profiles, submit them through the normal sitemap surface and measure Search Console outcomes on subsequent cycles.",
   "guardrails": [
     "Competitor pages are used only to discover market signals and possible official-source links.",

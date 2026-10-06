@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-06T15:51:21.741Z",
-  "gscGeneratedAt": "2026-10-06T15:49:32.811Z",
+  "generatedAt": "2026-10-06T15:56:26.859Z",
+  "gscGeneratedAt": "2026-10-06T15:54:13.016Z",
   "minimumImpressionsForHighConfidenceAction": 20,
   "rule": "Observed GSC demand may trigger additive factual decision depth. Low-sample first-page pages are protected from aggressive adaptive changes. Query strings must pass safety and intent-alignment checks before they can trigger adaptation.",
   "adaptiveApplied": 0,
@@ -93,9 +93,9 @@
     },
     {
       "intent": "best-crm-for-small-business",
-      "impressions": 323,
+      "impressions": 325,
       "clicks": 0,
-      "position": 76.5666,
+      "position": 76.6,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
@@ -138,15 +138,15 @@
     },
     {
       "intent": "best-seo-tools-for-agencies",
-      "impressions": 2698,
+      "impressions": 2721,
       "clicks": 0,
-      "position": 80.3328,
+      "position": 80.3477,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
         "query": "seo software for agencies",
-        "impressions": 189,
-        "position": 87.6402,
+        "impressions": 193,
+        "position": 87.5959,
         "alignment": 1
       },
       "action": "measure-only"
@@ -168,24 +168,24 @@
     },
     {
       "intent": "best-crm-for-sales-teams",
-      "impressions": 63,
+      "impressions": 64,
       "clicks": 0,
-      "position": 59,
+      "position": 59.2031,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
         "query": "crm for sales team",
-        "impressions": 16,
-        "position": 64.9375,
+        "impressions": 17,
+        "position": 65.3529,
         "alignment": 0.667
       },
       "action": "measure-only"
     },
     {
       "intent": "best-free-crm",
-      "impressions": 163,
+      "impressions": 164,
       "clicks": 0,
-      "position": 76.2025,
+      "position": 76.2561,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
@@ -198,9 +198,9 @@
     },
     {
       "intent": "best-project-management-tools",
-      "impressions": 133,
+      "impressions": 134,
       "clicks": 0,
-      "position": 45.8271,
+      "position": 45.9254,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {

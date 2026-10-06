@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-06T15:51:24.628Z",
+  "generatedAt": "2026-10-06T15:56:30.276Z",
   "count": 48,
   "policy": "Only editorially verified assets are eligible for distribution. Page-level Search Console demand chooses which existing pages deserve attention. Monetization can increase measurement urgency but never changes editorial ranking. Original research can be promoted to editorial, community and indexing surfaces, while product directories continue to receive the ToolScout product profile.",
   "items": [
@@ -74,9 +74,9 @@
       "priorityScore": 126,
       "demandBoost": 50,
       "searchDemand": {
-        "impressions": 462,
+        "impressions": 463,
         "clicks": 0,
-        "position": 74.0628,
+        "position": 74.0043,
         "lane": "relevance-and-authority",
         "monetized": false,
         "monetizedSlugs": []
@@ -372,9 +372,9 @@
       "priorityScore": 75,
       "demandBoost": 45,
       "searchDemand": {
-        "impressions": 2698,
+        "impressions": 2721,
         "clicks": 0,
-        "position": 80.3328,
+        "position": 80.3477,
         "lane": "relevance-and-authority",
         "monetized": false
       },
@@ -402,9 +402,9 @@
       "priorityScore": 75,
       "demandBoost": 40,
       "searchDemand": {
-        "impressions": 323,
+        "impressions": 325,
         "clicks": 0,
-        "position": 76.5666,
+        "position": 76.6,
         "lane": "relevance-and-authority",
         "monetized": true
       },
@@ -462,9 +462,9 @@
       "priorityScore": 66,
       "demandBoost": 31,
       "searchDemand": {
-        "impressions": 63,
+        "impressions": 64,
         "clicks": 0,
-        "position": 59,
+        "position": 59.2031,
         "lane": "editorial-depth",
         "monetized": true
       },
@@ -522,9 +522,9 @@
       "priorityScore": 62,
       "demandBoost": 33,
       "searchDemand": {
-        "impressions": 133,
+        "impressions": 134,
         "clicks": 0,
-        "position": 45.8271,
+        "position": 45.9254,
         "lane": "editorial-depth",
         "monetized": false
       },
@@ -552,9 +552,9 @@
       "priorityScore": 62,
       "demandBoost": 32,
       "searchDemand": {
-        "impressions": 163,
+        "impressions": 164,
         "clicks": 0,
-        "position": 76.2025,
+        "position": 76.2561,
         "lane": "relevance-and-authority",
         "monetized": false
       },

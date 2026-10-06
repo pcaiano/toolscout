@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-06T15:49:32.811Z",
+  "generatedAt": "2026-10-06T15:54:13.016Z",
   "source": "Google Search Console Search Analytics API",
   "property": "sc-domain:trytoolscout.org",
   "dataState": "all",
@@ -8,8 +8,8 @@
   "endDate": "2026-10-06",
   "siteTotals": {
     "clicks": 7,
-    "impressions": 6892,
-    "ctr": 0.1016
+    "impressions": 6922,
+    "ctr": 0.1011
   },
   "pageTypeSummary": {
     "comparison": {
@@ -25,7 +25,7 @@
     "guide": {
       "pages": 39,
       "clicks": 0,
-      "impressions": 4598
+      "impressions": 4626
     },
     "home": {
       "pages": 1,
@@ -40,7 +40,7 @@
     "tool-profile": {
       "pages": 75,
       "clicks": 1,
-      "impressions": 1834
+      "impressions": 1836
     }
   },
   "pageCount": 140,
@@ -52,15 +52,21 @@
       "type": "guide",
       "intent": "best-seo-tools-for-agencies",
       "clicks": 0,
-      "impressions": 2698,
+      "impressions": 2721,
       "ctr": 0,
-      "position": 80.3328,
+      "position": 80.3477,
       "topQueries": [
         {
           "query": "seo software for agencies",
           "clicks": 0,
-          "impressions": 189,
-          "position": 87.6402
+          "impressions": 193,
+          "position": 87.5959
+        },
+        {
+          "query": "seo tool for agencies",
+          "clicks": 0,
+          "impressions": 154,
+          "position": 82.5779
         },
         {
           "query": "best seo tools for agency",
@@ -69,34 +75,28 @@
           "position": 70.5163
         },
         {
-          "query": "seo tool for agencies",
-          "clicks": 0,
-          "impressions": 153,
-          "position": 82.5621
-        },
-        {
           "query": "seo agency tools",
           "clicks": 0,
-          "impressions": 131,
-          "position": 82.1221
+          "impressions": 133,
+          "position": 82.0677
         },
         {
           "query": "seo tools for agencies",
           "clicks": 0,
-          "impressions": 130,
-          "position": 84.0462
+          "impressions": 131,
+          "position": 84.0534
         },
         {
           "query": "seo platform for agencies",
           "clicks": 0,
-          "impressions": 126,
-          "position": 84.3175
+          "impressions": 127,
+          "position": 84.3622
         },
         {
           "query": "agency seo tools",
           "clicks": 0,
-          "impressions": 112,
-          "position": 81
+          "impressions": 113,
+          "position": 80.9381
         },
         {
           "query": "seo tools for agency",
@@ -107,14 +107,14 @@
         {
           "query": "seo agency tool",
           "clicks": 0,
-          "impressions": 96,
-          "position": 85.6667
+          "impressions": 97,
+          "position": 85.7216
         },
         {
           "query": "best seo software for agencies",
           "clicks": 0,
-          "impressions": 95,
-          "position": 73.4211
+          "impressions": 96,
+          "position": 73.3958
         }
       ]
     },
@@ -125,9 +125,9 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 462,
+      "impressions": 463,
       "ctr": 0,
-      "position": 74.0628,
+      "position": 74.0043,
       "topQueries": [
         {
           "query": "airtable",
@@ -198,9 +198,9 @@
       "type": "guide",
       "intent": "best-crm-for-small-business",
       "clicks": 0,
-      "impressions": 323,
+      "impressions": 325,
       "ctr": 0,
-      "position": 76.5666,
+      "position": 76.6,
       "topQueries": [
         {
           "query": "best crm for small business",
@@ -563,9 +563,9 @@
       "type": "guide",
       "intent": "best-free-crm",
       "clicks": 0,
-      "impressions": 163,
+      "impressions": 164,
       "ctr": 0,
-      "position": 76.2025,
+      "position": 76.2561,
       "topQueries": [
         {
           "query": "best free crm tools",
@@ -588,8 +588,8 @@
         {
           "query": "best free crm",
           "clicks": 0,
-          "impressions": 15,
-          "position": 82.0667
+          "impressions": 16,
+          "position": 82.25
         },
         {
           "query": "best free free crm",
@@ -709,9 +709,9 @@
       "type": "guide",
       "intent": "best-project-management-tools",
       "clicks": 0,
-      "impressions": 133,
+      "impressions": 134,
       "ctr": 0,
-      "position": 45.8271,
+      "position": 45.9254,
       "topQueries": [
         {
           "query": "management tool",
@@ -722,8 +722,8 @@
         {
           "query": "work management tool buyers guide",
           "clicks": 0,
-          "impressions": 17,
-          "position": 57.1765
+          "impressions": 18,
+          "position": 57.2778
         },
         {
           "query": "project automation tools",
@@ -1361,6 +1361,79 @@
       ]
     },
     {
+      "page": "https://trytoolscout.org/best-crm-for-sales-teams",
+      "pathname": "/best-crm-for-sales-teams",
+      "key": "best-crm-for-sales-teams",
+      "type": "guide",
+      "intent": "best-crm-for-sales-teams",
+      "clicks": 0,
+      "impressions": 64,
+      "ctr": 0,
+      "position": 59.2031,
+      "topQueries": [
+        {
+          "query": "crm for sales team",
+          "clicks": 0,
+          "impressions": 17,
+          "position": 65.3529
+        },
+        {
+          "query": "crm for sales teams",
+          "clicks": 0,
+          "impressions": 10,
+          "position": 71
+        },
+        {
+          "query": "crm for sales teams",
+          "clicks": 0,
+          "impressions": 9,
+          "position": 67.7778
+        },
+        {
+          "query": "crm for sales managers",
+          "clicks": 0,
+          "impressions": 6,
+          "position": 35.5
+        },
+        {
+          "query": "sales team crm",
+          "clicks": 0,
+          "impressions": 5,
+          "position": 72.6
+        },
+        {
+          "query": "best crm for managing sales pipeline",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 11
+        },
+        {
+          "query": "best crm for sales team",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 59
+        },
+        {
+          "query": "best crm pipeline management",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 75
+        },
+        {
+          "query": "crm for sales team",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 75.5
+        },
+        {
+          "query": "what’s the best crm for sales automation and pipeline tracking?",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 7
+        }
+      ]
+    },
+    {
       "page": "https://trytoolscout.org/best-free-project-management-tools",
       "pathname": "/best-free-project-management-tools",
       "key": "best-free-project-management-tools",
@@ -1430,79 +1503,6 @@
           "clicks": 0,
           "impressions": 1,
           "position": 66
-        }
-      ]
-    },
-    {
-      "page": "https://trytoolscout.org/best-crm-for-sales-teams",
-      "pathname": "/best-crm-for-sales-teams",
-      "key": "best-crm-for-sales-teams",
-      "type": "guide",
-      "intent": "best-crm-for-sales-teams",
-      "clicks": 0,
-      "impressions": 63,
-      "ctr": 0,
-      "position": 59,
-      "topQueries": [
-        {
-          "query": "crm for sales team",
-          "clicks": 0,
-          "impressions": 16,
-          "position": 64.9375
-        },
-        {
-          "query": "crm for sales teams",
-          "clicks": 0,
-          "impressions": 10,
-          "position": 71
-        },
-        {
-          "query": "crm for sales teams",
-          "clicks": 0,
-          "impressions": 9,
-          "position": 67.7778
-        },
-        {
-          "query": "crm for sales managers",
-          "clicks": 0,
-          "impressions": 6,
-          "position": 35.5
-        },
-        {
-          "query": "sales team crm",
-          "clicks": 0,
-          "impressions": 5,
-          "position": 72.6
-        },
-        {
-          "query": "best crm for managing sales pipeline",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 11
-        },
-        {
-          "query": "best crm for sales team",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 59
-        },
-        {
-          "query": "best crm pipeline management",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 75
-        },
-        {
-          "query": "crm for sales team",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 75.5
-        },
-        {
-          "query": "what’s the best crm for sales automation and pipeline tracking?",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 7
         }
       ]
     },
@@ -2040,15 +2040,15 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 29,
+      "impressions": 30,
       "ctr": 0,
-      "position": 63.2069,
+      "position": 62.8333,
       "topQueries": [
         {
           "query": "what is workato",
           "clicks": 0,
-          "impressions": 8,
-          "position": 59.125
+          "impressions": 9,
+          "position": 58.3333
         },
         {
           "query": "workato wiki",
@@ -4526,15 +4526,21 @@
       "intent": "best-seo-tools-for-agencies",
       "page": "https://trytoolscout.org/best-seo-tools-for-agencies",
       "clicks": 0,
-      "impressions": 2698,
+      "impressions": 2721,
       "ctr": 0,
-      "position": 80.3328,
+      "position": 80.3477,
       "topQueries": [
         {
           "query": "seo software for agencies",
           "clicks": 0,
-          "impressions": 189,
-          "position": 87.6402
+          "impressions": 193,
+          "position": 87.5959
+        },
+        {
+          "query": "seo tool for agencies",
+          "clicks": 0,
+          "impressions": 154,
+          "position": 82.5779
         },
         {
           "query": "best seo tools for agency",
@@ -4543,34 +4549,28 @@
           "position": 70.5163
         },
         {
-          "query": "seo tool for agencies",
-          "clicks": 0,
-          "impressions": 153,
-          "position": 82.5621
-        },
-        {
           "query": "seo agency tools",
           "clicks": 0,
-          "impressions": 131,
-          "position": 82.1221
+          "impressions": 133,
+          "position": 82.0677
         },
         {
           "query": "seo tools for agencies",
           "clicks": 0,
-          "impressions": 130,
-          "position": 84.0462
+          "impressions": 131,
+          "position": 84.0534
         },
         {
           "query": "seo platform for agencies",
           "clicks": 0,
-          "impressions": 126,
-          "position": 84.3175
+          "impressions": 127,
+          "position": 84.3622
         },
         {
           "query": "agency seo tools",
           "clicks": 0,
-          "impressions": 112,
-          "position": 81
+          "impressions": 113,
+          "position": 80.9381
         },
         {
           "query": "seo tools for agency",
@@ -4581,14 +4581,14 @@
         {
           "query": "seo agency tool",
           "clicks": 0,
-          "impressions": 96,
-          "position": 85.6667
+          "impressions": 97,
+          "position": 85.7216
         },
         {
           "query": "best seo software for agencies",
           "clicks": 0,
-          "impressions": 95,
-          "position": 73.4211
+          "impressions": 96,
+          "position": 73.3958
         }
       ]
     },
@@ -4596,9 +4596,9 @@
       "intent": "best-crm-for-small-business",
       "page": "https://trytoolscout.org/best-crm-for-small-business",
       "clicks": 0,
-      "impressions": 323,
+      "impressions": 325,
       "ctr": 0,
-      "position": 76.5666,
+      "position": 76.6,
       "topQueries": [
         {
           "query": "best crm for small business",
@@ -4806,9 +4806,9 @@
       "intent": "best-free-crm",
       "page": "https://trytoolscout.org/best-free-crm",
       "clicks": 0,
-      "impressions": 163,
+      "impressions": 164,
       "ctr": 0,
-      "position": 76.2025,
+      "position": 76.2561,
       "topQueries": [
         {
           "query": "best free crm tools",
@@ -4831,8 +4831,8 @@
         {
           "query": "best free crm",
           "clicks": 0,
-          "impressions": 15,
-          "position": 82.0667
+          "impressions": 16,
+          "position": 82.25
         },
         {
           "query": "best free free crm",
@@ -4876,9 +4876,9 @@
       "intent": "best-project-management-tools",
       "page": "https://trytoolscout.org/best-project-management-tools",
       "clicks": 0,
-      "impressions": 133,
+      "impressions": 134,
       "ctr": 0,
-      "position": 45.8271,
+      "position": 45.9254,
       "topQueries": [
         {
           "query": "management tool",
@@ -4889,8 +4889,8 @@
         {
           "query": "work management tool buyers guide",
           "clicks": 0,
-          "impressions": 17,
-          "position": 57.1765
+          "impressions": 18,
+          "position": 57.2778
         },
         {
           "query": "project automation tools",
@@ -5269,6 +5269,76 @@
       ]
     },
     {
+      "intent": "best-crm-for-sales-teams",
+      "page": "https://trytoolscout.org/best-crm-for-sales-teams",
+      "clicks": 0,
+      "impressions": 64,
+      "ctr": 0,
+      "position": 59.2031,
+      "topQueries": [
+        {
+          "query": "crm for sales team",
+          "clicks": 0,
+          "impressions": 17,
+          "position": 65.3529
+        },
+        {
+          "query": "crm for sales teams",
+          "clicks": 0,
+          "impressions": 10,
+          "position": 71
+        },
+        {
+          "query": "crm for sales teams",
+          "clicks": 0,
+          "impressions": 9,
+          "position": 67.7778
+        },
+        {
+          "query": "crm for sales managers",
+          "clicks": 0,
+          "impressions": 6,
+          "position": 35.5
+        },
+        {
+          "query": "sales team crm",
+          "clicks": 0,
+          "impressions": 5,
+          "position": 72.6
+        },
+        {
+          "query": "best crm for managing sales pipeline",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 11
+        },
+        {
+          "query": "best crm for sales team",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 59
+        },
+        {
+          "query": "best crm pipeline management",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 75
+        },
+        {
+          "query": "crm for sales team",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 75.5
+        },
+        {
+          "query": "what’s the best crm for sales automation and pipeline tracking?",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 7
+        }
+      ]
+    },
+    {
       "intent": "best-free-project-management-tools",
       "page": "https://trytoolscout.org/best-free-project-management-tools",
       "clicks": 0,
@@ -5335,76 +5405,6 @@
           "clicks": 0,
           "impressions": 1,
           "position": 66
-        }
-      ]
-    },
-    {
-      "intent": "best-crm-for-sales-teams",
-      "page": "https://trytoolscout.org/best-crm-for-sales-teams",
-      "clicks": 0,
-      "impressions": 63,
-      "ctr": 0,
-      "position": 59,
-      "topQueries": [
-        {
-          "query": "crm for sales team",
-          "clicks": 0,
-          "impressions": 16,
-          "position": 64.9375
-        },
-        {
-          "query": "crm for sales teams",
-          "clicks": 0,
-          "impressions": 10,
-          "position": 71
-        },
-        {
-          "query": "crm for sales teams",
-          "clicks": 0,
-          "impressions": 9,
-          "position": 67.7778
-        },
-        {
-          "query": "crm for sales managers",
-          "clicks": 0,
-          "impressions": 6,
-          "position": 35.5
-        },
-        {
-          "query": "sales team crm",
-          "clicks": 0,
-          "impressions": 5,
-          "position": 72.6
-        },
-        {
-          "query": "best crm for managing sales pipeline",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 11
-        },
-        {
-          "query": "best crm for sales team",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 59
-        },
-        {
-          "query": "best crm pipeline management",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 75
-        },
-        {
-          "query": "crm for sales team",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 75.5
-        },
-        {
-          "query": "what’s the best crm for sales automation and pipeline tracking?",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 7
         }
       ]
     },

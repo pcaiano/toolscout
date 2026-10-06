@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-06T15:49:42.621Z",
+  "generatedAt": "2026-10-06T15:54:26.971Z",
   "methodology": "Public sitemap URL patterns only, with robots.txt sitemap discovery, bounded recursive sitemap-index expansion and entity-level deduplication against the ToolScout catalog. Competitor content is not copied or used for editorial conclusions. Repeated URL themes are market-coverage signals and must pass first-party verification and ToolScout quality gates before publication.",
   "sources": [
     {

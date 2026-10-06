@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-06T15:49:32.809Z",
+  "generatedAt": "2026-10-06T15:54:13.013Z",
   "source": "Google Search Console first-party APIs",
   "property": "sc-domain:trytoolscout.org",
   "authorizationScope": "https://www.googleapis.com/auth/webmasters.readonly",
@@ -8,17 +8,17 @@
       "startDate": "2026-09-09",
       "endDate": "2026-10-06",
       "clicks": 7,
-      "impressions": 6892,
-      "ctr": 0.1016,
-      "position": 68.5142
+      "impressions": 6922,
+      "ctr": 0.1011,
+      "position": 68.5592
     },
     "recent7": {
       "startDate": "2026-09-30",
       "endDate": "2026-10-06",
       "clicks": 0,
-      "impressions": 3117,
+      "impressions": 3147,
       "ctr": 0,
-      "position": 75.401
+      "position": 75.4344
     },
     "previous7": {
       "startDate": "2026-09-23",
@@ -30,30 +30,30 @@
     },
     "change7d": {
       "clicksPct": -100,
-      "impressionsPct": 216.77,
-      "positionDelta": 10.2953
+      "impressionsPct": 219.82,
+      "positionDelta": 10.3287
     },
     "countries": [
       {
         "country": "usa",
         "clicks": 1,
-        "impressions": 4367,
-        "ctr": 0.0229,
-        "position": 72.0859
+        "impressions": 4388,
+        "ctr": 0.0228,
+        "position": 72.1215
       },
       {
         "country": "gbr",
         "clicks": 0,
-        "impressions": 614,
+        "impressions": 617,
         "ctr": 0,
-        "position": 72.7573
+        "position": 72.8347
       },
       {
         "country": "aus",
         "clicks": 0,
-        "impressions": 297,
+        "impressions": 298,
         "ctr": 0,
-        "position": 72.0741
+        "position": 72.0067
       },
       {
         "country": "fra",
@@ -65,9 +65,9 @@
       {
         "country": "ind",
         "clicks": 1,
-        "impressions": 154,
-        "ctr": 0.6494,
-        "position": 63.9026
+        "impressions": 156,
+        "ctr": 0.641,
+        "position": 63.9359
       },
       {
         "country": "nld",
@@ -107,16 +107,16 @@
       {
         "country": "ukr",
         "clicks": 0,
-        "impressions": 34,
+        "impressions": 35,
         "ctr": 0,
-        "position": 60.8824
+        "position": 61.5714
       },
       {
         "country": "idn",
         "clicks": 0,
-        "impressions": 29,
+        "impressions": 30,
         "ctr": 0,
-        "position": 52.7241
+        "position": 53.6667
       },
       {
         "country": "nzl",
@@ -126,34 +126,34 @@
         "position": 55.5357
       },
       {
+        "country": "rus",
+        "clicks": 0,
+        "impressions": 28,
+        "ctr": 0,
+        "position": 64
+      },
+      {
         "country": "pol",
         "clicks": 0,
         "impressions": 27,
         "ctr": 0,
         "position": 51.7037
-      },
-      {
-        "country": "rus",
-        "clicks": 0,
-        "impressions": 27,
-        "ctr": 0,
-        "position": 63.4074
       }
     ],
     "devices": [
       {
         "device": "DESKTOP",
         "clicks": 4,
-        "impressions": 5203,
-        "ctr": 0.0769,
-        "position": 69.1772
+        "impressions": 5231,
+        "ctr": 0.0765,
+        "position": 69.2334
       },
       {
         "device": "MOBILE",
         "clicks": 2,
-        "impressions": 1320,
-        "ctr": 0.1515,
-        "position": 73.3356
+        "impressions": 1322,
+        "ctr": 0.1513,
+        "position": 73.3275
       },
       {
         "device": "TABLET",
@@ -188,7 +188,13 @@
     "robotsBlocked": 0,
     "noindexBlocked": 0,
     "fetchIssues": 0,
-    "note": "Primary index-health metrics use canonical URLs in the current ToolScout sitemap. Legacy or alternate URLs observed in Search Analytics are inspected separately and do not count as canonical index failures."
+    "note": "Primary index-health metrics use canonical URLs in the current ToolScout sitemap. Legacy or alternate URLs observed in Search Analytics are inspected separately and do not count as canonical index failures.",
+    "preservedFromPrevious": true,
+    "preservedFromGeneratedAt": "2026-10-06T15:49:32.809Z",
+    "lastInspectionAttemptAt": "2026-10-06T15:54:13.013Z",
+    "lastInspectionAttemptCoveragePct": 0.5,
+    "lastInspectionAttemptErrors": 221,
+    "quotaLimited": true
   },
   "sitemaps": {
     "apiOk": true,
@@ -221,7 +227,7 @@
       "top": []
     },
     "index_recovery": {
-      "count": 57,
+      "count": 35,
       "top": [
         {
           "page": "/news/chatgpt-word-microsoft-office",
@@ -326,15 +332,15 @@
       ]
     },
     "ranking_opportunities": {
-      "count": 28,
+      "count": 14,
       "top": [
         {
           "page": "/best-seo-tools-for-agencies",
           "url": "https://trytoolscout.org/best-seo-tools-for-agencies",
           "kind": "high_impression_low_rank",
-          "score": 96,
-          "impressions": 2698,
-          "position": 80.3328,
+          "score": 96.1,
+          "impressions": 2721,
+          "position": 80.3477,
           "action": "authority_depth_and_query_alignment"
         },
         {
@@ -360,8 +366,8 @@
           "url": "https://trytoolscout.org/tools/airtable",
           "kind": "high_impression_low_rank",
           "score": 85.3,
-          "impressions": 462,
-          "position": 74.0628,
+          "impressions": 463,
+          "position": 74.0043,
           "action": "authority_depth_and_query_alignment"
         },
         {
@@ -377,9 +383,9 @@
           "page": "/best-crm-for-small-business",
           "url": "https://trytoolscout.org/best-crm-for-small-business",
           "kind": "high_impression_low_rank",
-          "score": 83.1,
-          "impressions": 323,
-          "position": 76.5666,
+          "score": 83.2,
+          "impressions": 325,
+          "position": 76.6,
           "action": "authority_depth_and_query_alignment"
         },
         {
@@ -387,8 +393,8 @@
           "url": "https://trytoolscout.org/best-project-management-tools",
           "kind": "striking_distance",
           "score": 82.6,
-          "impressions": 133,
-          "position": 45.8271,
+          "impressions": 134,
+          "position": 45.9254,
           "action": "authority_and_content_amplification"
         },
         {
@@ -421,7 +427,7 @@
       ]
     },
     "protect": {
-      "count": 3,
+      "count": 1,
       "top": [
         {
           "page": "/",
@@ -430,24 +436,6 @@
           "score": 79.7,
           "impressions": 85,
           "position": 7.6588,
-          "action": "protect_current_ranking"
-        },
-        {
-          "page": "/news/zapier-next-gen-zaps-mcp",
-          "url": "https://trytoolscout.org/news/zapier-next-gen-zaps-mcp",
-          "kind": "protect",
-          "score": 75.6,
-          "impressions": 31,
-          "position": 7.4194,
-          "action": "protect_current_ranking"
-        },
-        {
-          "page": "/news/github-actions-workflow-execution-protections-ga",
-          "url": "https://trytoolscout.org/news/github-actions-workflow-execution-protections-ga",
-          "kind": "protect",
-          "score": 72.5,
-          "impressions": 13,
-          "position": 6.9231,
           "action": "protect_current_ranking"
         }
       ]
@@ -459,11 +447,11 @@
       "queue": "ranking_opportunities",
       "url": "https://trytoolscout.org/best-seo-tools-for-agencies",
       "page": "/best-seo-tools-for-agencies",
-      "score": 96,
-      "impressions": 2698,
+      "score": 96.1,
+      "impressions": 2721,
       "clicks": 0,
       "ctr": 0,
-      "position": 80.3328,
+      "position": 80.3477,
       "action": "authority_depth_and_query_alignment"
     },
     {
@@ -524,10 +512,10 @@
       "url": "https://trytoolscout.org/tools/airtable",
       "page": "/tools/airtable",
       "score": 85.3,
-      "impressions": 462,
+      "impressions": 463,
       "clicks": 0,
       "ctr": 0,
-      "position": 74.0628,
+      "position": 74.0043,
       "action": "authority_depth_and_query_alignment"
     },
     {
@@ -547,11 +535,11 @@
       "queue": "ranking_opportunities",
       "url": "https://trytoolscout.org/best-crm-for-small-business",
       "page": "/best-crm-for-small-business",
-      "score": 83.1,
-      "impressions": 323,
+      "score": 83.2,
+      "impressions": 325,
       "clicks": 0,
       "ctr": 0,
-      "position": 76.5666,
+      "position": 76.6,
       "action": "authority_depth_and_query_alignment"
     },
     {
@@ -560,10 +548,10 @@
       "url": "https://trytoolscout.org/best-project-management-tools",
       "page": "/best-project-management-tools",
       "score": 82.6,
-      "impressions": 133,
+      "impressions": 134,
       "clicks": 0,
       "ctr": 0,
-      "position": 45.8271,
+      "position": 45.9254,
       "action": "authority_and_content_amplification"
     },
     {
@@ -644,10 +632,10 @@
       "url": "https://trytoolscout.org/best-free-crm",
       "page": "/best-free-crm",
       "score": 79,
-      "impressions": 163,
+      "impressions": 164,
       "clicks": 0,
       "ctr": 0,
-      "position": 76.2025,
+      "position": 76.2561,
       "action": "authority_depth_and_query_alignment"
     },
     {
@@ -5749,14 +5737,15 @@
   "limitations": [
     "Search Analytics returns top rows and is not guaranteed to include every row available in Search Console.",
     "URL Inspection describes the version in the Google index and does not perform a live indexability test.",
-    "The current inspection run covered the full canonical sitemap universe."
+    "Canonical index health is based on the inspected sitemap sample shown in this report.",
+    "This URL Inspection attempt did not meet the 80% coverage quality gate. The previous healthy index-health snapshot was preserved while Search Analytics was refreshed."
   ],
   "inspectionRun": {
-    "attempted": 212,
-    "succeeded": 212,
-    "errors": 0,
-    "coveragePct": 100,
-    "quotaLimited": false,
-    "preservedPriorHealthySnapshot": false
+    "attempted": 222,
+    "succeeded": 1,
+    "errors": 221,
+    "coveragePct": 0.5,
+    "quotaLimited": true,
+    "preservedPriorHealthySnapshot": true
   }
 }

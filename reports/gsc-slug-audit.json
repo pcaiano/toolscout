@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-06T15:49:34.307Z",
-  "sourceGeneratedAt": "2026-10-06T15:49:32.811Z",
+  "generatedAt": "2026-10-06T15:54:15.260Z",
+  "sourceGeneratedAt": "2026-10-06T15:54:13.016Z",
   "summary": {
     "canonical": 33,
     "redirected": 3,
@@ -11,17 +11,17 @@
       "slug": "best-seo-tools-for-agencies",
       "status": "canonical",
       "target": "best-seo-tools-for-agencies",
-      "impressions": 2698,
+      "impressions": 2721,
       "clicks": 0,
-      "position": 80.3328
+      "position": 80.3477
     },
     {
       "slug": "best-crm-for-small-business",
       "status": "canonical",
       "target": "best-crm-for-small-business",
-      "impressions": 323,
+      "impressions": 325,
       "clicks": 0,
-      "position": 76.5666
+      "position": 76.6
     },
     {
       "slug": "best-seo-keyword-research-tools",
@@ -43,17 +43,17 @@
       "slug": "best-free-crm",
       "status": "canonical",
       "target": "best-free-crm",
-      "impressions": 163,
+      "impressions": 164,
       "clicks": 0,
-      "position": 76.2025
+      "position": 76.2561
     },
     {
       "slug": "best-project-management-tools",
       "status": "canonical",
       "target": "best-project-management-tools",
-      "impressions": 133,
+      "impressions": 134,
       "clicks": 0,
-      "position": 45.8271
+      "position": 45.9254
     },
     {
       "slug": "best-funnel-builder",
@@ -96,20 +96,20 @@
       "position": 66.2754
     },
     {
+      "slug": "best-crm-for-sales-teams",
+      "status": "canonical",
+      "target": "best-crm-for-sales-teams",
+      "impressions": 64,
+      "clicks": 0,
+      "position": 59.2031
+    },
+    {
       "slug": "best-free-project-management-tools",
       "status": "canonical",
       "target": "best-free-project-management-tools",
       "impressions": 64,
       "clicks": 0,
       "position": 63.5
-    },
-    {
-      "slug": "best-crm-for-sales-teams",
-      "status": "canonical",
-      "target": "best-crm-for-sales-teams",
-      "impressions": 63,
-      "clicks": 0,
-      "position": 59
     },
     {
       "slug": "best-customer-support-tools",

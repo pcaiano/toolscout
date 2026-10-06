@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-06T15:49:50.511Z",
+  "generatedAt": "2026-10-06T15:54:36.409Z",
   "methodology": "Field-level first-party quality control for volatile catalog facts plus validated visual asset resolution. Ambiguous changes are reported, not silently rewritten.",
   "summary": {
     "tools": 127,
     "critical": 0,
     "high": 14,
-    "medium": 5,
+    "medium": 3,
     "low": 0,
     "autoCorrections": 0,
     "assetsResolved": 117
@@ -128,134 +128,32 @@
       "detail": "http_403"
     },
     {
-      "slug": "ahrefs",
+      "slug": "beehiiv",
       "severity": "medium",
       "type": "pricing_evidence_changed",
       "previous": [
-        "$ 129 /",
-        "$ 249 /",
-        "$ 449 /",
-        "$40/mo",
-        "$60/mo",
-        "$80/mo",
-        "$ 1,49",
-        "$ 29 /",
-        "$199/mo",
-        "$50/mo",
-        "$0.02",
-        "$100/mo",
-        "$0.01",
-        "$250/mo",
-        "$99/mo",
-        "$20/mo",
-        "$200/mo",
-        "€ 119 /",
-        "€ 229 /",
-        "€ 419 /",
-        "€37.4/mo",
-        "€56.1/mo",
-        "€74.8/mo",
-        "€ 1,39",
-        "€ 27 /",
-        "€179/mo",
-        "€46.7/mo",
-        "€0.01",
-        "€93/mo",
-        "€234/mo"
-      ],
-      "current": [
-        "$ 129 /",
-        "$ 249 /",
-        "$ 449 /",
-        "$40/mo",
-        "$60/mo",
-        "$80/mo",
-        "$ 1,49",
-        "$ 29 /",
-        "$199/mo",
-        "$50/mo",
-        "$0.02",
-        "$100/mo",
-        "$0.01",
-        "$250/mo",
-        "$99/mo",
-        "$20/mo",
-        "$200/mo"
-      ],
-      "evidenceUrls": [
-        "https://ahrefs.com/",
-        "https://ahrefs.com/pricing",
-        "https://ahrefs.com/pricing?utm_source=homepage"
-      ]
-    },
-    {
-      "slug": "asana",
-      "severity": "medium",
-      "type": "pricing_evidence_changed",
-      "previous": [
+        "$32",
         "$0",
-        "$10.99 per",
-        "$24.99 per",
-        "$13.49",
-        "$30.49",
-        "$0.50 per",
-        "$0.60 per",
-        "$300,00"
-      ],
-      "current": [
-        "$0",
-        "$10.99 per",
-        "$24.99 per",
-        "$13.49",
-        "$30.49",
-        "$0.50 per",
-        "$5.99 per",
-        "$0.60 per",
-        "$300,00"
-      ],
-      "evidenceUrls": [
-        "https://asana.com/",
-        "https://asana.com/pricing",
-        "https://asana.com/product/ai"
-      ]
-    },
-    {
-      "slug": "grammarly",
-      "severity": "medium",
-      "type": "pricing_evidence_changed",
-      "previous": [
-        "$0",
+        "$49 /mo",
+        "$39/mo",
+        "$95 /mo",
         "$12",
-        "$30",
-        "$5,00",
-        "$210"
+        "$0.30 per"
       ],
       "current": [
+        "$ 0",
+        "$ 49",
+        "$ 95",
         "$0",
-        "$12",
-        "$30",
-        "$5,00",
-        "$210",
-        "$0.00"
+        "$49 /mo",
+        "$39/mo",
+        "$95 /mo",
+        "$0.30 per"
       ],
       "evidenceUrls": [
-        "https://www.grammarly.com/",
-        "https://www.grammarly.com/plans",
-        "https://www.grammarly.com/features"
-      ]
-    },
-    {
-      "slug": "grammarly",
-      "severity": "medium",
-      "type": "trial_evidence_changed",
-      "previous": [
-        7
-      ],
-      "current": [],
-      "evidenceUrls": [
-        "https://www.grammarly.com/",
-        "https://www.grammarly.com/plans",
-        "https://www.grammarly.com/features"
+        "https://www.beehiiv.com/",
+        "https://www.beehiiv.com/pricing",
+        "https://www.beehiiv.com/newsletter-platform"
       ]
     },
     {
@@ -263,17 +161,6 @@
       "severity": "medium",
       "type": "pricing_evidence_changed",
       "previous": [
-        "$29 per",
-        "$0.99 per",
-        "$85 per",
-        "$132 per",
-        "$99 /mo",
-        "$99/month",
-        "$35 per",
-        "$0.01 per",
-        "$19 per"
-      ],
-      "current": [
         "$19 per",
         "$0.99 per",
         "$29 per",
@@ -290,10 +177,56 @@
         "$35 per",
         "$0.01 per"
       ],
+      "current": [
+        "$19 per",
+        "$0.99 per",
+        "$85 per",
+        "$10",
+        "$132 per",
+        "$90.09 /mo",
+        "$19.00 /mo",
+        "$109.09 /mo",
+        "$33/mo",
+        "$1.99 per",
+        "$99 per",
+        "$29 per",
+        "$99/month",
+        "$35 per",
+        "$0.01 per"
+      ],
       "evidenceUrls": [
         "https://www.intercom.com/",
         "https://www.intercom.com/pricing",
         "https://www.intercom.com/solutions/technology"
+      ]
+    },
+    {
+      "slug": "mailchimp",
+      "severity": "medium",
+      "type": "pricing_evidence_changed",
+      "previous": [
+        "$20 /month",
+        "$ 20",
+        "$ 350",
+        "$ 13",
+        "$ 0 /month",
+        "$299 per month",
+        "$800/mo",
+        "$385/mo"
+      ],
+      "current": [
+        "$ 20",
+        "$ 350",
+        "$ 13",
+        "$ 0 /month",
+        "$299 per month",
+        "$800/mo",
+        "$385/mo"
+      ],
+      "evidenceUrls": [
+        "https://mailchimp.com/",
+        "https://mailchimp.com/pricing/marketing/",
+        "https://mailchimp.com/pricing/marketing/compare-plans/"
       ]
     }
   ]

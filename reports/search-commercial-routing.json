@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-06T15:51:20.137Z",
+  "generatedAt": "2026-10-06T15:56:25.135Z",
   "engine": "ToolScout Search Commercial Routing v1",
   "objective": "Route editorial, internal-linking and distribution work from observed Google demand while keeping affiliate economics separate from editorial ranking.",
   "rules": {
@@ -61,15 +61,21 @@
       "pathname": "/best-seo-tools-for-agencies",
       "type": "guide",
       "clicks": 0,
-      "impressions": 2698,
+      "impressions": 2721,
       "ctr": 0,
-      "position": 80.3328,
+      "position": 80.3477,
       "topQueries": [
         {
           "query": "seo software for agencies",
           "clicks": 0,
-          "impressions": 189,
-          "position": 87.6402
+          "impressions": 193,
+          "position": 87.5959
+        },
+        {
+          "query": "seo tool for agencies",
+          "clicks": 0,
+          "impressions": 154,
+          "position": 82.5779
         },
         {
           "query": "best seo tools for agency",
@@ -78,28 +84,22 @@
           "position": 70.5163
         },
         {
-          "query": "seo tool for agencies",
-          "clicks": 0,
-          "impressions": 153,
-          "position": 82.5621
-        },
-        {
           "query": "seo agency tools",
           "clicks": 0,
-          "impressions": 131,
-          "position": 82.1221
+          "impressions": 133,
+          "position": 82.0677
         },
         {
           "query": "seo tools for agencies",
           "clicks": 0,
-          "impressions": 130,
-          "position": 84.0462
+          "impressions": 131,
+          "position": 84.0534
         }
       ],
       "monetized": false,
       "monetizedSlugs": [],
       "lane": "relevance-and-authority",
-      "priorityScore": 136.78,
+      "priorityScore": 136.93,
       "actions": [
         "improve-query-intent-match",
         "deepen-evidence",
@@ -151,9 +151,9 @@
       "pathname": "/best-crm-for-small-business",
       "type": "guide",
       "clicks": 0,
-      "impressions": 323,
+      "impressions": 325,
       "ctr": 0,
-      "position": 76.5666,
+      "position": 76.6,
       "topQueries": [
         {
           "query": "best crm for small business",
@@ -191,7 +191,7 @@
         "zoho-crm"
       ],
       "lane": "relevance-and-authority",
-      "priorityScore": 121.08,
+      "priorityScore": 121.18,
       "actions": [
         "improve-query-intent-match",
         "deepen-evidence",
@@ -319,9 +319,9 @@
       "pathname": "/tools/airtable",
       "type": "tool-profile",
       "clicks": 0,
-      "impressions": 462,
+      "impressions": 463,
       "ctr": 0,
-      "position": 74.0628,
+      "position": 74.0043,
       "topQueries": [
         {
           "query": "airtable",
@@ -357,7 +357,7 @@
       "monetized": false,
       "monetizedSlugs": [],
       "lane": "relevance-and-authority",
-      "priorityScore": 106.26,
+      "priorityScore": 106.3,
       "actions": [
         "improve-query-intent-match",
         "deepen-evidence",
@@ -800,9 +800,9 @@
       "pathname": "/best-project-management-tools",
       "type": "guide",
       "clicks": 0,
-      "impressions": 133,
+      "impressions": 134,
       "ctr": 0,
-      "position": 45.8271,
+      "position": 45.9254,
       "topQueries": [
         {
           "query": "management tool",
@@ -813,8 +813,8 @@
         {
           "query": "work management tool buyers guide",
           "clicks": 0,
-          "impressions": 17,
-          "position": 57.1765
+          "impressions": 18,
+          "position": 57.2778
         },
         {
           "query": "project automation tools",
@@ -838,7 +838,7 @@
       "monetized": false,
       "monetizedSlugs": [],
       "lane": "editorial-depth",
-      "priorityScore": 94.88,
+      "priorityScore": 94.9,
       "actions": [
         "deepen-decision-context",
         "align-copy-to-observed-queries",
@@ -929,15 +929,15 @@
       "pathname": "/best-crm-for-sales-teams",
       "type": "guide",
       "clicks": 0,
-      "impressions": 63,
+      "impressions": 64,
       "ctr": 0,
-      "position": 59,
+      "position": 59.2031,
       "topQueries": [
         {
           "query": "crm for sales team",
           "clicks": 0,
-          "impressions": 16,
-          "position": 64.9375
+          "impressions": 17,
+          "position": 65.3529
         },
         {
           "query": "crm for sales teams",
@@ -969,7 +969,7 @@
         "pipedrive"
       ],
       "lane": "editorial-depth",
-      "priorityScore": 93,
+      "priorityScore": 93.27,
       "actions": [
         "deepen-decision-context",
         "align-copy-to-observed-queries",
@@ -1233,9 +1233,9 @@
       "pathname": "/best-free-crm",
       "type": "guide",
       "clicks": 0,
-      "impressions": 163,
+      "impressions": 164,
       "ctr": 0,
-      "position": 76.2025,
+      "position": 76.2561,
       "topQueries": [
         {
           "query": "best free crm tools",
@@ -1258,8 +1258,8 @@
         {
           "query": "best free crm",
           "clicks": 0,
-          "impressions": 15,
-          "position": 82.0667
+          "impressions": 16,
+          "position": 82.25
         },
         {
           "query": "best free free crm",
@@ -1271,7 +1271,7 @@
       "monetized": false,
       "monetizedSlugs": [],
       "lane": "relevance-and-authority",
-      "priorityScore": 88.29,
+      "priorityScore": 88.4,
       "actions": [
         "improve-query-intent-match",
         "deepen-evidence",
