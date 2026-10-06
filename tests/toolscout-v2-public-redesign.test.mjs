@@ -311,7 +311,7 @@ test('live redesign acceptance audits the complete public sitemap rather than a 
 test('Software Trends source has no second local navigation and relies on the shared sticky header',()=>{
   const html=read('software-trends-index.html');
   assert.doesNotMatch(html,/<nav><a class="brand"/);
-  assert.match(html,/rel="canonical" href="https:\/\/trytoolscout\.org\/software-trends-index\.html"/);
+  assert.match(html,/rel="canonical" href="https:\/\/trytoolscout\.org\/software-trends-index"/);
   const runtime=read('public-redesign-runtime.js');
   assert.match(runtime,/data-toolscout-surface="trends"/);
   assert.match(runtime,/\.darkBand \.shell>nav:first-child\{display:none!important\}/);
