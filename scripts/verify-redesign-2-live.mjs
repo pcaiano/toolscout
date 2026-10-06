@@ -40,6 +40,8 @@ need(/href=["']\/["'][^>]*aria-label=["']ToolScout home["']|aria-label=["']ToolS
 need(/src=["']\/favicon\.svg["']/.test(home.text),'home_real_mark_missing');
 need(/Independent\. No sponsored rankings\./.test(home.text),'home_independence_proof_missing');
 need(/data\/software-updates\.json/.test(home.text),'home_live_updates_feed_missing');
+need(/\.hero\{min-height:520px;/.test(home.text),'home_desktop_hero_too_tall');
+need(/content:"Explore ↓"/.test(home.text),'home_scroll_cue_missing');
 
 const sitemap=await get('/sitemap.xml');
 need(sitemap.ok,'sitemap_unavailable',sitemap.status);
@@ -68,9 +70,20 @@ await pool(publicPages,12,async value=>{
   need(!/class=["'][^"']*\bts-global-nav\b[^"']*["']/.test(r.text),label+'_legacy_global_nav_present',value);
   need(!/<nav\b[^>]*>[\s\S]*?<a\b[^>]*class=["']brand["'][^>]*>\s*ToolScout\s*<\/a>[\s\S]*?<\/nav>/i.test(r.text),label+'_legacy_branded_nav_present',value);
   need(!/<div\b[^>]*class=["'][^"']*\btop\b[^"']*["'][^>]*>[\s\S]*?<a\b[^>]*class=["']brand["'][^>]*>\s*ToolScout\s*<\/a>/i.test(r.text),label+'_legacy_top_nav_present',value);
-  if(/^\/tools\/[a-z0-9][a-z0-9-]*$/i.test(new URL(value).pathname)){
+  const pathname=new URL(value).pathname.replace(/\/$/,'');
+  if(/^\/tools\/[a-z0-9][a-z0-9-]*$/i.test(pathname)){
     need(!/<a\b[^>]*class=["'][^"']*\bbrand\b[^"']*["'][^>]*>\s*ToolScout\s*<\/a>/i.test(r.text),label+'_legacy_tool_profile_brand_present',value);
     need(/data-toolscout-surface=["']tool-profile["']/.test(r.text),label+'_tool_profile_surface_missing',value);
+  }
+  if(/^\/best-[a-z0-9-]+$/i.test(pathname)){
+    need(/data-toolscout-surface=["']guide-detail["']/.test(r.text),label+'_guide_detail_surface_missing',value);
+    need(!/<a\b[^>]*class=["'][^"']*\bbrand\b[^"']*["'][^>]*>\s*ToolScout\s*<\/a>/i.test(r.text),label+'_legacy_guide_brand_present',value);
+  }
+  if(/^\/[a-z0-9][a-z0-9-]+-vs-[a-z0-9][a-z0-9-]+$/i.test(pathname)){
+    need(/data-toolscout-surface=["']compare["']/.test(r.text),label+'_comparison_surface_missing',value);
+  }
+  if(pathname==='/distribution/publisher-kit'){
+    need(/data-toolscout-surface=["']publisher-kit["']/.test(r.text),label+'_publisher_kit_surface_missing',value);
   }
 });
 
