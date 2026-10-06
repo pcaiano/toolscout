@@ -23,7 +23,11 @@ function aiComparisonSentence(a,b){
   const winner=av>bv?a:b,other=av>bv?b:a;return winner.name+' currently has the stronger verified AI interoperability profile. '+other.name+' may still fit better on product capability, price or workflow depth.';
 }
 function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-function editorialConclusion(a,b){
+function editorialPilotPair(a,b){
+  const key=[String(a?.slug||''),String(b?.slug||'')].sort().join('|');
+  return new Set(['activecampaign|mailchimp','framer|webflow']).has(key);
+}
+function editorialConclusionLegacy(a,b){
   const aWins=comparisonDimensions.filter(key=>Number(a.scores?.[key]||0)>Number(b.scores?.[key]||0)).slice(0,3).map(key=>dimensionLabel[key]||key);
   const bWins=comparisonDimensions.filter(key=>Number(b.scores?.[key]||0)>Number(a.scores?.[key]||0)).slice(0,3).map(key=>dimensionLabel[key]||key);
   const first=aWins.length&&bWins.length?a.name+' scores higher on '+listPhrase(aWins)+', while '+b.name+' scores higher on '+listPhrase(bWins)+'.':aWins.length?a.name+' has the clearer score advantage on '+listPhrase(aWins)+', while the remaining decision still depends on fit and current product terms.':bWins.length?b.name+' has the clearer score advantage on '+listPhrase(bWins)+', while the remaining decision still depends on fit and current product terms.':'ToolScout scores do not separate '+a.name+' and '+b.name+' clearly enough to support a general winner.';
@@ -32,23 +36,36 @@ function editorialConclusion(a,b){
   const bFeatures=new Set((b.features||[]).map(v=>String(v).toLowerCase()));
   const overlap=(a.features||[]).filter(v=>bFeatures.has(String(v).toLowerCase())).slice(0,3);
   const third=overlap.length?'Because both list '+listPhrase(overlap)+', compare the depth of those shared capabilities against your workflow before choosing.':'Compare the products against your actual workflow, feature requirements and current commercial terms before choosing.';
-  const fourth=aiComparisonSentence(a,b);
-  return [first,second,third,fourth].filter(Boolean).join(' ');
+  return [first,second,third,aiComparisonSentence(a,b)].filter(Boolean).join(' ');
 }
-function decisionGuidance(a,b){
-  const ranked=comparisonDimensions
-    .map(key=>({key,diff:Number(a.scores?.[key]||0)-Number(b.scores?.[key]||0)}))
-    .sort((x,y)=>Math.abs(y.diff)-Math.abs(x.diff));
+function editorialConclusionV2(a,b){
+  const deltas=comparisonDimensions.map(key=>({key,diff:Number(a.scores?.[key]||0)-Number(b.scores?.[key]||0)})).filter(x=>x.diff!==0).sort((x,y)=>Math.abs(y.diff)-Math.abs(x.diff));
+  const aEdge=deltas.find(x=>x.diff>0),bEdge=deltas.find(x=>x.diff<0);
+  const lower=x=>String(x).toLowerCase(),bFeatures=new Set((b.features||[]).map(lower)),aFeatures=new Set((a.features||[]).map(lower));
+  const aOnly=(a.features||[]).filter(v=>!bFeatures.has(lower(v))).slice(0,2),bOnly=(b.features||[]).filter(v=>!aFeatures.has(lower(v))).slice(0,2);
+  const sharedBest=overlapValues(a,b,'bestFor').slice(0,2);
+  const first=aEdge&&bEdge?'This is a genuine trade-off rather than a cosmetic tie. '+a.name+' has the larger recorded edge in '+(dimensionLabel[aEdge.key]||aEdge.key)+', while '+b.name+' answers back most clearly on '+(dimensionLabel[bEdge.key]||bEdge.key)+'.':aEdge?a.name+' owns the clearest numerical edge, led by '+(dimensionLabel[aEdge.key]||aEdge.key)+'; '+b.name+' needs to win on workflow fit rather than headline score.':bEdge?b.name+' owns the clearest numerical edge, led by '+(dimensionLabel[bEdge.key]||bEdge.key)+'; '+a.name+' needs to win on workflow fit rather than headline score.':'The scorecard is effectively level, so the useful distinction has to come from workflow and product scope.';
+  const second=aOnly.length&&bOnly.length?a.name+"'s distinctive recorded capabilities include "+listPhrase(aOnly)+', whereas '+b.name+' adds '+listPhrase(bOnly)+'. Those differences are more decision-useful than counting the features both products share.':aOnly.length?a.name+"'s distinctive recorded capabilities include "+listPhrase(aOnly)+', which is where its case becomes more specific.':bOnly.length?b.name+"'s distinctive recorded capabilities include "+listPhrase(bOnly)+', which is where its case becomes more specific.':'';
+  const third=sharedBest.length?'Both are aimed at '+listPhrase(sharedBest)+', so audience labels alone will not settle this comparison. Test the higher-priority workflow in each product before choosing.':'Their recorded audiences differ enough that fit should be judged against the actual team and job rather than the category label.';
+  return [first,second,third,aiComparisonSentence(a,b)].filter(Boolean).join(' ');
+}
+function editorialConclusion(a,b){return editorialPilotPair(a,b)?editorialConclusionV2(a,b):editorialConclusionLegacy(a,b)}
+function decisionGuidanceLegacy(a,b){
+  const ranked=comparisonDimensions.map(key=>({key,diff:Number(a.scores?.[key]||0)-Number(b.scores?.[key]||0)})).sort((x,y)=>Math.abs(y.diff)-Math.abs(x.diff));
   const lead=ranked.find(item=>item.diff!==0);
-  if(lead){
-    const winner=lead.diff>0?a:b,other=lead.diff>0?b:a;
-    const otherFit=(other.bestFor||[])[0]||other.category||'your alternative workflow';
-    return 'Choose '+winner.name+' if '+(dimensionLabel[lead.key]||lead.key)+' is the stronger priority for your workflow; choose '+other.name+' when '+otherFit+' better matches the job you need to do.';
-  }
-  const aFit=(a.bestFor||[])[0]||a.category||'your workflow';
-  const bFit=(b.bestFor||[])[0]||b.category||'your workflow';
-  return 'Choose '+a.name+' if '+aFit+' better matches your workflow; choose '+b.name+' when '+bFit+' is the closer fit.';
+  if(lead){const winner=lead.diff>0?a:b,other=lead.diff>0?b:a;const otherFit=(other.bestFor||[])[0]||other.category||'your alternative workflow';return 'Choose '+winner.name+' if '+(dimensionLabel[lead.key]||lead.key)+' is the stronger priority for your workflow; choose '+other.name+' when '+otherFit+' better matches the job you need to do.'}
+  const aFit=(a.bestFor||[])[0]||a.category||'your workflow',bFit=(b.bestFor||[])[0]||b.category||'your workflow';return 'Choose '+a.name+' if '+aFit+' better matches your workflow; choose '+b.name+' when '+bFit+' is the closer fit.';
 }
+function decisionGuidanceV2(a,b){
+  const ranked=comparisonDimensions.map(key=>({key,diff:Number(a.scores?.[key]||0)-Number(b.scores?.[key]||0)})).filter(x=>x.diff!==0).sort((x,y)=>Math.abs(y.diff)-Math.abs(x.diff));
+  const aEdge=ranked.find(x=>x.diff>0),bEdge=ranked.find(x=>x.diff<0);
+  const aFit=(a.bestFor||[])[0]||a.category||'this workflow',bFit=(b.bestFor||[])[0]||b.category||'this workflow';
+  if(aEdge&&bEdge)return 'Choose '+a.name+' when '+(dimensionLabel[aEdge.key]||aEdge.key)+' matters more and the buyer looks like '+aFit+'; choose '+b.name+' when '+(dimensionLabel[bEdge.key]||bEdge.key)+' is the harder requirement and '+bFit+' is the closer operating context.';
+  if(aEdge)return a.name+' is the stronger default on the recorded scorecard, especially for '+(dimensionLabel[aEdge.key]||aEdge.key)+'; choose '+b.name+' only where its product scope or '+bFit+' audience fit is more important than that edge.';
+  if(bEdge)return b.name+' is the stronger default on the recorded scorecard, especially for '+(dimensionLabel[bEdge.key]||bEdge.key)+'; choose '+a.name+' only where its product scope or '+aFit+' audience fit is more important than that edge.';
+  return 'There is no defensible score winner here. Choose '+a.name+' for the workflow that better matches '+aFit+', and '+b.name+' where '+bFit+' is the more accurate description of the buyer.';
+}
+function decisionGuidance(a,b){return editorialPilotPair(a,b)?decisionGuidanceV2(a,b):decisionGuidanceLegacy(a,b)}
 function comparisonMethodology(){
   return 'ToolScout compares catalog-backed pricing, capabilities, use cases and score dimensions using first-party vendor sources and recorded verification dates. The conclusion is a workflow fit judgment, not a universal product claim, and affiliate relationships do not influence the comparison.';
 }
