@@ -7,6 +7,7 @@ on:
     branches: [main]
     paths:
       - 'distribution-priority-worker.js'
+      - 'scripts/validate-v2-preservation.mjs'
       - '.github/workflows/deploy-worker.yml'
 
 permissions:
