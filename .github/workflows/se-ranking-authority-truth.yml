@@ -1,0 +1,57 @@
+name: ToolScout SE Ranking Authority Truth
+
+on:
+  schedule:
+    - cron: '47 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: toolscout-se-ranking-authority-truth
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Refresh SE Ranking authority truth
+        env:
+          SE_RANKING_API_KEY: ${{ secrets.SE_RANKING_API_KEY }}
+        run: |
+          if [ -z "$SE_RANKING_API_KEY" ]; then
+            echo "::error::SE_RANKING_API_KEY secret is missing"
+            exit 1
+          fi
+          node scripts/sync-se-ranking-authority.mjs
+
+      - name: Validate fresh snapshot
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const x=JSON.parse(fs.readFileSync('data/se-ranking-backlink-truth.json','utf8'));
+          const age=Date.now()-Date.parse(x.observedAt||0);
+          if(x.source!=='SE Ranking Data API') throw new Error('unexpected_source');
+          if(!Number.isFinite(age)||age>30*60*1000) throw new Error('se_ranking_snapshot_stale');
+          if(!Number.isFinite(Number(x.metrics?.backlinks))) throw new Error('missing_backlinks');
+          if(!Number.isFinite(Number(x.metrics?.referringDomains))) throw new Error('missing_refdomains');
+          NODE
+
+      - name: Commit refreshed authority truth
+        run: |
+          if git diff --quiet -- data/se-ranking-backlink-truth.json data/authority-truth.json; then
+            echo "SE Ranking authority truth unchanged"
+            exit 0
+          fi
+          git config user.name "toolscout-growth-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/se-ranking-backlink-truth.json data/authority-truth.json
+          git commit -m "Refresh SE Ranking authority truth"
+          git push
