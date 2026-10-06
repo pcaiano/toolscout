@@ -65,7 +65,7 @@ import {handleAffiliateCoverageRoute} from './affiliate-coverage-entry-worker.js
 import {handleContentEngineIntelligenceRoute} from './content-engine-intelligence-worker.js';
 import {handleDistributionNetworkRoute} from './distribution-network-worker.js';
 import {handleDistributionEmbedRoute} from './distribution-embed-worker.js';
-import {handleLinkableAssetsRoute,syncLinkableAssets} from './distribution-linkable-assets-worker.js';
+import {handleLinkableAssetsRoute} from './distribution-linkable-assets-worker.js';
 import {handleDistributionThroughputRoute} from './distribution-throughput-worker.js';
 import {handleDistributionSubmissionRoute} from './distribution-submission-worker.js';
 import {handleDistributionDiscoveryRoute} from './distribution-discovery-worker.js';
@@ -2544,12 +2544,8 @@ export default{
         await event(env,'newsletter_hubspot_sync_failed','failed',safe(error?.message||error,800)).catch(()=>{});
         return null;
       });
-      const linkableAssets=Promise.resolve(syncLinkableAssets(env)).catch(async error=>{
-        await event(env,'linkable_assets_sync_failed','failed',safe(error?.message||error,800)).catch(()=>{});
-        return null;
-      });
       const combined=(async()=>{
-        await Promise.allSettled([growth,authority,primary,seo,newsletterSync,linkableAssets]);
+        await Promise.allSettled([growth,authority,primary,seo,newsletterSync]);
         // The named sender-drain owner must claim/dispatch executable make_sender
         // work before the closed loop observes handoff state. Otherwise a pending,
         // ready task can appear runnable while public-candidates correctly sees no
