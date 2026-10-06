@@ -13,6 +13,7 @@ export function pageTypeForPath(page){
   if(/-vs-/.test(p))return'comparison';
   if(/^\/best-/.test(p))return'guide';
   if(p==='/software-trends-index')return'proprietary_dataset';
+  if(p==='/distribution/publisher-kit')return'publisher_asset';
   if(p==='/privacy'||p==='/affiliate-disclosure')return'policy';
   if(p==='/methodology')return'methodology';
   if(p==='/compare')return'interactive';
@@ -28,11 +29,14 @@ export function fileForPublicPath(root,page){
 }
 
 function externalEvidenceLinks(html){
-  const hrefs=[...String(html||'').matchAll(/href=["'](https:\/\/[^"'#]+)["']/gi)].map(m=>m[1]);
-  return hrefs.filter(url=>{
+  const text=String(html||'');
+  const hrefs=[...text.matchAll(/href=["'](https:\/\/[^"'#]+)["']/gi)].map(m=>m[1]);
+  const structured=[...text.matchAll(/"(?:citation|isBasedOn)"\s*:\s*"((?:https:\/\/)[^"]+)"/gi)].map(m=>m[1]);
+  const urls=[...new Set([...hrefs,...structured])];
+  return urls.filter(url=>{
     try{
       const u=new URL(url);
-      return u.hostname!=='trytoolscout.org'&&!u.hostname.endsWith('.trytoolscout.org')&&!/google\.com\/s2\/favicons/i.test(url);
+      return u.hostname!=='trytoolscout.org'&&!u.hostname.endsWith('.trytoolscout.org')&&!/google\.com\/s2\/favicons/i.test(url)&&u.hostname!=='schema.org';
     }catch{return false}
   }).length;
 }
@@ -84,6 +88,18 @@ export function scoreEditorialPage(html,{pageType='other',hasFreshUpdate=false}=
     if(hasH1)score+=5;
     if(hasMetaDescription)score+=5;
     if(wc>=900)score+=20;else if(wc>=500)score+=12;else if(wc>=250)score+=8;
+  }else if(pageType==='publisher_asset'){
+    score=10;
+    if(hasTitle)score+=10;
+    if(hasMetaDescription)score+=10;
+    if(hasCanonical)score+=10;
+    if(hasRobots)score+=5;
+    if(hasH1)score+=10;
+    if(hasStructuredData)score+=10;
+    if(wc>=500)score+=15;else if(wc>=300)score+=10;
+    if(internalLinks>=5)score+=10;else if(internalLinks>=2)score+=5;
+    if(hasDisclosure)score+=5;
+    if(hasVerification||dated)score+=5;
   }else if(pageType==='policy'){
     score=10;
     if(hasTitle)score+=15;
