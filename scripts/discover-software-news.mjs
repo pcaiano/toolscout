@@ -123,7 +123,7 @@ function editorialTextV2(type,tool,item){
   const detail=item.description&&item.description.length>=55?item.description:`${tool} published an official update titled "${item.title}".`;
   const lower=(item.title+' '+item.description).toLowerCase();
   const angle=/advertis|attribution|brand suitab/.test(lower)?'For software buyers, the notable shift is that the product is becoming a commercial surface as well as a working tool.':/shut down|retir|deprecat/.test(lower)?'The important point is continuity: buyers need to separate the capability that is disappearing from the workflows the vendor is keeping alive.':/branch|recovery|error|human reply|agentic/.test(lower)?'The meaningful change is execution depth rather than another layer of AI branding.':/mcp|connector|integration|api/.test(lower)?'The buyer question is interoperability: this update changes how the product can fit into an existing stack.':'The useful reading of this release is what it changes in the buying decision, not the announcement itself.';
-  const changed=cleanNews(`${angle} ${detail}`);
+  const changed=cleanNews(`${detail} ${angle}`);
   const whyMap={
     product_retirement:`For teams already using ${tool}, this changes migration and continuity risk. For new buyers, it removes a use case that should no longer influence the shortlist.`,
     pricing_packaging:`The product may now fit a different budget or customer segment, so previous pricing assumptions should not be carried into a new evaluation.`,
