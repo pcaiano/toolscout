@@ -1,44 +1,13 @@
 {
-  "generatedAt": "2026-10-05T15:54:22.123Z",
+  "generatedAt": "2026-10-06T11:04:59.543Z",
   "policy": "Broaden the indexable catalog using verified first-party product facts and repeated market signals, while keeping ranking and comparison eligibility separate until stronger tool-specific editorial evidence exists.",
   "summary": {
     "catalogTools": 127,
-    "promoted": 3,
-    "held": 18,
+    "promoted": 0,
+    "held": 21,
     "maxPromotionsPerCycle": 5
   },
-  "promoted": [
-    {
-      "slug": "vmaker-ai",
-      "name": "Vmaker AI",
-      "category": "content",
-      "signals": 2,
-      "capabilities": 7,
-      "catalogTier": "coverage",
-      "rankingEligible": true,
-      "comparisonEligible": true
-    },
-    {
-      "slug": "weryai",
-      "name": "Weryai",
-      "category": "design",
-      "signals": 2,
-      "capabilities": 4,
-      "catalogTier": "coverage",
-      "rankingEligible": true,
-      "comparisonEligible": true
-    },
-    {
-      "slug": "wondershare-repairit",
-      "name": "Wondershare Repairit",
-      "category": "developer",
-      "signals": 2,
-      "capabilities": 10,
-      "catalogTier": "coverage",
-      "rankingEligible": true,
-      "comparisonEligible": true
-    }
-  ],
+  "promoted": [],
   "held": [
     {
       "slug": "anijam-ai",
@@ -110,6 +79,18 @@
     },
     {
       "slug": "vidflux-ai",
+      "reason": "entity_already_in_catalog"
+    },
+    {
+      "slug": "vmaker-ai",
+      "reason": "entity_already_in_catalog"
+    },
+    {
+      "slug": "weryai",
+      "reason": "entity_already_in_catalog"
+    },
+    {
+      "slug": "wondershare-repairit",
       "reason": "entity_already_in_catalog"
     }
   ]

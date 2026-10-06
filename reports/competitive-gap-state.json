@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-05T15:54:04.693Z",
+  "updatedAt": "2026-10-06T11:04:49.862Z",
   "candidates": {
     "ai-background-remover": {
       "candidateType": "software-entity",
       "firstSeenAt": "2026-10-05T07:40:08.263Z",
-      "lastSeenAt": "2026-10-05T15:54:04.693Z",
+      "lastSeenAt": "2026-10-06T11:04:49.862Z",
       "mentions": 2,
       "sources": [
         "Toolify",
@@ -16,7 +16,7 @@
     "ai-email-writer": {
       "candidateType": "software-entity",
       "firstSeenAt": "2026-10-05T07:40:08.263Z",
-      "lastSeenAt": "2026-10-05T15:54:04.693Z",
+      "lastSeenAt": "2026-10-06T11:04:49.862Z",
       "mentions": 2,
       "sources": [
         "Futurepedia",
@@ -27,7 +27,7 @@
     "ai-image-editor": {
       "candidateType": "software-entity",
       "firstSeenAt": "2026-10-05T07:40:08.263Z",
-      "lastSeenAt": "2026-10-05T15:54:04.693Z",
+      "lastSeenAt": "2026-10-06T11:04:49.862Z",
       "mentions": 2,
       "sources": [
         "Aixploria",
@@ -38,7 +38,7 @@
     "ai-image-upscaler": {
       "candidateType": "software-entity",
       "firstSeenAt": "2026-10-05T07:40:08.263Z",
-      "lastSeenAt": "2026-10-05T15:54:04.693Z",
+      "lastSeenAt": "2026-10-06T11:04:49.862Z",
       "mentions": 2,
       "sources": [
         "Toolify",
@@ -66,12 +66,12 @@
         "position": 0,
         "status": "not-observed"
       },
-      "lastMeasuredAt": "2026-10-05T15:54:04.693Z"
+      "lastMeasuredAt": "2026-10-06T11:04:49.862Z"
     },
     "audio-editor": {
       "candidateType": "software-entity",
       "firstSeenAt": "2026-10-05T07:40:08.263Z",
-      "lastSeenAt": "2026-10-05T15:54:04.693Z",
+      "lastSeenAt": "2026-10-06T11:04:49.862Z",
       "mentions": 2,
       "sources": [
         "Capterra",
@@ -99,12 +99,12 @@
         "position": 0,
         "status": "not-observed"
       },
-      "lastMeasuredAt": "2026-10-05T15:54:04.693Z"
+      "lastMeasuredAt": "2026-10-06T11:04:49.862Z"
     },
     "claude-code": {
       "candidateType": "software-entity",
       "firstSeenAt": "2026-10-05T07:40:08.263Z",
-      "lastSeenAt": "2026-10-05T15:54:04.693Z",
+      "lastSeenAt": "2026-10-06T11:04:49.862Z",
       "mentions": 2,
       "sources": [
         "AlternativeTo",
@@ -115,7 +115,7 @@
     "content-creation": {
       "candidateType": "software-entity",
       "firstSeenAt": "2026-10-05T07:40:08.263Z",
-      "lastSeenAt": "2026-10-05T15:54:04.693Z",
+      "lastSeenAt": "2026-10-06T11:04:49.862Z",
       "mentions": 2,
       "sources": [
         "Capterra",
@@ -126,7 +126,7 @@
     "coool-ai": {
       "candidateType": "software-entity",
       "firstSeenAt": "2026-10-05T07:40:08.263Z",
-      "lastSeenAt": "2026-10-05T15:54:04.693Z",
+      "lastSeenAt": "2026-10-06T11:04:49.862Z",
       "mentions": 2,
       "sources": [
         "Futurepedia",
@@ -154,7 +154,7 @@
         "position": 0,
         "status": "not-observed"
       },
-      "lastMeasuredAt": "2026-10-05T15:54:04.693Z"
+      "lastMeasuredAt": "2026-10-06T11:04:49.862Z"
     },
     "davinci-ai": {
       "candidateType": "software-entity",
@@ -176,7 +176,7 @@
         "position": 0,
         "status": "not-observed"
       },
-      "lastMeasuredAt": "2026-10-05T15:54:04.693Z"
+      "lastMeasuredAt": "2026-10-06T11:04:49.862Z"
     },
     "deep-swap-ai": {
       "candidateType": "software-entity",
@@ -198,7 +198,7 @@
         "position": 0,
         "status": "not-observed"
       },
-      "lastMeasuredAt": "2026-10-05T15:54:04.693Z"
+      "lastMeasuredAt": "2026-10-06T11:04:49.862Z"
     },
     "face-swap-ai": {
       "candidateType": "software-entity",
@@ -220,12 +220,12 @@
         "position": 0,
         "status": "not-observed"
       },
-      "lastMeasuredAt": "2026-10-05T15:54:04.693Z"
+      "lastMeasuredAt": "2026-10-06T11:04:49.862Z"
     },
     "faq": {
       "candidateType": "software-entity",
       "firstSeenAt": "2026-10-05T07:40:08.263Z",
-      "lastSeenAt": "2026-10-05T15:54:04.693Z",
+      "lastSeenAt": "2026-10-06T11:04:49.862Z",
       "mentions": 2,
       "sources": [
         "AlternativeTo",
@@ -253,7 +253,7 @@
         "position": 0,
         "status": "not-observed"
       },
-      "lastMeasuredAt": "2026-10-05T15:54:04.693Z"
+      "lastMeasuredAt": "2026-10-06T11:04:49.862Z"
     },
     "lip-sync-ai": {
       "candidateType": "software-entity",
@@ -275,7 +275,7 @@
         "position": 0,
         "status": "not-observed"
       },
-      "lastMeasuredAt": "2026-10-05T15:54:04.693Z"
+      "lastMeasuredAt": "2026-10-06T11:04:49.862Z"
     },
     "lorka-ai": {
       "candidateType": "software-entity",
@@ -297,12 +297,12 @@
         "position": 0,
         "status": "not-observed"
       },
-      "lastMeasuredAt": "2026-10-05T15:54:04.693Z"
+      "lastMeasuredAt": "2026-10-06T11:04:49.862Z"
     },
     "makiverse": {
       "candidateType": "software-entity",
       "firstSeenAt": "2026-10-05T07:40:08.263Z",
-      "lastSeenAt": "2026-10-05T15:54:04.693Z",
+      "lastSeenAt": "2026-10-06T11:04:49.862Z",
       "mentions": 2,
       "sources": [
         "Aixploria",
@@ -313,7 +313,7 @@
     "maxaeo": {
       "candidateType": "software-entity",
       "firstSeenAt": "2026-10-05T07:40:08.263Z",
-      "lastSeenAt": "2026-10-05T15:54:04.693Z",
+      "lastSeenAt": "2026-10-06T11:04:49.862Z",
       "mentions": 2,
       "sources": [
         "Aixploria",
@@ -324,7 +324,7 @@
     "no-code": {
       "candidateType": "software-entity",
       "firstSeenAt": "2026-10-05T07:40:08.263Z",
-      "lastSeenAt": "2026-10-05T15:54:04.693Z",
+      "lastSeenAt": "2026-10-06T11:04:49.862Z",
       "mentions": 2,
       "sources": [
         "Capterra",
@@ -352,7 +352,7 @@
         "position": 0,
         "status": "not-observed"
       },
-      "lastMeasuredAt": "2026-10-05T15:54:04.693Z"
+      "lastMeasuredAt": "2026-10-06T11:04:49.862Z"
     },
     "pine-ai": {
       "candidateType": "software-entity",
@@ -374,7 +374,7 @@
         "position": 0,
         "status": "not-observed"
       },
-      "lastMeasuredAt": "2026-10-05T15:54:04.693Z"
+      "lastMeasuredAt": "2026-10-06T11:04:49.862Z"
     },
     "pixmax-ai": {
       "candidateType": "software-entity",
@@ -396,12 +396,12 @@
         "position": 0,
         "status": "not-observed"
       },
-      "lastMeasuredAt": "2026-10-05T15:54:04.693Z"
+      "lastMeasuredAt": "2026-10-06T11:04:49.862Z"
     },
     "postwizard-ai": {
       "candidateType": "software-entity",
       "firstSeenAt": "2026-10-05T07:40:08.263Z",
-      "lastSeenAt": "2026-10-05T15:54:04.693Z",
+      "lastSeenAt": "2026-10-06T11:04:49.862Z",
       "mentions": 2,
       "sources": [
         "Futurepedia",
@@ -429,7 +429,7 @@
         "position": 0,
         "status": "not-observed"
       },
-      "lastMeasuredAt": "2026-10-05T15:54:04.693Z"
+      "lastMeasuredAt": "2026-10-06T11:04:49.862Z"
     },
     "resume-ai": {
       "candidateType": "software-entity",
@@ -451,12 +451,12 @@
         "position": 0,
         "status": "not-observed"
       },
-      "lastMeasuredAt": "2026-10-05T15:54:04.693Z"
+      "lastMeasuredAt": "2026-10-06T11:04:49.862Z"
     },
     "search-engine": {
       "candidateType": "software-entity",
       "firstSeenAt": "2026-10-05T07:40:08.263Z",
-      "lastSeenAt": "2026-10-05T15:54:04.693Z",
+      "lastSeenAt": "2026-10-06T11:04:49.862Z",
       "mentions": 2,
       "sources": [
         "Capterra",
@@ -467,7 +467,7 @@
     "sketchbubble-ai": {
       "candidateType": "software-entity",
       "firstSeenAt": "2026-10-05T07:40:08.263Z",
-      "lastSeenAt": "2026-10-05T15:54:04.693Z",
+      "lastSeenAt": "2026-10-06T11:04:49.862Z",
       "mentions": 2,
       "sources": [
         "Futurepedia",
@@ -495,7 +495,7 @@
         "position": 0,
         "status": "not-observed"
       },
-      "lastMeasuredAt": "2026-10-05T15:54:04.693Z"
+      "lastMeasuredAt": "2026-10-06T11:04:49.862Z"
     },
     "teachquill": {
       "candidateType": "software-entity",
@@ -517,7 +517,7 @@
         "position": 0,
         "status": "not-observed"
       },
-      "lastMeasuredAt": "2026-10-05T15:54:04.693Z"
+      "lastMeasuredAt": "2026-10-06T11:04:49.862Z"
     },
     "typli-ai": {
       "candidateType": "software-entity",
@@ -539,12 +539,12 @@
         "position": 0,
         "status": "not-observed"
       },
-      "lastMeasuredAt": "2026-10-05T15:54:04.693Z"
+      "lastMeasuredAt": "2026-10-06T11:04:49.862Z"
     },
     "video-editing": {
       "candidateType": "software-entity",
       "firstSeenAt": "2026-10-05T07:40:08.263Z",
-      "lastSeenAt": "2026-10-05T15:54:04.693Z",
+      "lastSeenAt": "2026-10-06T11:04:49.862Z",
       "mentions": 2,
       "sources": [
         "Capterra",
@@ -572,7 +572,7 @@
         "position": 0,
         "status": "not-observed"
       },
-      "lastMeasuredAt": "2026-10-05T15:54:04.693Z"
+      "lastMeasuredAt": "2026-10-06T11:04:49.862Z"
     },
     "vmaker-ai": {
       "candidateType": "software-entity",
@@ -594,7 +594,7 @@
         "position": 0,
         "status": "not-observed"
       },
-      "lastMeasuredAt": "2026-10-05T15:54:04.693Z"
+      "lastMeasuredAt": "2026-10-06T11:04:49.862Z"
     },
     "weryai": {
       "candidateType": "software-entity",
@@ -616,7 +616,7 @@
         "position": 0,
         "status": "not-observed"
       },
-      "lastMeasuredAt": "2026-10-05T15:54:04.693Z"
+      "lastMeasuredAt": "2026-10-06T11:04:49.862Z"
     },
     "wondershare-repairit": {
       "candidateType": "software-entity",
@@ -638,7 +638,7 @@
         "position": 0,
         "status": "not-observed"
       },
-      "lastMeasuredAt": "2026-10-05T15:54:04.693Z"
+      "lastMeasuredAt": "2026-10-06T11:04:49.862Z"
     }
   }
 }

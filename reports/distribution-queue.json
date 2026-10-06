@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T15:56:14.432Z",
+  "generatedAt": "2026-10-06T11:06:49.151Z",
   "count": 47,
   "policy": "Only editorially verified assets are eligible for distribution. Page-level Search Console demand chooses which existing pages deserve attention. Monetization can increase measurement urgency but never changes editorial ranking. Original research can be promoted to editorial, community and indexing surfaces, while product directories continue to receive the ToolScout product profile.",
   "items": [
@@ -9,12 +9,12 @@
       "title": "MailerLite: Features &amp; Pricing",
       "url": "https://trytoolscout.org/tools/mailerlite",
       "category": "software",
-      "priorityScore": 140,
+      "priorityScore": 141,
       "demandBoost": 50,
       "searchDemand": {
-        "impressions": 15,
+        "impressions": 16,
         "clicks": 0,
-        "position": 15.8667,
+        "position": 15.5625,
         "lane": "authority-and-distribution",
         "monetized": true,
         "monetizedSlugs": [
@@ -40,19 +40,19 @@
       "title": "Apollo: Features &amp; Pricing",
       "url": "https://trytoolscout.org/tools/apollo",
       "category": "software",
-      "priorityScore": 131,
+      "priorityScore": 134,
       "demandBoost": 50,
       "searchDemand": {
-        "impressions": 8,
+        "impressions": 9,
         "clicks": 0,
-        "position": 15.25,
-        "lane": "authority-and-distribution",
+        "position": 14.2222,
+        "lane": "ctr-and-snippet",
         "monetized": true,
         "monetizedSlugs": [
           "apollo"
         ]
       },
-      "distributionReason": "Direct page distribution selected by GSC routing lane authority-and-distribution. This strengthens an existing page with observed demand.",
+      "distributionReason": "Direct page distribution selected by GSC routing lane ctr-and-snippet. This strengthens an existing page with observed demand.",
       "searchSnippet": "ToolScout profile for Apollo, covering recorded use cases, key capabilities, pricing, AI interoperability and relevant software comparisons.",
       "socialHook": "ToolScout updated its decision context for Apollo: Features &amp; Pricing. Here is the page and the criteria behind it.",
       "linkedInPost": "ToolScout updated its decision context for Apollo: Features &amp; Pricing. The page is based on documented capabilities and observed search demand, with ranking kept separate from affiliate relationships.\n\nhttps://trytoolscout.org/tools/apollo",
@@ -71,12 +71,12 @@
       "title": "Airtable: Features &amp; Pricing",
       "url": "https://trytoolscout.org/tools/airtable",
       "category": "software",
-      "priorityScore": 127,
+      "priorityScore": 126,
       "demandBoost": 50,
       "searchDemand": {
-        "impressions": 471,
+        "impressions": 461,
         "clicks": 0,
-        "position": 74.0191,
+        "position": 74.0412,
         "lane": "relevance-and-authority",
         "monetized": false,
         "monetizedSlugs": []
@@ -258,12 +258,12 @@
       "title": "Semrush: Features &amp; Pricing",
       "url": "https://trytoolscout.org/tools/semrush",
       "category": "software",
-      "priorityScore": 118,
-      "demandBoost": 49,
+      "priorityScore": 117,
+      "demandBoost": 48,
       "searchDemand": {
-        "impressions": 281,
+        "impressions": 270,
         "clicks": 0,
-        "position": 56.0747,
+        "position": 56.1481,
         "lane": "editorial-depth",
         "monetized": false,
         "monetizedSlugs": []
@@ -287,12 +287,12 @@
       "title": "Tally: Features &amp; Pricing",
       "url": "https://trytoolscout.org/tools/tally",
       "category": "software",
-      "priorityScore": 116,
+      "priorityScore": 115,
       "demandBoost": 48,
       "searchDemand": {
-        "impressions": 92,
+        "impressions": 86,
         "clicks": 0,
-        "position": 38.8587,
+        "position": 38.6395,
         "lane": "editorial-depth",
         "monetized": false,
         "monetizedSlugs": []
@@ -317,11 +317,11 @@
       "url": "https://trytoolscout.org/tools/moz-pro",
       "category": "software",
       "priorityScore": 109,
-      "demandBoost": 45,
+      "demandBoost": 44,
       "searchDemand": {
-        "impressions": 171,
+        "impressions": 166,
         "clicks": 0,
-        "position": 68.6784,
+        "position": 68.5904,
         "lane": "editorial-depth",
         "monetized": false,
         "monetizedSlugs": []
@@ -348,9 +348,9 @@
       "priorityScore": 75,
       "demandBoost": 45,
       "searchDemand": {
-        "impressions": 2494,
+        "impressions": 2672,
         "clicks": 0,
-        "position": 80.2346,
+        "position": 80.3275,
         "lane": "relevance-and-authority",
         "monetized": false
       },
@@ -378,9 +378,9 @@
       "priorityScore": 75,
       "demandBoost": 40,
       "searchDemand": {
-        "impressions": 313,
+        "impressions": 323,
         "clicks": 0,
-        "position": 77.3642,
+        "position": 76.5666,
         "lane": "relevance-and-authority",
         "monetized": true
       },
@@ -405,12 +405,12 @@
       "title": "Best Funnel Builder",
       "url": "https://trytoolscout.org/best-funnel-builder",
       "category": "marketing",
-      "priorityScore": 70,
-      "demandBoost": 36,
+      "priorityScore": 69,
+      "demandBoost": 35,
       "searchDemand": {
-        "impressions": 146,
+        "impressions": 129,
         "clicks": 0,
-        "position": 74.7397,
+        "position": 74.8605,
         "lane": "relevance-and-authority",
         "monetized": true
       },
@@ -438,9 +438,9 @@
       "priorityScore": 66,
       "demandBoost": 31,
       "searchDemand": {
-        "impressions": 61,
+        "impressions": 63,
         "clicks": 0,
-        "position": 58.5574,
+        "position": 59,
         "lane": "editorial-depth",
         "monetized": true
       },
@@ -498,9 +498,9 @@
       "priorityScore": 62,
       "demandBoost": 33,
       "searchDemand": {
-        "impressions": 135,
+        "impressions": 133,
         "clicks": 0,
-        "position": 45.3407,
+        "position": 45.8271,
         "lane": "editorial-depth",
         "monetized": false
       },
@@ -528,9 +528,9 @@
       "priorityScore": 62,
       "demandBoost": 32,
       "searchDemand": {
-        "impressions": 157,
+        "impressions": 162,
         "clicks": 0,
-        "position": 77.707,
+        "position": 76.1667,
         "lane": "relevance-and-authority",
         "monetized": false
       },
@@ -615,12 +615,12 @@
       "title": "Best Free Project Management Tools",
       "url": "https://trytoolscout.org/best-free-project-management-tools",
       "category": "business",
-      "priorityScore": 59,
-      "demandBoost": 30,
+      "priorityScore": 58,
+      "demandBoost": 29,
       "searchDemand": {
-        "impressions": 73,
+        "impressions": 64,
         "clicks": 0,
-        "position": 62.137,
+        "position": 63.5,
         "opportunity": "relevance-gap",
         "meaningfulSample": true
       },
@@ -648,9 +648,9 @@
       "priorityScore": 58,
       "demandBoost": 28,
       "searchDemand": {
-        "impressions": 72,
+        "impressions": 75,
         "clicks": 0,
-        "position": 75.8472,
+        "position": 75.2,
         "opportunity": "relevance-gap",
         "meaningfulSample": true
       },
@@ -678,9 +678,9 @@
       "priorityScore": 50,
       "demandBoost": 34,
       "searchDemand": {
-        "impressions": 31,
+        "impressions": 33,
         "clicks": 0,
-        "position": 34.6452,
+        "position": 35.8182,
         "lane": "editorial-depth",
         "monetized": true
       },
@@ -708,9 +708,9 @@
       "priorityScore": 46,
       "demandBoost": 35,
       "searchDemand": {
-        "impressions": 178,
+        "impressions": 183,
         "clicks": 0,
-        "position": 61.6517,
+        "position": 60.7322,
         "lane": "editorial-depth",
         "monetized": false
       },
@@ -738,9 +738,9 @@
       "priorityScore": 43,
       "demandBoost": 28,
       "searchDemand": {
-        "impressions": 81,
+        "impressions": 78,
         "clicks": 0,
-        "position": 75.5309,
+        "position": 75.5256,
         "lane": "relevance-and-authority",
         "monetized": false
       },
@@ -765,12 +765,12 @@
       "title": "Best Developer Tools",
       "url": "https://trytoolscout.org/best-developer-tools",
       "category": "developer",
-      "priorityScore": 40,
-      "demandBoost": 29,
+      "priorityScore": 41,
+      "demandBoost": 30,
       "searchDemand": {
-        "impressions": 60,
+        "impressions": 69,
         "clicks": 0,
-        "position": 66.2333,
+        "position": 66.2754,
         "opportunity": "relevance-gap",
         "meaningfulSample": true
       },
@@ -795,12 +795,12 @@
       "title": "Best Team Collaboration Tools",
       "url": "https://trytoolscout.org/best-team-collaboration-tools",
       "category": "business",
-      "priorityScore": 38,
-      "demandBoost": 24,
+      "priorityScore": 39,
+      "demandBoost": 25,
       "searchDemand": {
-        "impressions": 38,
+        "impressions": 42,
         "clicks": 0,
-        "position": 79.9211,
+        "position": 80.5476,
         "opportunity": "relevance-gap",
         "meaningfulSample": true
       },
@@ -828,9 +828,9 @@
       "priorityScore": 37,
       "demandBoost": 26,
       "searchDemand": {
-        "impressions": 49,
+        "impressions": 50,
         "clicks": 0,
-        "position": 80.0816,
+        "position": 80.42,
         "opportunity": "relevance-gap",
         "meaningfulSample": true
       },
@@ -858,9 +858,9 @@
       "priorityScore": 35,
       "demandBoost": 5,
       "searchDemand": {
-        "impressions": 5,
+        "impressions": 6,
         "clicks": 0,
-        "position": 88,
+        "position": 88.6667,
         "opportunity": "insufficient-sample",
         "meaningfulSample": false
       },
@@ -1164,9 +1164,9 @@
       "priorityScore": 16,
       "demandBoost": 5,
       "searchDemand": {
-        "impressions": 8,
+        "impressions": 12,
         "clicks": 0,
-        "position": 57.75,
+        "position": 41.1667,
         "opportunity": "insufficient-sample",
         "meaningfulSample": false
       },
@@ -1194,9 +1194,9 @@
       "priorityScore": 16,
       "demandBoost": 5,
       "searchDemand": {
-        "impressions": 8,
+        "impressions": 9,
         "clicks": 0,
-        "position": 50.125,
+        "position": 45.4444,
         "opportunity": "insufficient-sample",
         "meaningfulSample": false
       },
@@ -1224,9 +1224,9 @@
       "priorityScore": 16,
       "demandBoost": 5,
       "searchDemand": {
-        "impressions": 16,
+        "impressions": 18,
         "clicks": 0,
-        "position": 69.5,
+        "position": 69.6667,
         "opportunity": "insufficient-sample",
         "meaningfulSample": false
       },

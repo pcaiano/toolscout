@@ -2,10 +2,10 @@
   "version": 5,
   "edition": "2026-10",
   "editionLabel": "October 2026",
-  "publishedAt": "2026-10-05T15:53:54.130Z",
-  "scope": "ToolScout rolling 30 day editorial dataset of public software product changes selected for buyer relevance. It is not a measure of global market share.",
-  "windowStart": "2026-09-06T15:53:54.130Z",
-  "windowEnd": "2026-10-05T15:53:54.130Z",
+  "publishedAt": "2026-10-06T11:04:39.530Z",
+  "scope": "ToolScout first-party editorial dataset: a rolling 30 day sample of public software product changes selected for buyer relevance. It is not a measure of global market share.",
+  "windowStart": "2026-09-07T11:04:39.530Z",
+  "windowEnd": "2026-10-06T11:04:39.530Z",
   "updatedThrough": "2026-10-05",
   "sourceMethod": "Primary vendor documentation, changelogs, release notes and official product announcements from the rolling 30 day window. ToolScout aggregates observed changes into trend categories and keeps affiliate status out of selection.",
   "primarySourceCount": 20,
@@ -17,9 +17,9 @@
   },
   "searchVisibility": {
     "source": "Google Search Console",
-    "impressions": 6725,
+    "impressions": 6859,
     "clicks": 7,
-    "ctr": 0.1041,
+    "ctr": 0.1021,
     "position": 0
   },
   "editorialPolicy": "Updates are selected for buyer relevance. Affiliate status, commission and partner relationships do not influence inclusion or placement.",
@@ -765,6 +765,16 @@
           "type": "profile",
           "url": "/tools/notion",
           "label": "Notion profile"
+        },
+        {
+          "type": "comparison",
+          "url": "/notion-vs-clickup",
+          "label": "notion vs clickup"
+        },
+        {
+          "type": "comparison",
+          "url": "/airtable-vs-notion",
+          "label": "airtable vs notion"
         }
       ],
       "articleUrl": "/news/notion-mail-shuts-down.html",
@@ -807,6 +817,16 @@
           "type": "profile",
           "url": "/tools/zapier",
           "label": "Zapier profile"
+        },
+        {
+          "type": "comparison",
+          "url": "/make-vs-zapier",
+          "label": "make vs zapier"
+        },
+        {
+          "type": "guide",
+          "url": "/best-workflow-automation-tools",
+          "label": "Best Workflow Automation Tools"
         }
       ],
       "articleUrl": "/news/zapier-next-gen-zaps-mcp.html",
@@ -828,6 +848,16 @@
           "type": "profile",
           "url": "/tools/github",
           "label": "GitHub profile"
+        },
+        {
+          "type": "guide",
+          "url": "/best-developer-tools",
+          "label": "Best Developer Tools"
+        },
+        {
+          "type": "guide",
+          "url": "/best-ai-coding-tools",
+          "label": "Best AI Coding Tools"
         }
       ],
       "articleUrl": "/news/github-actions-workflow-execution-protections-ga.html",
@@ -849,6 +879,16 @@
           "type": "profile",
           "url": "/tools/github",
           "label": "GitHub profile"
+        },
+        {
+          "type": "guide",
+          "url": "/best-developer-tools",
+          "label": "Best Developer Tools"
+        },
+        {
+          "type": "guide",
+          "url": "/best-ai-coding-tools",
+          "label": "Best AI Coding Tools"
         }
       ],
       "articleUrl": "/news/github-ai-scan-codeql-setup.html",
@@ -870,6 +910,16 @@
           "type": "profile",
           "url": "/tools/notion",
           "label": "Notion profile"
+        },
+        {
+          "type": "comparison",
+          "url": "/notion-vs-clickup",
+          "label": "notion vs clickup"
+        },
+        {
+          "type": "comparison",
+          "url": "/airtable-vs-notion",
+          "label": "airtable vs notion"
         }
       ],
       "articleUrl": "/news/notion-3-7-agent-skills.html",
@@ -891,6 +941,26 @@
           "type": "profile",
           "url": "/tools/hubspot",
           "label": "HubSpot profile"
+        },
+        {
+          "type": "comparison",
+          "url": "/hubspot-vs-pipedrive",
+          "label": "hubspot vs pipedrive"
+        },
+        {
+          "type": "guide",
+          "url": "/best-free-crm",
+          "label": "Best Free CRM Tools"
+        },
+        {
+          "type": "guide",
+          "url": "/best-crm-with-automation",
+          "label": "Best CRM with Automation"
+        },
+        {
+          "type": "guide",
+          "url": "/best-affordable-crm",
+          "label": "Best Affordable CRM"
         }
       ],
       "articleUrl": "/news/hubspot-mcp-server-updates.html",

@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-05T15:53:54.132Z",
-  "engine": "ToolScout Editorial News Engine v1",
+  "generatedAt": "2026-10-06T11:04:39.531Z",
+  "engine": "ToolScout Editorial News Engine v2",
   "lookbackDays": 14,
   "maxPerRun": 4,
   "sources": [
@@ -41,14 +41,15 @@
   "candidates": 1,
   "published": [
     {
-      "id": "github-rate-limits-for-private-vulnerability-reports",
-      "date": "2026-10-01",
+      "id": "github-code-scanning-ai-scan-enablement-status-in-security-overview",
+      "date": "2026-10-06",
       "toolSlug": "github",
-      "title": "Rate limits for private vulnerability reports",
-      "sourceUrl": "https://github.blog/changelog/2026-10-01-rate-limits-for-private-vulnerability-reports",
-      "score": 5
+      "title": "Code scanning AI Scan enablement status in security overview",
+      "sourceUrl": "https://github.blog/changelog/2026-10-06-code-scanning-ai-scan-enablement-status-in-security-overview",
+      "score": 7
     }
   ],
-  "lastPublishedAt": "2026-10-05",
+  "refreshedArchive": 20,
+  "lastPublishedAt": "2026-10-06",
   "status": "healthy"
 }

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T15:56:10.685Z",
+  "generatedAt": "2026-10-06T11:06:46.192Z",
   "engine": "ToolScout Content Intelligence v1.3",
   "objective": "Choose and test content opportunities using observed page-level search demand and likely-human social/commercial behavior without allowing affiliate economics to influence editorial recommendations.",
   "evidenceTier": "directional",
@@ -18,9 +18,9 @@
   "search": {
     "summary": {
       "observedGscIntents": 39,
-      "observedGscPages": 139,
+      "observedGscPages": 140,
       "searchClicks": 7,
-      "searchImpressions": 6725,
+      "searchImpressions": 6859,
       "organicAcquisitionStatus": "early-search-acquisition",
       "indexingRecovery": 1,
       "actionableOpportunities": 21,
@@ -31,14 +31,14 @@
       "strikingMeaningful": 0,
       "strikingLowSample": 1,
       "authorityDepthOpportunities": 14,
-      "competitorResearchCandidates": 19
+      "competitorResearchCandidates": 16
     },
     "routingSummary": {
-      "pages": 139,
-      "monetizedPages": 31,
+      "pages": 140,
+      "monetizedPages": 30,
       "ctrAndSnippet": 30,
-      "authorityAndDistribution": 13,
-      "editorialDepth": 63
+      "authorityAndDistribution": 14,
+      "editorialDepth": 62
     },
     "topOpportunities": [
       {
@@ -47,8 +47,8 @@
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 2494,
-        "position": 80.2346,
+        "impressions": 2672,
+        "position": 80.3275,
         "topTools": [
           "semrush",
           "ahrefs",
@@ -57,12 +57,12 @@
       },
       {
         "intent": "best-crm-for-small-business",
-        "priorityScore": 52,
+        "priorityScore": 53,
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 313,
-        "position": 77.3642,
+        "impressions": 323,
+        "position": 76.5666,
         "topTools": [
           "freshsales",
           "zoho-crm",
@@ -75,8 +75,8 @@
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 178,
-        "position": 61.6517,
+        "impressions": 183,
+        "position": 60.7322,
         "topTools": [
           "socialbee",
           "buffer",
@@ -89,25 +89,12 @@
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 157,
-        "position": 77.707,
+        "impressions": 162,
+        "position": 76.1667,
         "topTools": [
           "attio",
           "hubspot",
           "freshsales"
-        ]
-      },
-      {
-        "intent": "best-funnel-builder",
-        "priorityScore": 44,
-        "lane": "seo-authority-depth",
-        "action": "deepen-existing",
-        "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 146,
-        "position": 74.7397,
-        "topTools": [
-          "getresponse",
-          "systeme-io"
         ]
       },
       {
@@ -116,12 +103,25 @@
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 135,
-        "position": 45.3407,
+        "impressions": 133,
+        "position": 45.8271,
         "topTools": [
           "asana",
           "wrike",
           "basecamp"
+        ]
+      },
+      {
+        "intent": "best-funnel-builder",
+        "priorityScore": 43,
+        "lane": "seo-authority-depth",
+        "action": "deepen-existing",
+        "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
+        "impressions": 129,
+        "position": 74.8605,
+        "topTools": [
+          "getresponse",
+          "systeme-io"
         ]
       },
       {
@@ -130,8 +130,8 @@
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 81,
-        "position": 75.5309,
+        "impressions": 78,
+        "position": 75.5256,
         "topTools": [
           "surfer",
           "ahrefs",
@@ -144,8 +144,8 @@
         "lane": "seo-authority-depth",
         "action": "deepen-existing",
         "reason": "Meaningful visibility with weak ranking: improve intent match, capability relevance, depth, evidence and authority. Impressions are not traffic.",
-        "impressions": 72,
-        "position": 75.8472,
+        "impressions": 75,
+        "position": 75.2,
         "topTools": [
           "close",
           "monday-crm",
@@ -158,10 +158,10 @@
         "pathname": "/",
         "type": "other",
         "lane": "ctr-and-snippet",
-        "priorityScore": 140.2,
-        "impressions": 89,
+        "priorityScore": 139.19,
+        "impressions": 85,
         "clicks": 2,
-        "position": 7.4607,
+        "position": 7.6588,
         "monetized": false,
         "monetizedSlugs": [],
         "actions": [
@@ -175,10 +175,10 @@
         "pathname": "/best-seo-tools-for-agencies",
         "type": "guide",
         "lane": "relevance-and-authority",
-        "priorityScore": 135.42,
-        "impressions": 2494,
+        "priorityScore": 136.61,
+        "impressions": 2672,
         "clicks": 0,
-        "position": 80.2346,
+        "position": 80.3275,
         "monetized": false,
         "monetizedSlugs": [],
         "actions": [
@@ -209,10 +209,10 @@
         "pathname": "/best-crm-for-small-business",
         "type": "guide",
         "lane": "relevance-and-authority",
-        "priorityScore": 120.54,
-        "impressions": 313,
+        "priorityScore": 121.08,
+        "impressions": 323,
         "clicks": 0,
-        "position": 77.3642,
+        "position": 76.5666,
         "monetized": true,
         "monetizedSlugs": [
           "zoho-crm"
@@ -246,10 +246,10 @@
         "pathname": "/tools/mailerlite",
         "type": "tool-profile",
         "lane": "authority-and-distribution",
-        "priorityScore": 112.05,
-        "impressions": 15,
+        "priorityScore": 113.43,
+        "impressions": 16,
         "clicks": 0,
-        "position": 15.8667,
+        "position": 15.5625,
         "monetized": true,
         "monetizedSlugs": [
           "mailerlite"
@@ -266,10 +266,10 @@
         "pathname": "/tools",
         "type": "other",
         "lane": "ctr-and-snippet",
-        "priorityScore": 108.67,
-        "impressions": 38,
+        "priorityScore": 108.69,
+        "impressions": 30,
         "clicks": 0,
-        "position": 13.8684,
+        "position": 10.2333,
         "monetized": false,
         "monetizedSlugs": [],
         "actions": [
@@ -280,33 +280,13 @@
         ]
       },
       {
-        "pathname": "/best-funnel-builder",
-        "type": "guide",
-        "lane": "relevance-and-authority",
-        "priorityScore": 107.4,
-        "impressions": 146,
-        "clicks": 0,
-        "position": 74.7397,
-        "monetized": true,
-        "monetizedSlugs": [
-          "systeme-io"
-        ],
-        "actions": [
-          "improve-query-intent-match",
-          "deepen-evidence",
-          "strengthen-internal-authority",
-          "test-selective-distribution",
-          "measure-monetized-outbound-and-revenue"
-        ]
-      },
-      {
         "pathname": "/tools/airtable",
         "type": "tool-profile",
         "lane": "relevance-and-authority",
-        "priorityScore": 106.59,
-        "impressions": 471,
+        "priorityScore": 106.22,
+        "impressions": 461,
         "clicks": 0,
-        "position": 74.0191,
+        "position": 74.0412,
         "monetized": false,
         "monetizedSlugs": [],
         "actions": [
@@ -334,13 +314,53 @@
         ]
       },
       {
+        "pathname": "/tools/apollo",
+        "type": "tool-profile",
+        "lane": "ctr-and-snippet",
+        "priorityScore": 105.72,
+        "impressions": 9,
+        "clicks": 0,
+        "position": 14.2222,
+        "monetized": true,
+        "monetizedSlugs": [
+          "apollo"
+        ],
+        "actions": [
+          "protect-ranking",
+          "improve-title-snippet-alignment",
+          "strengthen-answer-first-copy",
+          "measure-qualified-clicks",
+          "measure-monetized-outbound-and-revenue"
+        ]
+      },
+      {
+        "pathname": "/best-funnel-builder",
+        "type": "guide",
+        "lane": "relevance-and-authority",
+        "priorityScore": 105.27,
+        "impressions": 129,
+        "clicks": 0,
+        "position": 74.8605,
+        "monetized": true,
+        "monetizedSlugs": [
+          "systeme-io"
+        ],
+        "actions": [
+          "improve-query-intent-match",
+          "deepen-evidence",
+          "strengthen-internal-authority",
+          "test-selective-distribution",
+          "measure-monetized-outbound-and-revenue"
+        ]
+      },
+      {
         "pathname": "/best-ecommerce-platforms",
         "type": "guide",
         "lane": "editorial-depth",
-        "priorityScore": 103.39,
-        "impressions": 31,
+        "priorityScore": 103.15,
+        "impressions": 33,
         "clicks": 0,
-        "position": 34.6452,
+        "position": 35.8182,
         "monetized": true,
         "monetizedSlugs": [
           "shopify"
@@ -350,26 +370,6 @@
           "align-copy-to-observed-queries",
           "strengthen-internal-links",
           "prioritize-page-distribution",
-          "measure-monetized-outbound-and-revenue"
-        ]
-      },
-      {
-        "pathname": "/tools/apollo",
-        "type": "tool-profile",
-        "lane": "authority-and-distribution",
-        "priorityScore": 102.76,
-        "impressions": 8,
-        "clicks": 0,
-        "position": 15.25,
-        "monetized": true,
-        "monetizedSlugs": [
-          "apollo"
-        ],
-        "actions": [
-          "strengthen-internal-links",
-          "prioritize-page-distribution",
-          "queue-vendor-amplification-when-relevant",
-          "measure-position-change",
           "measure-monetized-outbound-and-revenue"
         ]
       }
@@ -653,16 +653,16 @@
       "best-crm-for-small-business",
       "best-social-media-management-tools",
       "best-free-crm",
-      "best-funnel-builder"
+      "best-project-management-tools"
     ],
     "pageCandidates": [
       "/best-seo-tools-for-agencies",
       "/best-crm-for-small-business",
       "/tools/mailerlite",
-      "/best-funnel-builder",
       "/tools/airtable",
-      "/best-ecommerce-platforms",
-      "/tools/apollo"
+      "/tools/apollo",
+      "/best-funnel-builder",
+      "/best-ecommerce-platforms"
     ],
     "testEligible": true,
     "allocationChangeEligible": false,

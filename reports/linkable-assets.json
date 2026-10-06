@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T15:53:54.130Z",
+  "generatedAt": "2026-10-06T11:04:39.530Z",
   "items": [
     {
       "id": "software-trends-2026-10",
@@ -8,7 +8,7 @@
       "canonicalUrl": "https://trytoolscout.org/software-trends-index.html",
       "dataUrl": "https://trytoolscout.org/software-trends-index.json",
       "citationText": "ToolScout Software Trends groups buyer relevant primary source software changes into observable patterns and supporting evidence.",
-      "sourcePolicy": "Official vendor sources and clearly labelled public product updates from a rolling 30 day editorial sample. The index reports editorial observations, not market share."
+      "sourcePolicy": "Official vendor sources and clearly labelled public product updates. The index reports editorial observations, not market share."
     }
   ]
 }

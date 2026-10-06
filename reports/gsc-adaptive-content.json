@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-05T15:56:11.124Z",
-  "gscGeneratedAt": "2026-10-05T15:53:53.393Z",
+  "generatedAt": "2026-10-06T11:06:46.525Z",
+  "gscGeneratedAt": "2026-10-06T11:04:38.589Z",
   "minimumImpressionsForHighConfidenceAction": 20,
   "rule": "Observed GSC demand may trigger additive factual decision depth. Low-sample first-page pages are protected from aggressive adaptive changes. Query strings must pass safety and intent-alignment checks before they can trigger adaptation.",
   "adaptiveApplied": 0,
@@ -18,9 +18,9 @@
     },
     {
       "intent": "best-crm-for-consultants",
-      "impressions": 5,
+      "impressions": 6,
       "clicks": 0,
-      "position": 88,
+      "position": 88.6667,
       "meaningfulSample": false,
       "lowSampleFirstPage": false,
       "dominantQuery": {
@@ -93,24 +93,24 @@
     },
     {
       "intent": "best-crm-for-small-business",
-      "impressions": 313,
+      "impressions": 323,
       "clicks": 0,
-      "position": 77.3642,
+      "position": 76.5666,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
         "query": "best crm for small business",
-        "impressions": 72,
-        "position": 78.5,
+        "impressions": 73,
+        "position": 78.5342,
         "alignment": 1
       },
       "action": "measure-only"
     },
     {
       "intent": "best-keyword-research-tools",
-      "impressions": 81,
+      "impressions": 78,
       "clicks": 0,
-      "position": 75.5309,
+      "position": 75.5256,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
@@ -123,9 +123,9 @@
     },
     {
       "intent": "best-ai-research-tools",
-      "impressions": 8,
+      "impressions": 9,
       "clicks": 0,
-      "position": 50.125,
+      "position": 45.4444,
       "meaningfulSample": false,
       "lowSampleFirstPage": false,
       "dominantQuery": null,
@@ -133,58 +133,73 @@
     },
     {
       "intent": "best-seo-tools-for-agencies",
-      "impressions": 2494,
+      "impressions": 2672,
       "clicks": 0,
-      "position": 80.2346,
+      "position": 80.3275,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
         "query": "seo software for agencies",
-        "impressions": 163,
-        "position": 88.0736,
+        "impressions": 186,
+        "position": 87.7366,
         "alignment": 1
       },
       "action": "measure-only"
     },
     {
       "intent": "best-funnel-builder",
-      "impressions": 146,
+      "impressions": 129,
       "clicks": 0,
-      "position": 74.7397,
+      "position": 74.8605,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
         "query": "best funnel builder",
-        "impressions": 32,
-        "position": 67.3438,
+        "impressions": 26,
+        "position": 68.8846,
         "alignment": 1
       },
       "action": "measure-only"
     },
     {
       "intent": "best-crm-for-sales-teams",
-      "impressions": 61,
+      "impressions": 63,
       "clicks": 0,
-      "position": 58.5574,
+      "position": 59,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
         "query": "crm for sales team",
-        "impressions": 14,
-        "position": 64.0714,
+        "impressions": 16,
+        "position": 64.9375,
         "alignment": 0.667
       },
       "action": "measure-only"
     },
     {
       "intent": "best-free-crm",
-      "impressions": 157,
+      "impressions": 162,
       "clicks": 0,
-      "position": 77.707,
+      "position": 76.1667,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
         "query": "best free crm tools",
+        "impressions": 19,
+        "position": 68.6316,
+        "alignment": 1
+      },
+      "action": "measure-only"
+    },
+    {
+      "intent": "best-project-management-tools",
+      "impressions": 133,
+      "clicks": 0,
+      "position": 45.8271,
+      "meaningfulSample": true,
+      "lowSampleFirstPage": false,
+      "dominantQuery": {
+        "query": "management tool",
         "impressions": 20,
         "position": 68.5,
         "alignment": 1
@@ -192,31 +207,16 @@
       "action": "measure-only"
     },
     {
-      "intent": "best-project-management-tools",
-      "impressions": 135,
-      "clicks": 0,
-      "position": 45.3407,
-      "meaningfulSample": true,
-      "lowSampleFirstPage": false,
-      "dominantQuery": {
-        "query": "management tool",
-        "impressions": 17,
-        "position": 67.4706,
-        "alignment": 1
-      },
-      "action": "measure-only"
-    },
-    {
       "intent": "best-free-project-management-tools",
-      "impressions": 73,
+      "impressions": 64,
       "clicks": 0,
-      "position": 62.137,
+      "position": 63.5,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
         "query": "free online project manager tools",
-        "impressions": 21,
-        "position": 67.381,
+        "impressions": 19,
+        "position": 67.5789,
         "alignment": 0.667
       },
       "action": "measure-only"

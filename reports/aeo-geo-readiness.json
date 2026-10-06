@@ -1,11 +1,16 @@
 {
-  "generatedAt": "2026-10-05T15:56:14.616Z",
-  "checked": 16,
+  "generatedAt": "2026-10-06T11:06:49.315Z",
+  "checked": 199,
+  "counts": {
+    "guides": 36,
+    "profiles": 127,
+    "comparisons": 15,
+    "news": 21,
+    "machine": 3
+  },
   "failures": 0,
-  "warnings": 1,
-  "methodology": "AEO/GEO gate checks crawlability, answer-first lead copy, explicit decision context, constraints, structured data and trust/methodology signals on decision-context guides. It does not claim or measure inclusion in any specific AI answer engine.",
+  "warnings": 0,
+  "methodology": "Site-wide SEO/AEO/GEO readiness gate for indexable ToolScout guides, tool profiles, comparisons and software news. It checks crawlability, canonical metadata, structured entities, answer-first decision content, explicit editorial analysis, freshness, primary-source or methodology signals and machine discovery surfaces. It does not claim or measure ranking, AI citations or inclusion in any specific answer engine.",
   "failureDetails": [],
-  "warningDetails": [
-    "best-no-code-automation-tools: generated page missing"
-  ]
+  "warningDetails": []
 }

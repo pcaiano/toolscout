@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T15:54:04.635Z",
+  "generatedAt": "2026-10-06T11:04:49.817Z",
   "methodology": "Public sitemap URL patterns only, with robots.txt sitemap discovery, bounded recursive sitemap-index expansion and entity-level deduplication against the ToolScout catalog. Competitor content is not copied or used for editorial conclusions. Repeated URL themes are market-coverage signals and must pass first-party verification and ToolScout quality gates before publication.",
   "sources": [
     {
@@ -69,8 +69,8 @@
       "sampledUrls": 750
     }
   ],
-  "suppressedCovered": 72,
-  "count": 19,
+  "suppressedCovered": 80,
+  "count": 16,
   "gaps": [
     {
       "slug": "ai-background-remover",
@@ -299,48 +299,6 @@
         "https://www.capterra.com/ai-video-generator-software/features/video-editing/",
         "https://www.capterra.com/animation-software/features/video-editing/",
         "https://dynamite-ai.com/categories/video-editing"
-      ]
-    },
-    {
-      "slug": "vmaker-ai",
-      "candidateType": "software-entity",
-      "entityKey": "vmaker",
-      "mentions": 2,
-      "sources": [
-        "Futurepedia",
-        "Aixploria"
-      ],
-      "exampleUrls": [
-        "https://www.futurepedia.io/tool/vmaker-ai",
-        "https://www.aixploria.com/vmaker-ai/"
-      ]
-    },
-    {
-      "slug": "weryai",
-      "candidateType": "software-entity",
-      "entityKey": "weryai",
-      "mentions": 2,
-      "sources": [
-        "Futurepedia",
-        "Aixploria"
-      ],
-      "exampleUrls": [
-        "https://www.futurepedia.io/tool/weryai",
-        "https://www.aixploria.com/weryai/"
-      ]
-    },
-    {
-      "slug": "wondershare-repairit",
-      "candidateType": "software-entity",
-      "entityKey": "wondershare-repairit",
-      "mentions": 2,
-      "sources": [
-        "Futurepedia",
-        "Aixploria"
-      ],
-      "exampleUrls": [
-        "https://www.futurepedia.io/tool/wondershare-repairit",
-        "https://www.aixploria.com/wondershare-repairit/"
       ]
     }
   ]

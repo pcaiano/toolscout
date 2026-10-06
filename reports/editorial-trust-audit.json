@@ -1,11 +1,132 @@
 {
-  "generatedAt": "2026-10-05T15:56:15.048Z",
+  "generatedAt": "2026-10-06T11:06:49.713Z",
   "catalogOnly": false,
   "errors": [],
-  "warnings": [],
+  "warnings": [
+    {
+      "code": "editorial_quality_repeated_sentence_shape",
+      "pages": [
+        "best-free-crm.html",
+        "best-email-marketing-tools.html",
+        "best-forms-for-small-business.html",
+        "best-productivity-tools-for-teams.html"
+      ],
+      "shape": "{tool} leads this shortlist because price carries more weight in this job and its catalog score is {n} versus {n} for {tool}."
+    },
+    {
+      "code": "editorial_quality_repeated_sentence_shape",
+      "pages": [
+        "best-ai-marketing-tools.html",
+        "best-funnel-builder.html",
+        "best-cold-email-tools.html",
+        "best-developer-tools.html"
+      ],
+      "shape": "{tool} leads this shortlist because integrations carries more weight in this job and its catalog score is {n} versus {n} for {tool}."
+    },
+    {
+      "code": "editorial_quality_repeated_sentence_shape",
+      "pages": [
+        "best-seo-tools.html",
+        "best-crm-for-consultants.html",
+        "best-sales-prospecting-tools.html",
+        "best-customer-support-tools.html",
+        "best-product-analytics-tools.html"
+      ],
+      "shape": "{tool} leads this shortlist because automation carries more weight in this job and its catalog score is {n} versus {n} for {tool}."
+    },
+    {
+      "code": "editorial_quality_repeated_sentence_shape",
+      "pages": [
+        "best-tools-for-agencies.html",
+        "best-project-management-tools.html",
+        "best-social-media-management-tools.html",
+        "best-ai-assistants.html",
+        "best-team-collaboration-tools.html"
+      ],
+      "shape": "{tool} sits first because its recorded capabilities align most {tool}ly with the constraints behind this guide."
+    },
+    {
+      "code": "editorial_quality_repeated_sentence_shape",
+      "pages": [
+        "best-crm-for-real-estate.html",
+        "best-affordable-crm.html",
+        "best-marketing-automation-tools.html",
+        "best-lead-capture-forms.html",
+        "best-free-project-management-tools.html",
+        "best-ai-research-tools.html",
+        "best-design-tools.html"
+      ],
+      "shape": "{tool} leads this shortlist because ease carries more weight in this job and its catalog score is {n} versus {n} for {tool}."
+    },
+    {
+      "code": "editorial_quality_repeated_sentence_shape",
+      "pages": [
+        "tools/airtable.html",
+        "tools/asana.html",
+        "tools/gorgias.html",
+        "tools/hootsuite.html",
+        "tools/n8n.html",
+        "tools/posthog.html",
+        "tools/zendesk.html"
+      ],
+      "shape": "{tool} s strongest case is not that it does everything, but that it brings automation and integrations into one buying decision."
+    },
+    {
+      "code": "editorial_quality_repeated_sentence_shape",
+      "pages": [
+        "tools/basecamp.html",
+        "tools/calendly.html",
+        "tools/hotjar.html",
+        "tools/paperform.html",
+        "tools/wix.html"
+      ],
+      "shape": "{tool} s strongest case is not that it does everything, but that it brings ease of use and integrations into one buying decision."
+    },
+    {
+      "code": "editorial_quality_repeated_sentence_shape",
+      "pages": [
+        "tools/lorka-ai.html",
+        "tools/paioclaw.html",
+        "tools/replit.html",
+        "tools/resume-ai.html",
+        "tools/talkpix-ai.html",
+        "tools/teachquill.html"
+      ],
+      "shape": "{tool} s strongest case is not that it does everything, but that it brings automation and ease of use into one buying decision."
+    },
+    {
+      "code": "editorial_quality_repeated_sentence_shape",
+      "pages": [
+        "news/chatgpt-images-2-5.html",
+        "news/chatgpt-introducing-gpt-6-sol-and-luna.html",
+        "news/chatgpt-word-microsoft-office.html",
+        "news/github-ai-scan-codeql-setup.html",
+        "news/github-code-scanning-ai-scan-enablement-status-in-security-overview.html",
+        "news/github-confidential-comments-on-repository-security-advisories.html",
+        "news/github-copilot-sandboxing-observability.html",
+        "news/github-proof-of-presence-enterprise.html",
+        "news/github-rate-limits-for-private-vulnerability-reports.html",
+        "news/github-ssh-security-changes-2026.html",
+        "news/notion-mail-shuts-down.html"
+      ],
+      "shape": "the useful reading of this release is what it changes in the buying decision, not the announcement itself."
+    },
+    {
+      "code": "editorial_quality_repeated_sentence_shape",
+      "pages": [
+        "news/chatgpt-introducing-gpt-6-1-sol.html",
+        "news/github-actions-workflow-execution-protections-ga.html",
+        "news/github-copilot-code-review-api-support-and-new-default-effort-level.html",
+        "news/github-new-fields-for-securityadvisory-graphql-api.html",
+        "news/github-repository-security-advisory-comments-api-in-public-preview.html",
+        "news/hubspot-mcp-server-updates.html"
+      ],
+      "shape": "the buyer question is interoperability: this update changes how the product can fit into an existing stack."
+    }
+  ],
   "summary": {
     "catalogRecords": 127,
     "errors": 0,
-    "warnings": 0
+    "warnings": 10
   }
 }

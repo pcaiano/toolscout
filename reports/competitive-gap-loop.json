@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-05T15:54:04.693Z",
+  "generatedAt": "2026-10-06T11:04:49.862Z",
   "objective": "Detect competitor coverage gaps, deduplicate against ToolScout, verify first-party sources, publish evidence-backed coverage profiles, submit them through the normal sitemap surface and measure Search Console outcomes on subsequent cycles.",
   "guardrails": [
     "Competitor pages are used only to discover market signals and possible official-source links.",
@@ -8,59 +8,16 @@
     "Unverified or thin candidates are held and retried instead of being published."
   ],
   "summary": {
-    "scannedGaps": 19,
+    "scannedGaps": 16,
     "activeProfiles": 21,
-    "newProfiles": 3,
+    "newProfiles": 0,
     "resolvedAsExistingCoverage": 1,
     "held": 15,
     "contentResearch": 0,
     "searchVisibleProfiles": 0,
     "trafficObservedProfiles": 0
   },
-  "admitted": [
-    {
-      "slug": "vmaker-ai",
-      "sourceUrl": "https://www.vmaker.com/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
-      "category": "content",
-      "features": [
-        "citations",
-        "video generation",
-        "video editing",
-        "voice",
-        "automation",
-        "forms",
-        "social media"
-      ]
-    },
-    {
-      "slug": "weryai",
-      "sourceUrl": "https://www.weryai.com/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
-      "category": "design",
-      "features": [
-        "image generation",
-        "video generation",
-        "design",
-        "ecommerce"
-      ]
-    },
-    {
-      "slug": "wondershare-repairit",
-      "sourceUrl": "https://repairit.wondershare.com/?utm_source=futurepedia&amp;utm_medium=marketplace&amp;utm_campaign=futurepedia",
-      "category": "developer",
-      "features": [
-        "research",
-        "citations",
-        "analysis",
-        "writing",
-        "coding",
-        "video generation",
-        "video editing",
-        "collaboration",
-        "design",
-        "social media"
-      ]
-    }
-  ],
+  "admitted": [],
   "resolved": [
     {
       "slug": "claude-code",
