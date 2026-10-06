@@ -1,4 +1,5 @@
 name: Visual Audit Once
+# secondary surface audit
 
 on:
   push:
@@ -19,13 +20,12 @@ jobs:
           set -euo pipefail
           mkdir -p shots
           urls=(
-            "home|https://trytoolscout.org/"
-            "tools|https://trytoolscout.org/tools"
-            "guides|https://trytoolscout.org/guides"
-            "compare|https://trytoolscout.org/compare"
-            "whats-new|https://trytoolscout.org/whats-new"
-            "publisher-kit|https://trytoolscout.org/distribution/publisher-kit"
-            "figma|https://trytoolscout.org/tools/figma"
+            "guide-detail|https://trytoolscout.org/best-project-management-tools"
+            "compare-detail|https://trytoolscout.org/make-vs-zapier"
+            "news-detail|https://trytoolscout.org/news/chatgpt-building-advertising-for-the-way-people-use-ai"
+            "methodology|https://trytoolscout.org/methodology"
+            "trends|https://trytoolscout.org/software-trends-index"
+            "categories|https://trytoolscout.org/categories"
           )
           for item in "${urls[@]}"; do
             name="${item%%|*}"
