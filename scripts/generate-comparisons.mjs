@@ -170,6 +170,12 @@ function suggestionsHtml(a,b){
   if(!items.length)return '';
   return `<div class='suggestions-head'><div class='meta'>Explore alternatives</div><h2>Also worth comparing</h2><p>Other tools in the same categories that may help sharpen the decision.</p></div><div class='suggestion-grid'>${items.map(item=>`<a class='suggestion-card' href='/compare.html?a=${encodeURIComponent(item.anchor.slug)}&amp;b=${encodeURIComponent(item.tool.slug)}&amp;source=comparison-suggestions'><div class='suggestion-top'>${suggestionLogoHtml(item.tool)}<strong>${esc(item.tool.name)}</strong></div><span>${esc(suggestionReason(item.tool,item.anchor))}</span><b>Compare with ${esc(item.anchor.name)}</b></a>`).join('')}</div>`;
 }
+function relatedGuidesHtml(a,b){
+  const guides=relatedGuides(a,b);
+  if(!guides.length)return '';
+  const guideTitle=intent=>intent.title||String(intent.slug||'').replace(/-/g,' ').replace(/\b\w/g,ch=>ch.toUpperCase());
+  return `<div class='suggestions-head'><div class='meta'>Related buying guides</div><h2>Useful guides for this decision</h2><p>These guides are semantically related to the two tools, with observed Google demand used only as a priority signal.</p></div><div class='suggestion-grid'>${guides.map(intent=>`<a class='suggestion-card' href='/${encodeURIComponent(intent.slug)}'><strong>${esc(guideTitle(intent))}</strong><span>Continue the decision with a focused ToolScout buying guide.</span><b>Open guide</b></a>`).join('')}</div>`;
+}
 function initials(n){return String(n||'T').split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase();}
 function iconSources(t){
   let first='',google='';
@@ -205,7 +211,7 @@ function render(a,b){
   html=html.replace('<div id="pairNote"></div>',`<div id="pairNote"><div class="pairNote">Comparing <strong>${esc(a.name)}</strong> with <strong>${esc(b.name)}</strong>. Change either selector to explore another pair.</div></div>`);
   html=html.replace('<div id="table" class="table"></div>',`<div id="table" class="table">${initialTable(a,b)}</div>`);
   html=html.replace('<section id="analysis" class="analysis" aria-live="polite"></section>',`<section id="analysis" class="analysis" aria-live="polite"><div class="meta">ToolScout analysis</div><h2>What this comparison means in practice</h2><p>${esc(editorialConclusion(a,b))}</p><p class="decision"><strong>Decision:</strong> ${esc(decisionGuidance(a,b))}</p><h3>How this comparison works</h3><p>${esc(comparisonMethodology())}</p><p class="source-note"><strong>Editorial evidence:</strong> first-party vendor sources are recorded in the ToolScout catalog. Catalog evidence last checked ${esc(a.lastVerified||'not recorded')} and ${esc(b.lastVerified||'not recorded')} respectively.</p></section>`);
-  html=html.replace('<section id="suggestions" class="suggestions" aria-live="polite"></section>',`<section id="suggestions" class="suggestions" aria-live="polite">${suggestionsHtml(a,b)}</section>`);
+  html=html.replace('<section id="suggestions" class="suggestions" aria-live="polite"></section>',`<section id="suggestions" class="suggestions" aria-live="polite">${relatedGuidesHtml(a,b)}${suggestionsHtml(a,b)}</section>`);
   return html;
 }
 
