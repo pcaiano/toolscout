@@ -1,0 +1,54 @@
+name: ToolScout Comparison Editorial Deploy Once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/comparison-editorial-deploy-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate comparison editorial fix
+        run: |
+          set -euo pipefail
+          node --check scripts/generate-comparisons.mjs
+          ! grep -Fq 'This is a genuine trade-off rather than a cosmetic tie.' compare.html
+          ! grep -Fq 'This is a genuine trade-off rather than a cosmetic tie.' activecampaign-vs-mailchimp.html
+          ! grep -Fq 'This is a genuine trade-off rather than a cosmetic tie.' webflow-vs-framer.html
+          grep -Fq 'The key divide is how far each product extends beyond email marketing.' data/organic-growth-engine.json
+          grep -Fq 'Webflow and Framer overlap heavily in visual site building' data/organic-growth-engine.json
+      - name: Wrangler dry-run
+        run: npx wrangler deploy --config wrangler.toml --dry-run --outdir /tmp/toolscout-comparison-editorial
+      - name: Deploy current main without migrations
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: npx wrangler deploy --config wrangler.toml --latest
+      - name: Verify live comparison copy
+        run: |
+          set -euo pipefail
+          check () {
+            rel="$1"
+            good="$2"
+            file="/tmp/page-$RANDOM.html"
+            curl -fsS --retry 4 --retry-all-errors --retry-delay 2 "https://trytoolscout.org/${rel}?comparison-editorial=${GITHUB_SHA}" -o "$file"
+            ! grep -Fq 'This is a genuine trade-off rather than a cosmetic tie.' "$file"
+            grep -Fq "$good" "$file"
+            echo "LIVE: https://trytoolscout.org/${rel}"
+          }
+          check "activecampaign-vs-mailchimp" "The key divide is how far each product extends beyond email marketing."
+          check "webflow-vs-framer" "Webflow and Framer overlap heavily in visual site building"
