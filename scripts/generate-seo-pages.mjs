@@ -39,7 +39,31 @@ const guideAnalysisV2=(toolsForPage,intent)=>{
   const leadEdge=deltas.find(x=>x.diff>0),runnerEdge=deltas.find(x=>x.diff<0);
   const leaderFeatures=(leader.features||[]).slice(0,3);
   const runnerFeatures=(runner?.features||[]).slice(0,3);
-  const first=runner&&leadEdge?`${leader.name} leads this shortlist because ${label(leadEdge.key)} carries more weight in this job and its catalog score is ${scoreFor(leader,leadEdge.key)} versus ${scoreFor(runner,leadEdge.key)} for ${runner.name}.`:`${leader.name} sits first because its recorded capabilities align most closely with the constraints behind this guide.`;
+  const frame=[...String(intent.slug||'')].reduce((sum,ch)=>sum+ch.charCodeAt(0),0)%8;
+  const leadLabel=leadEdge?label(leadEdge.key):null;
+  const leadScore=leadEdge?scoreFor(leader,leadEdge.key):null;
+  const runnerScore=leadEdge&&runner?scoreFor(runner,leadEdge.key):null;
+  const edgeOpenings=leadEdge&&runner?[
+    `${leader.name} leads on the criterion that matters most here: ${leadLabel}. Its catalog score is ${leadScore} against ${runnerScore} for ${runner.name}.`,
+    `This shortlist tilts toward ${leader.name} on ${leadLabel}, where ToolScout records ${leadScore} versus ${runnerScore} for ${runner.name}.`,
+    `${leadLabel} creates the clearest separation in this guide. ${leader.name} records ${leadScore}; ${runner.name}, ${runnerScore}.`,
+    `For this use case, the ranking turns first on ${leadLabel}. That favors ${leader.name}, ${leadScore} to ${runnerScore} over ${runner.name}.`,
+    `The deciding edge is ${leadLabel} rather than brand breadth. ${leader.name} scores ${leadScore}, compared with ${runner.name}'s ${runnerScore}.`,
+    `${leader.name} earns first place mainly through ${leadLabel}: ${leadScore} in the current catalog against ${runnerScore} for ${runner.name}.`,
+    `Start with ${leadLabel} and the order becomes clearer. ${leader.name} is at ${leadScore}; ${runner.name} is at ${runnerScore}.`,
+    `The ranking's strongest signal is ${leadLabel}. On that dimension, ${leader.name} leads ${runner.name} ${leadScore} to ${runnerScore}.`
+  ]:[];
+  const noEdgeOpenings=[
+    `${leader.name} comes first because its recorded capabilities map most closely to the job behind this guide.`,
+    `There is no single score gap driving this ranking. ${leader.name} takes the lead through the overall fit of its recorded capabilities.`,
+    `The top position here is about combined workflow fit rather than one dominant metric, which puts ${leader.name} first.`,
+    `${leader.name} reaches the top of this shortlist through breadth across the constraints that define this use case.`,
+    `No one dimension decides this guide. The current catalog gives ${leader.name} the strongest combined fit across the relevant requirements.`,
+    `This ranking starts with the job rather than the brand. On that basis, ${leader.name} has the closest overall match.`,
+    `The first-place signal is cumulative rather than concentrated: ${leader.name} aligns best across the recorded requirements for this guide.`,
+    `The shortlist favors ${leader.name} because its current catalog profile covers the decision criteria more evenly than the alternatives.`
+  ];
+  const first=edgeOpenings.length?edgeOpenings[frame]:noEdgeOpenings[frame];
   const second=runnerEdge?`${runner.name} is not simply a weaker version of the same choice: it scores better on ${label(runnerEdge.key)}, which can reverse the decision when that matters more than the headline ranking.`:runner?`${runner.name} remains the closest alternative, with ${runnerFeatures.join(', ')||runner.category} giving buyers a materially different route into the same job.`:'';
   const third=leaderFeatures.length?`For ${leader.name}, the useful evidence is ${leaderFeatures.join(', ')}. The ranking should therefore be read as a workflow recommendation, not as a generic popularity table.`:'The ranking should be read as a workflow recommendation rather than a generic popularity table.';
   return `<section class="section editorial-analysis" data-toolscout-analysis="1"><h2>ToolScout analysis</h2><p>${esc([first,second,third].filter(Boolean).join(' '))}</p></section>`;
