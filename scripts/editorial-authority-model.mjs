@@ -4,6 +4,7 @@ import path from 'node:path';
 const clamp=(v,min=0,max=100)=>Math.max(min,Math.min(max,Number(v)||0));
 const countMatches=(text,re)=>[...String(text||'').matchAll(re)].length;
 const words=text=>String(text||'').replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/&[a-z#0-9]+;/gi,' ').split(/\s+/).filter(Boolean).length;
+const cleanMetaText=text=>String(text||'').replace(/&[a-z#0-9]+;/gi,' ').replace(/\s+/g,' ').trim();
 
 export function pageTypeForPath(page){
   const p=String(page||'').replace(/\.html$/i,'')||'/';
@@ -47,10 +48,15 @@ export function scoreEditorialPage(html,{pageType='other',hasFreshUpdate=false}=
   const hasAnalysis=/(ToolScout analysis|ToolScout view|editorial view|what this means|in practice|buyer impact|why it matters|decision)/i.test(html);
   const hasTradeoffs=/(trade[- ]?off|limitation|not ideal|best for|before choosing|compare the depth|who should)/i.test(html);
   const hasVerification=/(last verified|verified on|last checked|checked\s+20\d{2}|methodology)/i.test(html);
-  const hasDisclosure=/(affiliate compensation|affiliate commission|sponsored|affiliate disclosure)/i.test(html);
+  const hasDisclosure=/(affiliate compensation|affiliate commission|affiliate status|may earn (?:affiliate )?commissions?|sponsored|affiliate disclosure)/i.test(html);
   const hasCanonical=/<link[^>]+rel=["']canonical["']/i.test(html);
   const hasTitle=/<title>[^<]{3,}<\/title>/i.test(html);
-  const hasMetaDescription=/<meta[^>]+name=["']description["'][^>]+content=["'][^"']{20,}["']/i.test(html)||/<meta[^>]+content=["'][^"']{20,}["'][^>]+name=["']description["']/i.test(html);
+  const metaTags=[...String(html||'').matchAll(/<meta\b[^>]*>/gi)].map(m=>m[0]);
+  const hasMetaDescription=metaTags.some(tag=>{
+    if(!/\bname=["']description["']/i.test(tag))return false;
+    const match=tag.match(/\bcontent=(["'])([\s\S]*?)\1/i);
+    return cleanMetaText(match?.[2]||'').length>=20;
+  });
   const hasRobots=/<meta[^>]+name=["']robots["']/i.test(html);
   const hasH1=/<h1(?:\s[^>]*)?>[\s\S]*?<\/h1>/i.test(html);
   const internalLinks=countMatches(html,/href=["']\/(?!\/)/gi);
