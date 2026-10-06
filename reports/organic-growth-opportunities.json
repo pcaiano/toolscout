@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-06T12:12:19.128Z",
+  "generatedAt": "2026-10-06T13:05:28.327Z",
   "engine": "ToolScout Search and Answer Opportunity Engine v6",
   "objective": "Autonomously pursue sustainable search rankings and qualified clicks while separating indexing failures from content-performance failures.",
   "acquisitionTruth": {
     "status": "early-search-acquisition",
     "searchClicks": 7,
-    "searchImpressions": 6892,
-    "ctr": 0.1016,
+    "searchImpressions": 6859,
+    "ctr": 0.1021,
     "gscStartDate": "2026-09-09",
     "gscEndDate": "2026-10-06",
     "gscDataState": "all",
@@ -34,7 +34,7 @@
     "observedGscIntents": 39,
     "observedGscPages": 140,
     "searchClicks": 7,
-    "searchImpressions": 6892,
+    "searchImpressions": 6859,
     "organicAcquisitionStatus": "early-search-acquisition",
     "indexingRecovery": 1,
     "actionableOpportunities": 21,
@@ -143,10 +143,10 @@
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 2698,
+        "impressions": 2672,
         "clicks": 0,
         "ctr": 0,
-        "position": 80.3328,
+        "position": 80.3275,
         "opportunity": "relevance-gap",
         "opportunityScore": 32,
         "meaningfulSample": true,
@@ -351,10 +351,10 @@
       "monetizationReadiness": "monetizable",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 163,
+        "impressions": 162,
         "clicks": 0,
         "ctr": 0,
-        "position": 76.2025,
+        "position": 76.1667,
         "opportunity": "relevance-gap",
         "opportunityScore": 22,
         "meaningfulSample": true,
@@ -507,10 +507,10 @@
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 77,
+        "impressions": 75,
         "clicks": 0,
         "ctr": 0,
-        "position": 75.6494,
+        "position": 75.2,
         "opportunity": "relevance-gap",
         "opportunityScore": 19,
         "meaningfulSample": true,
@@ -1885,10 +1885,10 @@
       "monetizationReadiness": "needs-affiliate-activation",
       "searchSignal": {
         "source": "gsc",
-        "impressions": 10,
+        "impressions": 9,
         "clicks": 0,
         "ctr": 0,
-        "position": 48.2,
+        "position": 45.4444,
         "opportunity": "insufficient-sample",
         "opportunityScore": 12,
         "meaningfulSample": false,
@@ -2829,15 +2829,15 @@
       "pathname": "/best-seo-tools-for-agencies",
       "type": "guide",
       "clicks": 0,
-      "impressions": 2698,
+      "impressions": 2672,
       "ctr": 0,
-      "position": 80.3328,
+      "position": 80.3275,
       "topQueries": [
         {
           "query": "seo software for agencies",
           "clicks": 0,
-          "impressions": 189,
-          "position": 87.6402
+          "impressions": 186,
+          "position": 87.7366
         },
         {
           "query": "best seo tools for agency",
@@ -2848,14 +2848,14 @@
         {
           "query": "seo tool for agencies",
           "clicks": 0,
-          "impressions": 153,
-          "position": 82.5621
+          "impressions": 151,
+          "position": 82.6225
         },
         {
           "query": "seo agency tools",
           "clicks": 0,
-          "impressions": 131,
-          "position": 82.1221
+          "impressions": 130,
+          "position": 82.1538
         },
         {
           "query": "seo tools for agencies",
@@ -2869,7 +2869,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 33.585,
+      "opportunityScore": 33.264,
       "outcome": "visibility-only"
     },
     {
@@ -2877,9 +2877,9 @@
       "pathname": "/tools/airtable",
       "type": "tool-profile",
       "clicks": 0,
-      "impressions": 462,
+      "impressions": 461,
       "ctr": 0,
-      "position": 74.0628,
+      "position": 74.0412,
       "topQueries": [
         {
           "query": "airtable",
@@ -2917,7 +2917,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 6.238,
+      "opportunityScore": 6.226,
       "outcome": "visibility-only"
     },
     {
@@ -3309,9 +3309,9 @@
       "pathname": "/best-free-crm",
       "type": "guide",
       "clicks": 0,
-      "impressions": 163,
+      "impressions": 162,
       "ctr": 0,
-      "position": 76.2025,
+      "position": 76.1667,
       "topQueries": [
         {
           "query": "best free crm tools",
@@ -3349,7 +3349,7 @@
       "meaningfulSample": true,
       "strategicOpportunity": false,
       "evidenceConfidence": "meaningful",
-      "opportunityScore": 2.139,
+      "opportunityScore": 2.127,
       "outcome": "visibility-only"
     },
     {

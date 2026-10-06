@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-06T12:12:24.186Z",
-  "count": 47,
+  "generatedAt": "2026-10-06T13:05:32.626Z",
+  "count": 48,
   "policy": "Only editorially verified assets are eligible for distribution. Page-level Search Console demand chooses which existing pages deserve attention. Monetization can increase measurement urgency but never changes editorial ranking. Original research can be promoted to editorial, community and indexing surfaces, while product directories continue to receive the ToolScout product profile.",
   "items": [
     {
@@ -74,9 +74,9 @@
       "priorityScore": 126,
       "demandBoost": 50,
       "searchDemand": {
-        "impressions": 462,
+        "impressions": 461,
         "clicks": 0,
-        "position": 74.0628,
+        "position": 74.0412,
         "lane": "relevance-and-authority",
         "monetized": false,
         "monetizedSlugs": []
@@ -340,6 +340,30 @@
       ]
     },
     {
+      "assetType": "original_research",
+      "slug": "software-trends-2026-10",
+      "title": "ToolScout Software Trends Index: October 2026",
+      "url": "https://trytoolscout.org/software-trends-index",
+      "category": "research",
+      "priorityScore": 96,
+      "demandBoost": 0,
+      "searchDemand": null,
+      "distributionReason": "Original first-party research is prioritized for legitimate editorial references, communities, AI discovery and page-indexing surfaces. Product-directory submissions continue to use the ToolScout product profile.",
+      "searchSnippet": "ToolScout Software Trends Index: October 2026. Verified first-party ToolScout observations with explicit methodology and a public dataset.",
+      "socialHook": "New ToolScout first-party research: ToolScout Software Trends Index: October 2026. The methodology and public dataset are included so every claim can be checked.",
+      "linkedInPost": "New first-party research from ToolScout: ToolScout Software Trends Index: October 2026.\n\nThe report separates observed Search Console visibility, verified catalog coverage and editorial shortlist frequency. It does not claim global market share or software popularity.\n\nhttps://trytoolscout.org/software-trends-index",
+      "xPost": "New ToolScout first-party research with a public methodology and dataset: ToolScout Software Trends Index: October 2026. https://trytoolscout.org/software-trends-index",
+      "redditStyle": "I published a ToolScout first-party software snapshot with the methodology and public dataset included. The metrics are deliberately limited to what ToolScout can verify.",
+      "newsletterSubject": "ToolScout Software Trends Index: October 2026",
+      "newsletterIntro": "Verified ToolScout first-party observations with explicit scope, source gates and a public JSON dataset: https://trytoolscout.org/software-trends-index",
+      "hashtags": [
+        "#software",
+        "#research",
+        "#AITools",
+        "#ToolScout"
+      ]
+    },
+    {
       "assetType": "guide",
       "slug": "best-seo-tools-for-agencies",
       "title": "Best SEO Tools for Agencies",
@@ -348,9 +372,9 @@
       "priorityScore": 75,
       "demandBoost": 45,
       "searchDemand": {
-        "impressions": 2698,
+        "impressions": 2672,
         "clicks": 0,
-        "position": 80.3328,
+        "position": 80.3275,
         "lane": "relevance-and-authority",
         "monetized": false
       },
@@ -528,9 +552,9 @@
       "priorityScore": 62,
       "demandBoost": 32,
       "searchDemand": {
-        "impressions": 163,
+        "impressions": 162,
         "clicks": 0,
-        "position": 76.2025,
+        "position": 76.1667,
         "lane": "relevance-and-authority",
         "monetized": false
       },
@@ -648,9 +672,9 @@
       "priorityScore": 58,
       "demandBoost": 28,
       "searchDemand": {
-        "impressions": 77,
+        "impressions": 75,
         "clicks": 0,
-        "position": 75.6494,
+        "position": 75.2,
         "opportunity": "relevance-gap",
         "meaningfulSample": true
       },
@@ -1194,9 +1218,9 @@
       "priorityScore": 16,
       "demandBoost": 5,
       "searchDemand": {
-        "impressions": 10,
+        "impressions": 9,
         "clicks": 0,
-        "position": 48.2,
+        "position": 45.4444,
         "opportunity": "insufficient-sample",
         "meaningfulSample": false
       },

@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-06T12:12:21.156Z",
-  "gscGeneratedAt": "2026-10-06T12:10:15.248Z",
+  "generatedAt": "2026-10-06T13:05:29.556Z",
+  "gscGeneratedAt": "2026-10-06T13:03:42.197Z",
   "minimumImpressionsForHighConfidenceAction": 20,
   "rule": "Observed GSC demand may trigger additive factual decision depth. Low-sample first-page pages are protected from aggressive adaptive changes. Query strings must pass safety and intent-alignment checks before they can trigger adaptation.",
   "adaptiveApplied": 0,
@@ -123,30 +123,25 @@
     },
     {
       "intent": "best-ai-research-tools",
-      "impressions": 10,
+      "impressions": 9,
       "clicks": 0,
-      "position": 48.2,
+      "position": 45.4444,
       "meaningfulSample": false,
       "lowSampleFirstPage": false,
-      "dominantQuery": {
-        "query": "source grounded ai research",
-        "impressions": 1,
-        "position": 73,
-        "alignment": 1
-      },
+      "dominantQuery": null,
       "action": "measure-only"
     },
     {
       "intent": "best-seo-tools-for-agencies",
-      "impressions": 2698,
+      "impressions": 2672,
       "clicks": 0,
-      "position": 80.3328,
+      "position": 80.3275,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {
         "query": "seo software for agencies",
-        "impressions": 189,
-        "position": 87.6402,
+        "impressions": 186,
+        "position": 87.7366,
         "alignment": 1
       },
       "action": "measure-only"
@@ -183,9 +178,9 @@
     },
     {
       "intent": "best-free-crm",
-      "impressions": 163,
+      "impressions": 162,
       "clicks": 0,
-      "position": 76.2025,
+      "position": 76.1667,
       "meaningfulSample": true,
       "lowSampleFirstPage": false,
       "dominantQuery": {

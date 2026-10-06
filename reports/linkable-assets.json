@@ -3,11 +3,20 @@
   "items": [
     {
       "id": "software-trends-2026-10",
-      "assetType": "editorial_research",
-      "title": "Software Trends: October 2026",
-      "canonicalUrl": "https://trytoolscout.org/software-trends-index.html",
+      "assetType": "original_research",
+      "title": "ToolScout Software Trends Index: October 2026",
+      "url": "https://trytoolscout.org/software-trends-index",
       "dataUrl": "https://trytoolscout.org/software-trends-index.json",
-      "citationText": "ToolScout Software Trends groups buyer relevant primary source software changes into observable patterns and supporting evidence.",
+      "csvUrl": "https://trytoolscout.org/software-trends-index.csv",
+      "chartUrl": "https://trytoolscout.org/software-trends-index-share.svg",
+      "claims": [
+        "Within 20 selected buyer-relevant changes, security and governance accounts for 35% (7 changes). This describes ToolScout's observed editorial sample, not global market share.",
+        "Security and governance moved from 1 selected changes in the previous 14-day window to 6 in the latest 14-day window (+5).",
+        "ToolScout recorded 11 selected material changes for GitHub in the rolling window, spanning 4 change categories. Frequency measures observed release activity in this sample, not product popularity.",
+        "ToolScout currently verifies AI interoperability for 6 of 127 catalog tools; 6 have an official MCP connection recorded. This is a ToolScout catalog verification snapshot, not an industry adoption estimate."
+      ],
+      "distributionPolicy": "Cite findings only with the ToolScout observed-data scope and edition window. Do not restate them as global market-share or adoption claims.",
+      "citationText": "ToolScout Software Trends Index, October 2026, rolling 30-day first-party editorial dataset.",
       "sourcePolicy": "Official vendor sources and clearly labelled public product updates. The index reports editorial observations, not market share."
     }
   ]

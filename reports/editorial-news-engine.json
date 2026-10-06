@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-06T12:10:16.241Z",
+  "generatedAt": "2026-10-06T13:03:43.589Z",
   "engine": "ToolScout Editorial News Engine v2",
   "lookbackDays": 14,
   "maxPerRun": 4,
@@ -40,7 +40,7 @@
   ],
   "candidates": 0,
   "published": [],
-  "refreshedArchive": 0,
+  "refreshedArchive": 21,
   "lastPublishedAt": "2026-10-06",
   "status": "healthy"
 }

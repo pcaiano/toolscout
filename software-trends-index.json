@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "edition": "2026-10",
   "editionLabel": "October 2026",
   "publishedAt": "2026-10-06T11:04:39.530Z",
@@ -8,6 +8,14 @@
   "windowEnd": "2026-10-06T11:04:39.530Z",
   "updatedThrough": "2026-10-05",
   "sourceMethod": "Primary vendor documentation, changelogs, release notes and official product announcements from the rolling 30 day window. ToolScout aggregates observed changes into trend categories and keeps affiliate status out of selection.",
+  "methodology": {
+    "selection": "Material public software changes are selected for buyer relevance from official vendor sources. Routine marketing, duplicate stories and thin announcements are excluded.",
+    "classification": "Each selected change is assigned to one buyer-impact category using the content of the official update and ToolScout editorial rules.",
+    "momentum": "Momentum compares the latest 14-day count with the preceding 14-day count inside the same selected editorial sample.",
+    "vendorActivity": "Vendor activity counts selected material changes, not popularity, revenue, users, market share or product quality.",
+    "aiSnapshot": "AI interoperability counts only current ToolScout catalog records with verified AI integration metadata.",
+    "limitations": "The sample is intentionally editorial and bounded. It should be cited as ToolScout observed software-change data, never as a census of the software market."
+  },
   "primarySourceCount": 20,
   "metrics": {
     "observedUpdates": 20,
@@ -17,9 +25,9 @@
   },
   "searchVisibility": {
     "source": "Google Search Console",
-    "impressions": 6892,
+    "impressions": 6859,
     "clicks": 7,
-    "ctr": 0.1016,
+    "ctr": 0.1021,
     "position": 0
   },
   "editorialPolicy": "Updates are selected for buyer relevance. Affiliate status, commission and partner relationships do not influence inclusion or placement.",
@@ -27,7 +35,7 @@
     {
       "id": "agent-workflows",
       "title": "AI agents are becoming reusable team workflows",
-      "summary": "Recent product releases point toward reusable skills, shared AI behaviour and repeatable agent workflows instead of isolated prompting.",
+      "summary": "Recent releases point toward reusable skills, shared AI behaviour and repeatable agent workflows instead of isolated prompting.",
       "evidence": [
         "github-selected-models-in-github-copilot-deprecated",
         "github-copilot-sandboxing-observability",
@@ -66,19 +74,49 @@
     {
       "id": "workflow-convergence",
       "title": "Analysis and execution are moving closer together",
-      "summary": "More software updates are designed to reduce the handoff between understanding what happened and taking the next operational action.",
+      "summary": "More product changes reduce the handoff between understanding what happened and taking the next operational action.",
       "evidence": [
+        "chatgpt-building-advertising-for-the-way-people-use-ai",
+        "github-selected-models-in-github-copilot-deprecated",
+        "github-copilot-code-review-api-support-and-new-default-effort-level",
+        "github-copilot-sandboxing-observability",
         "github-proof-of-presence-enterprise",
+        "chatgpt-introducing-gpt-6-sol-and-luna",
         "notion-mail-shuts-down",
         "zapier-next-gen-zaps-mcp",
         "github-actions-workflow-execution-protections-ga",
+        "notion-3-7-agent-skills",
         "hubspot-mcp-server-update"
       ],
       "vendors": [
+        "ChatGPT",
         "GitHub",
         "Notion",
         "Zapier",
         "HubSpot"
+      ]
+    },
+    {
+      "id": "governed-ai",
+      "title": "Governance is becoming part of the AI product decision",
+      "summary": "Security, permissions, auditability and administrative controls increasingly shape whether new AI capability is production-ready.",
+      "evidence": [
+        "chatgpt-building-advertising-for-the-way-people-use-ai",
+        "github-confidential-comments-on-repository-security-advisories",
+        "github-repository-security-advisory-comments-api-in-public-preview",
+        "github-new-fields-for-securityadvisory-graphql-api",
+        "github-rate-limits-for-private-vulnerability-reports",
+        "github-copilot-sandboxing-observability",
+        "github-proof-of-presence-enterprise",
+        "github-ssh-security-changes-2026",
+        "chatgpt-introducing-gpt-6-sol-and-luna",
+        "github-ai-scan-codeql-setup",
+        "notion-3-7-agent-skills"
+      ],
+      "vendors": [
+        "ChatGPT",
+        "GitHub",
+        "Notion"
       ]
     }
   ],
@@ -187,6 +225,124 @@
       ]
     }
   ],
+  "momentum": [
+    {
+      "id": "security_governance",
+      "label": "Security and governance",
+      "current14": 6,
+      "previous14": 1,
+      "delta": 5,
+      "direction": "accelerating"
+    },
+    {
+      "id": "integrations_connectivity",
+      "label": "Integrations and connectivity",
+      "current14": 1,
+      "previous14": 3,
+      "delta": -2,
+      "direction": "cooling"
+    },
+    {
+      "id": "product_capability",
+      "label": "Product capability",
+      "current14": 1,
+      "previous14": 0,
+      "delta": 1,
+      "direction": "accelerating"
+    },
+    {
+      "id": "ai_automation",
+      "label": "AI and automation",
+      "current14": 2,
+      "previous14": 2,
+      "delta": 0,
+      "direction": "steady"
+    },
+    {
+      "id": "pricing_packaging",
+      "label": "Pricing and packaging",
+      "current14": 1,
+      "previous14": 1,
+      "delta": 0,
+      "direction": "steady"
+    },
+    {
+      "id": "product_retirement",
+      "label": "Retirements and migrations",
+      "current14": 1,
+      "previous14": 1,
+      "delta": 0,
+      "direction": "steady"
+    }
+  ],
+  "pressFindings": [
+    {
+      "id": "largest-signal-cluster",
+      "headline": "Security and governance is the largest change cluster in ToolScout's current sample",
+      "finding": "Within 20 selected buyer-relevant changes, security and governance accounts for 35% (7 changes). This describes ToolScout's observed editorial sample, not global market share.",
+      "evidence": [
+        "github-confidential-comments-on-repository-security-advisories",
+        "github-repository-security-advisory-comments-api-in-public-preview",
+        "github-new-fields-for-securityadvisory-graphql-api",
+        "github-rate-limits-for-private-vulnerability-reports",
+        "github-proof-of-presence-enterprise",
+        "github-ssh-security-changes-2026",
+        "github-ai-scan-codeql-setup"
+      ]
+    },
+    {
+      "id": "strongest-momentum-shift",
+      "headline": "Security and governance shows the strongest two-week movement in the current sample",
+      "finding": "Security and governance moved from 1 selected changes in the previous 14-day window to 6 in the latest 14-day window (+5).",
+      "evidence": [
+        "github-confidential-comments-on-repository-security-advisories",
+        "github-repository-security-advisory-comments-api-in-public-preview",
+        "github-new-fields-for-securityadvisory-graphql-api",
+        "github-rate-limits-for-private-vulnerability-reports",
+        "github-proof-of-presence-enterprise",
+        "github-ssh-security-changes-2026",
+        "github-ai-scan-codeql-setup"
+      ]
+    },
+    {
+      "id": "most-observed-vendor",
+      "headline": "GitHub is the most frequently observed vendor in this edition",
+      "finding": "ToolScout recorded 11 selected material changes for GitHub in the rolling window, spanning 4 change categories. Frequency measures observed release activity in this sample, not product popularity.",
+      "evidence": [
+        "github-confidential-comments-on-repository-security-advisories",
+        "github-repository-security-advisory-comments-api-in-public-preview",
+        "github-new-fields-for-securityadvisory-graphql-api",
+        "github-selected-models-in-github-copilot-deprecated",
+        "github-copilot-code-review-api-support-and-new-default-effort-level",
+        "github-rate-limits-for-private-vulnerability-reports",
+        "github-copilot-sandboxing-observability",
+        "github-proof-of-presence-enterprise",
+        "github-ssh-security-changes-2026",
+        "github-actions-workflow-execution-protections-ga",
+        "github-ai-scan-codeql-setup"
+      ]
+    },
+    {
+      "id": "ai-interoperability-snapshot",
+      "headline": "AI interoperability is now a measurable catalog attribute",
+      "finding": "ToolScout currently verifies AI interoperability for 6 of 127 catalog tools; 6 have an official MCP connection recorded. This is a ToolScout catalog verification snapshot, not an industry adoption estimate.",
+      "evidence": [
+        "hubspot",
+        "zapier",
+        "make",
+        "n8n",
+        "figma",
+        "github"
+      ]
+    }
+  ],
+  "aiConnectivitySnapshot": {
+    "catalogTools": 127,
+    "verifiedAiInteroperability": 6,
+    "strongAiInteroperability": 6,
+    "officialMcp": 6,
+    "measuredAs": "Current ToolScout catalog verification snapshot, not a market-wide adoption rate."
+  },
   "vendorActivity": [
     {
       "toolSlug": "github",
@@ -301,7 +457,7 @@
       "title": "Confidential comments on repository security advisories",
       "summary": "You can now post confidential comments on repository security advisories.",
       "changeType": "security_governance",
-      "buyerImpact": "GitHub buyers should verify whether the new controls change authentication, administration or security requirements for their team.",
+      "buyerImpact": "GitHub buyers should verify whether the new controls change permissions, administration, auditability or security operations for their team.",
       "decisionPages": [
         {
           "type": "profile",
@@ -384,6 +540,48 @@
       "articleUrl": "/news/github-copilot-code-review-api-support-and-new-default-effort-level.html",
       "sourceName": "GitHub Changelog",
       "sourceUrl": "https://github.blog/changelog/2026-10-02-copilot-code-review-api-support-and-new-default-effort-level"
+    },
+    {
+      "id": "chatgpt-introducing-gpt-6-1-sol",
+      "publishedAt": "2026-09-29",
+      "toolSlug": "chatgpt",
+      "toolName": "ChatGPT",
+      "label": "Pricing and packaging update",
+      "title": "Introducing GPT-6.1 Sol",
+      "summary": "Meet GPT-6.1 Sol: near-Astra intelligence for coding, computer use, and professional work at one-fifth of Astra’s standard API input and output token prices.",
+      "changeType": "pricing_packaging",
+      "buyerImpact": "ChatGPT buyers should re-check total cost and plan eligibility because packaging changes can alter the economics of an existing shortlist.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/chatgpt",
+          "label": "ChatGPT profile"
+        }
+      ],
+      "articleUrl": "/news/chatgpt-introducing-gpt-6-1-sol.html",
+      "sourceName": "OpenAI",
+      "sourceUrl": "https://openai.com/index/introducing-gpt-6-1-sol"
+    },
+    {
+      "id": "chatgpt-images-2-5",
+      "publishedAt": "2026-09-26",
+      "toolSlug": "chatgpt",
+      "toolName": "ChatGPT",
+      "label": "Official product update",
+      "title": "ChatGPT Images 2.5 sharpens editing and speeds up generation",
+      "summary": "ChatGPT Images 2.5 improves detail, editing precision and generation speed while adding templates, sketch-based creation and prompt sharing.",
+      "changeType": "product_capability",
+      "buyerImpact": "ChatGPT buyers should compare the new capability against the requirements that originally put the product on their shortlist.",
+      "decisionPages": [
+        {
+          "type": "profile",
+          "url": "/tools/chatgpt",
+          "label": "ChatGPT profile"
+        }
+      ],
+      "articleUrl": "/news/chatgpt-images-2-5.html",
+      "sourceName": "OpenAI",
+      "sourceUrl": "https://openai.com/index/introducing-chatgpt-images-2-5/"
     }
   ],
   "updates": [
@@ -417,7 +615,7 @@
       "title": "Confidential comments on repository security advisories",
       "summary": "You can now post confidential comments on repository security advisories.",
       "changeType": "security_governance",
-      "buyerImpact": "GitHub buyers should verify whether the new controls change authentication, administration or security requirements for their team.",
+      "buyerImpact": "GitHub buyers should verify whether the new controls change permissions, administration, auditability or security operations for their team.",
       "decisionPages": [
         {
           "type": "profile",
@@ -448,7 +646,7 @@
       "title": "Repository security advisory comments API in public preview",
       "summary": "You can now read, add, and edit comments on repository security advisories using the REST API, including advisories created from private vulnerability reports.",
       "changeType": "security_governance",
-      "buyerImpact": "GitHub buyers should verify whether the new controls change authentication, administration or security requirements for their team.",
+      "buyerImpact": "GitHub buyers should verify whether the new controls change permissions, administration, auditability or security operations for their team.",
       "decisionPages": [
         {
           "type": "profile",
@@ -479,7 +677,7 @@
       "title": "New fields for SecurityAdvisory GraphQL API",
       "summary": "You can now read more of the GitHub Advisory Database directly from the GraphQL API without falling back to the REST API.",
       "changeType": "security_governance",
-      "buyerImpact": "GitHub buyers should verify whether the new controls change authentication, administration or security requirements for their team.",
+      "buyerImpact": "GitHub buyers should verify whether the new controls change permissions, administration, auditability or security operations for their team.",
       "decisionPages": [
         {
           "type": "profile",
@@ -572,7 +770,7 @@
       "title": "Rate limits for private vulnerability reports",
       "summary": "Open source maintainers are receiving more low-quality and automated vulnerability reports, which can bury the reports that matter.",
       "changeType": "security_governance",
-      "buyerImpact": "GitHub buyers should verify whether the new controls change authentication, administration or security requirements for their team.",
+      "buyerImpact": "GitHub buyers should verify whether the new controls change permissions, administration, auditability or security operations for their team.",
       "decisionPages": [
         {
           "type": "profile",
@@ -676,7 +874,7 @@
       "title": "GitHub adds fresh authentication for high-impact enterprise actions",
       "summary": "GitHub Enterprise Cloud can now require fresh re-authentication or MFA before managed users perform sensitive actions such as creating tokens or editing webhooks.",
       "changeType": "security_governance",
-      "buyerImpact": "GitHub buyers should verify whether the new controls change authentication, administration or security requirements for their team.",
+      "buyerImpact": "GitHub buyers should verify whether the new controls change permissions, administration, auditability or security operations for their team.",
       "decisionPages": [
         {
           "type": "profile",
@@ -707,7 +905,7 @@
       "title": "GitHub sets new SSH security requirements for keys and clients",
       "summary": "GitHub is phasing out older SSH cryptography, raising the minimum size for newly uploaded RSA keys and adding a post-quantum key exchange option.",
       "changeType": "security_governance",
-      "buyerImpact": "GitHub buyers should verify whether the new controls change authentication, administration or security requirements for their team.",
+      "buyerImpact": "GitHub buyers should verify whether the new controls change permissions, administration, auditability or security operations for their team.",
       "decisionPages": [
         {
           "type": "profile",
@@ -873,7 +1071,7 @@
       "title": "GitHub removes a setup barrier for AI Scan in pull requests",
       "summary": "GitHub AI Scan can now check pull requests without requiring CodeQL default setup first, reducing configuration friction for eligible GitHub Advanced Security customers.",
       "changeType": "security_governance",
-      "buyerImpact": "GitHub buyers should verify whether the new controls change authentication, administration or security requirements for their team.",
+      "buyerImpact": "GitHub buyers should verify whether the new controls change permissions, administration, auditability or security operations for their team.",
       "decisionPages": [
         {
           "type": "profile",
@@ -968,6 +1166,8 @@
       "sourceUrl": "https://community.hubspot.com/t/spotlight-feature-hubspot-mcp-server-updates/156456"
     }
   ],
-  "pageUrl": "https://trytoolscout.org/software-trends-index.html",
-  "dataUrl": "https://trytoolscout.org/software-trends-index.json"
+  "pageUrl": "https://trytoolscout.org/software-trends-index",
+  "dataUrl": "https://trytoolscout.org/software-trends-index.json",
+  "csvUrl": "https://trytoolscout.org/software-trends-index.csv",
+  "chartUrl": "https://trytoolscout.org/software-trends-index-share.svg"
 }

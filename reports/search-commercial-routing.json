@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-06T12:12:19.072Z",
+  "generatedAt": "2026-10-06T13:05:28.267Z",
   "engine": "ToolScout Search Commercial Routing v1",
   "objective": "Route editorial, internal-linking and distribution work from observed Google demand while keeping affiliate economics separate from editorial ranking.",
   "rules": {
@@ -61,15 +61,15 @@
       "pathname": "/best-seo-tools-for-agencies",
       "type": "guide",
       "clicks": 0,
-      "impressions": 2698,
+      "impressions": 2672,
       "ctr": 0,
-      "position": 80.3328,
+      "position": 80.3275,
       "topQueries": [
         {
           "query": "seo software for agencies",
           "clicks": 0,
-          "impressions": 189,
-          "position": 87.6402
+          "impressions": 186,
+          "position": 87.7366
         },
         {
           "query": "best seo tools for agency",
@@ -80,14 +80,14 @@
         {
           "query": "seo tool for agencies",
           "clicks": 0,
-          "impressions": 153,
-          "position": 82.5621
+          "impressions": 151,
+          "position": 82.6225
         },
         {
           "query": "seo agency tools",
           "clicks": 0,
-          "impressions": 131,
-          "position": 82.1221
+          "impressions": 130,
+          "position": 82.1538
         },
         {
           "query": "seo tools for agencies",
@@ -99,7 +99,7 @@
       "monetized": false,
       "monetizedSlugs": [],
       "lane": "relevance-and-authority",
-      "priorityScore": 136.78,
+      "priorityScore": 136.61,
       "actions": [
         "improve-query-intent-match",
         "deepen-evidence",
@@ -319,9 +319,9 @@
       "pathname": "/tools/airtable",
       "type": "tool-profile",
       "clicks": 0,
-      "impressions": 462,
+      "impressions": 461,
       "ctr": 0,
-      "position": 74.0628,
+      "position": 74.0412,
       "topQueries": [
         {
           "query": "airtable",
@@ -357,7 +357,7 @@
       "monetized": false,
       "monetizedSlugs": [],
       "lane": "relevance-and-authority",
-      "priorityScore": 106.26,
+      "priorityScore": 106.22,
       "actions": [
         "improve-query-intent-match",
         "deepen-evidence",
@@ -1233,9 +1233,9 @@
       "pathname": "/best-free-crm",
       "type": "guide",
       "clicks": 0,
-      "impressions": 163,
+      "impressions": 162,
       "ctr": 0,
-      "position": 76.2025,
+      "position": 76.1667,
       "topQueries": [
         {
           "query": "best free crm tools",
@@ -1271,7 +1271,7 @@
       "monetized": false,
       "monetizedSlugs": [],
       "lane": "relevance-and-authority",
-      "priorityScore": 88.29,
+      "priorityScore": 88.18,
       "actions": [
         "improve-query-intent-match",
         "deepen-evidence",
