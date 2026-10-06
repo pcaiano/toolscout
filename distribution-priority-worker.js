@@ -24,19 +24,30 @@ function number(v,fallback=0){const n=Number(v);return Number.isFinite(n)?n:fall
 function gradeRank(v){return({none:0,directional:1,emerging:2,strong:3,revenue_confirmed:4})[String(v||'none')]??0;}
 function hostOf(value){try{return new URL(String(value||'')).hostname.toLowerCase().replace(/^www\./,'')}catch{return''}}
 function sameHostFamily(a,b){const x=hostOf('https://'+String(a||'').replace(/^https?:\/\//,'')),y=hostOf('https://'+String(b||'').replace(/^https?:\/\//,''));return Boolean(x&&y&&(x===y||x.endsWith('.'+y)||y.endsWith('.'+x)))}
-async function currentAuthorityDomains(env){
+async function authorityPolicy(env){
+  const fallback={knownDomains:new Set(),targetReferringDomains:50,minAuthority:50,minBacklinkValue:50};
   try{
-    const r=await env.ASSETS.fetch(new Request('https://trytoolscout.org/data/se-ranking-backlink-truth.json'));
-    if(!r.ok)return new Set();
-    const x=await r.json();
-    return new Set((x.referringDomains||[]).map(row=>hostOf('https://'+String(row?.domain||''))).filter(Boolean));
-  }catch{return new Set()}
+    const [truthResponse,configResponse]=await Promise.all([
+      env.ASSETS.fetch(new Request('https://trytoolscout.org/data/se-ranking-backlink-truth.json')),
+      env.ASSETS.fetch(new Request('https://trytoolscout.org/data/organic-growth-engine.json'))
+    ]);
+    const truth=truthResponse.ok?await truthResponse.json():{};
+    const config=configResponse.ok?await configResponse.json():{};
+    const policy=config?.backlinkAuthority||{};
+    return {
+      knownDomains:new Set((truth.referringDomains||[]).map(row=>hostOf('https://'+String(row?.domain||''))).filter(Boolean)),
+      targetReferringDomains:number(policy.targetReferringDomains,50),
+      minAuthority:number(policy.minimumQualityAuthorityScore,50),
+      minBacklinkValue:number(policy.minimumQualityBacklinkValueScore,50)
+    };
+  }catch{return fallback}
 }
-function authorityDiversity(row,knownDomains){
+function authorityDiversity(row,policy){
   const host=hostOf(row?.live_url||row?.action_url);
-  const existing=Boolean(host&&[...knownDomains].some(domain=>sameHostFamily(host,domain)));
-  const quality=number(row?.authority)>=50&&number(row?.backlink_value)>=50;
-  return {host,existing,quality,newIndependentDomain:Boolean(host&&!existing&&quality),bonus:host&&!existing&&quality?12:0};
+  const existing=Boolean(host&&[...policy.knownDomains].some(domain=>sameHostFamily(host,domain)));
+  const quality=number(row?.authority)>=policy.minAuthority&&number(row?.backlink_value)>=policy.minBacklinkValue;
+  const belowTarget=policy.knownDomains.size<policy.targetReferringDomains;
+  return {host,existing,quality,belowTarget,newIndependentDomain:Boolean(host&&!existing&&quality&&belowTarget),bonus:host&&!existing&&quality&&belowTarget?12:0};
 }
 
 export function operatingDecision(row){
@@ -96,8 +107,8 @@ export async function rebalanceDistributionPriorities(env){
     rows=q.results||[];
   }catch(error){return{ok:false,updated:0,reason:'operating_decision_schema_unavailable',detail:String(error?.message||error).slice(0,500)};}
 
-  const knownAuthorityDomains=await currentAuthorityDomains(env);
-  const staged=rows.map(row=>{const value=expectedHumanValue(row);const enriched={...row,externalValue:value};return{...enriched,authorityDiversity:authorityDiversity(enriched,knownAuthorityDomains),decision:operatingDecision(enriched)};});
+  const authorityPolicyState=await authorityPolicy(env);
+  const staged=rows.map(row=>{const value=expectedHumanValue(row);const enriched={...row,externalValue:value};return{...enriched,authorityDiversity:authorityDiversity(enriched,authorityPolicyState),decision:operatingDecision(enriched)};});
   const supervisorSlots=Math.max(0,Math.min(3,number(supervisor?.config?.exploration_slots,0)));
   const explorationLimit=Math.max(1,Math.min(3,supervisorSlots||HUMAN_ACQUISITION_SPRINT.explorationSlots));
   const explorationCandidates=staged.filter(eligibleForExploration).sort((a,b)=>Number(Boolean(b.authorityDiversity?.newIndependentDomain))-Number(Boolean(a.authorityDiversity?.newIndependentDomain))||number(b.backlink_value)-number(a.backlink_value)||oldestFirst(a,b)).slice(0,explorationLimit);
