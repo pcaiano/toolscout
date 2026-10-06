@@ -161,7 +161,7 @@ const publicData={
   edition,
   editionLabel,
   publishedAt:publishedAt.toISOString(),
-  scope:'ToolScout rolling 30 day editorial dataset of public software product changes selected for buyer relevance. It is not a measure of global market share.',
+  scope:'ToolScout first-party editorial dataset: a rolling 30 day sample of public software product changes selected for buyer relevance. It is not a measure of global market share.',
   windowStart:windowStart.toISOString(),
   windowEnd:publishedAt.toISOString(),
   updatedThrough:updates[0]?.publishedAt||null,
