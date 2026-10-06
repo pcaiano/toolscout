@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-10-06T11:29:37.271Z",
+  "generatedAt": "2026-10-06T12:10:36.687Z",
   "methodology": "Field-level first-party quality control for volatile catalog facts plus validated visual asset resolution. Ambiguous changes are reported, not silently rewritten.",
   "summary": {
     "tools": 127,
     "critical": 0,
-    "high": 14,
-    "medium": 8,
+    "high": 16,
+    "medium": 4,
     "low": 0,
     "autoCorrections": 0,
-    "assetsResolved": 117
+    "assetsResolved": 116
   },
   "corrections": [],
   "findings": [
@@ -77,6 +77,20 @@
       "detail": "network_error"
     },
     {
+      "slug": "grammarly",
+      "severity": "high",
+      "type": "free_plan_contradiction",
+      "catalogValue": true,
+      "observedValue": false,
+      "confidence": "inferred",
+      "reason": "official_pricing_page_lists_trial_and_paid_pricing_without_free_plan",
+      "evidenceUrls": [
+        "https://www.grammarly.com/",
+        "https://www.grammarly.com/plans",
+        "https://www.grammarly.com/features"
+      ]
+    },
+    {
       "slug": "integrately",
       "severity": "high",
       "type": "free_plan_contradiction",
@@ -122,56 +136,22 @@
       "detail": "http_403"
     },
     {
+      "slug": "resume-ai",
+      "severity": "high",
+      "type": "official_source_unavailable",
+      "detail": "http_403"
+    },
+    {
       "slug": "ubersuggest",
       "severity": "high",
       "type": "official_source_unavailable",
       "detail": "http_403"
     },
     {
-      "slug": "asana",
-      "severity": "medium",
-      "type": "pricing_evidence_changed",
-      "previous": [
-        "$0",
-        "$10.99 per",
-        "$24.99 per",
-        "$13.49",
-        "$30.49",
-        "$0.50 per",
-        "$0.60 per",
-        "$300,00"
-      ],
-      "current": [
-        "$0",
-        "$10.99 per",
-        "$24.99 per",
-        "$13.49",
-        "$30.49",
-        "$0.50 per",
-        "$5.99 per",
-        "$0.60 per",
-        "$300,00"
-      ],
-      "evidenceUrls": [
-        "https://asana.com/",
-        "https://asana.com/pricing",
-        "https://asana.com/product/ai"
-      ]
-    },
-    {
       "slug": "beehiiv",
       "severity": "medium",
       "type": "pricing_evidence_changed",
       "previous": [
-        "$32",
-        "$0",
-        "$49 /mo",
-        "$39/mo",
-        "$95 /mo",
-        "$12",
-        "$0.30 per"
-      ],
-      "current": [
         "$ 0",
         "$ 49",
         "$ 95",
@@ -179,6 +159,15 @@
         "$49 /mo",
         "$39/mo",
         "$95 /mo",
+        "$0.30 per"
+      ],
+      "current": [
+        "$32",
+        "$0",
+        "$49 /mo",
+        "$39/mo",
+        "$95 /mo",
+        "$12",
         "$0.30 per"
       ],
       "evidenceUrls": [
@@ -196,15 +185,15 @@
         "$12",
         "$30",
         "$5,00",
-        "$210"
+        "$210",
+        "$0.00"
       ],
       "current": [
         "$0",
         "$12",
         "$30",
         "$5,00",
-        "$210",
-        "$0.00"
+        "$210"
       ],
       "evidenceUrls": [
         "https://www.grammarly.com/",
@@ -216,10 +205,10 @@
       "slug": "grammarly",
       "severity": "medium",
       "type": "trial_evidence_changed",
-      "previous": [
+      "previous": [],
+      "current": [
         7
       ],
-      "current": [],
       "evidenceUrls": [
         "https://www.grammarly.com/",
         "https://www.grammarly.com/plans",
@@ -231,23 +220,6 @@
       "severity": "medium",
       "type": "pricing_evidence_changed",
       "previous": [
-        "$19 per",
-        "$0.99 per",
-        "$85 per",
-        "$10",
-        "$132 per",
-        "$90.09 /mo",
-        "$19.00 /mo",
-        "$109.09 /mo",
-        "$33/mo",
-        "$1.99 per",
-        "$99 per",
-        "$29 per",
-        "$99/month",
-        "$35 per",
-        "$0.01 per"
-      ],
-      "current": [
         "$29 per",
         "$0.99 per",
         "$85 per",
@@ -257,139 +229,27 @@
         "$35 per",
         "$0.01 per"
       ],
+      "current": [
+        "$19 per",
+        "$0.99 per",
+        "$29 per",
+        "$85 per",
+        "$10",
+        "$132 per",
+        "$90.09 /mo",
+        "$29.00 /mo",
+        "$119.09 /mo",
+        "$33/mo",
+        "$1.99 per",
+        "$99 per",
+        "$99/month",
+        "$35 per",
+        "$0.01 per"
+      ],
       "evidenceUrls": [
         "https://www.intercom.com/",
         "https://www.intercom.com/pricing",
         "https://www.intercom.com/solutions/technology"
-      ]
-    },
-    {
-      "slug": "moz-pro",
-      "severity": "medium",
-      "type": "pricing_evidence_changed",
-      "previous": [
-        "$20/month",
-        "$20",
-        "$75/month",
-        "$ 20",
-        "$ 75",
-        "$5 /",
-        "$125",
-        "$500/month",
-        "$ 125",
-        "$25 /",
-        "$ 250",
-        "$20 /",
-        "$ 500",
-        "$10 /",
-        "$0",
-        "$75",
-        "$250",
-        "$500",
-        "$5",
-        "$25",
-        "$10",
-        "$ 99",
-        "$79/mo",
-        "$238/yr",
-        "$ 79",
-        "$950",
-        "$ 179",
-        "$143/mo",
-        "$429/yr",
-        "$ 143"
-      ],
-      "current": [
-        "$20/month",
-        "$20",
-        "$75/month",
-        "$ 20",
-        "$ 75",
-        "$5 /",
-        "$125",
-        "$500/month",
-        "$ 125",
-        "$25 /",
-        "$ 250",
-        "$20 /",
-        "$ 500",
-        "$10 /",
-        "$2,00",
-        "$ 2,00",
-        "0 usd /",
-        "$0",
-        "$75",
-        "$250",
-        "$500",
-        "$5",
-        "$25",
-        "$10",
-        "$ 99",
-        "$79/mo",
-        "$238/yr",
-        "$ 79",
-        "$950",
-        "$ 179"
-      ],
-      "evidenceUrls": [
-        "https://moz.com/products/pro",
-        "https://moz.com/products/api/pricing",
-        "https://moz.com/products/pro/pricing"
-      ]
-    },
-    {
-      "slug": "screaming-frog",
-      "severity": "medium",
-      "type": "pricing_evidence_changed",
-      "previous": [
-        "£199 per year"
-      ],
-      "current": [
-        "€245 per year",
-        "£199 per year"
-      ],
-      "evidenceUrls": [
-        "https://www.screamingfrog.co.uk/seo-spider/",
-        "https://www.screamingfrog.co.uk/seo-spider/pricing/",
-        "https://www.screamingfrog.co.uk/log-file-analyser/pricing/"
-      ]
-    },
-    {
-      "slug": "zapier",
-      "severity": "medium",
-      "type": "pricing_evidence_changed",
-      "previous": [
-        "$40",
-        "$1",
-        "$0 /month",
-        "$19.99 /month",
-        "$69 /month",
-        "$400",
-        "$33.33 /month",
-        "$160",
-        "$13.33 /month",
-        "$800",
-        "$66.67 /month",
-        "$500,00"
-      ],
-      "current": [
-        "$150,00",
-        "$150",
-        "$0 /month",
-        "$19.99 /month",
-        "$69 /month",
-        "$400",
-        "$33.33 /month",
-        "$160",
-        "$13.33 /month",
-        "$800",
-        "$66.67 /month",
-        "$500,00"
-      ],
-      "evidenceUrls": [
-        "https://zapier.com/",
-        "https://zapier.com/pricing",
-        "https://zapier.com/solutions/revops-automation"
       ]
     }
   ]

@@ -1,6 +1,6 @@
 {
   "brain": "shared-growth-v3",
-  "generatedAt": "2026-10-06T11:31:39.721Z",
+  "generatedAt": "2026-10-06T12:12:20.581Z",
   "northStar": "strict_verified_human_sessions",
   "supervisor": {
     "seo": {
@@ -112,7 +112,7 @@
         "backlink_attempts_24h": 2,
         "backlink_attempts_7d": 17,
         "backlink_authority_queue": 2,
-        "backlink_last_verified_age_hours": 47.5,
+        "backlink_last_verified_age_hours": 48,
         "backlink_throughput_gap": true,
         "backlink_stagnating": true,
         "backlink_stagnation_hours": 24,
@@ -152,7 +152,7 @@
         "repeat_domain_authority_priority": "secondary_unless_verified_human_or_commercial_signal",
         "backlink_priority_basis": "new independent referring domains first + relevance + editorial legitimacy + observed search demand + verified human or commercial outcomes"
       },
-      "lastEvaluatedAt": "2026-10-06 11:30:45"
+      "lastEvaluatedAt": "2026-10-06 12:00:43"
     },
     "growth": {
       "status": "working",
@@ -334,7 +334,7 @@
           "attempts_7d": 17,
           "authority_queue": 2,
           "last_verified_at": "2026-09-30 03:19:38",
-          "last_verified_age_hours": 47.5,
+          "last_verified_age_hours": 48,
           "throughput_gap": true,
           "stagnating": true,
           "stagnation_hours": 24,
@@ -347,14 +347,14 @@
           "pending": 9,
           "claimed": 0,
           "attempted": 1,
-          "verified": 747
+          "verified": 754
         },
         "architecture_escalation": {
           "open_incidents": 0,
           "approval_required": false
         }
       },
-      "lastEvaluatedAt": "2026-10-06 11:30:47"
+      "lastEvaluatedAt": "2026-10-06 12:00:45"
     }
   },
   "directives": [
@@ -373,7 +373,7 @@
         "content_amplification",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:31"
     },
     {
       "opportunity_key": "search:best-project-management-tools",
@@ -390,7 +390,7 @@
         "content_amplification",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:31"
     },
     {
       "opportunity_key": "search:best-crm-for-sales-teams",
@@ -407,7 +407,7 @@
         "content_amplification",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:31"
     },
     {
       "opportunity_key": "search:best-funnel-builder",
@@ -424,7 +424,7 @@
         "content_amplification",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "search:best-free-project-management-tools",
@@ -440,7 +440,7 @@
       "actions": [
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:31"
     },
     {
       "opportunity_key": "search:best-free-crm",
@@ -457,7 +457,7 @@
         "content_amplification",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:31"
     },
     {
       "opportunity_key": "search:best-keyword-research-tools",
@@ -474,7 +474,7 @@
         "content_amplification",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "search:best-forms-for-small-business",
@@ -490,7 +490,7 @@
       "actions": [
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "search:best-email-marketing-tools",
@@ -506,7 +506,7 @@
       "actions": [
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "search:best-crm-for-consultants",
@@ -522,7 +522,7 @@
       "actions": [
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "search:best-crm-for-small-business",
@@ -539,7 +539,7 @@
         "content_amplification",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:31"
     },
     {
       "opportunity_key": "search:best-team-collaboration-tools",
@@ -556,7 +556,7 @@
         "content_amplification",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "search:best-tools-for-agencies",
@@ -572,7 +572,7 @@
       "actions": [
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "search:best-developer-tools",
@@ -589,7 +589,7 @@
         "content_amplification",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "search:best-no-code-automation-tools",
@@ -605,7 +605,7 @@
       "actions": [
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "search:best-video-content-tools",
@@ -621,7 +621,7 @@
       "actions": [
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "search:best-crm-for-real-estate",
@@ -637,7 +637,7 @@
       "actions": [
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "search:best-affordable-crm",
@@ -653,7 +653,7 @@
       "actions": [
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "search:best-crm-with-automation",
@@ -670,7 +670,7 @@
         "content_amplification",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "search:best-marketing-automation-tools",
@@ -686,7 +686,7 @@
       "actions": [
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "search:best-workflow-automation-tools",
@@ -702,7 +702,7 @@
       "actions": [
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "search:best-seo-tools",
@@ -718,7 +718,7 @@
       "actions": [
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "search:best-ai-marketing-tools",
@@ -734,7 +734,7 @@
       "actions": [
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "search:best-ecommerce-platforms",
@@ -751,7 +751,7 @@
         "content_amplification",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "search:best-customer-support-tools",
@@ -768,7 +768,7 @@
         "content_amplification",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "search:best-productivity-tools-for-teams",
@@ -784,7 +784,7 @@
       "actions": [
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "search:best-competitor-seo-tools",
@@ -801,7 +801,7 @@
         "content_amplification",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "search:best-lead-capture-forms",
@@ -817,7 +817,7 @@
       "actions": [
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "search:best-social-media-management-tools",
@@ -834,7 +834,7 @@
         "content_amplification",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:home",
@@ -851,7 +851,7 @@
         "protect_current_ranking",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/tools",
@@ -869,7 +869,7 @@
         "strengthen_internal_links",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/tools/semrush",
@@ -887,7 +887,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/best-project-management-tools",
@@ -905,7 +905,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/best-seo-tools-for-agencies",
@@ -923,7 +923,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/best-seo-keyword-research-tools",
@@ -941,7 +941,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/best-no-code-automation-tools",
@@ -959,7 +959,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/tools/airtable",
@@ -977,7 +977,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/compare",
@@ -995,7 +995,7 @@
         "strengthen_internal_links",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/tools/tally",
@@ -1013,7 +1013,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/best-funnel-builder",
@@ -1031,7 +1031,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/tools/klaviyo",
@@ -1049,7 +1049,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/best-developer-tools",
@@ -1067,7 +1067,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/guides",
@@ -1085,7 +1085,7 @@
         "strengthen_internal_links",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/best-team-collaboration-tools",
@@ -1103,7 +1103,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/tools/moz-pro",
@@ -1121,7 +1121,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/best-product-analytics-tools",
@@ -1137,7 +1137,7 @@
       "actions": [
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:33"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/best-crm-for-small-business",
@@ -1155,7 +1155,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/best-free-crm",
@@ -1173,7 +1173,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/best-keyword-research-tools",
@@ -1191,7 +1191,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/best-free-project-management-tools",
@@ -1209,7 +1209,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/best-crm-for-sales-teams",
@@ -1227,7 +1227,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/tools/netlify",
@@ -1245,7 +1245,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/asana-vs-clickup",
@@ -1263,7 +1263,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/tools/gorgias",
@@ -1281,7 +1281,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/tools/mixpanel",
@@ -1299,7 +1299,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/tools/monday-crm",
@@ -1317,7 +1317,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/best-customer-support-tools",
@@ -1335,7 +1335,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/tools/matomo",
@@ -1351,7 +1351,7 @@
       "actions": [
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:33"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/tools/miro",
@@ -1369,7 +1369,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/news/notion-3-7-agent-skills",
@@ -1387,7 +1387,7 @@
         "improve_click_capture",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/best-social-media-management-tools",
@@ -1405,7 +1405,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/tools/screaming-frog",
@@ -1423,7 +1423,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/news/github-actions-workflow-execution-protections-ga",
@@ -1440,7 +1440,7 @@
         "protect_current_ranking",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/news/hubspot-mcp-server-updates",
@@ -1456,7 +1456,7 @@
       "actions": [
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/airtable-vs-notion",
@@ -1474,7 +1474,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/tools/descript",
@@ -1492,7 +1492,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/tools/workato",
@@ -1510,7 +1510,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/tools/mangools",
@@ -1528,7 +1528,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/best-competitor-seo-tools",
@@ -1546,7 +1546,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/news/zapier-next-gen-zaps-mcp",
@@ -1563,7 +1563,7 @@
         "protect_current_ranking",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/best-crm-with-automation",
@@ -1581,7 +1581,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/tools/zoho-crm",
@@ -1599,7 +1599,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-reality:index_issue:/news/chatgpt-word-microsoft-office",
@@ -1616,7 +1616,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:28"
+      "last_evaluated_at": "2026-10-06 11:46:28"
     },
     {
       "opportunity_key": "gsc-page:/news/notion-mail-shuts-down",
@@ -1634,7 +1634,7 @@
         "improve_click_capture",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/tools/apollo",
@@ -1651,7 +1651,7 @@
         "observe_low_sample_ranking",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:33"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "strict-search-human:/",
@@ -1687,7 +1687,7 @@
         "strengthen_internal_links",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "strict-search-human:/news/github-ssh-security-changes-2026",
@@ -1723,7 +1723,7 @@
         "observe_low_sample_ranking",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/best-ecommerce-platforms",
@@ -1741,7 +1741,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/hubspot-vs-pipedrive",
@@ -1759,7 +1759,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-page:/tools/mailerlite",
@@ -1777,7 +1777,7 @@
         "strengthen_internal_links",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "sprint-search:best-project-management-tools",
@@ -1985,7 +1985,7 @@
       "actions": [
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:32"
+      "last_evaluated_at": "2026-10-06 11:46:32"
     },
     {
       "opportunity_key": "gsc-reality:index_issue:/methodology",
@@ -2003,7 +2003,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:28"
+      "last_evaluated_at": "2026-10-06 11:46:28"
     },
     {
       "opportunity_key": "gsc-reality:index_issue:/categories",
@@ -2021,7 +2021,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:28"
+      "last_evaluated_at": "2026-10-06 11:46:28"
     },
     {
       "opportunity_key": "gsc-reality:index_issue:/crm-tools",
@@ -2038,7 +2038,7 @@
         "strengthen_internal_links",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:28"
+      "last_evaluated_at": "2026-10-06 11:46:28"
     },
     {
       "opportunity_key": "gsc-reality:index_issue:/seo-tools",
@@ -2055,7 +2055,7 @@
         "strengthen_internal_links",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:28"
+      "last_evaluated_at": "2026-10-06 11:46:28"
     },
     {
       "opportunity_key": "gsc-reality:index_issue:/software-trends-index",
@@ -2073,7 +2073,7 @@
         "deepen_existing_search_asset",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:28"
+      "last_evaluated_at": "2026-10-06 11:46:28"
     },
     {
       "opportunity_key": "gsc-reality:index_issue:/best-affordable-crm",
@@ -2090,7 +2090,7 @@
         "strengthen_internal_links",
         "search_measurement"
       ],
-      "last_evaluated_at": "2026-10-06 11:16:28"
+      "last_evaluated_at": "2026-10-06 11:46:28"
     }
   ]
 }

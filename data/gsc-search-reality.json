@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-06T11:29:16.795Z",
+  "generatedAt": "2026-10-06T12:10:15.244Z",
   "source": "Google Search Console first-party APIs",
   "property": "sc-domain:trytoolscout.org",
   "authorizationScope": "https://www.googleapis.com/auth/webmasters.readonly",
@@ -8,17 +8,17 @@
       "startDate": "2026-09-09",
       "endDate": "2026-10-06",
       "clicks": 7,
-      "impressions": 6859,
-      "ctr": 0.1021,
-      "position": 68.4526
+      "impressions": 6892,
+      "ctr": 0.1016,
+      "position": 68.5142
     },
     "recent7": {
       "startDate": "2026-09-30",
       "endDate": "2026-10-06",
       "clicks": 0,
-      "impressions": 3084,
+      "impressions": 3117,
       "ctr": 0,
-      "position": 75.3375
+      "position": 75.401
     },
     "previous7": {
       "startDate": "2026-09-23",
@@ -30,23 +30,23 @@
     },
     "change7d": {
       "clicksPct": -100,
-      "impressionsPct": 213.41,
-      "positionDelta": 10.2318
+      "impressionsPct": 216.77,
+      "positionDelta": 10.2953
     },
     "countries": [
       {
         "country": "usa",
         "clicks": 1,
-        "impressions": 4342,
-        "ctr": 0.023,
-        "position": 72.0299
+        "impressions": 4367,
+        "ctr": 0.0229,
+        "position": 72.0859
       },
       {
         "country": "gbr",
         "clicks": 0,
-        "impressions": 612,
+        "impressions": 614,
         "ctr": 0,
-        "position": 72.7402
+        "position": 72.7573
       },
       {
         "country": "aus",
@@ -58,9 +58,9 @@
       {
         "country": "fra",
         "clicks": 0,
-        "impressions": 156,
+        "impressions": 157,
         "ctr": 0,
-        "position": 71.7564
+        "position": 71.8025
       },
       {
         "country": "ind",
@@ -100,23 +100,23 @@
       {
         "country": "deu",
         "clicks": 0,
-        "impressions": 50,
+        "impressions": 51,
         "ctr": 0,
-        "position": 68.48
+        "position": 68.7059
       },
       {
         "country": "ukr",
         "clicks": 0,
-        "impressions": 33,
+        "impressions": 34,
         "ctr": 0,
-        "position": 60.1515
+        "position": 60.8824
       },
       {
         "country": "idn",
         "clicks": 0,
-        "impressions": 28,
+        "impressions": 29,
         "ctr": 0,
-        "position": 51.8214
+        "position": 52.7241
       },
       {
         "country": "nzl",
@@ -144,9 +144,9 @@
       {
         "device": "DESKTOP",
         "clicks": 4,
-        "impressions": 5170,
-        "ctr": 0.0774,
-        "position": 69.0996
+        "impressions": 5203,
+        "ctr": 0.0769,
+        "position": 69.1772
       },
       {
         "device": "MOBILE",
@@ -191,10 +191,10 @@
     "note": "Primary index-health metrics use canonical URLs in the current ToolScout sitemap. Legacy or alternate URLs observed in Search Analytics are inspected separately and do not count as canonical index failures.",
     "preservedFromPrevious": true,
     "preservedFromGeneratedAt": "2026-10-06T11:04:38.586Z",
-    "lastInspectionAttemptAt": "2026-10-06T11:29:16.795Z",
-    "lastInspectionAttemptCoveragePct": 6.6,
-    "lastInspectionAttemptErrors": 204,
-    "quotaLimited": true
+    "lastInspectionAttemptAt": "2026-10-06T12:10:15.244Z",
+    "lastInspectionAttemptCoveragePct": 77.8,
+    "lastInspectionAttemptErrors": 51,
+    "quotaLimited": false
   },
   "sitemaps": {
     "apiOk": true,
@@ -339,8 +339,8 @@
           "url": "https://trytoolscout.org/best-seo-tools-for-agencies",
           "kind": "high_impression_low_rank",
           "score": 96,
-          "impressions": 2672,
-          "position": 80.3275,
+          "impressions": 2698,
+          "position": 80.3328,
           "action": "authority_depth_and_query_alignment"
         },
         {
@@ -366,8 +366,8 @@
           "url": "https://trytoolscout.org/tools/airtable",
           "kind": "high_impression_low_rank",
           "score": 85.3,
-          "impressions": 461,
-          "position": 74.0412,
+          "impressions": 462,
+          "position": 74.0628,
           "action": "authority_depth_and_query_alignment"
         },
         {
@@ -448,10 +448,10 @@
       "url": "https://trytoolscout.org/best-seo-tools-for-agencies",
       "page": "/best-seo-tools-for-agencies",
       "score": 96,
-      "impressions": 2672,
+      "impressions": 2698,
       "clicks": 0,
       "ctr": 0,
-      "position": 80.3275,
+      "position": 80.3328,
       "action": "authority_depth_and_query_alignment"
     },
     {
@@ -498,10 +498,10 @@
       "url": "https://trytoolscout.org/tools/airtable",
       "page": "/tools/airtable",
       "score": 85.3,
-      "impressions": 461,
+      "impressions": 462,
       "clicks": 0,
       "ctr": 0,
-      "position": 74.0412,
+      "position": 74.0628,
       "action": "authority_depth_and_query_alignment"
     },
     {
@@ -618,10 +618,10 @@
       "url": "https://trytoolscout.org/best-free-crm",
       "page": "/best-free-crm",
       "score": 79,
-      "impressions": 162,
+      "impressions": 163,
       "clicks": 0,
       "ctr": 0,
-      "position": 76.1667,
+      "position": 76.2025,
       "action": "authority_depth_and_query_alignment"
     },
     {
@@ -5795,11 +5795,11 @@
     "This URL Inspection attempt did not meet the 80% coverage quality gate. The previous healthy index-health snapshot was preserved while Search Analytics was refreshed."
   ],
   "inspectionRun": {
-    "attempted": 218,
-    "succeeded": 14,
-    "errors": 204,
-    "coveragePct": 6.6,
-    "quotaLimited": true,
+    "attempted": 216,
+    "succeeded": 165,
+    "errors": 51,
+    "coveragePct": 77.8,
+    "quotaLimited": false,
     "preservedPriorHealthySnapshot": true
   }
 }

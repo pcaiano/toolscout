@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-06T11:29:19.166Z",
-  "sourceGeneratedAt": "2026-10-06T11:29:16.798Z",
+  "generatedAt": "2026-10-06T12:10:16.647Z",
+  "sourceGeneratedAt": "2026-10-06T12:10:15.248Z",
   "summary": {
     "canonical": 33,
     "redirected": 3,
@@ -11,9 +11,9 @@
       "slug": "best-seo-tools-for-agencies",
       "status": "canonical",
       "target": "best-seo-tools-for-agencies",
-      "impressions": 2672,
+      "impressions": 2698,
       "clicks": 0,
-      "position": 80.3275
+      "position": 80.3328
     },
     {
       "slug": "best-crm-for-small-business",
@@ -43,9 +43,9 @@
       "slug": "best-free-crm",
       "status": "canonical",
       "target": "best-free-crm",
-      "impressions": 162,
+      "impressions": 163,
       "clicks": 0,
-      "position": 76.1667
+      "position": 76.2025
     },
     {
       "slug": "best-project-management-tools",
@@ -83,9 +83,9 @@
       "slug": "best-crm-with-automation",
       "status": "canonical",
       "target": "best-crm-with-automation",
-      "impressions": 75,
+      "impressions": 77,
       "clicks": 0,
-      "position": 75.2
+      "position": 75.6494
     },
     {
       "slug": "best-developer-tools",
@@ -184,6 +184,14 @@
       "position": 55.4545
     },
     {
+      "slug": "best-ai-research-tools",
+      "status": "canonical",
+      "target": "best-ai-research-tools",
+      "impressions": 10,
+      "clicks": 0,
+      "position": 48.2
+    },
+    {
       "slug": "best-productivity-tools-for-teams",
       "status": "canonical",
       "target": "best-productivity-tools-for-teams",
@@ -198,14 +206,6 @@
       "impressions": 9,
       "clicks": 0,
       "position": 81.8889
-    },
-    {
-      "slug": "best-ai-research-tools",
-      "status": "canonical",
-      "target": "best-ai-research-tools",
-      "impressions": 9,
-      "clicks": 0,
-      "position": 45.4444
     },
     {
       "slug": "best-seo-tools",
