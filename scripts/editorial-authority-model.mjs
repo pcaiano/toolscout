@@ -51,7 +51,7 @@ export function scoreEditorialPage(html,{pageType='other',hasFreshUpdate=false}=
   const hasH1=/<h1(?:\s[^>]*)?>[\s\S]*?<\/h1>/i.test(html);
   const internalLinks=countMatches(html,/href=["']\/(?!\/)/gi);
   const hasEditorialPolicy=/(editorial bar|editorial policy|affiliate status never|affiliate relationships do not determine|does not sell ranking positions|independent analysis)/i.test(html);
-  const hasEditorialEvidence=/(Editorial evidence:|Primary sources:)/i.test(html);
+  const hasEditorialEvidence=/(Editorial evidence:|Primary source(?:s)?(?: first)?[:.]|DOWNLOAD THE STRUCTURED DATA|sourceMethod)/i.test(html);
   const dated=countMatches(html,/\b20\d{2}-\d{2}-\d{2}\b/g)>0||countMatches(html,/\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{1,2},\s+20\d{2}\b/gi)>0;
   const hasStructuredData=/<script[^>]+application\/ld\+json/i.test(html);
   const verificationMatch=String(html||'').match(/(?:last checked|checked|verified on|last verified)\s+(20\d{2}-\d{2}-\d{2})/i);
@@ -65,7 +65,7 @@ export function scoreEditorialPage(html,{pageType='other',hasFreshUpdate=false}=
   let score=0;
   if(pageType==='news'){
     score=10;
-    if(sourceLinks>=1)score+=20;
+    if(sourceLinks>=1)score+=20;else if(hasEditorialEvidence)score+=10;
     if(hasAnalysis)score+=20;
     if(hasCanonical)score+=10;
     if(hasStructuredData)score+=10;
@@ -76,7 +76,7 @@ export function scoreEditorialPage(html,{pageType='other',hasFreshUpdate=false}=
     if(hasEditorialPolicy||hasDisclosure)score+=5;
   }else if(pageType==='proprietary_dataset'){
     score=10;
-    if(sourceLinks>=2)score+=15;else if(sourceLinks===1)score+=8;
+    if(sourceLinks>=2)score+=15;else if(sourceLinks===1)score+=8;else if(hasEditorialEvidence)score+=8;
     if(hasAnalysis)score+=20;
     if(hasCanonical)score+=10;
     if(hasStructuredData)score+=15;
