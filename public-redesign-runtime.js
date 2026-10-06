@@ -379,7 +379,7 @@ export async function transformPublicRedesignResponse(request,response){
   html=stripLegacyNavigation(html,surface);
   if(isCommercialDecisionPath(url.pathname))html=stripCommercialVendorSourceLinks(html);
   if(!html.includes('data-toolscout-public-redesign="2"'))html=html.replace('</head>',styleTag()+'</head>');
-  if(!html.includes('toolscout-v2-native.css'))html=html.replace('</head>','<link rel="stylesheet" href="/toolscout-v2-native.css?v=20261006-1" data-toolscout-native-v2="1"></head>');
+  if(!html.includes('toolscout-v2-native.css'))html=html.replace('</head>','<link rel="stylesheet" href="/toolscout-v2-native.css?v=20261006-2" data-toolscout-native-v2="1"></head>');
   if(!/<html\b[^>]*data-toolscout-redesign=["']2["']/i.test(html))html=html.replace(/<html\b([^>]*)>/i,(match,attrs)=>'<html'+attrs+' data-toolscout-redesign="2" data-toolscout-surface="'+surface+'">');
   else if(!/<html\b[^>]*data-toolscout-surface=/i.test(html))html=html.replace(/<html\b([^>]*)>/i,(match,attrs)=>'<html'+attrs+' data-toolscout-surface="'+surface+'">');
   html=html.replace(/<body\b[^>]*>/i,m=>m+navHtml(url.pathname));
