@@ -1,5 +1,5 @@
 name: Visual Audit Once
-# secondary surface audit final
+# last surface family audit
 
 on:
   push:
@@ -20,12 +20,10 @@ jobs:
           set -euo pipefail
           mkdir -p shots
           urls=(
-            "guide-detail|https://trytoolscout.org/best-project-management-tools"
-            "compare-detail|https://trytoolscout.org/make-vs-zapier"
-            "news-detail|https://trytoolscout.org/news/chatgpt-building-advertising-for-the-way-people-use-ai"
-            "methodology|https://trytoolscout.org/methodology"
-            "trends|https://trytoolscout.org/software-trends-index"
-            "categories|https://trytoolscout.org/categories"
+            "crm-tools|https://trytoolscout.org/crm-tools"
+            "seo-tools|https://trytoolscout.org/seo-tools"
+            "affiliate-disclosure|https://trytoolscout.org/affiliate-disclosure"
+            "privacy|https://trytoolscout.org/privacy"
           )
           for item in "${urls[@]}"; do
             name="${item%%|*}"
