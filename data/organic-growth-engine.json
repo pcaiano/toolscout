@@ -251,7 +251,7 @@
     "diagnoseOffPageWhenOnPageHealthy": true
   },
   "editorialQuality": {
-    "rollout": "pilot",
+    "rollout": "full",
     "objective": "Make every ToolScout page read like a distinct specialist editorial piece while preserving SEO, GEO, AEO, structured data and evidence contracts.",
     "rules": {
       "editorialAngleBeforeKeywords": true,
@@ -275,7 +275,7 @@
       "webflow-vs-framer.html"
     ],
     "validation": {
-      "marker": "data-editorial-quality=\"pilot\"",
+      "marker": "data-editorial-quality=\"full\"",
       "rejectLeadBodyDuplication": true,
       "rejectGenericAnalysisPhrases": [
         "is the strongest general fit in the current ToolScout catalog",
@@ -293,6 +293,7 @@
         "analysis": "Webflow and Framer overlap heavily in visual site building, but they pull in different directions once a team goes beyond the canvas. Framer's clearest advantage is AI capability, alongside slightly stronger ease of use and price. Webflow counters with smaller but broader advantages across integrations, SEO and agency fit, plus a more extensible content and marketing workflow. For buyers, this is less a question of which builder has more features than whether speed and AI-assisted creation matter more than depth around site operations, SEO and agency use.",
         "decision": "Choose Framer when rapid visual production, AI-assisted building and ease of use are the harder requirements. Choose Webflow when SEO control, integrations and agency-scale site management carry more weight."
       }
-    }
+    },
+    "fullRolloutAt": "2026-10-06"
   }
 }
