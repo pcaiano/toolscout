@@ -279,4 +279,36 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`ToolScout PR Media Crawler listening on ${PORT}`);
+
+  const startupDomains = [...new Set(
+    String(process.env.BATCH_DOMAINS || "")
+      .split(",")
+      .map(normalizeDomain)
+      .filter(Boolean)
+  )].slice(0, 40);
+
+  if (startupDomains.length) {
+    (async () => {
+      const batchId = process.env.BATCH_ID || new Date().toISOString();
+      const started = Date.now();
+      console.log("PR_CRAWL_BATCH_START " + JSON.stringify({batch_id: batchId, domains: startupDomains}));
+      try {
+        const results = await crawlMany(startupDomains);
+        const contacts = results.flatMap(r => r.contacts);
+        console.log("PR_CRAWL_BATCH_RESULT " + JSON.stringify({
+          batch_id: batchId,
+          domains_requested: startupDomains.length,
+          domains_with_contacts: results.filter(r => r.contacts.length).length,
+          contacts_found: contacts.length,
+          elapsed_ms: Date.now() - started,
+          results
+        }));
+      } catch (err) {
+        console.error("PR_CRAWL_BATCH_ERROR " + JSON.stringify({
+          batch_id: batchId,
+          error: String(err?.stack || err)
+        }));
+      }
+    })();
+  }
 });
