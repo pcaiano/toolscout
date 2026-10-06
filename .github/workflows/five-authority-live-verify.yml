@@ -1,0 +1,70 @@
+name: Five Authority Points Live Verify
+
+on:
+  push:
+    branches:
+      - fix-five-authority-gaps-20261006
+    paths:
+      - '.github/workflows/five-authority-live-verify.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify live authority surfaces
+        run: |
+          set -euo pipefail
+          fetch () {
+            path="$1"
+            out="$2"
+            curl -fsS --retry 4 --retry-all-errors --retry-delay 2 "https://trytoolscout.org${path}?authority-live=${GITHUB_SHA}" -o "$out"
+          }
+
+          fetch "/software-trends-index" /tmp/trends.html
+          grep -Fq 'Software change,' /tmp/trends.html
+          grep -Fq 'Press findings' /tmp/trends.html
+          grep -Fq 'Publisher resources' /tmp/trends.html
+          grep -Fq 'DOWNLOAD CSV' /tmp/trends.html
+          grep -Fq 'PUBLISHER KIT AND FINDER EMBEDS' /tmp/trends.html
+
+          fetch "/distribution/publisher-kit" /tmp/publisher.html
+          grep -Fq 'Research asset' /tmp/publisher.html
+          grep -Fq 'Software Trends Index' /tmp/publisher.html
+          grep -Fq 'application/ld+json' /tmp/publisher.html
+
+          headers="$(curl -sSI --retry 4 --retry-all-errors --retry-delay 2 'https://trytoolscout.org/best-seo-keyword-research-tools?authority-live=1')"
+          printf '%s\n' "$headers"
+          printf '%s' "$headers" | grep -Eq '^HTTP/[^ ]+ 30[1278]'
+          printf '%s' "$headers" | grep -Eiq '^location: https://trytoolscout\.org/best-keyword-research-tools|^location: /best-keyword-research-tools'
+
+          fetch "/news/github-confidential-comments-on-repository-security-advisories" /tmp/confidential.html
+          grep -Fq 'GitHub now lets maintainers add confidential comments' /tmp/confidential.html
+          grep -Fq '"citation":"https://github.blog/changelog/2026-10-02-confidential-comments-on-repository-security-advisories"' /tmp/confidential.html
+
+          fetch "/news/github-rate-limits-for-private-vulnerability-reports" /tmp/rates.html
+          grep -Fq 'GitHub has added daily per-user rate limits' /tmp/rates.html
+          grep -Fq '"citation":"https://github.blog/changelog/2026-10-01-rate-limits-for-private-vulnerability-reports"' /tmp/rates.html
+
+          json_headers="$(curl -sSI 'https://trytoolscout.org/software-trends-index.json')"
+          csv_headers="$(curl -sSI 'https://trytoolscout.org/software-trends-index.csv')"
+          svg_headers="$(curl -sSI 'https://trytoolscout.org/software-trends-index-share.svg')"
+          printf '%s\n' "$json_headers" | grep -Eiq '^content-type: application/json'
+          printf '%s\n' "$csv_headers" | grep -Eiq '^content-type: text/csv'
+          printf '%s\n' "$svg_headers" | grep -Eiq '^content-type: image/svg\+xml'
+
+          curl -fsS 'https://trytoolscout.org/software-trends-index.json' -o /tmp/trends.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const d=JSON.parse(fs.readFileSync('/tmp/trends.json','utf8'));
+          if(d.version!==6)throw new Error('wrong trends version');
+          if(!Array.isArray(d.pressFindings)||d.pressFindings.length<3)throw new Error('press findings missing');
+          if(!Array.isArray(d.momentum)||!d.momentum.length)throw new Error('momentum missing');
+          if(!d.aiConnectivitySnapshot)throw new Error('AI snapshot missing');
+          if(!d.csvUrl||!d.chartUrl)throw new Error('download assets missing');
+          console.log(JSON.stringify({version:d.version,metrics:d.metrics,findings:d.pressFindings.length,momentum:d.momentum.length,ai:d.aiConnectivitySnapshot},null,2));
+          NODE
+          echo "ALL_FIVE_AUTHORITY_POINTS_LIVE"
