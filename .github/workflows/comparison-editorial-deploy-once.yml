@@ -39,11 +39,11 @@ jobs:
           ];
           for(const item of cases){
             const page=await browser.newPage();
-            await page.goto(item.url,{waitUntil:'networkidle',timeout:60000});
+            await page.goto(item.url,{waitUntil:'domcontentloaded',timeout:30000});
             await page.waitForFunction(required=>{
               const text=document.querySelector('#analysis')?.innerText||'';
               return text.includes(required);
-            },item.required,{timeout:30000});
+            },item.required,{timeout:20000});
             const text=await page.locator('#analysis').innerText();
             if(text.includes('This is a genuine trade-off rather than a cosmetic tie.'))throw new Error('canned comparison lead still rendered');
             console.log('LIVE:',item.url.replace(/\?.*$/,''),'\n',text);
