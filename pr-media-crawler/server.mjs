@@ -14,7 +14,7 @@ const COMMON_PATHS = [
 
 const LINK_HINTS = /(about|team|staff|masthead|author|editor|contact|press|newsroom|impressum|redaktion|redacao|redazione|kontakt|contacto)/i;
 const GOOD_LOCAL = /(editor|editorial|editors|news|newsroom|press|presse|prensa|tips|story|stories|pitch|redacao|redacao|redaktion|redazione|redaccion|redaccion|redac|redactie|desk|journalist|reporter|tech|technology|startup|saas|ai|software)/i;
-const BAD_LOCAL = /(noreply|no-reply|donotreply|support|helpdesk|help|billing|invoice|privacy|legal|abuse|sales|advertis|^ads?$|career|jobs|recruit|^hr$|customer|customerservice|shop|store|orders|webmaster|finance|membership|ombudsman|reader|aboservice|jobanzeigen|werben|relay)/i;
+const BAD_LOCAL = /(noreply|no-reply|donotreply|support|helpdesk|help|billing|invoice|privacy|legal|abuse|sales|advertis|adinquir|^ads?$|career|jobs|recruit|^hr$|customer|customerservice|shop|store|orders|webmaster|finance|membership|ombudsman|reader|aboservice|jobanzeigen|werben|relay|accounts?|corrections?|bugs?)/i;
 const ROLE_WORDS = /(editor|reporter|journalist|writer|correspondent|producer|news|editorial|press|technology|software|saas|startup|artificial intelligence|\bai\b|developer|cloud|cyber|security|enterprise|data|digital)/i;
 
 function json(res, status, body) {
@@ -132,6 +132,7 @@ function looksLikePersonName(text) {
   const s = String(text || "").replace(/\s+/g, " ").trim();
   if (s.length < 4 || s.length > 70) return false;
   if (/\b(editorial|team|staff|contact|about|news|press|home|author|authors|contributors|privacy|terms|advertise|subscribe)\b/i.test(s)) return false;
+  if (/^(editor|reporter|journalist|writer|producer|strategist|outreach|case study|marketing|press|news)\b/i.test(s)) return false;
   const parts = s.split(" ").filter(Boolean);
   if (parts.length < 2 || parts.length > 5) return false;
   return parts.every(p => /^[A-ZÀ-ÖØ-Ý][A-Za-zÀ-ÿ'’.\-]+$/.test(p) || /^[A-Z]{2,}$/.test(p));
@@ -192,6 +193,9 @@ function extractContacts(html, url, domain) {
   for (let email of emails) {
     email = email.replace(/[),.;:]+$/g, "").toLowerCase();
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) continue;
+    const emailDomain = email.split("@")[1].toLowerCase();
+    if (/^(example\.com|company\.com|sentry\.io)$/.test(emailDomain)) continue;
+    if (/^[a-f0-9]{24,}@/i.test(email)) continue;
     const idx = text.toLowerCase().indexOf(email.toLowerCase());
     const context = idx >= 0 ? text.slice(Math.max(0, idx - 220), Math.min(text.length, idx + email.length + 220)) : "";
     const c = classify(email, context, new URL(url).pathname);
