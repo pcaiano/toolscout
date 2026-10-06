@@ -174,7 +174,7 @@ jobs:
             'data/tools.json','data/competitive-gap-profiles.json','data/seo-longtail.json',
             'data/catalog-quality-state.json','data/tool-assets.json','data/comparisons.json',
             'data/search-commercial-routing.json','data/gsc-search-reality.json','data/gsc-daily-trend.json','data/software-updates.json',
-            'sitemap.xml','robots.txt','feed.xml','llms.txt','software-trends-index.json'
+            'sitemap.xml','robots.txt','feed.xml','llms.txt','software-trends-index.json','software-trends-index.csv','software-trends-index-share.svg'
           ]);
           const allowed=p=>exact.has(p)||/^[^/]+\.html$/.test(p)||/^tools\/.*\.html$/.test(p)||/^news\/.*\.html$/.test(p)||/^blog\/.*\.html$/.test(p)||/^reports\/.*\.json$/.test(p);
           const forbidden=paths.filter(p=>!allowed(p));
@@ -185,14 +185,14 @@ jobs:
         id: commit_assets
         if: github.ref == 'refs/heads/main'
         run: |
-          if [ -z "$(git status --porcelain -- data/tools.json data/competitive-gap-profiles.json data/seo-longtail.json data/catalog-quality-state.json data/tool-assets.json data/comparisons.json data/search-commercial-routing.json data/gsc-search-reality.json data/gsc-daily-trend.json data/software-updates.json '*.html' 'tools/*.html' 'news/*.html' 'sitemap.xml' 'robots.txt' 'feed.xml' 'llms.txt' 'blog/*.html' 'reports/*.json' 'software-trends-index.json')" ]; then
+          if [ -z "$(git status --porcelain -- data/tools.json data/competitive-gap-profiles.json data/seo-longtail.json data/catalog-quality-state.json data/tool-assets.json data/comparisons.json data/search-commercial-routing.json data/gsc-search-reality.json data/gsc-daily-trend.json data/software-updates.json '*.html' 'tools/*.html' 'news/*.html' 'sitemap.xml' 'robots.txt' 'feed.xml' 'llms.txt' 'blog/*.html' 'reports/*.json' 'software-trends-index.json' 'software-trends-index.csv' 'software-trends-index-share.svg')" ]; then
             echo "No SEO/distribution asset changes to commit."
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git config user.name "toolscout-seo-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- data/tools.json data/competitive-gap-profiles.json data/seo-longtail.json data/catalog-quality-state.json data/tool-assets.json data/comparisons.json data/search-commercial-routing.json data/gsc-search-reality.json data/gsc-daily-trend.json data/software-updates.json '*.html' 'tools/*.html' 'news/*.html' sitemap.xml robots.txt feed.xml llms.txt blog reports software-trends-index.json
+          git add -- data/tools.json data/competitive-gap-profiles.json data/seo-longtail.json data/catalog-quality-state.json data/tool-assets.json data/comparisons.json data/search-commercial-routing.json data/gsc-search-reality.json data/gsc-daily-trend.json data/software-updates.json '*.html' 'tools/*.html' 'news/*.html' sitemap.xml robots.txt feed.xml llms.txt blog reports software-trends-index.json software-trends-index.csv software-trends-index-share.svg
           git commit -m "Refresh SEO, catalog quality, comparisons, indexing, research, blog and distribution assets"
           if [ -n "$(git status --porcelain)" ]; then
             echo "Unexpected generated changes remain unstaged after the canonical SEO asset commit."
