@@ -1,0 +1,39 @@
+name: Visual Audit Once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/visual-audit-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Capture live desktop screenshots
+        run: |
+          set -euo pipefail
+          mkdir -p shots
+          urls=(
+            "home|https://trytoolscout.org/"
+            "tools|https://trytoolscout.org/tools"
+            "guides|https://trytoolscout.org/guides"
+            "compare|https://trytoolscout.org/compare"
+            "whats-new|https://trytoolscout.org/whats-new"
+            "publisher-kit|https://trytoolscout.org/distribution/publisher-kit"
+            "figma|https://trytoolscout.org/tools/figma"
+          )
+          for item in "${urls[@]}"; do
+            name="${item%%|*}"
+            url="${item#*|}"
+            google-chrome --headless=new --no-sandbox --hide-scrollbars --window-size=1440,1200 --screenshot="shots/${name}.png" "${url}?visual_audit=1"
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: toolscout-live-shots
+          path: shots/*.png
+          retention-days: 1
