@@ -60,7 +60,7 @@ test('commercial detail families are owned by explicit ToolScout 2.0 surfaces',a
     const out=await transformPublicRedesignResponse(new Request('https://trytoolscout.org'+path),new Response(source,{status:200,headers:{'content-type':'text/html; charset=UTF-8'}}));
     const html=await out.text();
     assert.match(html,new RegExp('data-toolscout-surface="'+surface+'"'),path);
-    assert.match(html,new RegExp('>'+label.replace(/[.*+?^${}()|[\]\\]/g,'\\test('public redesign injects the shared shell without changing canonical content',async()=>{')+'<'),path);
+    assert.ok(html.includes('>'+label+'<'),path);
     assert.match(html,/data-toolscout-public-redesign="2"/,path);
   }
   const runtime=read('public-redesign-runtime.js');
