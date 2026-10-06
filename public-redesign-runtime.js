@@ -18,7 +18,9 @@ function publicSurface(pathname){
   if(p==='/tools')return'tools';
   if(/^\/tools\/[a-z0-9][a-z0-9-]*$/i.test(p))return'tool-profile';
   if(p==='/guides')return'guides';
+  if(/^\/best-[a-z0-9-]+$/i.test(p))return'guide-detail';
   if(p==='/compare')return'compare';
+  if(/^\/[a-z0-9][a-z0-9-]+-vs-[a-z0-9][a-z0-9-]+$/i.test(p))return'compare';
   if(p==='/whats-new')return'whats-new';
   if(p==='/methodology')return'methodology';
   if(p==='/affiliate-disclosure'||p==='/privacy')return'policy';
@@ -42,8 +44,8 @@ function stripLegacyNavigation(html,surface){
   // Generated tool profiles used a standalone pre-2.0 ToolScout brand link above breadcrumbs.
   // The shared ToolScout 2.0 header owns brand identity, so remove the duplicate at runtime
   // for already-generated profiles as well as preventing it at generation time.
-  if(surface==='tool-profile'){
-    out=out.replace(/<a\b(?=[^>]*class=["'][^"']*\bbrand\b[^"']*["'])(?=[^>]*href=["']\/["'])[^>]*>\s*ToolScout\s*<\/a>/gi,'');
+  if(surface==='tool-profile'||surface==='guide-detail'){
+    out=out.replace(/<a\b(?=[^>]*class=["'][^"']*\bbrand\b[^"']*["'])(?=[^>]*href=["'](?:\.\/|\/)["'])[^>]*>\s*ToolScout\s*<\/a>/gi,'');
   }
   return out;
 }
@@ -148,15 +150,26 @@ html[data-toolscout-surface="tools"] .ai-badge{border-radius:6px!important;backg
 html[data-toolscout-surface="tools"] .ai-badge::before{background:var(--ts-g)!important;color:var(--ts-l)!important}
 html[data-toolscout-surface="tools"] .crawl-index{border:0!important;border-top:1px solid var(--ts-line)!important;border-radius:0!important;background:transparent!important;padding:22px 0!important}
 
+html[data-toolscout-surface="tools"] .tool-head{align-items:center!important;gap:14px!important}
+html[data-toolscout-surface="tools"] .tool h2{font-size:24px!important;line-height:1.08!important;margin:3px 0 0!important}
+html[data-toolscout-surface="tools"] .tool p{color:#626962!important;line-height:1.58!important}
+html[data-toolscout-surface="tools"] .tool-summary{margin:14px 0 7px!important}
+html[data-toolscout-surface="tools"] .tool-view{margin:10px 0 0!important;color:#515851!important}
+html[data-toolscout-surface="tools"] .tool-footer{margin-top:18px!important;padding-top:14px!important;border-top:1px solid var(--ts-line)!important}
+html[data-toolscout-surface="tools"] .tool-actions{display:flex!important;gap:8px!important}
+html[data-toolscout-surface="tools"] .tool-link,
+html[data-toolscout-surface="tools"] .tool-visit{min-height:36px!important;padding:8px 11px!important;border-radius:7px!important;font-size:12px!important;font-weight:800!important;text-decoration:none!important}
+html[data-toolscout-surface="tools"] .tool-link{background:transparent!important;color:var(--ts-g)!important;border:1px solid var(--ts-line)!important}
+html[data-toolscout-surface="tools"] .tool-visit{background:var(--ts-g)!important;color:#fff!important;border:1px solid var(--ts-g)!important}
+html[data-toolscout-surface="tools"] .cat,
+html[data-toolscout-surface="tools"] .price{color:#777F77!important}
+
 html[data-toolscout-surface="guides"] .section{margin-top:42px!important;padding-top:28px!important;border-top:1px solid var(--ts-g)!important}
 html[data-toolscout-surface="guides"] .section h2{font-size:34px!important;line-height:1.05!important;margin:8px 0 18px!important}
 html[data-toolscout-surface="guides"] .grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:0 28px!important;border-top:1px solid var(--ts-line)}
 html[data-toolscout-surface="guides"] .card{display:grid!important;grid-template-columns:1fr auto!important;align-items:center!important;gap:18px!important;padding:18px 0!important;border:0!important;border-bottom:1px solid var(--ts-line)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
 html[data-toolscout-surface="guides"] .card:hover{transform:none!important;padding-left:5px!important;background:transparent!important}
 html[data-toolscout-surface="guides"] .card strong{font-size:16px!important}
-html[data-toolscout-surface="guides"] .section:first-of-type .grid{grid-template-columns:1fr!important}
-html[data-toolscout-surface="guides"] .section:first-of-type .card{padding:22px 0!important}
-html[data-toolscout-surface="guides"] .section:first-of-type .card strong{font-size:20px!important}
 
 html[data-toolscout-surface="compare"] .selectors{display:grid!important;grid-template-columns:1fr 1fr!important;gap:18px!important;margin:26px 0 18px!important;padding:22px 0!important;border-top:1px solid var(--ts-g);border-bottom:1px solid var(--ts-line)}
 html[data-toolscout-surface="compare"] .selectors select{margin-top:7px!important;padding:14px!important;border-radius:8px!important;border:1px solid var(--ts-line)!important;box-shadow:none!important;background:#fff!important}
@@ -196,6 +209,79 @@ html[data-toolscout-surface="trends"] body>.wrap>.brand:first-child{display:none
 html[data-toolscout-surface="trends"] .hero{max-width:820px!important;padding:66px 0 34px!important}
 html[data-toolscout-surface="trends"] .card,
 html[data-toolscout-surface="trends"] .panel{border-radius:9px!important;box-shadow:none!important}
+
+
+/* ToolScout 2.0 tool profiles */
+html[data-toolscout-surface="tool-profile"] body>.wrap{max-width:1120px!important;padding-top:0!important;padding-bottom:88px!important}
+html[data-toolscout-surface="tool-profile"] .crumbs{display:flex!important;gap:7px!important;align-items:center!important;padding:24px 0 0!important;margin:0!important;color:#7B827B!important;font-size:12px!important}
+html[data-toolscout-surface="tool-profile"] .crumbs a{color:#545B54!important;text-decoration:none!important}
+html[data-toolscout-surface="tool-profile"] .hero{max-width:900px!important;margin:0!important;padding:54px 0 34px!important;border-bottom:1px solid var(--ts-line)!important}
+html[data-toolscout-surface="tool-profile"] .heroHead{display:flex!important;align-items:center!important;gap:18px!important}
+html[data-toolscout-surface="tool-profile"] .toolLogo,
+html[data-toolscout-surface="tool-profile"] .logoFallback{width:58px!important;height:58px!important;flex:0 0 58px!important;border-radius:11px!important}
+html[data-toolscout-surface="tool-profile"] .hero h1{margin:9px 0 0!important}
+html[data-toolscout-surface="tool-profile"] .hero .lead{max-width:780px!important;margin:22px 0 0!important;font-size:18px!important}
+html[data-toolscout-surface="tool-profile"] .editorialIntro{display:grid!important;grid-template-columns:180px minmax(0,1fr)!important;gap:34px!important;margin:0!important;padding:30px 0!important;border:0!important;border-bottom:1px solid var(--ts-line)!important;border-radius:0!important;background:transparent!important}
+html[data-toolscout-surface="tool-profile"] .editorialIntro p{margin:0!important;color:#515851!important;font-size:16px!important;line-height:1.68!important}
+html[data-toolscout-surface="tool-profile"] .grid{display:grid!important;grid-template-columns:1.15fr .85fr!important;gap:18px!important;margin-top:34px!important}
+html[data-toolscout-surface="tool-profile"] .panel{padding:24px!important;border:1px solid var(--ts-line)!important;border-radius:9px!important;background:#fff!important;box-shadow:none!important}
+html[data-toolscout-surface="tool-profile"] .panel h2{font-size:24px!important;margin:0 0 14px!important}
+html[data-toolscout-surface="tool-profile"] .panel h2:not(:first-child){margin-top:26px!important}
+html[data-toolscout-surface="tool-profile"] .section{margin-top:48px!important;padding-top:28px!important;border-top:1px solid var(--ts-g)!important}
+html[data-toolscout-surface="tool-profile"] .section h2{font-size:31px!important;line-height:1.08!important;margin-top:6px!important}
+html[data-toolscout-surface="tool-profile"] .sectionHead{display:flex!important;align-items:flex-end!important;justify-content:space-between!important;gap:24px!important}
+html[data-toolscout-surface="tool-profile"] .aiFacts{display:flex!important;flex-wrap:wrap!important;gap:8px!important;margin-top:18px!important}
+html[data-toolscout-surface="tool-profile"] .aiFacts span{padding:8px 10px!important;background:var(--ts-soft)!important;border:1px solid var(--ts-line)!important}
+html[data-toolscout-surface="tool-profile"] .relatedGrid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:0 24px!important;border-top:1px solid var(--ts-line)!important}
+html[data-toolscout-surface="tool-profile"] .relatedCard{padding:18px 0!important;border:0!important;border-bottom:1px solid var(--ts-line)!important;border-radius:0!important;background:transparent!important}
+html[data-toolscout-surface="tool-profile"] .relatedIdentity{display:flex!important;align-items:center!important;gap:11px!important}
+html[data-toolscout-surface="tool-profile"] details{padding:16px 0!important;border:0!important;border-bottom:1px solid var(--ts-line)!important;border-radius:0!important;background:transparent!important}
+html[data-toolscout-surface="tool-profile"] details summary{font-weight:800!important}
+html[data-toolscout-surface="tool-profile"] .qualityActions{display:flex!important;flex-wrap:wrap!important;gap:12px 20px!important;margin-top:26px!important;padding-top:20px!important;border-top:1px solid var(--ts-line)!important}
+html[data-toolscout-surface="tool-profile"] .qualityActions a{font-size:12px!important;font-weight:800!important;color:var(--ts-g)!important}
+html[data-toolscout-surface="tool-profile"] [data-toolscout-related-tools="1"]>div{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:0 24px!important;border-top:1px solid var(--ts-line)!important}
+html[data-toolscout-surface="tool-profile"] [data-toolscout-related-tools="1"]>div>a{padding:18px 0!important;border:0!important;border-bottom:1px solid var(--ts-line)!important;border-radius:0!important;background:transparent!important}
+
+/* ToolScout 2.0 individual buying guides */
+html[data-toolscout-surface="guide-detail"] body>.wrap{max-width:1080px!important;padding-top:0!important;padding-bottom:88px!important}
+html[data-toolscout-surface="guide-detail"] body>.wrap>.brand{display:none!important}
+html[data-toolscout-surface="guide-detail"] .hero{max-width:880px!important;margin:0!important;padding:66px 0 36px!important;border-bottom:1px solid var(--ts-line)!important}
+html[data-toolscout-surface="guide-detail"] .hero h1{margin:12px 0 18px!important;text-wrap:balance}
+html[data-toolscout-surface="guide-detail"] .hero .lead{max-width:780px!important;font-size:18px!important}
+html[data-toolscout-surface="guide-detail"] .hero .sub{max-width:820px!important;margin-top:14px!important;font-size:14px!important}
+html[data-toolscout-surface="guide-detail"] .section{margin-top:42px!important;padding-top:28px!important;border-top:1px solid var(--ts-g)!important}
+html[data-toolscout-surface="guide-detail"] .section h2{font-size:31px!important;line-height:1.08!important;margin:6px 0 14px!important}
+html[data-toolscout-surface="guide-detail"] body>.wrap>.grid{display:grid!important;grid-template-columns:1fr!important;gap:0!important;margin-top:38px!important;border-top:1px solid var(--ts-g)!important}
+html[data-toolscout-surface="guide-detail"] body>.wrap>.grid>.card{position:relative!important;padding:28px 0 30px 70px!important;border:0!important;border-bottom:1px solid var(--ts-line)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+html[data-toolscout-surface="guide-detail"] body>.wrap>.grid>.card:hover{transform:none!important;background:rgba(255,255,255,.34)!important}
+html[data-toolscout-surface="guide-detail"] .card .rank{position:absolute!important;left:0!important;top:31px!important;width:42px!important;height:28px!important;display:grid!important;place-items:center!important;border:1px solid var(--ts-g)!important;border-radius:5px!important;font-size:11px!important;font-weight:900!important}
+html[data-toolscout-surface="guide-detail"] .card h2{font-size:28px!important;line-height:1.1!important;margin:5px 0 10px!important}
+html[data-toolscout-surface="guide-detail"] .card>p{max-width:790px!important;color:#5D655D!important;line-height:1.62!important}
+html[data-toolscout-surface="guide-detail"] .proof,
+html[data-toolscout-surface="guide-detail"] .sourceProof{margin-top:12px!important;color:#777F77!important;font-size:12px!important;line-height:1.55!important}
+html[data-toolscout-surface="guide-detail"] .features{display:flex!important;flex-wrap:wrap!important;gap:7px!important;margin:14px 0!important}
+html[data-toolscout-surface="guide-detail"] .card>a{display:inline-flex!important;align-items:center!important;min-height:36px!important;margin:8px 8px 0 0!important;padding:8px 11px!important;border-radius:7px!important;font-size:12px!important;font-weight:800!important;text-decoration:none!important}
+html[data-toolscout-surface="guide-detail"] .card>a[href^="/tools/"]{border:1px solid var(--ts-line)!important;color:var(--ts-g)!important;background:transparent!important}
+html[data-toolscout-surface="guide-detail"] .card>a[href^="/go/"]{border:1px solid var(--ts-g)!important;color:#fff!important;background:var(--ts-g)!important}
+html[data-toolscout-surface="guide-detail"] .editorial-analysis{padding:30px 0!important;background:transparent!important;border-left:0!important;border-right:0!important;border-bottom:1px solid var(--ts-line)!important}
+html[data-toolscout-surface="guide-detail"] .related{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:0 24px!important;border-top:1px solid var(--ts-line)!important}
+html[data-toolscout-surface="guide-detail"] .related-card{display:flex!important;justify-content:space-between!important;gap:20px!important;padding:17px 0!important;border:0!important;border-bottom:1px solid var(--ts-line)!important;border-radius:0!important;background:transparent!important;text-decoration:none!important}
+
+/* Publisher Kit uses the same public shell even though its source is natively designed */
+html[data-toolscout-surface="publisher-kit"] body>main{max-width:1180px!important;margin:auto!important;padding:0 24px 88px!important}
+html[data-toolscout-surface="publisher-kit"] .ts2-global-nav .nav-shell{height:84px!important;max-width:1440px!important;margin:auto!important;padding:0 72px!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:24px!important}
+html[data-toolscout-surface="publisher-kit"] .ts2-global-nav .nav-actions,
+html[data-toolscout-surface="publisher-kit"] .ts2-global-nav .nav-links{display:flex!important;align-items:center!important}
+html[data-toolscout-surface="publisher-kit"] .ts2-global-nav .nav-actions{gap:22px!important}
+html[data-toolscout-surface="publisher-kit"] .ts2-global-nav .nav-links{gap:20px!important}
+html[data-toolscout-surface="publisher-kit"] .ts2-global-nav .nav-links a{color:#CDD2CC!important;text-decoration:none!important;font-size:13px!important;font-weight:650!important}
+html[data-toolscout-surface="publisher-kit"] .ts2-global-nav .nav-cta{background:var(--ts-l)!important;color:var(--ts-g)!important;padding:12px 17px!important;border-radius:7px!important;font-weight:800!important;text-decoration:none!important}
+html[data-toolscout-surface="publisher-kit"] .hero{padding:66px 0 42px!important;border-bottom:1px solid var(--ts-line)!important}
+html[data-toolscout-surface="publisher-kit"] .section{margin-top:46px!important;padding-top:28px!important;border-top:1px solid var(--ts-g)!important}
+html[data-toolscout-surface="publisher-kit"] .card,
+html[data-toolscout-surface="publisher-kit"] .step,
+html[data-toolscout-surface="publisher-kit"] .theme-card{border-radius:9px!important;box-shadow:none!important}
+html[data-toolscout-surface="publisher-kit"] pre{white-space:pre-wrap!important;overflow-wrap:anywhere!important;border-radius:7px!important}
 
 /* Legacy public informational and category hubs */
 html[data-toolscout-surface="methodology"] body>.wrap,
@@ -240,6 +326,18 @@ html[data-toolscout-surface="category"] body>section[style]{padding-left:0!impor
   html[data-toolscout-surface="whats-new"] .grid,
   html[data-toolscout-surface="compare"] .suggestion-grid{grid-template-columns:1fr!important;gap:0!important}
   html[data-toolscout-surface="tools"] .tool{padding:18px 0!important}
+  html[data-toolscout-surface="tool-profile"] .editorialIntro{grid-template-columns:1fr!important;gap:10px!important;padding:24px 0!important}
+  html[data-toolscout-surface="tool-profile"] .grid{grid-template-columns:1fr!important}
+  html[data-toolscout-surface="tool-profile"] .relatedGrid,
+  html[data-toolscout-surface="tool-profile"] [data-toolscout-related-tools="1"]>div{grid-template-columns:1fr!important;gap:0!important}
+  html[data-toolscout-surface="tool-profile"] .sectionHead{align-items:flex-start!important;flex-direction:column!important}
+  html[data-toolscout-surface="guide-detail"] .hero{padding:46px 0 30px!important}
+  html[data-toolscout-surface="guide-detail"] body>.wrap>.grid>.card{padding:24px 0 26px 58px!important}
+  html[data-toolscout-surface="guide-detail"] .card .rank{top:27px!important;width:36px!important}
+  html[data-toolscout-surface="guide-detail"] .related{grid-template-columns:1fr!important;gap:0!important}
+  html[data-toolscout-surface="publisher-kit"] body>main{padding-left:18px!important;padding-right:18px!important}
+  html[data-toolscout-surface="publisher-kit"] .ts2-global-nav .nav-shell{height:auto!important;min-height:72px!important;padding:14px 20px 11px!important;flex-wrap:wrap!important}
+
   html[data-toolscout-surface="guides"] .section{margin-top:34px!important;padding-top:22px!important}
   html[data-toolscout-surface="guides"] .section h2{font-size:29px!important}
   html[data-toolscout-surface="guides"] .card{padding:16px 0!important}
