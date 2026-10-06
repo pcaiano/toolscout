@@ -1,4 +1,4 @@
-name: ToolScout Editorial Pilot Deploy Once
+name: ToolScout Editorial Pilot Verify Once
 
 on:
   push:
@@ -9,76 +9,29 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: toolscout-editorial-pilot-deploy-once
-  cancel-in-progress: false
-
 jobs:
-  deploy:
+  verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     steps:
-      - name: Checkout current main
-        uses: actions/checkout@v4
-        with:
-          ref: main
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Verify pilot scope
+      - name: Verify all 10 pilot pages and copy live
         run: |
           set -euo pipefail
-          git merge-base --is-ancestor 270ffa6c5004d96177c3673c2ef1e618dc231cb0 HEAD
-          node - <<'NODE'
-          const fs=require('fs');
-          const cfg=JSON.parse(fs.readFileSync('data/organic-growth-engine.json','utf8')).editorialQuality;
-          if(cfg?.rollout!=='pilot') throw new Error('editorial pilot rollout is not locked to pilot');
-          if(!Array.isArray(cfg.pilotPaths)||cfg.pilotPaths.length!==10) throw new Error('editorial pilot must contain exactly 10 paths');
-          for(const rel of cfg.pilotPaths){
-            const html=fs.readFileSync(rel,'utf8');
-            if(!html.includes('data-editorial-quality="pilot"')) throw new Error('pilot marker missing: '+rel);
-          }
-          console.log(JSON.stringify({rollout:cfg.rollout,pages:cfg.pilotPaths.length,paths:cfg.pilotPaths},null,2));
-          NODE
-
-      - name: Validate editorial implementation
-        run: |
-          set -euo pipefail
-          node --check scripts/discover-software-news.mjs
-          node --check scripts/generate-tool-pages.mjs
-          node --check scripts/generate-seo-pages.mjs
-          node --check scripts/generate-comparisons.mjs
-          node --check scripts/validate-editorial-trust.mjs
-
-      - name: Wrangler dry-run
-        run: npx wrangler deploy --config wrangler.toml --dry-run --outdir /tmp/toolscout-editorial-pilot
-
-      - name: Deploy current main without migrations
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: npx wrangler deploy --config wrangler.toml --latest
-
-      - name: Verify all 10 pilot pages live
-        run: |
-          set -euo pipefail
-          urls=(
-            "news/chatgpt-building-advertising-for-the-way-people-use-ai"
-            "news/notion-mail-shuts-down"
-            "news/zapier-next-gen-zaps-mcp"
-            "tools/hubspot"
-            "tools/notion"
-            "tools/semrush"
-            "best-seo-tools-for-agencies"
-            "best-workflow-automation-tools"
-            "activecampaign-vs-mailchimp"
-            "webflow-vs-framer"
-          )
-          for rel in "${urls[@]}"; do
-            body="$(curl -fsS --retry 4 --retry-all-errors --retry-delay 2 "https://trytoolscout.org/${rel}?editorial-pilot=${GITHUB_SHA}")"
-            printf '%s' "$body" | grep -Fq 'data-editorial-quality="pilot"'
+          check () {
+            rel="$1"
+            phrase="$2"
+            body="$(curl -fsS --retry 4 --retry-all-errors --retry-delay 2 "https://trytoolscout.org/${rel}?editorial-verify=${GITHUB_SHA}")"
+            grep -Fq 'data-editorial-quality="pilot"' <<< "$body"
+            grep -Fq "$phrase" <<< "$body"
             echo "LIVE: https://trytoolscout.org/${rel}"
-          done
+          }
+          check "news/chatgpt-building-advertising-for-the-way-people-use-ai" "OpenAI is doing more than inserting ads into ChatGPT."
+          check "news/notion-mail-shuts-down" "The shutdown removes a product surface, not all of Notion's email ambitions."
+          check "news/zapier-next-gen-zaps-mcp" "Zapier's Next Gen Zaps are becoming a deeper execution model"
+          check "tools/hubspot" "HubSpot's case is breadth with relatively little stitching"
+          check "tools/notion" "Notion is most convincing when the problem is fragmented team knowledge"
+          check "tools/semrush" "Semrush is the broad-suite choice in this SEO shortlist."
+          check "best-seo-tools-for-agencies" "For an agency, first place here is about breadth across repeatable client work"
+          check "best-workflow-automation-tools" "Integrately leads this particular ranking because its 10 for ease of use"
+          check "activecampaign-vs-mailchimp" "ActiveCampaign and Mailchimp overlap at email marketing"
+          check "webflow-vs-framer" "Webflow and Framer are close on the basics"
