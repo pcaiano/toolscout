@@ -195,7 +195,13 @@
     "requireReciprocalLinks": false,
     "target": "grow relevant referring domains that strengthen observed search demand or can send qualified humans; backlink counts alone are not success",
     "competitorGapDiscovery": true,
-    "scaleOnlyWithReferralOrSearchEvidence": true
+    "scaleOnlyWithReferralOrSearchEvidence": true,
+    "targetReferringDomains": 50,
+    "minimumQualityAuthorityScore": 50,
+    "minimumQualityBacklinkValueScore": 50,
+    "prioritizeNewIndependentDomains": true,
+    "repeatReferringDomainPriority": "secondary unless the domain produces verified human, search or commercial outcomes",
+    "targetDefinition": "Reach at least 50 independent relevant referring domains before treating backlink volume as a secondary optimization; quality and human/search value remain mandatory."
   },
   "humanAcquisitionStrategy": {
     "version": "human-acquisition-v4",
