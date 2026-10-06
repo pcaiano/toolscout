@@ -7,6 +7,7 @@ const read=(file,fallback)=>{try{return JSON.parse(fs.readFileSync(path.join(ROO
 const gsc=read('data/gsc-search-reality.json',{opportunities:[],searchPerformance:{window28d:{}}});
 const updates=read('data/software-updates.json',{items:[]}).items||[];
 const config=read('data/organic-growth-engine.json',{editorialAuthority:{}});
+const consolidations=read('data/seo-consolidations.json',{});
 const policy=config.editorialAuthority||{};
 const hardFloor=Number(policy.hardFloorScore||90);
 const target=Number(policy.targetScore||95);
@@ -55,13 +56,17 @@ const surface=[...new Set([...sitemapSurface,...opportunityByPage.keys()])];
 const rows=[];
 for(const page of surface){
   const opp=opportunityByPage.get(page)||{};
-  const authority=editorialAuthorityForPath(ROOT,page,updates);
+  const slug=String(page||'').replace(/^\//,'');
+  const consolidatedSlug=consolidations?.[slug]||null;
+  const authorityPage=consolidatedSlug?'/'+consolidatedSlug:page;
+  const authority=editorialAuthorityForPath(ROOT,authorityPage,updates);
   const impressions=Number(opp.impressions||0),clicks=Number(opp.clicks||0),position=Number(opp.position||0);
   const priority=authorityGapPriority({impressions,position,authorityScore:authority.score,targetScore:target,hardFloorScore:hardFloor,weight});
   const band=qualityBand(authority.score);
   let action='observe';
   let diagnosis='quality_healthy_no_strong_search_trigger';
-  if(!authority.exists){action='repair_public_surface';diagnosis='indexable_surface_missing_public_file';}
+  if(consolidatedSlug){action='observe';diagnosis='consolidated_legacy_url_redirected';}
+  else if(!authority.exists){action='repair_public_surface';diagnosis='indexable_surface_missing_public_file';}
   else if(authority.score<hardFloor){action='remediate_editorial_quality';diagnosis='below_editorial_hard_floor';}
   else if(authority.score<target){action='close_editorial_gap';diagnosis='below_editorial_target';}
   else if(authority.pageType==='news'&&clicks>0){action='convert_news_to_decision_flywheel';diagnosis='quality_healthy_news_with_observed_clicks';}
@@ -70,6 +75,8 @@ for(const page of surface){
   else if(position>0&&position<=10){action='protect_and_amplify';diagnosis='quality_healthy_first_page';}
   rows.push({
     page,
+    canonicalPage:authorityPage,
+    consolidatedTo:consolidatedSlug?'/'+consolidatedSlug:null,
     pageType:authority.pageType,
     exists:authority.exists,
     indexedSurface:sitemapSet.has(page),
