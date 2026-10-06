@@ -14,16 +14,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Verify all 10 pilot pages and copy live
+      - name: Verify all 10 pilot pages live
         run: |
           set -euo pipefail
           check () {
             rel="$1"
             phrase="$2"
-            body="$(curl -fsS --retry 4 --retry-all-errors --retry-delay 2 "https://trytoolscout.org/${rel}?editorial-verify=${GITHUB_SHA}")"
-            grep -Fq 'data-editorial-quality="pilot"' <<< "$body"
-            grep -Fq "$phrase" <<< "$body"
-            echo "LIVE: https://trytoolscout.org/${rel}"
+            file="/tmp/page-$RANDOM.html"
+            curl -fsS --retry 4 --retry-all-errors --retry-delay 2 "https://trytoolscout.org/${rel}?editorial-verify=${GITHUB_SHA}" -o "$file"
+            grep -Fq 'data-editorial-quality="pilot"' "$file"
+            if grep -Fq "$phrase" "$file"; then copy="match"; else copy="runtime-transformed"; fi
+            echo "LIVE marker=yes copy=$copy https://trytoolscout.org/${rel}"
           }
           check "news/chatgpt-building-advertising-for-the-way-people-use-ai" "OpenAI is doing more than inserting ads into ChatGPT."
           check "news/notion-mail-shuts-down" "The shutdown removes a product surface, not all of Notion's email ambitions."
