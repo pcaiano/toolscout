@@ -36,8 +36,8 @@ test('homepage keeps canonical, structured data, recommendation ids and editoria
 
 test('desktop homepage hero reveals the next section and keeps an explicit scroll cue',()=>{
   const html=read('index.html');
-  assert.match(html,/\.hero\{min-height:520px;/);
-  assert.match(html,/\.heroCopy\{padding:54px 0 56px;/);
+  assert.match(html,/\.hero\{min-height:410px;/);
+  assert.match(html,/\.heroCopy\{padding:34px 0 36px;/);
   assert.match(html,/content:"Explore ↓"/);
   assert.match(html,/\.contentShell\{padding-top:52px;/);
 });
@@ -68,6 +68,12 @@ test('commercial detail families are owned by explicit ToolScout 2.0 surfaces',a
   assert.match(runtime,/ToolScout 2\.0 individual buying guides/);
   assert.match(runtime,/data-toolscout-surface="publisher-kit"/);
   assert.match(runtime,/data-toolscout-surface="tools"\] \.tool-visit/);
+  assert.match(runtime,/toolscout-v2-native\.css/);
+  const nativeCss=read('toolscout-v2-native.css');
+  assert.match(nativeCss,/TOOL PROFILES/);
+  assert.match(nativeCss,/WHAT'S NEW/);
+  assert.match(nativeCss,/grid-template-columns:minmax\(0,1fr\) 260px/);
+  assert.match(nativeCss,/background:var\(--ts2-g\)!important/);
 });
 
 test('public redesign is idempotent and collapses duplicate current and legacy navigation',async()=>{
