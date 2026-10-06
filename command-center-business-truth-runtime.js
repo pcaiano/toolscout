@@ -11,6 +11,7 @@ const MACHINE_SAFE_EXTERNAL_MAX_24H=800;
 const RESEARCH_EXTERNAL_MAX_24H=1500;
 const EMAIL_TARGET_24H=50;
 const EMAIL_MAX_24H=60;
+const GSC_EVIDENCE_FRESHNESS_HOURS=30;
 
 // ToolScout 2.0 canonical Command Center read model.
 // Extracted from operational-truth-reconciliation-worker.js without changing
@@ -106,7 +107,7 @@ async function buildStaticBusinessTruthFallback(request,env,reason='runtime_trut
   const gscEvidenceAt=gscSignals?.generatedAt||gscReality?.generatedAt||gscDailyTrend?.generatedAt||null;
   const gscEvidenceMs=Date.parse(String(gscEvidenceAt||''));
   const gscEvidenceAgeHours=Number.isFinite(gscEvidenceMs)?Math.max(0,(Date.now()-gscEvidenceMs)/3600000):null;
-  const searchStatus=gscEvidence?(gscEvidenceAgeHours!=null&&gscEvidenceAgeHours<=6?'connected':'stale'):'unavailable';
+  const searchStatus=gscEvidence?(gscEvidenceAgeHours!=null&&gscEvidenceAgeHours<=GSC_EVIDENCE_FRESHNESS_HOURS?'connected':'stale'):'unavailable';
 
   const seObservedAt=seRanking?.observedAt||null;
   const seObservedMs=Date.parse(String(seObservedAt||''));
@@ -215,8 +216,8 @@ async function buildStaticBusinessTruthFallback(request,env,reason='runtime_trut
       generatedAt:gscEvidenceAt,
       evidenceAgeHours:gscEvidenceAgeHours,
       runtimeGeneratedAt:gscHealth?.generatedAt||null,
-      runtimeOk:gscEvidence?(searchStatus==='connected'?true:(gscHealth?.ok===true?true:false)):false,
-      runtimeStatus:gscEvidence?(searchStatus==='connected'?'service_account_evidence_fresh':(gscHealth?.status||'asset_fallback')):'unavailable',
+      runtimeOk:gscEvidence?searchStatus==='connected':false,
+      runtimeStatus:gscEvidence?(searchStatus==='connected'?'service_account_evidence_fresh':'service_account_evidence_stale'):'unavailable',
       liveWindow:gscEvidence?{
         startDate:gscWindow.startDate||null,
         endDate:gscWindow.endDate||null,
@@ -561,7 +562,7 @@ async function buildCommandCenterBusinessTruth(request,env){
   const gscEvidenceMs=Date.parse(String(gscEvidenceAt||''));
   const gscEvidenceAgeHours=Number.isFinite(gscEvidenceMs)?Math.max(0,(Date.now()-gscEvidenceMs)/3600000):null;
   const gscEvidenceAvailable=Boolean(gscSignals?.payload_json||gscReality?.payload_json||gscDailyTrend?.generatedAt);
-  const gscEvidenceFresh=gscEvidenceAvailable&&gscEvidenceAgeHours!=null&&gscEvidenceAgeHours<=6;
+  const gscEvidenceFresh=gscEvidenceAvailable&&gscEvidenceAgeHours!=null&&gscEvidenceAgeHours<=GSC_EVIDENCE_FRESHNESS_HOURS;
   const gscStatus=gscEvidenceAvailable?(gscEvidenceFresh?'connected':'stale'):'unavailable';
   const w=reality?.searchPerformance?.window28d||gsc?.siteTotals||{};
   const idx=reality?.indexHealth||{};
@@ -929,8 +930,8 @@ async function buildCommandCenterBusinessTruth(request,env){
       generatedAt:gscEvidenceAt,
       evidenceAgeHours:gscEvidenceAgeHours,
       runtimeGeneratedAt:gh?.generatedAt||gscHealth?.source_generated_at||null,
-      runtimeOk:gscEvidenceAvailable?(gscEvidenceFresh?true:gh?.ok===true):false,
-      runtimeStatus:gscEvidenceAvailable?(gscEvidenceFresh?'service_account_evidence_fresh':(gh?.status||null)):'unavailable',
+      runtimeOk:gscEvidenceAvailable?gscEvidenceFresh:false,
+      runtimeStatus:gscEvidenceAvailable?(gscEvidenceFresh?'service_account_evidence_fresh':'service_account_evidence_stale'):'unavailable',
       liveWindow:gscEvidenceAvailable?{
         startDate:w.startDate||null,
         endDate:w.endDate||null,
