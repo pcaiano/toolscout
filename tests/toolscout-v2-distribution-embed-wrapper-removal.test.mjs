@@ -28,6 +28,8 @@ test('generic traversal bypasses distribution embed wrapper',()=>{
   assert.doesNotMatch(compute,/import base from /);
   assert.doesNotMatch(compute,/import base from '\.\/distribution-embed-worker\.js'/);
   assert.match(compute,/ownership\.owner==='distribution_public_embed'/);
+  assert.match(compute,/publisherKitPublicSurface=ownership\.owner==='distribution_public_embed'/);
+  assert.match(compute,/publisherKitPublicSurface\)\{/);
   assert.match(runtime,/export async function handleDistributionEmbedRoute/);
   assert.doesNotMatch(runtime,/CREATE\s+(?:TABLE|INDEX)|ALTER\s+TABLE/i);
 });
