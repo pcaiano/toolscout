@@ -38,18 +38,29 @@ function editorialConclusionLegacy(a,b){
   const third=overlap.length?'Because both list '+listPhrase(overlap)+', compare the depth of those shared capabilities against your workflow before choosing.':'Compare the products against your actual workflow, feature requirements and current commercial terms before choosing.';
   return [first,second,third,aiComparisonSentence(a,b)].filter(Boolean).join(' ');
 }
+let comparisonEditorialOverrides={};
+function comparisonKey(a,b){return [String(a?.slug||''),String(b?.slug||'')].sort().join('|')}
+function editorialOverride(a,b){return comparisonEditorialOverrides?.[comparisonKey(a,b)]||null}
 function editorialConclusionV2(a,b){
   const deltas=comparisonDimensions.map(key=>({key,diff:Number(a.scores?.[key]||0)-Number(b.scores?.[key]||0)})).filter(x=>x.diff!==0).sort((x,y)=>Math.abs(y.diff)-Math.abs(x.diff));
-  const aEdge=deltas.find(x=>x.diff>0),bEdge=deltas.find(x=>x.diff<0);
+  const aEdges=deltas.filter(x=>x.diff>0),bEdges=deltas.filter(x=>x.diff<0),aEdge=aEdges[0],bEdge=bEdges[0];
   const lower=x=>String(x).toLowerCase(),bFeatures=new Set((b.features||[]).map(lower)),aFeatures=new Set((a.features||[]).map(lower));
   const aOnly=(a.features||[]).filter(v=>!bFeatures.has(lower(v))).slice(0,2),bOnly=(b.features||[]).filter(v=>!aFeatures.has(lower(v))).slice(0,2);
   const sharedBest=overlapValues(a,b,'bestFor').slice(0,2);
-  const first=aEdge&&bEdge?'This is a genuine trade-off rather than a cosmetic tie. '+a.name+' has the larger recorded edge in '+(dimensionLabel[aEdge.key]||aEdge.key)+', while '+b.name+' answers back most clearly on '+(dimensionLabel[bEdge.key]||bEdge.key)+'.':aEdge?a.name+' owns the clearest numerical edge, led by '+(dimensionLabel[aEdge.key]||aEdge.key)+'; '+b.name+' needs to win on workflow fit rather than headline score.':bEdge?b.name+' owns the clearest numerical edge, led by '+(dimensionLabel[bEdge.key]||bEdge.key)+'; '+a.name+' needs to win on workflow fit rather than headline score.':'The scorecard is effectively level, so the useful distinction has to come from workflow and product scope.';
-  const second=aOnly.length&&bOnly.length?a.name+"'s distinctive recorded capabilities include "+listPhrase(aOnly)+', whereas '+b.name+' adds '+listPhrase(bOnly)+'. Those differences are more decision-useful than counting the features both products share.':aOnly.length?a.name+"'s distinctive recorded capabilities include "+listPhrase(aOnly)+', which is where its case becomes more specific.':bOnly.length?b.name+"'s distinctive recorded capabilities include "+listPhrase(bOnly)+', which is where its case becomes more specific.':'';
-  const third=sharedBest.length?'Both are aimed at '+listPhrase(sharedBest)+', so audience labels alone will not settle this comparison. Test the higher-priority workflow in each product before choosing.':'Their recorded audiences differ enough that fit should be judged against the actual team and job rather than the category label.';
+  let first='';
+  if(aEdge&&bEdge){
+    const aMag=Math.abs(aEdge.diff),bMag=Math.abs(bEdge.diff);
+    if(aMag>bMag)first=a.name+"'s clearest numerical separation is "+(dimensionLabel[aEdge.key]||aEdge.key)+', where it scores '+Number(a.scores?.[aEdge.key]||0)+' against '+Number(b.scores?.[aEdge.key]||0)+' for '+b.name+'. '+b.name+"'s strongest counterweight is "+(dimensionLabel[bEdge.key]||bEdge.key)+'.';
+    else if(bMag>aMag)first=b.name+"'s strongest score advantage is "+(dimensionLabel[bEdge.key]||bEdge.key)+', at '+Number(b.scores?.[bEdge.key]||0)+' versus '+Number(a.scores?.[bEdge.key]||0)+'. '+a.name+' answers with smaller advantages led by '+(dimensionLabel[aEdge.key]||aEdge.key)+'.';
+    else first=a.name+' and '+b.name+' separate on different priorities: '+a.name+' is stronger on '+(dimensionLabel[aEdge.key]||aEdge.key)+', while '+b.name+' is stronger on '+(dimensionLabel[bEdge.key]||bEdge.key)+'.';
+  }else if(aEdge)first=a.name+' has the clearer score profile, led by '+(dimensionLabel[aEdge.key]||aEdge.key)+'; '+b.name+"'s case has to come from product fit rather than a higher recorded score.";
+  else if(bEdge)first=b.name+' has the clearer score profile, led by '+(dimensionLabel[bEdge.key]||bEdge.key)+'; '+a.name+"'s case has to come from product fit rather than a higher recorded score.";
+  else first='The scorecard does not create a meaningful numerical gap between '+a.name+' and '+b.name+', so product scope and workflow fit have to do the separating.';
+  const second=aOnly.length&&bOnly.length?a.name+' adds '+listPhrase(aOnly)+' to the comparison, while '+b.name+' brings '+listPhrase(bOnly)+'.':aOnly.length?a.name+"'s more distinctive recorded capabilities include "+listPhrase(aOnly)+'.':bOnly.length?b.name+"'s more distinctive recorded capabilities include "+listPhrase(bOnly)+'.':'';
+  const third=sharedBest.length?'Both target '+listPhrase(sharedBest)+', so audience labels alone are not enough to settle the choice.':'Their recorded audiences differ enough that the buyer profile should carry real weight in the decision.';
   return [first,second,third,aiComparisonSentence(a,b)].filter(Boolean).join(' ');
 }
-function editorialConclusion(a,b){return editorialPilotPair(a,b)?editorialConclusionV2(a,b):editorialConclusionLegacy(a,b)}
+function editorialConclusion(a,b){const override=editorialOverride(a,b);if(override?.analysis)return override.analysis;return editorialPilotPair(a,b)?editorialConclusionV2(a,b):editorialConclusionLegacy(a,b)}
 function decisionGuidanceLegacy(a,b){
   const ranked=comparisonDimensions.map(key=>({key,diff:Number(a.scores?.[key]||0)-Number(b.scores?.[key]||0)})).sort((x,y)=>Math.abs(y.diff)-Math.abs(x.diff));
   const lead=ranked.find(item=>item.diff!==0);
@@ -65,7 +76,7 @@ function decisionGuidanceV2(a,b){
   if(bEdge)return b.name+' is the stronger default on the recorded scorecard, especially for '+(dimensionLabel[bEdge.key]||bEdge.key)+'; choose '+a.name+' only where its product scope or '+aFit+' audience fit is more important than that edge.';
   return 'There is no defensible score winner here. Choose '+a.name+' for the workflow that better matches '+aFit+', and '+b.name+' where '+bFit+' is the more accurate description of the buyer.';
 }
-function decisionGuidance(a,b){return editorialPilotPair(a,b)?decisionGuidanceV2(a,b):decisionGuidanceLegacy(a,b)}
+function decisionGuidance(a,b){const override=editorialOverride(a,b);if(override?.decision)return override.decision;return editorialPilotPair(a,b)?decisionGuidanceV2(a,b):decisionGuidanceLegacy(a,b)}
 function comparisonMethodology(){
   return 'ToolScout compares catalog-backed pricing, capabilities, use cases and score dimensions using first-party vendor sources and recorded verification dates. The conclusion is a workflow fit judgment, not a universal product claim, and affiliate relationships do not influence the comparison.';
 }
@@ -125,8 +136,9 @@ function suggestionsHtml(a,b,tools,assets){
 async function event(type,pair,tool){try{await fetch('/api/events',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({event_id:'evt_'+crypto.randomUUID(),session_id:sid,event_type:type,intent_slug:pair,tool_slug:tool||null,path:location.pathname,source:sourceValue(),referrer_host:referrerHost()}),keepalive:true})}catch{}}
 async function loadJson(url,fallback){try{const r=await fetch(url,{cache:'no-store'});return r.ok?await r.json():fallback}catch{return fallback}}
 async function boot(){
-  const [all,assetData]=await Promise.all([loadJson('./data/tools.json',[]),loadJson('./data/tool-assets.json',{assets:{}})]);
+  const [all,assetData,organicConfig]=await Promise.all([loadJson('./data/tools.json',[]),loadJson('./data/tool-assets.json',{assets:{}}),loadJson('./data/organic-growth-engine.json',{})]);
   const assets=assetData?.assets||{};
+  comparisonEditorialOverrides=organicConfig?.editorialQuality?.comparisonOverrides||{};
   const tools=all.filter(t=>t.comparisonEligible!==false);
   const a=document.getElementById('a'),b=document.getElementById('b'),table=document.getElementById('table'),pairNote=document.getElementById('pairNote'),analysis=document.getElementById('analysis'),suggestions=document.getElementById('suggestions');
   if(tools.length<2){table.innerHTML='<div class="empty">Not enough verified tools are available for comparison yet.</div>';return}

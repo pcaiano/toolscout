@@ -280,8 +280,19 @@
       "rejectGenericAnalysisPhrases": [
         "is the strongest general fit in the current ToolScout catalog",
         "is a practical fit for",
-        "Treat the order as a decision aid rather than a universal winner"
+        "Treat the order as a decision aid rather than a universal winner",
+        "This is a genuine trade-off rather than a cosmetic tie."
       ]
+    },
+    "comparisonOverrides": {
+      "activecampaign|mailchimp": {
+        "analysis": "The key divide is how far each product extends beyond email marketing. ActiveCampaign pushes further into CRM, sales automation and more complex customer journeys, while Mailchimp keeps more of its strength in audience management, campaigns and ease of adoption. The scorecard reflects that split: ActiveCampaign is materially stronger on automation and sales workflows, while Mailchimp scores better on price and ease of use. Because both remain strong on core marketing and integrations, the buying decision should be driven by operating model rather than by a generic winner.",
+        "decision": "Choose ActiveCampaign when automation depth, CRM and sales handoff are central to the workflow. Choose Mailchimp when ease of use, budget and straightforward campaign management matter more."
+      },
+      "framer|webflow": {
+        "analysis": "Webflow and Framer overlap heavily in visual site building, but they pull in different directions once a team goes beyond the canvas. Framer's clearest advantage is AI capability, alongside slightly stronger ease of use and price. Webflow counters with smaller but broader advantages across integrations, SEO and agency fit, plus a more extensible content and marketing workflow. For buyers, this is less a question of which builder has more features than whether speed and AI-assisted creation matter more than depth around site operations, SEO and agency use.",
+        "decision": "Choose Framer when rapid visual production, AI-assisted building and ease of use are the harder requirements. Choose Webflow when SEO control, integrations and agency-scale site management carry more weight."
+      }
     }
   }
 }
