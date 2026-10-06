@@ -14,7 +14,7 @@ const COMMON_PATHS = [
 
 const LINK_HINTS = /(about|team|staff|masthead|author|editor|contact|press|newsroom|impressum|redaktion|redacao|redazione|kontakt|contacto)/i;
 const GOOD_LOCAL = /(editor|editorial|editors|news|newsroom|press|presse|prensa|tips|story|stories|pitch|redacao|redacao|redaktion|redazione|redaccion|redaccion|redac|redactie|desk|journalist|reporter|tech|technology|startup|saas|ai|software)/i;
-const BAD_LOCAL = /(noreply|no-reply|donotreply|support|helpdesk|help|billing|invoice|privacy|legal|abuse|security|sales|advertis|ads|career|jobs|recruit|hr|customer|customerservice|shop|store|orders|webmaster)/i;
+const BAD_LOCAL = /(noreply|no-reply|donotreply|support|helpdesk|help|billing|invoice|privacy|legal|abuse|sales|advertis|^ads?$|career|jobs|recruit|^hr$|customer|customerservice|shop|store|orders|webmaster|finance|membership|ombudsman|reader|aboservice|jobanzeigen|werben|relay)/i;
 const ROLE_WORDS = /(editor|reporter|journalist|writer|correspondent|producer|news|editorial|press|technology|software|saas|startup|artificial intelligence|\bai\b|developer|cloud|cyber|security|enterprise|data|digital)/i;
 
 function json(res, status, body) {
@@ -127,6 +127,51 @@ function classify(email, context, sourcePath) {
   };
 }
 
+
+function looksLikePersonName(text) {
+  const s = String(text || "").replace(/\s+/g, " ").trim();
+  if (s.length < 4 || s.length > 70) return false;
+  if (/\b(editorial|team|staff|contact|about|news|press|home|author|authors|contributors|privacy|terms|advertise|subscribe)\b/i.test(s)) return false;
+  const parts = s.split(" ").filter(Boolean);
+  if (parts.length < 2 || parts.length > 5) return false;
+  return parts.every(p => /^[A-ZÀ-ÖØ-Ý][A-Za-zÀ-ÿ'’.\-]+$/.test(p) || /^[A-Z]{2,}$/.test(p));
+}
+
+function extractAuthorLinks(html, base) {
+  const out = new Map();
+  const re = /<a\b[^>]*href=["']([^"'#]+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+  for (const m of String(html || "").matchAll(re)) {
+    let u;
+    try { u = new URL(decodeEntities(m[1]), base); } catch { continue; }
+    const baseHost = new URL(base).hostname.replace(/^www\./, "");
+    if (u.hostname.replace(/^www\./, "") !== baseHost) continue;
+    if (!/(\/author\/|\/authors\/|\/profile\/|\/people\/|\/contributors?\/|\/staff\/|\/team\/|\/by\/)/i.test(u.pathname)) continue;
+    const name = stripHtml(m[2]).replace(/\s+/g, " ").trim();
+    if (!looksLikePersonName(name)) continue;
+    u.hash = ""; u.search = "";
+    const key = u.toString();
+    if (!out.has(key)) out.set(key, {url:key, name});
+  }
+  return [...out.values()];
+}
+
+function extractPeopleFromText(html, url, domain) {
+  const text = stripHtml(html);
+  const out = [];
+  const role = "(?:Editor(?:-in-Chief| in Chief)?|Managing Editor|Executive Editor|News Editor|Technology Editor|Tech Editor|Senior Editor|Reporter|Senior Reporter|Journalist|Writer|Senior Writer|Correspondent|Producer|Editorial Director|Editorial Lead|Staff Writer|Contributor)";
+  const re = new RegExp("\\b([A-ZÀ-ÖØ-Ý][A-Za-zÀ-ÿ'’.-]+(?:\\s+[A-ZÀ-ÖØ-Ý][A-Za-zÀ-ÿ'’.-]+){1,3})\\s*(?:[-–—|,:]|\\bis\\b)?\\s*(" + role + ")\\b", "gi");
+  const seen = new Set();
+  for (const m of text.matchAll(re)) {
+    const name = m[1].replace(/\s+/g, " ").trim();
+    const job = m[2].replace(/\s+/g, " ").trim();
+    const key = name.toLowerCase();
+    if (!looksLikePersonName(name) || seen.has(key)) continue;
+    seen.add(key);
+    out.push({domain, name, role:job, source_url:url});
+  }
+  return out.slice(0, 80);
+}
+
 function extractContacts(html, url, domain) {
   const raw = decodeEntities(String(html || ""));
   const text = stripHtml(raw);
@@ -194,73 +239,75 @@ async function crawlDomain(domain) {
   const seeds = new Set(COMMON_PATHS.map(p => `https://${domain}${p}`));
   const fetched = [];
   const contacts = [];
+  const people = [];
+  const authorLinks = new Map();
+
+  function absorbPage(page) {
+    fetched.push(page.url);
+    contacts.push(...extractContacts(page.html, page.url, domain));
+    people.push(...extractPeopleFromText(page.html, page.url, domain));
+    for (const a of extractAuthorLinks(page.html, page.url)) {
+      if (!authorLinks.has(a.url)) authorLinks.set(a.url, a);
+    }
+  }
 
   const first = await fetchPage(`https://${domain}/`);
   if (first.ok) {
-    fetched.push(first.url);
-    contacts.push(...extractContacts(first.html, first.url, domain));
-    for (const u of extractLinks(first.html, first.url).slice(0, 18)) seeds.add(u);
+    absorbPage(first);
+    for (const u of extractLinks(first.html, first.url).slice(0, 14)) seeds.add(u);
   }
 
-  const urls = [...seeds].filter(u => !fetched.includes(u)).slice(0, 28);
+  const urls = [...seeds].filter(u => !fetched.includes(u)).slice(0, 18);
   let cursor = 0;
-  const workers = Array.from({ length: 4 }, async () => {
+  const workers = Array.from({ length: 5 }, async () => {
     while (cursor < urls.length) {
       const i = cursor++;
       const page = await fetchPage(urls[i]);
       if (!page.ok) continue;
-      fetched.push(page.url);
-      contacts.push(...extractContacts(page.html, page.url, domain));
+      absorbPage(page);
     }
   });
   await Promise.all(workers);
 
-  const best = new Map();
+  const authorTargets = [...authorLinks.values()].slice(0, 35);
+  cursor = 0;
+  const authorWorkers = Array.from({ length: 6 }, async () => {
+    while (cursor < authorTargets.length) {
+      const i = cursor++;
+      const target = authorTargets[i];
+      const page = await fetchPage(target.url);
+      if (!page.ok) {
+        people.push({domain, name:target.name, role:"Journalist / Author", source_url:target.url});
+        continue;
+      }
+      absorbPage(page);
+      if (!people.some(p => p.name.toLowerCase() === target.name.toLowerCase())) {
+        people.push({domain, name:target.name, role:"Journalist / Author", source_url:page.url});
+      }
+    }
+  });
+  await Promise.all(authorWorkers);
+
+  const bestContacts = new Map();
   for (const c of contacts) {
     const key = c.email.toLowerCase();
-    const prev = best.get(key);
-    if (!prev || c.score > prev.score) best.set(key, c);
+    const prev = bestContacts.get(key);
+    if (!prev || c.score > prev.score) bestContacts.set(key, c);
+  }
+
+  const bestPeople = new Map();
+  for (const p of people) {
+    if (!p.name) continue;
+    const key = p.name.toLowerCase();
+    if (!bestPeople.has(key)) bestPeople.set(key, p);
   }
 
   return {
     domain,
     pages_fetched: [...new Set(fetched)].length,
-    contacts: [...best.values()].sort((a, b) => b.score - a.score)
+    contacts: [...bestContacts.values()].sort((a, b) => b.score - a.score),
+    people: [...bestPeople.values()].slice(0, 120)
   };
-}
-
-
-function parseMuckrackJournalists(html, outletSlug, outletDomain) {
-  const reserved = new Set([
-    "media-outlet","search","trends","blog","about","pricing","login","logout",
-    "signup","settings","messages","saved","topics","campaigns","lists",
-    "dashboard","account"
-  ]);
-  const out = [];
-  const seen = new Set();
-  const re = /<a\b[^>]*href=["']\/([A-Za-z0-9_-]+)\/?["'][^>]*>([\s\S]*?)<\/a>/gi;
-  for (const m of String(html || "").matchAll(re)) {
-    const slug = m[1];
-    if (reserved.has(slug.toLowerCase()) || slug.toLowerCase() === String(outletSlug).toLowerCase()) continue;
-    let name = stripHtml(m[2]).trim();
-    if (!name || name.length < 3 || name.length > 70) continue;
-    if (!name.includes(" ") && !name.includes(",")) continue;
-    if (/^(sign in|log in|learn more|contact us|read more|view profile|follow us)$/i.test(name)) continue;
-    if (name.includes(",")) {
-      const parts = name.split(",", 2).map(x => x.trim());
-      if (parts[0] && parts[1]) name = parts[1] + " " + parts[0];
-    }
-    if (seen.has(slug)) continue;
-    seen.add(slug);
-    out.push({
-      journalist: name,
-      muckrack_slug: slug,
-      muckrack_url: "https://muckrack.com/" + slug,
-      outlet_slug: outletSlug,
-      outlet_domain: outletDomain
-    });
-  }
-  return out.slice(0, 60);
 }
 
 async function discoverMuckrackOutlet(outletSlug, outletDomain) {
@@ -354,13 +401,18 @@ server.listen(PORT, "0.0.0.0", () => {
       try {
         const results = await crawlMany(startupDomains);
         const contacts = results.flatMap(r => r.contacts);
+        const people = results.flatMap(r => r.people || []);
+        for (const result of results) {
+          console.log("PR_CRAWL_DOMAIN_RESULT " + JSON.stringify({batch_id: batchId, ...result}));
+        }
         console.log("PR_CRAWL_BATCH_RESULT " + JSON.stringify({
           batch_id: batchId,
           domains_requested: startupDomains.length,
           domains_with_contacts: results.filter(r => r.contacts.length).length,
+          domains_with_people: results.filter(r => (r.people || []).length).length,
           contacts_found: contacts.length,
-          elapsed_ms: Date.now() - started,
-          results
+          people_found: people.length,
+          elapsed_ms: Date.now() - started
         }));
       } catch (err) {
         console.error("PR_CRAWL_BATCH_ERROR " + JSON.stringify({
