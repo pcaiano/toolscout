@@ -2373,7 +2373,8 @@ async function earlyOwnedRoute(request,env,ctx){
   else if(ownership.owner==='public_navigation')response=await renderPublicNavigationPage(request,env);
   else if(ownership.owner==='affiliate_redirect')response=await handleAffiliateRedirectRoute(request,env,ctx);
   if(!response)return null;
-  if(request.method==='GET'&&(ownership.owner==='public_decision'||ownership.owner==='public_navigation')){
+  const publisherKitPublicSurface=ownership.owner==='distribution_public_embed'&&new URL(request.url).pathname.replace(/\/$/,'')==='/distribution/publisher-kit';
+  if(request.method==='GET'&&(ownership.owner==='public_decision'||ownership.owner==='public_navigation'||publisherKitPublicSurface)){
     response=await transformPublicRedesignResponse(request,response);
     response=await transformPublicOutboundPolicyResponse(request,response);
   }
