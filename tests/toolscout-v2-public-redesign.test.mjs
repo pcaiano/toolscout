@@ -34,6 +34,42 @@ test('homepage keeps canonical, structured data, recommendation ids and editoria
   assert.match(html,/prefers-reduced-motion:reduce/);
 });
 
+test('desktop homepage hero reveals the next section and keeps an explicit scroll cue',()=>{
+  const html=read('index.html');
+  assert.match(html,/\.hero\{min-height:520px;/);
+  assert.match(html,/\.heroCopy\{padding:54px 0 56px;/);
+  assert.match(html,/content:"Explore ↓"/);
+  assert.match(html,/\.contentShell\{padding-top:52px;/);
+});
+
+test('Guides hub does not regress the redundant Trends promo block',()=>{
+  const html=read('guides.html');
+  assert.doesNotMatch(html,/Original research[\s\S]*Software Trends Index/);
+  assert.match(html,/Buying guides/);
+});
+
+test('commercial detail families are owned by explicit ToolScout 2.0 surfaces',async()=>{
+  const cases=[
+    ['/tools/figma','tool-profile','Tools'],
+    ['/best-project-management-tools','guide-detail','Guides'],
+    ['/make-vs-zapier','compare','Compare'],
+    ['/distribution/publisher-kit','publisher-kit','Publisher Kit']
+  ];
+  for(const [path,surface,label] of cases){
+    const source='<!doctype html><html><head></head><body><div class="wrap"><a class="brand" href="./">ToolScout</a><main class="hero"><h1>Page</h1></main><section class="grid"><article class="card">Card</article></section></div></body></html>';
+    const out=await transformPublicRedesignResponse(new Request('https://trytoolscout.org'+path),new Response(source,{status:200,headers:{'content-type':'text/html; charset=UTF-8'}}));
+    const html=await out.text();
+    assert.match(html,new RegExp('data-toolscout-surface="'+surface+'"'),path);
+    assert.match(html,new RegExp('>'+label.replace(/[.*+?^${}()|[\]\\]/g,'\\test('public redesign injects the shared shell without changing canonical content',async()=>{')+'<'),path);
+    assert.match(html,/data-toolscout-public-redesign="2"/,path);
+  }
+  const runtime=read('public-redesign-runtime.js');
+  assert.match(runtime,/ToolScout 2\.0 tool profiles/);
+  assert.match(runtime,/ToolScout 2\.0 individual buying guides/);
+  assert.match(runtime,/data-toolscout-surface="publisher-kit"/);
+  assert.match(runtime,/data-toolscout-surface="tools"\] \.tool-visit/);
+});
+
 test('public redesign injects the shared shell without changing canonical content',async()=>{
   const source='<!doctype html><html><head><link rel="canonical" href="https://trytoolscout.org/tools/figma"></head><body><div class="wrap"><a class="brand" href="/">ToolScout</a><main><h1>Figma</h1></main></div></body></html>';
   const response=new Response(source,{status:200,headers:{'content-type':'text/html; charset=UTF-8'}});
