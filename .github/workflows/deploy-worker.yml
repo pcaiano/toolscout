@@ -3,6 +3,11 @@ name: ToolScout Worker Recovery Fallback
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'distribution-priority-worker.js'
+      - '.github/workflows/deploy-worker.yml'
 
 permissions:
   contents: read
@@ -53,6 +58,7 @@ jobs:
           node --check seo-cloudflare-runtime-worker.js
           node --check cloudflare-primary-runtime-worker.js
           node --check distribution-throughput-worker.js
+          node --check distribution-priority-worker.js
           node --check distribution-autonomous-worker.js
           node --check distribution-submission-worker.js
           node --check distribution-discovery-worker.js
