@@ -34,4 +34,7 @@ assert.equal(results[2].status,"failed");
 assert.equal(results[2].retry_required,true);
 assert.equal(results[2].pages_fetched,2);
 assert(source.includes("[...discovered, ...priority.map"));
+const ownership = vm.createContext({contacts:[{email:"editor@publisher.org",score:3,context:"",source_url:"staff"},{email:"editor@publisher.org",score:3,context:"Jane Doe, Editor, email editor@publisher.org",source_url:"author"}]});
+vm.runInContext(source.slice(source.indexOf("  const bestContacts = new Map();"), source.indexOf("  const bestPeople = new Map();"))+";globalThis.best=bestContacts;",ownership);
+assert.equal(ownership.best.get("editor@publisher.org").source_url,"author");
 console.log("PASS: public encoded mail context, junk/advertising exclusion, no inferred mailbox names, streamed completion and partial preservation on timeout/exit.");
