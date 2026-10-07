@@ -1,0 +1,51 @@
+name: One Shot Content Bluesky Diagnostic
+
+on:
+  push:
+    paths:
+      - ".github/workflows/one-shot-content-bluesky-diagnostic.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Query live D1 content evidence
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT mission_id,stage,status,external_id,detail,observed_at,created_at,updated_at
+          FROM external_engine_evidence
+          WHERE mission_id='wednesday_comparison_2026-10-07'
+          ORDER BY observed_at ASC;
+          " | tee /tmp/content-evidence.json
+
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT task_id,status,executor,subject_type,subject_key,action,last_result,claimed_at,attempted_at,verify_deadline,updated_at
+          FROM growth_execution_contract
+          WHERE executor='content_issue'
+          ORDER BY updated_at DESC
+          LIMIT 12;
+          " | tee /tmp/content-contracts.json
+
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT brief_id,family,commercial_mode,selected_tool_slug,policy_status,created_at,substr(target_json,1,1200) target_json
+          FROM content_engine_briefs
+          WHERE family='wednesday_comparison'
+          ORDER BY created_at DESC
+          LIMIT 6;
+          " | tee /tmp/content-briefs.json
+
+          echo "=== external evidence ==="
+          cat /tmp/content-evidence.json
+          echo "=== content contracts ==="
+          cat /tmp/content-contracts.json
+          echo "=== latest Wednesday briefs ==="
+          cat /tmp/content-briefs.json
