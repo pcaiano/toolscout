@@ -44,3 +44,33 @@ test('AgentReady verification is owned by central hourly scheduler',()=>{
   assert.match(scheduler,/mission:'agentready_verification'/);
   assert.match(scheduler,/syncAgentReadyVerified/);
 });
+
+
+test('MCP publishes the expanded ToolScout decision toolset',async()=>{
+  const body={jsonrpc:'2.0',id:7,method:'tools/list',params:{_meta:{'io.modelcontextprotocol/protocolVersion':'2026-07-28','io.modelcontextprotocol/clientInfo':{name:'test-client',version:'1.0'},'io.modelcontextprotocol/clientCapabilities':{}}}};
+  const response=await handleAgentProtocolRoute(
+    new Request('https://trytoolscout.org/mcp',{method:'POST',headers:{'Content-Type':'application/json','MCP-Protocol-Version':'2026-07-28','Mcp-Method':'tools/list'},body:JSON.stringify(body)}),
+    {},
+    {waitUntil(){}}
+  );
+  assert.equal(response.status,200);
+  const payload=await response.json();
+  assert.deepEqual(payload.result.tools.map(x=>x.name),['recommend_tools','search_tools','get_tool','compare_tools','get_ai_compatibility']);
+});
+
+test('MCP get_tool returns ToolScout URLs without exposing raw affiliate programme fields',async()=>{
+  const catalog=JSON.parse(fs.readFileSync(new URL('../data/tools.json',import.meta.url),'utf8'));
+  const env={ASSETS:{fetch:async()=>Response.json(catalog)}};
+  const body={jsonrpc:'2.0',id:8,method:'tools/call',params:{name:'get_tool',arguments:{tool:'hubspot'},_meta:{'io.modelcontextprotocol/protocolVersion':'2026-07-28','io.modelcontextprotocol/clientInfo':{name:'test-client',version:'1.0'},'io.modelcontextprotocol/clientCapabilities':{}}}};
+  const response=await handleAgentProtocolRoute(
+    new Request('https://trytoolscout.org/mcp',{method:'POST',headers:{'Content-Type':'application/json','MCP-Protocol-Version':'2026-07-28','Mcp-Method':'tools/call','Mcp-Name':'get_tool'},body:JSON.stringify(body)}),
+    env,
+    {waitUntil(){}}
+  );
+  assert.equal(response.status,200);
+  const payload=await response.json();
+  assert.equal(payload.result.structuredContent.tool.slug,'hubspot');
+  assert.match(payload.result.structuredContent.tool.tool_url,/\/go\/hubspot\?source=ai-agent$/);
+  assert.equal('affiliateUrl' in payload.result.structuredContent.tool,false);
+  assert.equal('commission' in payload.result.structuredContent.tool,false);
+});

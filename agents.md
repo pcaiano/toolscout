@@ -48,11 +48,15 @@ Supported methods:
 - `tools/list`
 - `tools/call`
 
-Published tool:
+Published tools:
 
-- `recommend_tools` — returns ToolScout's deterministic software recommendations for a described need and optional constraints.
+- `recommend_tools` — deterministic fit-based software recommendations for a described need and optional constraints.
+- `search_tools` — catalog search by name, category, feature, use case or verified AI interoperability.
+- `get_tool` — one ToolScout software profile with catalog facts, AI interoperability and canonical ToolScout URLs.
+- `compare_tools` — factual side-by-side comparison for two to four catalog tools.
+- `get_ai_compatibility` — verified MCP, API and AI-assistant interoperability evidence for one product.
 
-The MCP tool delegates to the same canonical recommendation engine used by `/api/recommend`; it does not maintain a separate ranking model.
+`recommend_tools` delegates to the same canonical recommendation engine used by `/api/recommend`. The catalog lookup and comparison tools read the same canonical ToolScout catalog and do not maintain a separate ranking model. Returned vendor navigation uses ToolScout `/go/` URLs with AI-agent attribution; affiliate participation never changes ranking, search order, comparison order or factual output.
 
 ## A2A
 

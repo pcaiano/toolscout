@@ -2,7 +2,7 @@ import base from './content-engine-intelligence-worker.js';
 
 const PROTOCOL_VERSION='2026-07-28';
 const A2A_VERSION='1.0';
-const SERVER_INFO={name:'ToolScout',version:'1.0.0',websiteUrl:'https://trytoolscout.org/'};
+const SERVER_INFO={name:'ToolScout',version:'1.1.0',websiteUrl:'https://trytoolscout.org/'};
 const SERVER_META_KEY='io.modelcontextprotocol/serverInfo';
 const JSON_HEADERS={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store','Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'Content-Type, Accept, MCP-Protocol-Version, Mcp-Method, Mcp-Name','Access-Control-Allow-Methods':'POST, OPTIONS'};
 const A2A_HEADERS={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store','Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'Content-Type, Accept, A2A-Version','Access-Control-Allow-Methods':'GET, POST, OPTIONS'};
@@ -37,41 +37,98 @@ function validateEnvelope(request,body){
   if(!principal&&name)return {code:-32020,message:'HeaderMismatch',data:{header:'Mcp-Name',expected:null,received:name}};
   return null;
 }
-function toolDefinition(){
-  return {
-    name:'recommend_tools',
-    title:'Recommend software with ToolScout',
-    description:'Return deterministic ToolScout software recommendations for a job, persona, budget, team and priority. Affiliate relationships do not influence ranking.',
-    inputSchema:{
-      type:'object',
-      additionalProperties:false,
-      required:['q'],
-      properties:{
-        q:{type:'string',minLength:2,maxLength:300,description:'Natural-language description of the software job or need.'},
-        goal:{type:'string',maxLength:40,description:'Optional category or goal hint.'},
-        budget:{type:'string',enum:['free','low','mid','high']},
-        team:{type:'string',enum:['solo','small','team','large','agency']},
-        priority:{type:'string',enum:['ease','automation','integrations','features']},
-        limit:{type:'integer',minimum:1,maximum:5,default:3}
-      }
+function toolDefinitions(){
+  const readOnly={readOnlyHint:true,destructiveHint:false,idempotentHint:true,openWorldHint:false};
+  return [
+    {
+      name:'recommend_tools',
+      title:'Recommend software with ToolScout',
+      description:'Return deterministic ToolScout software recommendations for a job, persona, budget, team and priority. Affiliate relationships do not influence ranking.',
+      inputSchema:{
+        type:'object',additionalProperties:false,required:['q'],
+        properties:{
+          q:{type:'string',minLength:2,maxLength:300,description:'Natural-language description of the software job or need.'},
+          goal:{type:'string',maxLength:40,description:'Optional category or goal hint.'},
+          budget:{type:'string',enum:['free','low','mid','high']},
+          team:{type:'string',enum:['solo','small','team','large','agency']},
+          priority:{type:'string',enum:['ease','automation','integrations','features']},
+          limit:{type:'integer',minimum:1,maximum:5,default:3}
+        }
+      },
+      outputSchema:{type:'object',required:['query','count','recommendations','ranking','affiliate_disclosure'],properties:{query:{type:'string'},profile:{type:'object'},intent:{type:['object','null']},count:{type:'integer'},ranking:{type:'string'},affiliate_disclosure:{type:'string'},recommendations:{type:'array',items:{type:'object'}}}},
+      annotations:readOnly
     },
-    outputSchema:{
-      type:'object',
-      required:['query','count','recommendations','ranking','affiliate_disclosure'],
-      properties:{
-        query:{type:'string'},profile:{type:'object'},intent:{type:['object','null']},count:{type:'integer'},ranking:{type:'string'},affiliate_disclosure:{type:'string'},recommendations:{type:'array',items:{type:'object'}}
-      }
+    {
+      name:'search_tools',
+      title:'Search the ToolScout software catalog',
+      description:'Search ToolScout by tool name, category, feature, use case or AI interoperability. Returns catalog matches without inventing personalised match percentages.',
+      inputSchema:{
+        type:'object',additionalProperties:false,required:['q'],
+        properties:{
+          q:{type:'string',minLength:2,maxLength:160},
+          category:{type:'string',maxLength:60},
+          ai_interoperability:{type:'string',enum:['verified','strong','official_mcp']},
+          limit:{type:'integer',minimum:1,maximum:10,default:5}
+        }
+      },
+      outputSchema:{type:'object',required:['query','count','results','affiliate_disclosure'],properties:{query:{type:'string'},count:{type:'integer'},results:{type:'array',items:{type:'object'}},affiliate_disclosure:{type:'string'}}},
+      annotations:readOnly
     },
-    annotations:{readOnlyHint:true,destructiveHint:false,idempotentHint:true,openWorldHint:false}
-  };
+    {
+      name:'get_tool',
+      title:'Get a ToolScout software profile',
+      description:'Return ToolScout catalog facts for one software product, including AI interoperability evidence and canonical ToolScout profile and outbound URLs.',
+      inputSchema:{type:'object',additionalProperties:false,required:['tool'],properties:{tool:{type:'string',minLength:1,maxLength:120,description:'Tool name or ToolScout slug.'}}},
+      outputSchema:{type:'object',required:['tool','affiliate_disclosure'],properties:{tool:{type:'object'},affiliate_disclosure:{type:'string'}}},
+      annotations:readOnly
+    },
+    {
+      name:'compare_tools',
+      title:'Compare software with ToolScout',
+      description:'Return a factual side-by-side comparison of two to four ToolScout catalog tools. Affiliate participation never changes the comparison order or facts.',
+      inputSchema:{type:'object',additionalProperties:false,required:['tools'],properties:{tools:{type:'array',minItems:2,maxItems:4,uniqueItems:true,items:{type:'string',minLength:1,maxLength:120}}}},
+      outputSchema:{type:'object',required:['count','tools','missing','affiliate_disclosure'],properties:{count:{type:'integer'},tools:{type:'array',items:{type:'object'}},missing:{type:'array',items:{type:'string'}},affiliate_disclosure:{type:'string'}}},
+      annotations:readOnly
+    },
+    {
+      name:'get_ai_compatibility',
+      title:'Check AI interoperability for software',
+      description:'Return ToolScout verified AI interoperability data for one product, including MCP status, public API status and supported AI assistants when present.',
+      inputSchema:{type:'object',additionalProperties:false,required:['tool'],properties:{tool:{type:'string',minLength:1,maxLength:120,description:'Tool name or ToolScout slug.'}}},
+      outputSchema:{type:'object',required:['tool','ai_integration','evidence_status'],properties:{tool:{type:'object'},ai_integration:{type:'object'},evidence_status:{type:'string'}}},
+      annotations:readOnly
+    }
+  ];
 }
-function validArguments(a){
+function validRecommendArguments(a){
   if(!a||typeof a!=='object'||Array.isArray(a))return 'arguments must be an object';
   if(typeof a.q!=='string'||a.q.trim().length<2||a.q.length>300)return 'q must be a string between 2 and 300 characters';
   const checks=[['budget',['free','low','mid','high']],['team',['solo','small','team','large','agency']],['priority',['ease','automation','integrations','features']]];
   for(const [key,values] of checks)if(a[key]!==undefined&&!values.includes(a[key]))return `${key} is invalid`;
   if(a.limit!==undefined&&(!Number.isInteger(a.limit)||a.limit<1||a.limit>5))return 'limit must be an integer from 1 to 5';
   return null;
+}
+function validToolArguments(name,a){
+  if(!a||typeof a!=='object'||Array.isArray(a))return 'arguments must be an object';
+  if(name==='recommend_tools')return validRecommendArguments(a);
+  if(name==='search_tools'){
+    if(typeof a.q!=='string'||a.q.trim().length<2||a.q.length>160)return 'q must be a string between 2 and 160 characters';
+    if(a.category!==undefined&&(typeof a.category!=='string'||a.category.length>60))return 'category is invalid';
+    if(a.ai_interoperability!==undefined&&!['verified','strong','official_mcp'].includes(a.ai_interoperability))return 'ai_interoperability is invalid';
+    if(a.limit!==undefined&&(!Number.isInteger(a.limit)||a.limit<1||a.limit>10))return 'limit must be an integer from 1 to 10';
+    return null;
+  }
+  if(name==='get_tool'||name==='get_ai_compatibility'){
+    if(typeof a.tool!=='string'||!a.tool.trim()||a.tool.length>120)return 'tool must be a non-empty string up to 120 characters';
+    return null;
+  }
+  if(name==='compare_tools'){
+    if(!Array.isArray(a.tools)||a.tools.length<2||a.tools.length>4)return 'tools must contain between 2 and 4 tool names or slugs';
+    if(a.tools.some(x=>typeof x!=='string'||!x.trim()||x.length>120))return 'each tool must be a non-empty string up to 120 characters';
+    if(new Set(a.tools.map(x=>x.trim().toLowerCase())).size!==a.tools.length)return 'tools must be unique';
+    return null;
+  }
+  return 'unknown tool';
 }
 async function callRecommend(args,request,env,ctx){
   const url=new URL('/api/recommend',request.url);
@@ -82,6 +139,94 @@ async function callRecommend(args,request,env,ctx){
   if(!response.ok)return {error:data?.message||data?.error||'Recommendation unavailable.',status:response.status,data};
   return {data};
 }
+function catalogNormalize(v){return String(v||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim()}
+async function loadCatalog(request,env){
+  const url=new URL('/data/tools.json',request.url);
+  const response=await env.ASSETS.fetch(new Request(url.toString(),{method:'GET',headers:{Accept:'application/json'}}));
+  if(!response.ok)throw new Error('catalog_unavailable');
+  const tools=await response.json();
+  if(!Array.isArray(tools))throw new Error('catalog_invalid');
+  return tools;
+}
+function findCatalogTool(tools,value){
+  const raw=String(value||'').trim(),needle=catalogNormalize(raw);
+  if(!needle)return null;
+  const exact=tools.find(t=>String(t?.slug||'').toLowerCase()===raw.toLowerCase()||catalogNormalize(t?.name)===needle);
+  if(exact)return exact;
+  const partial=tools.filter(t=>catalogNormalize(t?.name).includes(needle)||catalogNormalize(t?.slug).includes(needle));
+  return partial.length===1?partial[0]:null;
+}
+function aiIntegration(tool){
+  const ai=tool?.aiIntegration&&typeof tool.aiIntegration==='object'?tool.aiIntegration:{};
+  return {
+    status:ai.status||'unverified',
+    tier:ai.tier||'unknown',
+    mcp:ai.mcp||'unknown',
+    public_api:ai.publicApi??null,
+    assistants:Array.isArray(ai.assistants)?ai.assistants:[],
+    summary:ai.summary||'ToolScout has not yet verified this tool\'s current AI interoperability.',
+    verified_at:ai.verifiedAt||null
+  };
+}
+function publicTool(tool){
+  return {
+    slug:tool.slug,
+    name:tool.name,
+    category:tool.category,
+    description:tool.description,
+    pricing:tool.pricing,
+    free_plan:Boolean(tool.freePlan),
+    features:Array.isArray(tool.features)?tool.features:[],
+    best_for:Array.isArray(tool.bestFor)?tool.bestFor:[],
+    ai_integration:aiIntegration(tool),
+    last_verified:tool.lastVerified||null,
+    profile_url:`https://trytoolscout.org/tools/${encodeURIComponent(tool.slug)}`,
+    tool_url:`https://trytoolscout.org/go/${encodeURIComponent(tool.slug)}?source=ai-agent`
+  };
+}
+function catalogSearchScore(tool,args){
+  const q=catalogNormalize(args.q),tokens=q.split(' ').filter(Boolean),name=catalogNormalize(tool?.name),slug=catalogNormalize(tool?.slug),category=catalogNormalize(tool?.category);
+  const hay=catalogNormalize([tool?.name,tool?.slug,tool?.category,tool?.description,...(tool?.features||[]),...(tool?.bestFor||[])].join(' '));
+  let score=0;
+  if(name===q||slug===q)score+=100;
+  else if(name.includes(q)||slug.includes(q))score+=50;
+  if(category===q)score+=30;
+  for(const token of tokens)if(token.length>=2&&hay.includes(token))score+=8;
+  if(args.category&&category!==catalogNormalize(args.category))return -1;
+  const ai=aiIntegration(tool);
+  if(args.ai_interoperability==='verified'&&ai.status!=='verified')return -1;
+  if(args.ai_interoperability==='strong'&&!(ai.status==='verified'&&ai.tier==='strong'))return -1;
+  if(args.ai_interoperability==='official_mcp'&&ai.mcp!=='official')return -1;
+  return score;
+}
+async function callCatalogTool(name,args,request,env){
+  let tools;
+  try{tools=await loadCatalog(request,env)}catch{return {error:'ToolScout catalog is temporarily unavailable.',status:503}}
+  if(name==='search_tools'){
+    const limit=Math.max(1,Math.min(10,args.limit||5));
+    const ranked=tools.map(t=>({tool:t,score:catalogSearchScore(t,args)})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score||String(a.tool.name).localeCompare(String(b.tool.name))).slice(0,limit);
+    const results=ranked.map(x=>({...publicTool(x.tool),relevance:x.score>=100?'exact':x.score>=50?'strong':'relevant'}));
+    return {data:{query:args.q,count:results.length,results,affiliate_disclosure:'ToolScout may earn a commission from some outbound links. Affiliate relationships do not influence search order.'}};
+  }
+  if(name==='get_tool'){
+    const tool=findCatalogTool(tools,args.tool);
+    if(!tool)return {error:'Tool not found in the ToolScout catalog.',status:404,data:{tool:null,query:args.tool}};
+    return {data:{tool:publicTool(tool),affiliate_disclosure:'ToolScout may earn a commission from some outbound links. Affiliate relationships do not influence profile facts.'}};
+  }
+  if(name==='compare_tools'){
+    const found=[],missing=[];
+    for(const value of args.tools){const tool=findCatalogTool(tools,value);if(tool)found.push(publicTool(tool));else missing.push(value)}
+    if(found.length<2)return {error:'At least two requested tools must exist in the ToolScout catalog.',status:404,data:{count:found.length,tools:found,missing}};
+    return {data:{count:found.length,tools:found,missing,comparison_basis:'ToolScout catalog facts and verified AI interoperability fields. No affiliate payout or paid placement is used as a comparison criterion.',affiliate_disclosure:'ToolScout may earn a commission from some outbound links. Affiliate relationships do not influence comparison order or facts.'}};
+  }
+  if(name==='get_ai_compatibility'){
+    const tool=findCatalogTool(tools,args.tool);
+    if(!tool)return {error:'Tool not found in the ToolScout catalog.',status:404,data:{tool:null,query:args.tool}};
+    const ai=aiIntegration(tool);
+    return {data:{tool:{slug:tool.slug,name:tool.name,profile_url:`https://trytoolscout.org/tools/${encodeURIComponent(tool.slug)}`,tool_url:`https://trytoolscout.org/go/${encodeURIComponent(tool.slug)}?source=ai-agent`},ai_integration:ai,evidence_status:ai.status==='verified'?'verified':'unverified'}};
+  }
+  return {error:'Unknown tool.',status:400};
+}
 function mcpClient(body){const c=requestMeta(body)['io.modelcontextprotocol/clientInfo']||{};return {clientName:c.name||null,clientVersion:c.version||null}}
 async function handleMcp(request,env,ctx){
   if(request.method==='OPTIONS')return new Response(null,{status:204,headers:JSON_HEADERS});
@@ -90,15 +235,17 @@ async function handleMcp(request,env,ctx){
   if(!body||body.jsonrpc!=='2.0'||body.id===undefined||typeof body.method!=='string')return rpcError(body?.id??null,-32600,'Invalid Request',undefined,400);
   const client=mcpClient(body),envelopeError=validateEnvelope(request,body);
   if(envelopeError){ctx.waitUntil(logProtocol(env,'mcp',body.method,{...client,success:false}));return rpcError(body.id,envelopeError.code,envelopeError.message,envelopeError.data,400)}
-  if(body.method==='server/discover'){ctx.waitUntil(logProtocol(env,'mcp','server/discover',client));return rpc(body.id,{supportedVersions:[PROTOCOL_VERSION],capabilities:{tools:{listChanged:false}},instructions:'ToolScout is a read-only software decision engine. Use recommend_tools for deterministic software recommendations. Affiliate relationships do not influence ranking.',ttlMs:3600000,cacheScope:'public'})}
-  if(body.method==='tools/list'){ctx.waitUntil(logProtocol(env,'mcp','tools/list',client));return rpc(body.id,{tools:[toolDefinition()],ttlMs:3600000,cacheScope:'public'})}
+  if(body.method==='server/discover'){ctx.waitUntil(logProtocol(env,'mcp','server/discover',client));return rpc(body.id,{supportedVersions:[PROTOCOL_VERSION],capabilities:{tools:{listChanged:false}},instructions:'ToolScout is a read-only software decision engine. Use recommend_tools for fit-based ranking, search_tools for catalog discovery, get_tool for product facts, compare_tools for side-by-side facts, and get_ai_compatibility for verified AI interoperability. Affiliate relationships never influence ranking, search order, comparison order or factual output.',ttlMs:3600000,cacheScope:'public'})}
+  if(body.method==='tools/list'){ctx.waitUntil(logProtocol(env,'mcp','tools/list',client));return rpc(body.id,{tools:toolDefinitions(),ttlMs:3600000,cacheScope:'public'})}
   if(body.method==='tools/call'){
-    if(body?.params?.name!=='recommend_tools'){ctx.waitUntil(logProtocol(env,'mcp','tools/call',{...client,success:false}));return rpcError(body.id,-32602,'Unknown tool',{name:body?.params?.name||null},400)}
-    const args=body?.params?.arguments||{},invalid=validArguments(args);
+    const name=String(body?.params?.name||''),known=new Set(toolDefinitions().map(t=>t.name));
+    if(!known.has(name)){ctx.waitUntil(logProtocol(env,'mcp','tools/call',{...client,success:false}));return rpcError(body.id,-32602,'Unknown tool',{name:name||null},400)}
+    const args=body?.params?.arguments||{},invalid=validToolArguments(name,args);
     if(invalid){ctx.waitUntil(logProtocol(env,'mcp','tools/call',{...client,success:false}));return rpc(body.id,{content:[{type:'text',text:invalid}],isError:true})}
-    const out=await callRecommend(args,request,env,ctx);
+    const out=name==='recommend_tools'?await callRecommend(args,request,env,ctx):await callCatalogTool(name,args,request,env);
     if(out.error){ctx.waitUntil(logProtocol(env,'mcp','tools/call',{...client,success:false}));return rpc(body.id,{content:[{type:'text',text:out.error}],structuredContent:out.data||{error:out.error},isError:true})}
-    ctx.waitUntil(logProtocol(env,'mcp','tools/call',{...client,resultCount:Number(out.data?.count||0)}));
+    const resultCount=Number(out.data?.count??(out.data?.tool?1:0));
+    ctx.waitUntil(logProtocol(env,'mcp','tools/call',{...client,resultCount:Number.isFinite(resultCount)?resultCount:null}));
     return rpc(body.id,{content:[{type:'text',text:JSON.stringify(out.data)}],structuredContent:out.data,isError:false});
   }
   ctx.waitUntil(logProtocol(env,'mcp',body.method,{...client,success:false}));
@@ -135,7 +282,7 @@ function a2aArgs(message){
   const args={...data};
   if(!args.q&&texts.length)args.q=texts.join('\n');
   if(!args.q)return {error:'message must include text or application/json data with q'};
-  const invalid=validArguments(args);if(invalid)return {error:invalid};
+  const invalid=validRecommendArguments(args);if(invalid)return {error:invalid};
   return {args};
 }
 function recommendationText(data){
