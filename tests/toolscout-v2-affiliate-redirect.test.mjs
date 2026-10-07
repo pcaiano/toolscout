@@ -4,6 +4,13 @@ import fs from 'node:fs';
 
 const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
+test('affiliate redirects stay crawlable so Google can observe their noindex header',()=>{
+  const robots=read('robots.txt');
+  const outbound=read('outbound-integrity-worker.js');
+  assert.doesNotMatch(robots,/^Disallow:\s*\/go\//mi);
+  assert.match(outbound,/X-Robots-Tag','noindex, nofollow, noarchive'/);
+});
+
 test('affiliate redirect direct owner preserves the proven commercial stages',()=>{
   const runtime=read('affiliate-redirect-runtime.js');
   assert.match(runtime,/import commercialCore from '\.\/distribution-embed-worker\.js'/);
