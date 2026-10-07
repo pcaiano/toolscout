@@ -49,6 +49,10 @@ jobs:
           echo "=== ACQUISITION_WEBHOOK references ==="
           grep -R -n --exclude-dir=node_modules --exclude-dir=.git "ACQUISITION_WEBHOOK" . || true
 
+          echo "=== Bluesky posts on 2026-10-07 ==="
+          curl -fsSL "https://public.api.bsky.app/xrpc/app.bsky.feed.getAuthorFeed?actor=did:plc:hjawfnxtifnuqcgidlvmas76&limit=100" \
+            | jq -r '.feed[] | select((.post.indexedAt // "") | startswith("2026-10-07")) | [.post.uri,.post.indexedAt,((.post.record.text // "")|gsub("\n";" "))] | @tsv' || true
+
           echo "=== external evidence ==="
           cat /tmp/content-evidence.json
           echo "=== content contracts ==="
