@@ -71,7 +71,11 @@
       "partial_evidence_preserved_on_failure": true,
       "failed_or_zero_page_requires_retry": true,
       "prefer_discovered_contact_links": true,
-      "validation_command": "node pr-media-crawler/verify-crawler.mjs"
+      "validation_command": "node pr-media-crawler/verify-crawler.mjs",
+      "prefer_nonempty_ownership_context_on_duplicate_evidence": true,
+      "reviewed_source_url_environment": "PUBLIC_SOURCE_URLS",
+      "reviewed_source_urls_same_domain_https_only": true,
+      "reviewed_source_urls_max_per_domain": 16
     }
   },
   "execution": {
