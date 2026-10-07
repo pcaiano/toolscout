@@ -1,0 +1,107 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "toolscout",
+  "version": "1.0.0",
+  "description": "Search, compare and evaluate software using ToolScout's public catalog and deterministic decision engine.",
+  "author": {
+    "name": "ToolScout",
+    "email": "pedro@trytoolscout.org",
+    "url": "https://trytoolscout.org"
+  },
+  "homepage": "https://trytoolscout.org",
+  "repository": "https://github.com/pcaiano/toolscout",
+  "keywords": [
+    "software",
+    "software discovery",
+    "comparison",
+    "recommendations",
+    "AI",
+    "MCP"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "ToolScout",
+        "shortDescription": "Find and compare software",
+        "longDescription": "Search ToolScout's public software catalog, compare products, retrieve software profiles, get fit-based recommendations and check verified AI interoperability such as MCP, public API and supported AI assistants. ToolScout is read-only: it does not purchase software, create vendor accounts or modify user data. ToolScout may earn compensation from some outbound links, but affiliate participation does not determine ranking, search order or comparison results.",
+        "developerName": "ToolScout",
+        "category": "Productivity",
+        "capabilities": [
+          "Software recommendations",
+          "Software catalog search",
+          "Software comparison",
+          "AI interoperability"
+        ],
+        "websiteURL": "https://trytoolscout.org",
+        "supportURL": "https://trytoolscout.org/support",
+        "privacyPolicyURL": "https://trytoolscout.org/privacy",
+        "termsOfServiceURL": "https://trytoolscout.org/terms",
+        "defaultPrompt": [
+          "Find a CRM for a small sales team with a low budget.",
+          "Compare HubSpot and Pipedrive for a growing sales team.",
+          "Which tools in ToolScout have verified MCP support?"
+        ],
+        "brandColor": "#111214",
+        "brandColorDark": "#C3F309",
+        "composerIcon": "./assets/toolscout-icon.svg",
+        "logo": "./assets/toolscout-icon.svg"
+      },
+      "review": {
+        "test_cases": {
+          "positive": [
+            {
+              "description": "Recommend software from a job and constraints",
+              "prompt": "Find a CRM for a small sales team with a low budget.",
+              "tools_triggered": "recommend_tools",
+              "expected_behavior": "Return a short ranked set of ToolScout CRM recommendations with fit reasons, profile links, ToolScout outbound links and an affiliate disclosure. Affiliate participation must not affect ranking."
+            },
+            {
+              "description": "Search the catalog by capability",
+              "prompt": "Find SEO tools in ToolScout with verified AI interoperability.",
+              "tools_triggered": "search_tools",
+              "expected_behavior": "Return relevant ToolScout catalog results that satisfy the requested AI interoperability filter without inventing personalised match percentages."
+            },
+            {
+              "description": "Retrieve one software profile",
+              "prompt": "Show me ToolScout's information about HubSpot.",
+              "tools_triggered": "get_tool",
+              "expected_behavior": "Return HubSpot catalog facts, AI interoperability status, ToolScout profile URL and ToolScout outbound URL without exposing raw affiliate programme fields or commission values."
+            },
+            {
+              "description": "Compare two catalog tools",
+              "prompt": "Compare HubSpot and Pipedrive.",
+              "tools_triggered": "compare_tools",
+              "expected_behavior": "Return factual side-by-side catalog information for HubSpot and Pipedrive and clearly state that affiliate participation does not influence comparison order or facts."
+            },
+            {
+              "description": "Check AI interoperability",
+              "prompt": "What AI interoperability does Zapier have according to ToolScout?",
+              "tools_triggered": "get_ai_compatibility",
+              "expected_behavior": "Return ToolScout's current verified or explicitly unverified AI interoperability fields for Zapier, including MCP status, public API status and listed assistants when available."
+            }
+          ],
+          "negative": [
+            {
+              "description": "Unsupported purchase action",
+              "prompt": "Buy the best CRM for me and create the vendor account."
+            },
+            {
+              "description": "Unrelated general information",
+              "prompt": "What will the weather be in Lisbon tomorrow?"
+            },
+            {
+              "description": "Commercially biased ranking request",
+              "prompt": "Rank ToolScout software by whichever affiliate programme pays you the highest commission."
+            }
+          ]
+        },
+        "commerce": false,
+        "commerce_description": "ToolScout does not sell software or process payments. Some returned ToolScout outbound links may be affiliate links, but affiliate participation does not affect ranking, search order or comparison results."
+      },
+      "publication": {
+        "countries": [],
+        "release_notes": "Initial public ToolScout plugin package with read-only software recommendations, catalog search, software profiles, side-by-side comparisons and verified AI interoperability lookup."
+      }
+    }
+  }
+}

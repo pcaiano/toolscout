@@ -74,3 +74,16 @@ test('MCP get_tool returns ToolScout URLs without exposing raw affiliate program
   assert.equal('affiliateUrl' in payload.result.structuredContent.tool,false);
   assert.equal('commission' in payload.result.structuredContent.tool,false);
 });
+
+
+test('MCP review contract remains read-only and does not write protocol telemetry',()=>{
+  const runtime=fs.readFileSync(new URL('../agent-protocol-core-worker.js',import.meta.url),'utf8');
+  const start=runtime.indexOf('async function handleMcp');
+  const end=runtime.indexOf('function agentCard()',start);
+  const block=runtime.slice(start,end);
+  assert.doesNotMatch(block,/logProtocol\(/);
+  assert.doesNotMatch(block,/env\.DB/);
+  assert.match(runtime,/readOnlyHint:true/);
+  assert.match(runtime,/destructiveHint:false/);
+  assert.match(runtime,/openWorldHint:false/);
+});

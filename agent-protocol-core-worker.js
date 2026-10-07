@@ -233,22 +233,19 @@ async function handleMcp(request,env,ctx){
   if(request.method!=='POST')return new Response('Method Not Allowed',{status:405,headers:{...JSON_HEADERS,Allow:'POST, OPTIONS'}});
   let body;try{body=await request.json()}catch{return rpcError(null,-32700,'Parse error',undefined,400)}
   if(!body||body.jsonrpc!=='2.0'||body.id===undefined||typeof body.method!=='string')return rpcError(body?.id??null,-32600,'Invalid Request',undefined,400);
-  const client=mcpClient(body),envelopeError=validateEnvelope(request,body);
-  if(envelopeError){ctx.waitUntil(logProtocol(env,'mcp',body.method,{...client,success:false}));return rpcError(body.id,envelopeError.code,envelopeError.message,envelopeError.data,400)}
-  if(body.method==='server/discover'){ctx.waitUntil(logProtocol(env,'mcp','server/discover',client));return rpc(body.id,{supportedVersions:[PROTOCOL_VERSION],capabilities:{tools:{listChanged:false}},instructions:'ToolScout is a read-only software decision engine. Use recommend_tools for fit-based ranking, search_tools for catalog discovery, get_tool for product facts, compare_tools for side-by-side facts, and get_ai_compatibility for verified AI interoperability. Affiliate relationships never influence ranking, search order, comparison order or factual output.',ttlMs:3600000,cacheScope:'public'})}
-  if(body.method==='tools/list'){ctx.waitUntil(logProtocol(env,'mcp','tools/list',client));return rpc(body.id,{tools:toolDefinitions(),ttlMs:3600000,cacheScope:'public'})}
+  const envelopeError=validateEnvelope(request,body);
+  if(envelopeError){return rpcError(body.id,envelopeError.code,envelopeError.message,envelopeError.data,400)}
+  if(body.method==='server/discover'){return rpc(body.id,{supportedVersions:[PROTOCOL_VERSION],capabilities:{tools:{listChanged:false}},instructions:'ToolScout is a read-only software decision engine. Use recommend_tools for fit-based ranking, search_tools for catalog discovery, get_tool for product facts, compare_tools for side-by-side facts, and get_ai_compatibility for verified AI interoperability. Affiliate relationships never influence ranking, search order, comparison order or factual output.',ttlMs:3600000,cacheScope:'public'})}
+  if(body.method==='tools/list'){return rpc(body.id,{tools:toolDefinitions(),ttlMs:3600000,cacheScope:'public'})}
   if(body.method==='tools/call'){
     const name=String(body?.params?.name||''),known=new Set(toolDefinitions().map(t=>t.name));
-    if(!known.has(name)){ctx.waitUntil(logProtocol(env,'mcp','tools/call',{...client,success:false}));return rpcError(body.id,-32602,'Unknown tool',{name:name||null},400)}
+    if(!known.has(name)){return rpcError(body.id,-32602,'Unknown tool',{name:name||null},400)}
     const args=body?.params?.arguments||{},invalid=validToolArguments(name,args);
-    if(invalid){ctx.waitUntil(logProtocol(env,'mcp','tools/call',{...client,success:false}));return rpc(body.id,{content:[{type:'text',text:invalid}],isError:true})}
+    if(invalid){return rpc(body.id,{content:[{type:'text',text:invalid}],isError:true})}
     const out=name==='recommend_tools'?await callRecommend(args,request,env,ctx):await callCatalogTool(name,args,request,env);
-    if(out.error){ctx.waitUntil(logProtocol(env,'mcp','tools/call',{...client,success:false}));return rpc(body.id,{content:[{type:'text',text:out.error}],structuredContent:out.data||{error:out.error},isError:true})}
-    const resultCount=Number(out.data?.count??(out.data?.tool?1:0));
-    ctx.waitUntil(logProtocol(env,'mcp','tools/call',{...client,resultCount:Number.isFinite(resultCount)?resultCount:null}));
+    if(out.error){return rpc(body.id,{content:[{type:'text',text:out.error}],structuredContent:out.data||{error:out.error},isError:true})}
     return rpc(body.id,{content:[{type:'text',text:JSON.stringify(out.data)}],structuredContent:out.data,isError:false});
   }
-  ctx.waitUntil(logProtocol(env,'mcp',body.method,{...client,success:false}));
   return rpcError(body.id,-32601,'Method not found',{method:body.method},400);
 }
 function agentCard(){
