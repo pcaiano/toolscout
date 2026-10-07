@@ -10,6 +10,7 @@ on:
       - 'growth-supervisor.js'
       - 'growth-execution-contract.js'
       - 'growth-command-center-v2-worker.js'
+      - 'mission-integrity-worker.js'
       - 'distribution-orchestrator-worker.js'
 
 permissions:
