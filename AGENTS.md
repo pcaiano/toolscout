@@ -114,3 +114,20 @@ A repair is fixed only when all applicable stages are true:
 `source changed -> relevant checks pass -> deployment exists -> affected live path responds correctly -> canonical state is reconciled -> observability reflects the result -> reusable regression protection exists when warranted`
 
 Do not declare success from repository state alone.
+
+## Code Review Rules
+
+### Production invariants
+
+- Flag any change that can alter public canonicals, indexed URLs, verified backlinks, `/go/` affiliate routes, structured data, or measurement contracts without an explicit compatibility or migration path.
+  Safe path: preserve existing external behavior or include a backward-compatible migration and live verification.
+
+### Source of truth and project isolation
+
+- Flag changes that write ToolScout canonical state outside the declared Cloudflare/D1 ownership model, or that can target BEARING resources from ToolScout code.
+  Safe path: verify the exact ToolScout resource name or ID and keep canonical business state inside the declared ToolScout control plane.
+
+### Runtime ownership
+
+- Flag new route or scheduled-task handlers that bypass the declared route, schedule, or production-worker ownership model, or introduce duplicate/shadow ownership.
+  Safe path: modify the declared owner or its direct dependency and update the operating contract when ownership changes.
