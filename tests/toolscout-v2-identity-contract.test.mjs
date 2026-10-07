@@ -14,7 +14,11 @@ test('ToolScout public identity is consistent across discovery surfaces',()=>{
     'apis.json',
     'openapi.json',
     'machine-discovery-catalog-runtime.js',
-    'social-profiles.js'
+    'social-profiles.js',
+    'distribution-embed-worker.js',
+    'openai-plugin/README.md',
+    '.well-known/ai-catalog.json',
+    '.well-known/ard.json'
   ]){
     const content=fs.readFileSync(new URL('../'+path,import.meta.url),'utf8');
     assert.ok(content.includes(descriptor),path+' must include the canonical ToolScout descriptor');
