@@ -15,7 +15,7 @@ const COMMON_PATHS = [
 
 const LINK_HINTS = /(about|team|staff|masthead|author|editor|contact|press|newsroom|impressum|redaktion|redacao|redazione|kontakt|contacto)/i;
 const GOOD_LOCAL = /(editor|editorial|editors|news|newsroom|press|presse|prensa|tips|story|stories|pitch|redacao|redacao|redaktion|redazione|redaccion|redaccion|redac|redactie|desk|journalist|reporter|tech|technology|startup|saas|ai|software)/i;
-const BAD_LOCAL = /(noreply|no-reply|donotreply|support|helpdesk|help|billing|invoice|privacy|legal|abuse|sales|advertis|adinquir|^ads?$|career|jobs|recruit|^hr$|customer|customerservice|shop|store|orders|webmaster|finance|membership|ombudsman|reader|aboservice|jobanzeigen|werben|relay|accounts?|corrections?|bugs?)/i;
+const BAD_LOCAL = /(noreply|no-reply|donotreply|support|helpdesk|help|billing|invoice|privacy|legal|abuse|sales|advertis|adinquir|^ads?$|career|jobs|recruit|^hr$|customer|customerservice|shop|store|orders|webmaster|finance|membership|ombudsman|reader|aboservice|jobanzeigen|werben|relay|marketing|^newsletter$|publicidad|pubblicita|comercial|reklam|subscriptions?|abonnement|accounts?|corrections?|bugs?)/i;
 const ROLE_WORDS = /(editor|reporter|journalist|writer|correspondent|producer|news|editorial|press|technology|software|saas|startup|artificial intelligence|\bai\b|developer|cloud|cyber|security|enterprise|data|digital)/i;
 
 function json(res, status, body) {
@@ -38,6 +38,10 @@ function normalizeDomain(v) {
 
 function decodeEntities(s) {
   return String(s || "")
+    .replace(/&#(?:x([0-9a-f]+)|(\d+));/gi, (match, hex, dec) => {
+      const cp = parseInt(hex || dec, hex ? 16 : 10);
+      return cp > 0 && cp <= 0x10ffff && !(cp >= 0xd800 && cp <= 0xdfff) ? String.fromCodePoint(cp) : match;
+    })
     .replace(/&nbsp;/gi, " ")
     .replace(/&#64;|&commat;/gi, "@")
     .replace(/&#46;|&period;/gi, ".")
@@ -238,7 +242,15 @@ function extractPeopleFromText(html, url, domain) {
 
 function extractContacts(html, url, domain) {
   const raw = decodeEntities(String(html || ""));
-  const text = stripHtml(raw);
+  // Public mailto/Cloudflare HTML may hide the address from visible text.
+  // Decode only the published value, adjacent to its original anchor context.
+  const contextualHtml = raw.replace(/<(?:a|span)\b[^>]*>/gi, tag => {
+    const cf = tag.match(/data-cfemail=["']([0-9a-f]+)["']/i) || tag.match(/email-protection#([0-9a-f]+)/i);
+    const mailto = tag.match(/href=["']mailto:([^"'?\s<>]+)/i);
+    const email = cf ? decodeCfEmail(cf[1]) : mailto ? mailto[1] : "";
+    return email ? tag + " " + email + " " : tag;
+  });
+  const text = stripHtml(contextualHtml);
   const emails = new Set();
 
   for (const m of raw.matchAll(/mailto:([^"'?\s<>]+)/gi)) emails.add(m[1].trim());
@@ -255,7 +267,8 @@ function extractContacts(html, url, domain) {
   const out = [];
   for (let email of emails) {
     email = email.split("?")[0].replace(/[),.;:]+$/g, "").toLowerCase();
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) continue;
+    if (!/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i.test(email)) continue;
+    if (/^u00[0-9a-f]{2}/i.test(email)) continue;
     const emailDomain = email.split("@")[1].toLowerCase();
     if (/^(example\.com|company\.com|sentry\.io)$/.test(emailDomain)) continue;
     if (/^[a-f0-9]{24,}@/i.test(email)) continue;
@@ -266,7 +279,7 @@ function extractContacts(html, url, domain) {
     const c = classify(email, context, new URL(url).pathname);
     if (!c.relevant) continue;
     const local = email.split("@")[0];
-    const name = inferName(local, context);
+    const name = ""; // A nearby name is not proof of mailbox ownership.
     out.push({
       domain,
       name,
@@ -411,10 +424,17 @@ async function crawlDomain(domain) {
   const fetched = [];
   const contacts = [];
   const people = [];
+  function publishProgress() {
+    if (isMainThread || !parentPort) return;
+    const uniqueContacts = [...new Map(contacts.map(c => [c.email.toLowerCase(), c])).values()].slice(0, 150);
+    const uniquePeople = [...new Map(people.map(p => [p.name.toLowerCase(), p])).values()].slice(0, 120);
+    parentPort.postMessage({progress:true, domain, pages_fetched:new Set(fetched).size, contacts:uniqueContacts, people:uniquePeople});
+  }
 
   try {
     const directoryPeople = await discoverPublicAuthorDirectory(domain);
     people.push(...directoryPeople);
+    publishProgress();
   } catch {}
   const authorLinks = new Map();
   const articleLinks = new Set();
@@ -428,6 +448,7 @@ async function crawlDomain(domain) {
       if (!authorLinks.has(a.url)) authorLinks.set(a.url, a);
     }
     for (const u of extractArticleLinks(page.html, page.url)) articleLinks.add(u);
+    publishProgress();
   }
 
   const first = await fetchPage(`https://${domain}/`);
@@ -436,7 +457,11 @@ async function crawlDomain(domain) {
     for (const u of extractLinks(first.html, first.url).slice(0, 14)) seeds.add(u);
   }
 
-  const urls = [...seeds].filter(u => !fetched.includes(u)).slice(0, 12);
+  // Actual publisher links outrank guessed paths; include staff/team paths.
+  const discovered = first.ok ? extractLinks(first.html, first.url) : [];
+  const priority = ["/contact", "/contact-us", "/about", "/about-us", "/team", "/staff", "/masthead", "/authors", "/impressum", "/contacto", "/kontakt", "/contatti"];
+  const urls = [...new Set([...discovered, ...priority.map(p => `https://${domain}${p}`), ...seeds])]
+    .filter(u => !fetched.includes(u)).slice(0, 16);
   let cursor = 0;
   const workers = Array.from({ length: 5 }, async () => {
     while (cursor < urls.length) {
@@ -533,6 +558,7 @@ async function crawlDomainBounded(domain) {
       resourceLimits: { maxOldGenerationSizeMb: 96 }
     });
     let settled = false;
+    let partial = {domain, pages_fetched:0, contacts:[], people:[]};
     const finish = result => {
       if (settled) return;
       settled = true;
@@ -541,17 +567,20 @@ async function crawlDomainBounded(domain) {
       worker.terminate().catch(() => {});
     };
     const timer = setTimeout(() => finish({
-      domain, pages_fetched: 0, contacts: [], people: [],
+      ...partial,
       status: "timeout", error: "domain_budget_exceeded", retry_required: true
     }), 60000);
-    worker.once("message", finish);
+    worker.on("message", result => {
+      if (result.progress) { const {progress, ...data} = result; partial = data; }
+      else finish(result);
+    });
     worker.once("error", error => finish({
-      domain, pages_fetched: 0, contacts: [], people: [],
+      ...partial,
       status: "failed", error: String(error.message), retry_required: true
     }));
     worker.once("exit", code => {
       if (!settled) finish({
-        domain, pages_fetched: 0, contacts: [], people: [],
+        ...partial,
         status: "failed", error: "worker_exit_" + code, retry_required: true
       });
     });
@@ -754,5 +783,7 @@ if (isMainThread) server.listen(PORT, "0.0.0.0", () => {
 });
 
 else if (workerData?.domain) {
-  crawlDomain(workerData.domain).then(result => parentPort.postMessage({...result, status: "complete"})).catch(error => parentPort.postMessage({domain:workerData.domain, pages_fetched:0, contacts:[], people:[], status:"failed", error:String(error.message), retry_required:true}));
+  // Keep the worker alive while fetch promises settle; the parent enforces 60s.
+  const keepAlive = setInterval(() => {}, 1000);
+  crawlDomain(workerData.domain).then(result => parentPort.postMessage({...result, status: "complete"})).catch(error => parentPort.postMessage({domain:workerData.domain, pages_fetched:0, contacts:[], people:[], status:"failed", error:String(error.message), retry_required:true})).finally(() => clearInterval(keepAlive));
 }
