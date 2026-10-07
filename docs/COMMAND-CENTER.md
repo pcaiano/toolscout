@@ -488,3 +488,11 @@ Distribution Network outreach now leads with the free Finder widget. A verified 
 
 The public recommendation API inherits the Finder's intent-recognition and broad-category safeguards. Unrecognised requests resolve explicitly rather than receiving a default ranking, and broad category searches use qualitative category-fit labels instead of personalised percentage claims.
 
+
+## Isolated PR crawler recovery - 2026-10-07
+
+The owner requires uninterrupted free PR database expansion toward 25,000 unique relevant reachable contacts and renewed message review before any send. Original Google Sheet: 1iRfseZSnbmpvXJozLC9A1cQTZODkO5f6ijQ4yg89auo. Public profiles alone do not meet the target; shared inboxes count once.
+
+Series global-series-006-20261007 started 89 domains at 14:38 UTC but emitted no domain results by 14:49 UTC. Recovery on the isolated pr-media-crawler branch adds independent domain workers, a 60-second hard deadline, explicit retry evidence and immediate per-domain results. Public production, overflow and auth-broker are out of scope. Syntax and actual worker tests verify that a CPU-stalled domain cannot block a fast one; image/placeholder emails and inferred mailbox names are rejected. Deployment verification is pending until live results appear.
+
+The inherited operating validator reported 37 passes and 3 failures because it searches literal cron declarations/base.scheduled while the current router uses runtime-schedule-contract.js and direct Growth/Command Center scheduler delegation. This unrelated validator drift is recorded; no production scheduling change was made. Context7 is unavailable; Node's first-party worker-thread documentation and executable worker tests are used for this backend-only repair.
