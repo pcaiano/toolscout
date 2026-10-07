@@ -1,6 +1,10 @@
-# ToolScout OpenAI plugin submission
+# ToolScout: Software Decision Engine | OpenAI plugin submission
 
 This folder is the portable Agent Plugins package for ToolScout.
+
+**ToolScout**  
+**Independent Software Discovery & Decision Engine**  
+**trytoolscout.org**
 
 ## Package contents
 

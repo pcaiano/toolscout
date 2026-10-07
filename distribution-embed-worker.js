@@ -2,6 +2,7 @@ import base from './distribution-command-worker.js';
 import { prioritizedDistributionFeed } from './distribution-feed-priority.js';
 import {recentDistributionAssets,handleMachineDiscoveryCatalogRoute} from './machine-discovery-catalog-runtime.js';
 
+const TOOLSCOUT_DESCRIPTOR='Independent Software Discovery & Decision Engine';
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'public, max-age=120','Access-Control-Allow-Origin':'*'};
 const JS_H={'Content-Type':'application/javascript; charset=UTF-8','Cache-Control':'public, max-age=3600','Access-Control-Allow-Origin':'*'};
 const SVG_H={'Content-Type':'image/svg+xml; charset=UTF-8','Cache-Control':'public, max-age=86400'};
@@ -232,11 +233,11 @@ async function logEmbedClick(request,env){
 }
 async function feedJson(env){
   const items=await recentDistributionAssets(env,30);
-  return Response.json({name:'ToolScout Distribution Feed',home:'https://trytoolscout.org',updated_at:new Date().toISOString(),items:items.map(x=>({url:x.asset_url,type:x.asset_type,last_seen_at:x.last_seen_at}))},{headers:JSON_H});
+  return Response.json({name:'ToolScout Distribution Feed',description:`ToolScout | ${TOOLSCOUT_DESCRIPTOR} | trytoolscout.org.`,home:'https://trytoolscout.org',updated_at:new Date().toISOString(),items:items.map(x=>({url:x.asset_url,type:x.asset_type,last_seen_at:x.last_seen_at}))},{headers:JSON_H});
 }
 async function feedRss(env){
   const items=await recentDistributionAssets(env,30);
-  const xml=`<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>ToolScout Distribution Feed</title><link>https://trytoolscout.org/</link><description>Recent ToolScout decision assets for syndication and discovery.</description>${items.map(x=>`<item><title>${escXml(x.asset_type||'ToolScout decision asset')}</title><link>${escXml(x.asset_url)}</link><guid>${escXml(x.asset_url)}</guid><pubDate>${new Date((x.last_seen_at||'').replace(' ','T')+'Z').toUTCString()}</pubDate></item>`).join('')}</channel></rss>`;
+  const xml=`<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>ToolScout Distribution Feed</title><link>https://trytoolscout.org/</link><description>ToolScout | ${TOOLSCOUT_DESCRIPTOR} | trytoolscout.org. Recent ToolScout decision assets for syndication and discovery.</description>${items.map(x=>`<item><title>${escXml(x.asset_type||'ToolScout decision asset')}</title><link>${escXml(x.asset_url)}</link><guid>${escXml(x.asset_url)}</guid><pubDate>${new Date((x.last_seen_at||'').replace(' ','T')+'Z').toUTCString()}</pubDate></item>`).join('')}</channel></rss>`;
   return new Response(xml,{headers:XML_H});
 }
 async function publisherKit(request,env){

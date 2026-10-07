@@ -32,6 +32,9 @@ test('distribution manifest is served directly and read-only',async()=>{
   assert.equal(response.status,200);
   const body=await response.json();
   assert.equal(body.name,'ToolScout');
+  assert.equal(body.descriptor,'Independent Software Discovery & Decision Engine');
+  assert.equal(body.plugin_display_name,'ToolScout: Software Decision Engine');
+  assert.equal(body.canonical_identity,'ToolScout | Independent Software Discovery & Decision Engine | trytoolscout.org');
   assert.equal(body.machine_discovery.api_catalog,'https://trytoolscout.org/.well-known/api-catalog');
   assert.deepEqual(body.recent_assets,['https://trytoolscout.org/best-seo-tools-for-agencies']);
 });

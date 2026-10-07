@@ -8,10 +8,10 @@
   "entries": [
     {
       "identifier": "urn:air:trytoolscout.org:mcp:software-recommendation",
-      "displayName": "ToolScout MCP Software Decision Server",
+      "displayName": "ToolScout: Software Decision Engine",
       "type": "application/mcp-server-card+json",
       "url": "https://trytoolscout.org/mcp",
-      "description": "Read-only software decision capability for recommendations, catalog search, side-by-side comparison, product facts and verified AI interoperability. Affiliate relationships do not influence ranking or factual output.",
+      "description": "ToolScout is the independent software discovery and decision engine at trytoolscout.org. This read-only MCP capability supports recommendations, catalog search, side-by-side comparison, product facts and verified AI interoperability. Affiliate relationships do not influence ranking or factual output.",
       "tags": [
         "software",
         "recommendations",
@@ -38,10 +38,10 @@
     },
     {
       "identifier": "urn:air:trytoolscout.org:a2a:software-recommendation-agent",
-      "displayName": "ToolScout Software Recommendation Agent",
+      "displayName": "ToolScout: Software Decision Engine Agent",
       "type": "application/a2a-agent-card+json",
       "url": "https://trytoolscout.org/.well-known/agent-card.json",
-      "description": "A2A software recommendation agent for discovering and ranking software from natural-language requirements.",
+      "description": "ToolScout is the independent software discovery and decision engine at trytoolscout.org. This A2A agent discovers and ranks software from natural-language requirements.",
       "tags": [
         "software",
         "recommendations",
@@ -62,10 +62,10 @@
     },
     {
       "identifier": "urn:air:trytoolscout.org:openapi:recommendation-api",
-      "displayName": "ToolScout Recommendation API",
+      "displayName": "ToolScout: Software Decision Engine API",
       "type": "application/vnd.oai.openapi+json;version=3.1",
       "url": "https://trytoolscout.org/openapi.json",
-      "description": "Public read-only API for deterministic software recommendations by job, goal, budget, team and priority.",
+      "description": "Public read-only API from ToolScout, the Independent Software Discovery & Decision Engine at trytoolscout.org, for deterministic software recommendations by job, goal, budget, team and priority.",
       "tags": [
         "software",
         "api",

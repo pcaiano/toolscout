@@ -2,11 +2,11 @@
   "aid": "toolscout",
   "type": "Index",
   "name": "ToolScout",
-  "description": "Independent software discovery and recommendation platform with public recommendation, MCP and A2A interfaces plus machine-readable distribution discovery endpoints.",
+  "description": "ToolScout | Independent Software Discovery & Decision Engine | trytoolscout.org. Public recommendation, MCP and A2A interfaces expose ToolScout software decision capabilities through machine-readable discovery endpoints.",
   "url": "https://trytoolscout.org/apis.json",
   "image": "https://trytoolscout.org/embed/badge.svg",
   "created": "2026-09-07",
-  "modified": "2026-10-05",
+  "modified": "2026-10-07",
   "specificationVersion": "0.19",
   "tags": [
     "Software Discovery",
@@ -28,7 +28,7 @@
     {
       "aid": "toolscout:public-discovery-api",
       "name": "ToolScout Public Discovery API",
-      "description": "Public endpoints exposing ToolScout software recommendations, agent protocols, distribution assets, machine-discovery metadata, embeddable discovery surfaces and privacy-bounded embed telemetry.",
+      "description": "Public endpoints for ToolScout: Software Decision Engine, exposing ToolScout software recommendations, agent protocols, distribution assets, machine-discovery metadata, embeddable discovery surfaces and privacy-bounded embed telemetry.",
       "image": "https://trytoolscout.org/embed/badge.svg",
       "humanURL": "https://trytoolscout.org/",
       "baseURL": "https://trytoolscout.org",

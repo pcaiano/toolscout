@@ -1,3 +1,5 @@
+const TOOLSCOUT_DESCRIPTOR='Independent Software Discovery & Decision Engine';
+const TOOLSCOUT_PLUGIN_NAME='ToolScout: Software Decision Engine';
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'public, max-age=300','Access-Control-Allow-Origin':'*'};
 const LINKSET_H={'Content-Type':'application/linkset+json; profile="https://www.rfc-editor.org/info/rfc9727"','Cache-Control':'public, max-age=3600','Link':'</.well-known/api-catalog>; rel="api-catalog"'};
 
@@ -24,6 +26,9 @@ async function manifest(env){
   const items=await recentDistributionAssets(env,12);
   return Response.json({
     name:'ToolScout',
+    descriptor:TOOLSCOUT_DESCRIPTOR,
+    plugin_display_name:TOOLSCOUT_PLUGIN_NAME,
+    canonical_identity:`ToolScout | ${TOOLSCOUT_DESCRIPTOR} | trytoolscout.org`,
     canonical_url:'https://trytoolscout.org',
     machine_discovery:{
       llms_txt:'https://trytoolscout.org/llms.txt',
