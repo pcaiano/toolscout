@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import {prioritizedDistributionFeed} from '../distribution-feed-priority.js';
 
 const descriptor='Independent Software Discovery & Decision Engine';
 const pluginName='ToolScout: Software Decision Engine';
@@ -41,8 +42,21 @@ test('ToolScout public identity is consistent across discovery surfaces',()=>{
   assert.ok(publisherKit.includes('\"@id\":\"https://trytoolscout.org/distribution/publisher-kit#finder\"'));
   assert.ok(publisherKit.includes('\"@id\":\"https://trytoolscout.org/#organization\"'));
 
-  const routedFeed=fs.readFileSync(new URL('../distribution-feed-priority.js',import.meta.url),'utf8');
-  assert.ok(routedFeed.includes(descriptor));
-  assert.ok(routedFeed.includes('ToolScout | ${esc(TOOLSCOUT_DESCRIPTOR)} | trytoolscout.org.'));
-  assert.ok(routedFeed.includes('ToolScout | ${TOOLSCOUT_DESCRIPTOR} | trytoolscout.org.'));
+});
+
+test('routed public distribution feeds expose the canonical ToolScout identity',async()=>{
+  const env={ASSETS:{fetch:async request=>{
+    const pathname=new URL(request.url).pathname;
+    if(pathname==='/data/search-commercial-routing.json')return new Response(JSON.stringify({priorities:[]}),{status:200,headers:{'Content-Type':'application/json'}});
+    if(pathname==='/sitemap.xml')return new Response('<urlset><url><loc>https://trytoolscout.org/tools/semrush</loc></url></urlset>',{status:200,headers:{'Content-Type':'application/xml'}});
+    return new Response('',{status:404});
+  }}};
+  const request=new Request('https://trytoolscout.org/api/distribution/feed.json');
+  const jsonResponse=await prioritizedDistributionFeed(request,env,'json');
+  const jsonBody=await jsonResponse.json();
+  assert.ok(jsonBody.description.includes(`ToolScout | ${descriptor} | trytoolscout.org.`));
+
+  const xmlResponse=await prioritizedDistributionFeed(request,env,'xml');
+  const xmlBody=await xmlResponse.text();
+  assert.ok(xmlBody.includes(`ToolScout | ${descriptor} | trytoolscout.org.`));
 });
