@@ -460,7 +460,17 @@ async function crawlDomain(domain) {
   // Actual publisher links outrank guessed paths; include staff/team paths.
   const discovered = first.ok ? extractLinks(first.html, first.url) : [];
   const priority = ["/contact", "/contact-us", "/about", "/about-us", "/team", "/staff", "/masthead", "/authors", "/impressum", "/contacto", "/kontakt", "/contatti"];
-  const urls = [...new Set([...discovered, ...priority.map(p => `https://${domain}${p}`), ...seeds])]
+  // Owner-selected public author/contact pages are reviewed URL evidence,
+  // not guessed email patterns. Only this domain's HTTPS URLs are eligible.
+  const configured = String(process.env.PUBLIC_SOURCE_URLS || "").split(",").flatMap(raw => {
+    try {
+      const u = new URL(raw.trim());
+      if (u.protocol !== "https:" || u.username || u.password || u.port || u.hostname.replace(/^www\./, "") !== domain.replace(/^www\./, "")) return [];
+      u.hash = "";
+      return [u.href];
+    } catch { return []; }
+  }).slice(0, 16);
+  const urls = [...new Set([...configured, ...new Set([...discovered, ...priority.map(p => `https://${domain}${p}`), ...seeds])])]
     .filter(u => !fetched.includes(u)).slice(0, 16);
   let cursor = 0;
   const workers = Array.from({ length: 5 }, async () => {
