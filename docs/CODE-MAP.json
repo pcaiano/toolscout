@@ -1,0 +1,120 @@
+{
+  "version": 1,
+  "updated": "2026-10-07",
+  "purpose": "Compact repository localization map for ToolScout agents. Consult this before broad repository traversal.",
+  "repository": "pcaiano/toolscout",
+  "production_branch": "main",
+  "entrypoint": "compute-router-worker.js",
+  "contracts": {
+    "route_ownership": "runtime-route-contract.js",
+    "scheduled_ownership": "runtime-schedule-contract.js",
+    "operating": "docs/OPERATING-CONTRACT.json"
+  },
+  "localization_rule": "Open the smallest relevant subsystem set first. Broaden only when the map or direct imports do not resolve the task.",
+  "subsystems": {
+    "public_site": {
+      "files": [
+        "public-decision-runtime.js",
+        "public-navigation-runtime.js",
+        "public-editorial-runtime.js",
+        "public-redesign-runtime.js",
+        "dynamic-worker.js"
+      ],
+      "notes": "Tool profiles, comparisons, navigation hubs, news/editorial surfaces, canonical public rendering and outbound policy."
+    },
+    "finder_and_publisher_kit": {
+      "files": [
+        "distribution-embed-worker.js",
+        "embed/toolscout-finder.js",
+        "runtime-route-contract.js"
+      ],
+      "notes": "First-party Finder API and publisher embed assets, including Publisher Kit and embed telemetry boundary."
+    },
+    "command_center": {
+      "files": [
+        "command-center-direct-runtime.js",
+        "command-center-business-truth-runtime.js",
+        "command-center-resilient-worker.js",
+        "analytics-chairman-runtime.js",
+        "analytics-human-actions-runtime.js"
+      ],
+      "notes": "Owner-facing analytics and operational truth. GA4, GSC, D1 and outbound ledgers retain separate source-of-truth roles."
+    },
+    "growth_planner": {
+      "files": [
+        "growth-scheduler.js",
+        "distribution-orchestrator-worker.js",
+        "growth-supervisor.js",
+        "acquisition-value-model.js",
+        "runtime-schedule-contract.js"
+      ],
+      "notes": "Shared Growth Brain, mission cadence, prioritization and external-value-first policy."
+    },
+    "distribution": {
+      "files": [
+        "distribution-engine-worker.js",
+        "distribution-autonomous-worker.js",
+        "distribution-priority-worker.js",
+        "distribution-discovery-worker.js",
+        "distribution-submission-worker.js",
+        "distribution-learning-worker.js",
+        "distribution-sender-worker.js",
+        "distribution-contact-worker.js",
+        "distribution-network-worker.js"
+      ],
+      "notes": "Discovery, qualification, submissions, learning, outreach and network distribution."
+    },
+    "seo_aeo_geo": {
+      "files": [
+        "seo-cloudflare-runtime-worker.js",
+        "seo-execution-batch.js",
+        "scripts/sync-gsc-signals.mjs",
+        "docs/TOOLSCOUT-2.0-ARCHITECTURE.md"
+      ],
+      "notes": "Search execution, GSC truth bridge, public SEO transforms and editorial-authority architecture."
+    },
+    "affiliate": {
+      "files": [
+        "affiliate-redirect-runtime.js",
+        "affiliate-workflow-worker.js",
+        "affiliate-coverage-entry-worker.js",
+        "affiliate-human-action-entry-worker.js"
+      ],
+      "notes": "Affiliate routing, coverage workflow and owner-ready human actions. Editorial ranking remains affiliate-neutral."
+    },
+    "content_and_audience": {
+      "files": [
+        "content-engine-intelligence-worker.js",
+        "audience-worker.js",
+        "newsletter-runtime-worker.js",
+        "public-editorial-runtime.js"
+      ],
+      "notes": "Software news intelligence, social audience workflows and newsletter capture/HubSpot sync."
+    },
+    "catalog": {
+      "files": [
+        "catalog-autonomy-worker.js",
+        "machine-discovery-catalog-runtime.js",
+        "data/tools.json"
+      ],
+      "notes": "Catalog admission, runtime quality and machine-readable software discovery."
+    },
+    "infrastructure": {
+      "files": [
+        "wrangler.toml",
+        "render.yaml",
+        "compute-router-worker.js",
+        "docs/OPERATING-CONTRACT.json"
+      ],
+      "notes": "Cloudflare control plane, D1 binding, Render execution plane, crons and production entrypoint."
+    },
+    "integrity_and_tests": {
+      "files": [
+        "scripts/validate-operating-contract.mjs",
+        "scripts/audit-runtime-architecture.mjs",
+        "scripts/validate-v2-preservation.mjs"
+      ],
+      "notes": "Run the narrowest relevant checks first, then architecture/preservation gates for cross-cutting changes."
+    }
+  }
+}
