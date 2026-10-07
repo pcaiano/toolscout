@@ -9,6 +9,9 @@ const overflowServer=read('overflow-compute/server.mjs');
 const gscWorkflow=read('.github/workflows/gsc-growth-bridge.yml');
 const gscSync=read('scripts/sync-gsc-signals.mjs');
 const agents=read('AGENTS.md');
+const operatingMemory=read('docs/OPERATING-MEMORY.md');
+const codeMapPath=contract.memory?.code_map||'docs/CODE-MAP.json';
+const codeMap=JSON.parse(read(codeMapPath));
 
 const failures=[];
 const passes=[];
@@ -61,6 +64,33 @@ requireCheck(gscWorkflow.includes('git add $GSC_FILES'),'GSC truth files are com
 requireCheck(agents.includes('docs/OPERATING-MEMORY.md'),'AGENTS startup reads operating memory');
 requireCheck(agents.includes('docs/OPERATING-CONTRACT.json'),'AGENTS startup reads operating contract');
 requireCheck(agents.includes('validate-operating-contract.mjs'),'AGENTS requires operating contract validation');
+
+requireCheck(codeMap.repository===contract.project.repository,'code map repository matches contract');
+requireCheck(codeMap.production_branch===contract.project.production_branch,'code map production branch matches contract');
+requireCheck(codeMap.entrypoint===contract.cloudflare.entrypoint,'code map entrypoint matches contract');
+requireCheck(fs.existsSync(codeMap.contracts?.route_ownership||''),'code map route contract exists');
+requireCheck(fs.existsSync(codeMap.contracts?.scheduled_ownership||''),'code map schedule contract exists');
+
+if(contract.memory){
+  const startupSection=(agents.split('## Mandatory startup context')[1]||'').split('\n## ')[0]||'';
+  for(const startupFile of contract.memory.startup_files||[]){
+    requireCheck(startupSection.includes(startupFile),'startup context includes '+startupFile);
+  }
+  for(const onDemandFile of contract.memory.on_demand_files||[]){
+    requireCheck(!startupSection.includes(onDemandFile),'startup context excludes on-demand '+onDemandFile);
+  }
+  requireCheck(agents.includes(contract.memory.code_map),'AGENTS routes code localization through code map');
+  requireCheck(agents.includes(contract.memory.policy_index),'AGENTS routes specialized policy through policy index');
+  requireCheck(operatingMemory.includes('Operating contract version: '+contract.version),'operating memory contract version matches');
+  requireCheck(operatingMemory.includes('Effective: '+contract.effective_date),'operating memory effective date matches contract');
+  requireCheck(operatingMemory.includes(contract.mission.objective),'operating memory mission matches contract');
+  requireCheck(operatingMemory.length<=Number(contract.memory.operating_memory_max_chars||Infinity),'operating memory stays within compact startup budget');
+  requireCheck(fs.existsSync(contract.memory.code_map),'configured code map exists');
+  requireCheck(fs.existsSync(contract.memory.policy_index),'configured policy index exists');
+  for(const historyFile of contract.memory.historical_context||[]){
+    requireCheck(fs.existsSync(historyFile),'historical/on-demand context exists '+historyFile);
+  }
+}
 
 console.log('ToolScout operating contract validation');
 for(const p of passes)console.log('PASS '+p);
