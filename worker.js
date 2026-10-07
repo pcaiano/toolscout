@@ -57,7 +57,7 @@ const coreRuntime = {
     }
     if (url.pathname === '/robots.txt' && request.method === 'GET') {
       try { const response=await env.ASSETS.fetch(new Request(new URL('/robots.txt',request.url))); if(response.ok){const headers=new Headers(response.headers);headers.set('Content-Type','text/plain; charset=UTF-8');headers.set('Cache-Control','public, max-age=3600');headers.delete('Content-Encoding');return new Response(response.body,{status:response.status,headers});} } catch {}
-      return new Response('User-agent: *\nAllow: /\nDisallow: /go/\nSitemap: https://trytoolscout.org/sitemap.xml\n',{status:200,headers:{'Content-Type':'text/plain; charset=UTF-8'}});
+      return new Response('User-agent: *\nAllow: /\nSitemap: https://trytoolscout.org/sitemap.xml\n',{status:200,headers:{'Content-Type':'text/plain; charset=UTF-8'}});
     }
     if (url.pathname.startsWith('/go/')) {
       const tool=url.pathname.slice(4).toLowerCase().replace(/[^a-z0-9-]/g,'');
