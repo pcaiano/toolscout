@@ -1,3 +1,5 @@
+export const TOOLSCOUT_PUBLIC_IDENTITY=Object.freeze({name:'ToolScout',descriptor:'Independent Software Discovery & Decision Engine',domain:'trytoolscout.org',pluginDisplayName:'ToolScout: Software Decision Engine'});
+
 export const TOOLSCOUT_SOCIAL_PROFILES=Object.freeze([
   {key:'linkedin',label:'LinkedIn',url:'https://www.linkedin.com/company/146229906/'},
   {key:'x',label:'X',url:'https://x.com/trytoolscout'},
@@ -9,7 +11,7 @@ export const TOOLSCOUT_SOCIAL_PROFILES=Object.freeze([
 
 function socialFooterHtml(){
   const links=TOOLSCOUT_SOCIAL_PROFILES.map(p=>`<a href="${p.url}" rel="me noopener" target="_blank" data-toolscout-social-link="1" data-social-network="${p.key}"><span>${p.label}</span><span class="ts-social-arrow" aria-hidden="true">↗</span></a>`).join('');
-  return `<div data-toolscout-social-footer="2" class="ts-social-follow"><div class="ts-social-follow-inner"><div class="ts-social-follow-copy"><span class="ts-social-kicker">ToolScout elsewhere</span><span class="ts-social-note">Follow product updates, launches and editorial picks.</span></div><div class="ts-social-follow-links" role="navigation" aria-label="ToolScout social profiles">${links}</div></div><style>
+  return `<div data-toolscout-social-footer="2" class="ts-social-follow"><div class="ts-social-follow-inner"><div class="ts-social-follow-copy"><span class="ts-social-kicker">ToolScout elsewhere</span><span class="ts-social-note">Independent Software Discovery & Decision Engine · trytoolscout.org</span></div><div class="ts-social-follow-links" role="navigation" aria-label="ToolScout social profiles">${links}</div></div><style>
 [data-toolscout-social-footer="2"]{margin-top:30px!important;padding-top:22px!important;border-top:1px solid #DDE2DC!important;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important}
 [data-toolscout-social-footer="2"] .ts-social-follow-inner{display:grid!important;grid-template-columns:minmax(170px,210px) minmax(0,1fr)!important;align-items:start!important;gap:22px 36px!important}
 [data-toolscout-social-footer="2"] .ts-social-follow-copy{display:flex!important;flex-direction:column!important;gap:6px!important}
