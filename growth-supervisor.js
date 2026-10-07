@@ -379,15 +379,42 @@ export async function runGrowthSupervisorAudit(env){
   return{ok:true,northStar:NORTH_STAR,businessFunnel:BUSINESS_FUNNEL,operatingMode:'outcome_weighted_bounded_always_on',strictHumanLearning,criticalStrictHumans24hMax:CRITICAL_STRICT_HUMANS_24H_MAX,externalExecutionBaseline24h:{min:BASELINE_EXTERNAL_EXECUTIONS_MIN_24H,target:BASELINE_EXTERNAL_EXECUTIONS_TARGET_24H,max:BASELINE_EXTERNAL_EXECUTIONS_MAX_24H},status,directive,strictHumans24h:strict24,strictHumans7d:strict7,attributedHumans7d:attributed7,unattributedHumans7d:n(humans.unattributed.h7),verifiedOutbound24h:n(outboundMetrics?.verified_outbound_24h),verifiedOutbound7d:n(outboundMetrics?.verified_outbound_7d),monetizedOutbound24h:n(outboundMetrics?.monetized_outbound_24h),monetizedOutbound7d:n(outboundMetrics?.monetized_outbound_7d),acquisitionExecutions24h:exec24,acquisitionExecutions7d:exec7,senderCapacity:senderCapacityDirective(senderCapacity),backlinkAcquisition:{required:backlinkAcquisitionRequired,mode:'exhaustive_backlog',bootstrapIncomplete:backlinkBootstrapIncomplete,backlogActive:authorityQueue>0,slowdownAllowed:false,verifiedBacklinks:observedBacklinks,internalVerifiedBacklinks:verifiedBacklinks,observedBacklinks,seRankingBacklinks,seRankingDofollowBacklinks,seRankingDofollowReferringDomains,domainAuthority:seRankingDomainAuthority,domainAuthoritySource:seRankingFresh?'SE Ranking':null,verifiedReferringDomains,internalVerifiedReferringDomains,seRankingReferringDomains,seRankingObservedAt:seRankingFresh?seRankingBacklinkTruth?.observedAt:null,seRankingReferringDomainList,referringDomainSource:seRankingFresh?'SE Ranking':'internal verified ledger',referringDomainDiversification:true,newReferringDomainPriority:'primary',repeatDomainAuthorityPriority:'secondary_unless_verified_human_or_commercial_signal',bootstrapReferringDomainFloor:BACKLINK_BOOTSTRAP_REFERRING_DOMAIN_FLOOR,qualityOnly:true,attemptMin24h:BACKLINK_ATTEMPT_MIN_24H,attemptTarget24h:BACKLINK_ATTEMPT_TARGET_24H,attempts24h:backlinkAttempts24,attempts7d:backlinkAttempts7,authorityQueue,lastVerifiedAt:authorityMetrics?.last_verified_at||null,lastVerifiedAgeHours:Number.isFinite(backlinkLastVerifiedAgeHours)?Number(backlinkLastVerifiedAgeHours.toFixed(1)):null,throughputGap:backlinkThroughputGap,stagnating:backlinkStagnating,stagnationHours:BACKLINK_STAGNATION_HOURS},executionContract:{missingExecutors,stalled:stalledContracts,pending:n(executionContract?.pending),claimed:n(executionContract?.claimed),attempted:n(executionContract?.attempted),verified:n(executionContract?.verified)},architectureEscalation:{openIncidents:openArchitectureIncidents,approvalRequired:openArchitectureIncidents>0},gsc:{generatedAt:gscTruthGeneratedAt,ageHours:gscAge,impressions:gscImpressions,clicks:gscClicks,indexed:gscIndexed,inspected:gscInspected,indexRecoveryCandidates:gscIndexIssues,canonicalMismatches:gscCanonicalMismatches,redirected:gscRedirected,discoveredNotIndexed:gscDiscoveredNotIndexed,unknownToGoogle:gscUnknownToGoogle,sitemapApiOk:gscReality?.sitemaps?.apiOk??null,source:gscReality?.source||gsc?.source||'Google Search Console'},organicActions:{generatedAt:organic?.generatedAt||null,runtimeUpdatedAt:seoRuntime?.last_run_at||null,ageHours:organicAge,newInterventions:seoInterventions,source:Number.isFinite(seoRuntimeAge)?'seo_runtime_state':'legacy_report'},growth,engines};
 }
 
+async function liveContentExecutionTruth(env){
+  const [canonical,legacy]=await Promise.all([
+    first(env,`SELECT MAX(observed_at) last_at FROM external_engine_evidence WHERE engine='content' AND status='completed' AND external_id IS NOT NULL`),
+    first(env,`SELECT MAX(created_at) last_at FROM audience_events WHERE event_type='content_published' AND status='published' AND source IN ('make_content_engine','make')`)
+  ]);
+  const parse=v=>{const s=String(v||'').trim();if(!s)return null;const t=Date.parse(s.includes('T')?s:(s.replace(' ','T')+'Z'));return Number.isFinite(t)?t:null};
+  const candidates=[{source:'external_engine_evidence',at:canonical?.last_at||null,t:parse(canonical?.last_at)},{source:'audience_events_legacy',at:legacy?.last_at||null,t:parse(legacy?.last_at)}].filter(x=>Number.isFinite(x.t)).sort((a,b)=>b.t-a.t);
+  const latest=candidates[0]||null;
+  return{source:latest?.source||null,last_at:latest?.at||null,age_hours:latest?Math.max(0,(Date.now()-latest.t)/HOUR):Infinity};
+}
+function reconcileContentRead(row,truth){
+  if(!row||row.engine!=='content')return row;
+  let cfg={};try{cfg=JSON.parse(row.directive_json||'{}')}catch{}
+  const live={...row,live_execution_source:truth?.source||null,live_execution_at:truth?.last_at||null,live_execution_age_hours:Number.isFinite(truth?.age_hours)?Number(truth.age_hours.toFixed(2)):null};
+  if(row.status==='execution_gap'&&Number.isFinite(truth?.age_hours)&&truth.age_hours<=48){
+    const p=policy('content',{h24:n(row.attributed_humans_24h),h7:n(row.attributed_humans_7d),e24:n(row.external_executions_24h),e7:n(row.external_executions_7d),lastExecutionAgeHours:truth.age_hours,activeOpportunities:1,googleOrganicNewsHumans7d:0,searchHumanPaths:[]});
+    live.status=p.status;live.directive=p.directive;live.directive_json=JSON.stringify(p.config);live.live_reconciled=true;
+  }else{
+    live.live_reconciled=false;
+    live.directive_json=JSON.stringify(cfg);
+  }
+  return live;
+}
+
 export async function growthSupervisorSnapshot(env){
   await ensureSchema(env);
   const rows=await all(env,`SELECT engine,role,status,north_star,strict_humans_24h,strict_humans_7d,attributed_humans_24h,attributed_humans_7d,external_executions_24h,external_executions_7d,evidence_age_hours,directive,directive_json,correction_count,last_correction_at,last_execution_at,last_evaluated_at FROM growth_supervisor_state ORDER BY CASE engine WHEN 'growth_brain' THEN 0 WHEN 'distribution' THEN 1 WHEN 'content' THEN 2 WHEN 'audience' THEN 3 WHEN 'seo_geo_aio' THEN 4 WHEN 'affiliate' THEN 5 ELSE 6 END`);
-  return{northStar:NORTH_STAR,generatedAt:new Date().toISOString(),items:rows.map(x=>{let cfg={};try{cfg=JSON.parse(x.directive_json||'{}')}catch{}const y={...x,directiveConfig:cfg};delete y.directive_json;return y})};
+  const contentTruth=await liveContentExecutionTruth(env);
+  return{northStar:NORTH_STAR,generatedAt:new Date().toISOString(),items:rows.map(raw=>{const x=reconcileContentRead(raw,contentTruth);let cfg={};try{cfg=JSON.parse(x.directive_json||'{}')}catch{}const y={...x,directiveConfig:cfg};delete y.directive_json;return y})};
 }
 
 export async function growthSupervisorDirective(env,engine){
   await ensureSchema(env);
-  const row=await env.DB.prepare(`SELECT status,directive,directive_json,last_evaluated_at FROM growth_supervisor_state WHERE engine=?`).bind(engine).first();
-  if(!row)return null;let config={};try{config=JSON.parse(row.directive_json||'{}')}catch{}
-  return{status:row.status,directive:row.directive,config,lastEvaluatedAt:row.last_evaluated_at};
+  const row=await env.DB.prepare(`SELECT engine,status,directive,directive_json,last_evaluated_at,attributed_humans_24h,attributed_humans_7d,external_executions_24h,external_executions_7d FROM growth_supervisor_state WHERE engine=?`).bind(engine).first();
+  if(!row)return null;
+  const x=engine==='content'?reconcileContentRead(row,await liveContentExecutionTruth(env)):row;
+  let config={};try{config=JSON.parse(x.directive_json||'{}')}catch{}
+  return{status:x.status,directive:x.directive,config,lastEvaluatedAt:x.last_evaluated_at,liveExecutionSource:x.live_execution_source||null,liveExecutionAt:x.live_execution_at||null,liveExecutionAgeHours:x.live_execution_age_hours??null,liveReconciled:Boolean(x.live_reconciled)};
 }
