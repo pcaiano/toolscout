@@ -426,7 +426,8 @@ async function crawlDomain(domain) {
   const people = [];
   function publishProgress() {
     if (isMainThread || !parentPort) return;
-    const uniqueContacts = [...new Map(contacts.map(c => [c.email.toLowerCase(), c])).values()].slice(0, 150);
+    const rankedContacts = [...contacts].sort((a, b) => a.score - b.score || (a.context || "").length - (b.context || "").length);
+    const uniqueContacts = [...new Map(rankedContacts.map(c => [c.email.toLowerCase(), c])).values()].slice(0, 150);
     const uniquePeople = [...new Map(people.map(p => [p.name.toLowerCase(), p])).values()].slice(0, 120);
     parentPort.postMessage({progress:true, domain, pages_fetched:new Set(fetched).size, contacts:uniqueContacts, people:uniquePeople});
   }
@@ -518,7 +519,7 @@ async function crawlDomain(domain) {
   for (const c of contacts) {
     const key = c.email.toLowerCase();
     const prev = bestContacts.get(key);
-    if (!prev || c.score > prev.score) bestContacts.set(key, c);
+    if (!prev || c.score > prev.score || (c.score === prev.score && c.context && !prev.context)) bestContacts.set(key, c);
   }
 
   const bestPeople = new Map();
