@@ -1,6 +1,9 @@
 # ToolScout
 
-> ToolScout is an independent software discovery, recommendation engine and decision engine. It helps people choose software from the job to be done, buyer context, constraints, candidate tools, comparisons and recommendation fit. Affiliate relationships never determine ranking.
+> Independent Software Discovery & Decision Engine
+> https://trytoolscout.org/
+>
+> ToolScout is the independent software discovery and decision engine at trytoolscout.org. It helps people choose software from the job to be done, buyer context, constraints, candidate tools, comparisons and recommendation fit. Affiliate relationships never determine ranking.
 
 ## Canonical identity
 - Site: https://trytoolscout.org/
