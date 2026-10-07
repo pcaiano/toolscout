@@ -180,7 +180,7 @@ test('core public hubs do not append SEO link farms beneath the product UI',()=>
 test('public social footer is integrated, responsive and isolated from legacy nav CSS',async()=>{
   const social=read('social-profiles.js');
   assert.match(social,/ToolScout elsewhere/);
-  assert.match(social,/Follow product updates, launches and editorial picks\./);
+  assert.match(social,/Independent Software Discovery & Decision Engine · trytoolscout\.org/);
   assert.match(social,/data-toolscout-social-footer="2"/);
   assert.match(social,/data-toolscout-social-link="1"/);
   assert.match(social,/class="ts-social-follow-links" role="navigation"/);
