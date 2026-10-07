@@ -210,6 +210,7 @@
       "gsc-growth-bridge.yml",
       "gsc-search-reality.yml",
       "public-visual-integrity.yml",
+      "se-ranking-authority-truth.yml",
       "search-evidence-watchdog.yml",
       "seo-engine-v2.yml",
       "toolscout-v2-ci.yml",
@@ -221,11 +222,12 @@
       "gsc-search-reality.yml": "23 6 * * *",
       "search-evidence-watchdog.yml": "47 6 * * *",
       "seo-engine-v2.yml": "17 5 * * *",
-      "public-visual-integrity.yml": "17 5 * * *"
+      "public-visual-integrity.yml": "17 5 * * *",
+      "se-ranking-authority-truth.yml": "47 6 * * *"
     },
     "legacy_conservation_branch": "pre-conservation-2026-09-13",
     "conservation_stubs_removed": 53,
-    "historical_one_shots_removed": 45
+    "historical_one_shots_removed": 47
   },
   "email_brand": {
     "sender": "ToolScout <pedro@trytoolscout.org>",
