@@ -828,14 +828,22 @@ export async function reconcileExecutionContracts(env){
       evidence=await first(env,`SELECT result,created_at FROM distribution_qualification_events WHERE surface_slug=? AND created_at>=? ORDER BY created_at DESC LIMIT 1`,[subject,created]);
       if(evidence)evidence={...evidence,verified:true};
     }else if(t.executor==='content_issue'){
-      // Preparing a brief is not external content execution. A content task is only
-      // verified after a real publication event has been recorded by the publisher.
-      evidence=await first(env,`SELECT event_id,platform,post_uri,content_id,created_at
-        FROM audience_events
-        WHERE source IN ('make_content_engine','make') AND event_type='content_published' AND status='published'
-          AND created_at>=?
-        ORDER BY created_at ASC LIMIT 1`,[created]);
-      if(evidence)evidence={...evidence,verified:true,proof_scope:'published_content'};
+      // Preparing a brief is not external content execution. Canonical proof is a
+      // publisher-recorded external_engine_evidence row with a real public ID/URL.
+      evidence=await first(env,`SELECT mission_id,stage,external_id,observed_at created_at
+        FROM external_engine_evidence
+        WHERE engine='content' AND status='completed' AND external_id IS NOT NULL
+          AND observed_at>=?
+        ORDER BY observed_at ASC LIMIT 1`,[created]).catch(()=>null);
+      if(evidence)evidence={...evidence,verified:true,proof_scope:'external_engine_evidence'};
+      if(!evidence){
+        evidence=await first(env,`SELECT event_id,platform,post_uri,content_id,created_at
+          FROM audience_events
+          WHERE source IN ('make_content_engine','make') AND event_type='content_published' AND status='published'
+            AND created_at>=?
+          ORDER BY created_at ASC LIMIT 1`,[created]);
+        if(evidence)evidence={...evidence,verified:true,proof_scope:'published_content_legacy'};
+      }
     }else if(t.executor==='audience_make'&&t.source_kind==='supervisor'){
       evidence=await first(env,`SELECT event_id,event_type,created_at,post_uri FROM audience_events WHERE status='published' AND event_type='outbound_reply' AND created_at>=COALESCE(?,?) ORDER BY created_at ASC LIMIT 1`,[sqlTime(t.claimed_at),created]);
       if(evidence)evidence={...evidence,verified:true,proof_scope:'single_inflight_supervisor_task'};
