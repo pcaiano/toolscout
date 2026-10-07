@@ -280,7 +280,7 @@ function extractContacts(html, url, domain) {
 
 async function fetchPage(url) {
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 7000);
+  const timer = setTimeout(() => ctrl.abort(), 5500);
   try {
     const r = await fetch(url, {
       redirect: "follow",
@@ -326,7 +326,7 @@ async function crawlDomain(domain) {
     for (const u of extractLinks(first.html, first.url).slice(0, 14)) seeds.add(u);
   }
 
-  const urls = [...seeds].filter(u => !fetched.includes(u)).slice(0, 18);
+  const urls = [...seeds].filter(u => !fetched.includes(u)).slice(0, 12);
   let cursor = 0;
   const workers = Array.from({ length: 5 }, async () => {
     while (cursor < urls.length) {
@@ -338,7 +338,7 @@ async function crawlDomain(domain) {
   });
   await Promise.all(workers);
 
-  const articleTargets = [...articleLinks].slice(0, 12);
+  const articleTargets = [...articleLinks].slice(0, 6);
   cursor = 0;
   const articleWorkers = Array.from({ length: 6 }, async () => {
     while (cursor < articleTargets.length) {
@@ -350,7 +350,7 @@ async function crawlDomain(domain) {
   });
   await Promise.all(articleWorkers);
 
-  const authorTargets = [...authorLinks.values()].slice(0, 45);
+  const authorTargets = [...authorLinks.values()].slice(0, 20);
   cursor = 0;
   const authorWorkers = Array.from({ length: 6 }, async () => {
     while (cursor < authorTargets.length) {
