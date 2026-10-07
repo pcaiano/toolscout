@@ -1607,6 +1607,7 @@ if(u.pathname==='/api/growth/engine-health/public-reconcile'&&request.method==='
   await run('affiliateCoverage','affiliate','coverage_cycle',20,()=>runAffiliateCoverageCycle(env));
   await run('catalogRuntimeQuality','catalog','runtime_quality',20,()=>contractVerifyCatalogBatch(env));
   await run('contentSocialIntelligence','content','social_intelligence',15,()=>runContentSocialIntelligenceCycle(env));
+  await run('growthSupervisor','growth','self_audit',20,()=>runGrowthSupervisorAudit(env));
   const ok=Object.values(results).every(x=>x?.ok!==false);
   return Response.json({ok,mode:'engine_health_recovery_v1',results},{status:ok?200:207,headers:H});
 }
