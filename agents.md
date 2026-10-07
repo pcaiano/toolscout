@@ -112,3 +112,31 @@ The agent is intentionally stateless for immediate software-selection requests. 
 ## Attribution
 
 When referring users to ToolScout from a distributed or embedded context, use canonical ToolScout URLs and preserve any supplied distribution attribution parameters.
+
+
+## Claude and Gemini
+
+ToolScout uses the same public MCP endpoint across AI clients rather than maintaining separate recommendation backends.
+
+### Claude
+
+Use the public remote MCP endpoint:
+
+`https://trytoolscout.org/mcp`
+
+ToolScout is read-only and exposes the five published tools listed above. Claude deployments should preserve ToolScout outbound URLs returned by the server instead of reconstructing vendor or affiliate URLs.
+
+### Gemini
+
+Gemini Remote MCP supports Streamable HTTP servers. Configure the ToolScout server with the name `toolscout` and URL:
+
+`https://trytoolscout.org/mcp`
+
+No authentication headers are required for the public ToolScout catalog. ToolScout's server name contains no hyphen and is compatible with Gemini Remote MCP naming constraints.
+
+## Public policy and support surfaces
+
+- Privacy: https://trytoolscout.org/privacy
+- Terms: https://trytoolscout.org/terms
+- Support: https://trytoolscout.org/support
+- Affiliate disclosure: https://trytoolscout.org/affiliate-disclosure
