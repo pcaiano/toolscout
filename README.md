@@ -1,8 +1,9 @@
 # ToolScout
 
-**Find the right AI & software tool for the job.**
+**Independent Software Discovery & Decision Engine**  
+**trytoolscout.org**
 
-ToolScout is a lightweight recommendation engine designed to help people choose software and AI tools based on their actual needs — not generic rankings.
+ToolScout is the independent software discovery and decision engine at trytoolscout.org. It helps people choose software and AI tools based on their actual needs, constraints and workflow fit, not generic rankings.
 
 ## MVP
 
