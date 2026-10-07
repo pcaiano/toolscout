@@ -43,6 +43,9 @@ jobs:
           LIMIT 6;
           " | tee /tmp/content-briefs.json
 
+          echo "=== Cloudflare Worker secret names ==="
+          npx wrangler secret list --config wrangler.toml || true
+
           echo "=== external evidence ==="
           cat /tmp/content-evidence.json
           echo "=== content contracts ==="
