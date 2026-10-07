@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "effective_date": "2026-10-05",
+  "effective_date": "2026-10-07",
   "purpose": "Machine-checkable ToolScout operating contract and anti-drift invariants.",
   "project": {
     "repository": "pcaiano/toolscout",
@@ -247,5 +247,28 @@
       "future_transactional_email"
     ],
     "reputation_and_compliance_rules_remain_authoritative": true
+  },
+  "memory": {
+    "startup_files": [
+      "AGENTS.md",
+      "docs/OPERATING-MEMORY.md"
+    ],
+    "on_demand_files": [
+      "docs/OPERATING-CONTRACT.json",
+      "docs/PRODUCTION-BASELINE.md",
+      "docs/COMMAND-CENTER.md",
+      "docs/AGENT-POLICIES.md",
+      "docs/OPERATING-MEMORY-HISTORY.md"
+    ],
+    "code_map": "docs/CODE-MAP.json",
+    "policy_index": "docs/AGENT-POLICIES.md",
+    "historical_context": [
+      "docs/PRODUCTION-BASELINE.md",
+      "docs/COMMAND-CENTER.md",
+      "docs/OPERATING-MEMORY-HISTORY.md"
+    ],
+    "operating_memory_max_chars": 9000,
+    "localization_policy": "code_map_before_broad_repository_traversal",
+    "contract_load_policy": "on_demand_for_runtime_architecture_infrastructure_scheduler_ownership_or_cross_cutting_changes"
   }
 }
