@@ -3,7 +3,7 @@
   "info": {
     "title": "ToolScout: Software Decision Engine API",
     "version": "1.2.1",
-    "description": "ToolScout is the independent software discovery and decision engine at trytoolscout.org. This public read-only API exposes discovery, recommendation and distribution endpoints. No authentication is required for the endpoints documented here."
+    "description": "ToolScout | Independent Software Discovery & Decision Engine | trytoolscout.org. This public read-only API exposes discovery, recommendation and distribution endpoints. No authentication is required for the endpoints documented here."
   },
   "servers": [
     {
