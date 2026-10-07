@@ -12,6 +12,7 @@ const agents=read('AGENTS.md');
 const operatingMemory=read('docs/OPERATING-MEMORY.md');
 const codeMapPath=contract.memory?.code_map||'docs/CODE-MAP.json';
 const codeMap=JSON.parse(read(codeMapPath));
+const scheduleContractSource=read('runtime-schedule-contract.js');
 
 const failures=[];
 const passes=[];
@@ -47,12 +48,15 @@ requireCheck(router.includes('const EXECUTION_DAILY_JOB_BUDGET='+contract.execut
 requireCheck(router.includes('const BATCH_SIZE='+contract.execution.batch_size+';'),'router batch size matches contract');
 requireCheck(router.includes('const MAX_ACTIVE_BATCHES='+contract.execution.max_active_batches+';'),'router active batch limit matches contract');
 requireCheck(router.includes('const DISTRIBUTION_CLASSIFIER_VERSION='+contract.execution.distribution_classifier_version+';'),'distribution classifier version matches contract');
-requireCheck(router.includes("const OVERFLOW_CRON='"+contract.execution.dispatch_cron+"';"),'router overflow cron matches contract');
-requireCheck(router.includes("const RENDER_KEEPALIVE_CRON='"+contract.execution.render_keepalive_cron+"';"),'render keepalive cron matches contract');
+requireCheck(scheduleContractSource.includes("primaryGrowth:'"+contract.execution.dispatch_cron+"'"),'schedule contract primary growth cron matches operating contract');
+requireCheck(scheduleContractSource.includes("renderKeepalive:'"+contract.execution.render_keepalive_cron+"'"),'schedule contract render keepalive cron matches operating contract');
+requireCheck(router.includes('const OVERFLOW_CRON=TOOLSCOUT_CRONS.primaryGrowth;'),'router overflow cron uses schedule contract');
+requireCheck(router.includes('const RENDER_KEEPALIVE_CRON=TOOLSCOUT_CRONS.renderKeepalive;'),'router keepalive cron uses schedule contract');
 requireCheck(wrangler.includes('"'+contract.execution.autonomous_control_cron+'"'),'wrangler autonomous control cron matches contract');
 requireCheck(router.includes("const RENDER_TRIGGER_TIMEOUT_MS="+contract.execution.render_trigger_timeout_ms+";"),'Render trigger timeout matches contract');
 requireCheck(router.includes("async scheduled(scheduledEvent,env,ctx)"),'overflow scheduler does not shadow event logger');
-requireCheck(router.includes("base.scheduled(scheduledEvent,env,ctx)"),'overflow cron delegates to inherited scheduler');
+requireCheck(router.includes('runGrowthScheduler(scheduledEvent,env,ctx)'),'overflow cron delegates to Growth Scheduler');
+requireCheck(router.includes('runCommandCenterIntegrityScheduled(scheduledEvent,env,ctx)'),'overflow cron preserves Command Center integrity scheduler');
 requireCheck(router.includes("'inherited_scheduler_failed'"),'inherited scheduler failures are observable');
 
 for(const truthFile of contract.observability.gsc_truth_files){
