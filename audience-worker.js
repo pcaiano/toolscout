@@ -215,10 +215,12 @@ async function ingestAudienceEvent(request,env){
   const publishedText=normalizeBlueskyCopy(verifiedPost?.record?.text||'');
   const publishedGraphemes=graphemeLength(publishedText);
   const likelyHardCut=eventType==='outbound_reply'&&publishedGraphemes>=BLUESKY_REPLY_TARGET_GRAPHEMES&&!/[.!?)]$/.test(publishedText);
+  const rawSource=safeText(body.source,80);
+  const eventSource=eventType==='content_published'&&(!rawSource||rawSource==='make')?'make_content_engine':(rawSource||'make');
   const eventId=safeText(body.event_id,120)||`aud_${crypto.randomUUID()}`;
   try{
     await env.DB.prepare(`INSERT INTO audience_events(event_id,platform,event_type,direction,status,actor_handle,post_uri,parent_uri,content_id,context_text,suggestion_text,risk,followers,impressions,reactions,replies,reposts,source,observed_at,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,datetime('now')) ON CONFLICT(event_id) DO NOTHING`)
-      .bind(eventId,platform,eventType,safeText(body.direction,20)||null,status,safeText(body.actor_handle,120)||null,postUri||null,safeText(body.parent_uri,500)||null,safeText(body.content_id,120)||null,safeText(body.context_text,2000)||null,safeText(body.suggestion_text||publishedText,2000)||null,likelyHardCut?'amber':risk,null,null,null,null,null,safeText(body.source,80)||'make',safeText(body.observed_at,80)||new Date().toISOString()).run();
+      .bind(eventId,platform,eventType,safeText(body.direction,20)||null,status,safeText(body.actor_handle,120)||null,postUri||null,safeText(body.parent_uri,500)||null,safeText(body.content_id,120)||null,safeText(body.context_text,2000)||null,safeText(body.suggestion_text||publishedText,2000)||null,likelyHardCut?'amber':risk,null,null,null,null,null,eventSource,safeText(body.observed_at,80)||new Date().toISOString()).run();
     if(likelyHardCut){
       await env.DB.prepare(`INSERT INTO distribution_events(event_id,event_type,status,asset_type,asset_id,source_url,detail,observed_at,created_at) VALUES(?,?,?,?,?,?,?,datetime('now'),datetime('now'))`)
         .bind(`bskycut_${crypto.randomUUID()}`,'bluesky_reply_possible_hard_cut','warning','audience_reply',eventId,postUri,`Published Bluesky reply reached ${publishedGraphemes} graphemes without a natural terminal boundary. Future drafts must pass /api/audience/bluesky-reply/prepare before publication.`).run().catch(()=>{});
