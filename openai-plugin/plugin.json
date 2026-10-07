@@ -2,7 +2,7 @@
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "toolscout",
   "version": "1.0.0",
-  "description": "Search, compare and evaluate software using ToolScout's public catalog and deterministic decision engine.",
+  "description": "Use ToolScout, the Independent Software Discovery & Decision Engine at trytoolscout.org, to search, compare and evaluate software.",
   "author": {
     "name": "ToolScout",
     "email": "pedro@trytoolscout.org",
@@ -16,14 +16,15 @@
     "comparison",
     "recommendations",
     "AI",
-    "MCP"
+    "MCP",
+    "decision engine"
   ],
   "extensions": {
     "com.openai": {
       "interface": {
-        "displayName": "ToolScout",
-        "shortDescription": "Find and compare software",
-        "longDescription": "Search ToolScout's public software catalog, compare products, retrieve software profiles, get fit-based recommendations and check verified AI interoperability such as MCP, public API and supported AI assistants. ToolScout is read-only: it does not purchase software, create vendor accounts or modify user data. ToolScout may earn compensation from some outbound links, but affiliate participation does not determine ranking, search order or comparison results.",
+        "displayName": "ToolScout: Software Decision Engine",
+        "shortDescription": "Independent software discovery and decision support",
+        "longDescription": "ToolScout is the independent software discovery and decision engine at trytoolscout.org. Search its public software catalog, compare products, retrieve software profiles, get fit-based recommendations and check verified AI interoperability such as MCP, public API and supported AI assistants. ToolScout is read-only: it does not purchase software, create vendor accounts or modify user data. ToolScout may earn compensation from some outbound links, but affiliate participation does not determine ranking, search order or comparison results.",
         "developerName": "ToolScout",
         "category": "Productivity",
         "capabilities": [
@@ -100,7 +101,7 @@
       },
       "publication": {
         "countries": [],
-        "release_notes": "Initial public ToolScout plugin package with read-only software recommendations, catalog search, software profiles, side-by-side comparisons and verified AI interoperability lookup."
+        "release_notes": "Initial public ToolScout: Software Decision Engine package with read-only software recommendations, catalog search, software profiles, side-by-side comparisons and verified AI interoperability lookup."
       }
     }
   }
