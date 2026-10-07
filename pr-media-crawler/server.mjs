@@ -1,4 +1,5 @@
 import http from "node:http";
+import { Worker, isMainThread, parentPort, workerData } from "node:worker_threads";
 
 const PORT = Number(process.env.PORT || 10000);
 const USER_AGENT = "ToolScoutPRMediaResearch/1.0 (+https://trytoolscout.org)";
@@ -95,7 +96,7 @@ function inferName(local, context) {
 
   const cleanLocal = local.replace(/^(editorial|editor|editors|news|newsroom|press|presse|prensa|tips|contact|info|hello|redacao|redaktion|redazione|redaccion)$/i, "");
   if (!cleanLocal) return "";
-  const parts = cleanLocal.split(/[._-]+/).filter(x => /^[a-z][a-z'-]{1,}$/i.test(x));
+  const parts = []; // Mailbox names are not independent identity evidence.
   if (parts.length >= 2 && parts.length <= 4) {
     return parts.map(x => x[0].toUpperCase() + x.slice(1)).join(" ");
   }
@@ -258,6 +259,8 @@ function extractContacts(html, url, domain) {
     const emailDomain = email.split("@")[1].toLowerCase();
     if (/^(example\.com|company\.com|sentry\.io)$/.test(emailDomain)) continue;
     if (/^[a-f0-9]{24,}@/i.test(email)) continue;
+    if (/\.(png|jpe?g|gif|webp|svg|css|js)$/i.test(emailDomain)) continue;
+    if (/^(samplemail|yourname|youremail|dinemail|test|example)@/i.test(email)) continue;
     const idx = text.toLowerCase().indexOf(email.toLowerCase());
     const context = idx >= 0 ? text.slice(Math.max(0, idx - 220), Math.min(text.length, idx + email.length + 220)) : "";
     const c = classify(email, context, new URL(url).pathname);
@@ -523,13 +526,46 @@ async function discoverMuckrackMany(entries) {
   return results;
 }
 
-async function crawlMany(domains) {
+async function crawlDomainBounded(domain) {
+  return new Promise(resolve => {
+    const worker = new Worker(new URL(import.meta.url), {
+      workerData: { domain },
+      resourceLimits: { maxOldGenerationSizeMb: 96 }
+    });
+    let settled = false;
+    const finish = result => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      resolve(result);
+      worker.terminate().catch(() => {});
+    };
+    const timer = setTimeout(() => finish({
+      domain, pages_fetched: 0, contacts: [], people: [],
+      status: "timeout", error: "domain_budget_exceeded", retry_required: true
+    }), 60000);
+    worker.once("message", finish);
+    worker.once("error", error => finish({
+      domain, pages_fetched: 0, contacts: [], people: [],
+      status: "failed", error: String(error.message), retry_required: true
+    }));
+    worker.once("exit", code => {
+      if (!settled) finish({
+        domain, pages_fetched: 0, contacts: [], people: [],
+        status: "failed", error: "worker_exit_" + code, retry_required: true
+      });
+    });
+  });
+}
+
+async function crawlMany(domains, onResult = () => {}) {
   const results = [];
   let cursor = 0;
   const workers = Array.from({ length: 3 }, async () => {
     while (cursor < domains.length) {
       const i = cursor++;
-      results[i] = await crawlDomain(domains[i]);
+      results[i] = await crawlDomainBounded(domains[i]);
+      onResult(results[i]);
     }
   });
   await Promise.all(workers);
@@ -571,7 +607,7 @@ const server = http.createServer(async (req, res) => {
   });
 });
 
-server.listen(PORT, "0.0.0.0", () => {
+if (isMainThread) server.listen(PORT, "0.0.0.0", () => {
   console.log(`ToolScout PR Media Crawler listening on ${PORT}`);
 
   const startupDomains = [...new Set(
@@ -652,12 +688,11 @@ server.listen(PORT, "0.0.0.0", () => {
         const started = Date.now();
         console.log("PR_CRAWL_BATCH_START " + JSON.stringify({batch_id: batchId, domains: group}));
         try {
-          const results = await crawlMany(group);
+          const results = await crawlMany(group, result => {
+            console.log("PR_CRAWL_DOMAIN_RESULT " + JSON.stringify({batch_id: batchId, ...result}));
+          });
           const contacts = results.flatMap(r => r.contacts || []);
           const people = results.flatMap(r => r.people || []);
-          for (const result of results) {
-            console.log("PR_CRAWL_DOMAIN_RESULT " + JSON.stringify({batch_id: batchId, ...result}));
-          }
           totalContacts += contacts.length;
           totalPeople += people.length;
           completed += group.length;
@@ -717,3 +752,7 @@ server.listen(PORT, "0.0.0.0", () => {
     })();
   }
 });
+
+else if (workerData?.domain) {
+  crawlDomain(workerData.domain).then(result => parentPort.postMessage({...result, status: "complete"})).catch(error => parentPort.postMessage({domain:workerData.domain, pages_fetched:0, contacts:[], people:[], status:"failed", error:String(error.message), retry_required:true}));
+}
