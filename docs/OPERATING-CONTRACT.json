@@ -65,7 +65,13 @@
       "results_streamed_per_domain": true,
       "timeout_requires_retry": true,
       "independent_sending_forbidden": true,
-      "canonical_pr_database": "Google Sheet 1iRfseZSnbmpvXJozLC9A1cQTZODkO5f6ijQ4yg89auo"
+      "canonical_pr_database": "Google Sheet 1iRfseZSnbmpvXJozLC9A1cQTZODkO5f6ijQ4yg89auo",
+      "decoded_published_mail_context": true,
+      "mailbox_name_inference_forbidden": true,
+      "partial_evidence_preserved_on_failure": true,
+      "failed_or_zero_page_requires_retry": true,
+      "prefer_discovered_contact_links": true,
+      "validation_command": "node pr-media-crawler/verify-crawler.mjs"
     }
   },
   "execution": {
