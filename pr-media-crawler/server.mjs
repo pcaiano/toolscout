@@ -504,6 +504,59 @@ server.listen(PORT, "0.0.0.0", () => {
     })();
   }
 
+
+  const seriesDomains = [...new Set(
+    String(process.env.SERIES_DOMAINS || "")
+      .split(",")
+      .map(normalizeDomain)
+      .filter(Boolean)
+  )].slice(0, 100);
+
+  if (seriesDomains.length) {
+    (async () => {
+      const seriesId = process.env.SERIES_ID || new Date().toISOString();
+      console.log("PR_CRAWL_SERIES_START " + JSON.stringify({series_id: seriesId, domains: seriesDomains.length}));
+      let totalContacts = 0;
+      let totalPeople = 0;
+      let completed = 0;
+      for (let offset = 0; offset < seriesDomains.length; offset += 5) {
+        const group = seriesDomains.slice(offset, offset + 5);
+        const batchId = seriesId + "-" + String(offset / 5 + 1).padStart(2, "0");
+        const started = Date.now();
+        console.log("PR_CRAWL_BATCH_START " + JSON.stringify({batch_id: batchId, domains: group}));
+        try {
+          const results = await crawlMany(group);
+          const contacts = results.flatMap(r => r.contacts || []);
+          const people = results.flatMap(r => r.people || []);
+          for (const result of results) {
+            console.log("PR_CRAWL_DOMAIN_RESULT " + JSON.stringify({batch_id: batchId, ...result}));
+          }
+          totalContacts += contacts.length;
+          totalPeople += people.length;
+          completed += group.length;
+          console.log("PR_CRAWL_BATCH_RESULT " + JSON.stringify({
+            batch_id: batchId,
+            domains_requested: group.length,
+            domains_with_contacts: results.filter(r => (r.contacts || []).length).length,
+            domains_with_people: results.filter(r => (r.people || []).length).length,
+            contacts_found: contacts.length,
+            people_found: people.length,
+            elapsed_ms: Date.now() - started
+          }));
+        } catch (err) {
+          console.error("PR_CRAWL_BATCH_ERROR " + JSON.stringify({batch_id: batchId, error: String(err?.stack || err)}));
+        }
+      }
+      console.log("PR_CRAWL_SERIES_RESULT " + JSON.stringify({
+        series_id: seriesId,
+        domains_requested: seriesDomains.length,
+        domains_completed: completed,
+        contacts_found: totalContacts,
+        people_found: totalPeople
+      }));
+    })();
+  }
+
   const muckrackEntries = String(process.env.MUCKRACK_OUTLETS || "")
     .split(",")
     .map(x => x.trim())
