@@ -46,6 +46,9 @@ jobs:
           echo "=== Cloudflare Worker secret names ==="
           npx wrangler secret list --config wrangler.toml || true
 
+          echo "=== ACQUISITION_WEBHOOK references ==="
+          grep -R -n --exclude-dir=node_modules --exclude-dir=.git "ACQUISITION_WEBHOOK" . || true
+
           echo "=== external evidence ==="
           cat /tmp/content-evidence.json
           echo "=== content contracts ==="
