@@ -58,5 +58,5 @@ test('routed public distribution feeds expose the canonical ToolScout identity',
 
   const xmlResponse=await prioritizedDistributionFeed(request,env,'xml');
   const xmlBody=await xmlResponse.text();
-  assert.ok(xmlBody.includes(`ToolScout | ${descriptor} | trytoolscout.org.`));
+  assert.ok(xmlBody.includes(`ToolScout | ${descriptor.replaceAll('&','&amp;')} | trytoolscout.org.`));
 });
