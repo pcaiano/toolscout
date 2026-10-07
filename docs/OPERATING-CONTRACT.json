@@ -258,7 +258,8 @@
       "docs/PRODUCTION-BASELINE.md",
       "docs/COMMAND-CENTER.md",
       "docs/AGENT-POLICIES.md",
-      "docs/OPERATING-MEMORY-HISTORY.md"
+      "docs/OPERATING-MEMORY-HISTORY.md",
+      "docs/OPERATING-GUARDS.md"
     ],
     "code_map": "docs/CODE-MAP.json",
     "policy_index": "docs/AGENT-POLICIES.md",
@@ -269,6 +270,7 @@
     ],
     "operating_memory_max_chars": 9000,
     "localization_policy": "code_map_before_broad_repository_traversal",
-    "contract_load_policy": "on_demand_for_runtime_architecture_infrastructure_scheduler_ownership_or_cross_cutting_changes"
+    "contract_load_policy": "on_demand_for_runtime_architecture_infrastructure_scheduler_ownership_or_cross_cutting_changes",
+    "guard_index": "docs/OPERATING-GUARDS.md"
   }
 }
