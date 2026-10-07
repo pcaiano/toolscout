@@ -28,6 +28,18 @@ jobs:
           " | tee /tmp/content-evidence.json
 
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT mission_id,
+                 GROUP_CONCAT(stage || ':' || status, ',') AS stages,
+                 MAX(observed_at) AS last_observed
+          FROM external_engine_evidence
+          WHERE engine='content'
+            AND observed_at>=datetime('now','-30 days')
+          GROUP BY mission_id
+          ORDER BY MAX(observed_at) DESC
+          LIMIT 30;
+          " | tee /tmp/content-mission-history.json
+
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
           SELECT task_id,status,executor,subject_type,subject_key,action,last_result,claimed_at,attempted_at,verify_deadline,updated_at
           FROM growth_execution_contract
           WHERE executor='content_issue'
@@ -55,6 +67,8 @@ jobs:
 
           echo "=== external evidence ==="
           cat /tmp/content-evidence.json
+          echo "=== content mission history ==="
+          cat /tmp/content-mission-history.json
           echo "=== content contracts ==="
           cat /tmp/content-contracts.json
           echo "=== latest Wednesday briefs ==="
