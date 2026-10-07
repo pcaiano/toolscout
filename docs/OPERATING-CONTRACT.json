@@ -52,6 +52,20 @@
       "current_code_dependency_observed": false,
       "upgrade_required": false,
       "disposition": "retire_before_expiry_unless_new_machine_evidence_proves_dependency"
+    },
+    "pr_media_crawler": {
+      "service_name": "toolscout-pr-media-crawler",
+      "service_id": "srv-db2kbrpsrm7s73bosedg",
+      "branch": "pr-media-crawler",
+      "plan": "free",
+      "role": "public_professional_pr_contact_research_only",
+      "domain_timeout_ms": 60000,
+      "domain_concurrency": 3,
+      "worker_heap_limit_mb": 96,
+      "results_streamed_per_domain": true,
+      "timeout_requires_retry": true,
+      "independent_sending_forbidden": true,
+      "canonical_pr_database": "Google Sheet 1iRfseZSnbmpvXJozLC9A1cQTZODkO5f6ijQ4yg89auo"
     }
   },
   "execution": {
