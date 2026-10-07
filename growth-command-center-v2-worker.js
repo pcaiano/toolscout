@@ -485,7 +485,15 @@ async function growthOpsSnapshot(request,env,ctx,stats){
     safeFirst(env,`SELECT COUNT(*) total,MAX(updated_at) last_gap_at FROM catalog_market_gaps WHERE status='research_required'`),
     safeAll(env,`SELECT tool_slug,detail,evidence_json,created_at FROM catalog_runtime_events WHERE event_type='catalog_growth_admitted' AND status='completed' ORDER BY created_at DESC LIMIT 8`),
     safeFirst(env,`SELECT MAX(created_at) AS last_event_at FROM audience_events`),
-    safeFirst(env,`SELECT MAX(created_at) AS last_publish_at,COUNT(*) AS published_30d FROM audience_events WHERE event_type='content_published' AND status='published' AND source IN ('make_content_engine','make') AND created_at>=datetime('now','-30 days')`),
+    safeFirst(env,`SELECT
+      COALESCE(
+        (SELECT MAX(observed_at) FROM external_engine_evidence WHERE engine='content' AND status='completed' AND external_id IS NOT NULL AND observed_at>=datetime('now','-30 days')),
+        (SELECT MAX(created_at) FROM audience_events WHERE event_type='content_published' AND status='published' AND source IN ('make_content_engine','make') AND created_at>=datetime('now','-30 days'))
+      ) AS last_publish_at,
+      CASE WHEN EXISTS(SELECT 1 FROM external_engine_evidence WHERE engine='content' AND status='completed' AND external_id IS NOT NULL AND observed_at>=datetime('now','-30 days'))
+        THEN (SELECT COUNT(DISTINCT mission_id) FROM external_engine_evidence WHERE engine='content' AND status='completed' AND external_id IS NOT NULL AND observed_at>=datetime('now','-30 days'))
+        ELSE (SELECT COUNT(*) FROM audience_events WHERE event_type='content_published' AND status='published' AND source IN ('make_content_engine','make') AND created_at>=datetime('now','-30 days'))
+      END AS published_30d`),
     safeAll(env,`SELECT status,COUNT(*) count FROM distribution_network_outreach GROUP BY status ORDER BY count DESC`),
     safeFirst(env,`WITH proof AS (
       SELECT surface_slug FROM distribution_placements WHERE placement_verified=1
