@@ -9,12 +9,19 @@
   "entries": [
     {
       "identifier": "urn:air:trytoolscout.org:mcp:software-recommendations",
-      "displayName": "ToolScout MCP Software Recommendations",
+      "displayName": "ToolScout: Software Decision Engine",
       "type": "application/mcp-server-card+json",
       "url": "https://trytoolscout.org/mcp",
-      "description": "Deterministic software recommendations for a job, persona, budget, team and priority. Affiliate relationships do not influence ranking.",
-      "tags": ["software", "recommendations", "decision-support", "mcp"],
-      "capabilities": ["recommend_tools"],
+      "description": "ToolScout is the independent software discovery and decision engine at trytoolscout.org. Deterministic recommendations use job, persona, budget, team and priority, and affiliate relationships do not influence ranking.",
+      "tags": [
+        "software",
+        "recommendations",
+        "decision-support",
+        "mcp"
+      ],
+      "capabilities": [
+        "recommend_tools"
+      ],
       "representativeQueries": [
         "what software should I use for my small sales team",
         "recommend a CRM under 25 dollars per month",
@@ -25,12 +32,19 @@
     },
     {
       "identifier": "urn:air:trytoolscout.org:a2a:software-recommendation-agent",
-      "displayName": "ToolScout Software Recommendation Agent",
+      "displayName": "ToolScout: Software Decision Engine Agent",
       "type": "application/a2a-agent-card+json",
       "url": "https://trytoolscout.org/.well-known/agent-card.json",
-      "description": "Read-only agent that ranks software against a described job and optional budget, team and priority constraints.",
-      "tags": ["software", "recommendations", "agent", "a2a"],
-      "capabilities": ["recommend_software"],
+      "description": "ToolScout is the independent software discovery and decision engine at trytoolscout.org. This read-only agent ranks software against a described job and optional budget, team and priority constraints.",
+      "tags": [
+        "software",
+        "recommendations",
+        "agent",
+        "a2a"
+      ],
+      "capabilities": [
+        "recommend_software"
+      ],
       "representativeQueries": [
         "find software for customer support",
         "which AI assistant should my team use",
@@ -40,12 +54,19 @@
     },
     {
       "identifier": "urn:air:trytoolscout.org:openapi:recommendation-api",
-      "displayName": "ToolScout Recommendation API",
+      "displayName": "ToolScout: Software Decision Engine API",
       "type": "application/vnd.oai.openapi+json;version=3.1",
       "url": "https://trytoolscout.org/openapi.json",
-      "description": "Public read-only recommendation API for deterministic ToolScout software matching.",
-      "tags": ["software", "recommendations", "api", "openapi"],
-      "capabilities": ["recommend_tools"],
+      "description": "Public read-only recommendation API from ToolScout, the Independent Software Discovery & Decision Engine at trytoolscout.org.",
+      "tags": [
+        "software",
+        "recommendations",
+        "api",
+        "openapi"
+      ],
+      "capabilities": [
+        "recommend_tools"
+      ],
       "representativeQueries": [
         "software recommendation API",
         "API that ranks SaaS tools for a use case",
