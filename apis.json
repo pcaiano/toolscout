@@ -2,7 +2,7 @@
   "aid": "toolscout",
   "type": "Index",
   "name": "ToolScout",
-  "description": "ToolScout is the independent software discovery and decision engine at trytoolscout.org. Public recommendation, MCP and A2A interfaces expose its software decision capabilities through machine-readable discovery endpoints.",
+  "description": "ToolScout | Independent Software Discovery & Decision Engine | trytoolscout.org. Public recommendation, MCP and A2A interfaces expose ToolScout software decision capabilities through machine-readable discovery endpoints.",
   "url": "https://trytoolscout.org/apis.json",
   "image": "https://trytoolscout.org/embed/badge.svg",
   "created": "2026-09-07",
