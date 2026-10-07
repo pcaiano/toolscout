@@ -1,6 +1,10 @@
 # ToolScout agent guidance
 
-ToolScout is an independent software discovery and decision engine at https://trytoolscout.org/.
+**ToolScout**  
+**Independent Software Discovery & Decision Engine**  
+**trytoolscout.org**
+
+ToolScout is the independent software discovery and decision engine at https://trytoolscout.org/.
 
 ## What agents can do
 
