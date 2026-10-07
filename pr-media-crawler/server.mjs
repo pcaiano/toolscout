@@ -505,6 +505,26 @@ server.listen(PORT, "0.0.0.0", () => {
   }
 
 
+
+  if (String(process.env.JDB_PROBE || "") === "1") {
+    (async () => {
+      const probeUrl = "https://journalistdb.com/journalists/beat/technology";
+      try {
+        const page = await fetchPage(probeUrl);
+        console.log("PR_JDB_PROBE " + JSON.stringify({
+          ok: page.ok,
+          status: page.status,
+          url: page.url,
+          html_length: (page.html || "").length,
+          text_sample: stripHtml(page.html || "").slice(0, 12000),
+          html_sample: String(page.html || "").slice(0, 12000)
+        }));
+      } catch (err) {
+        console.error("PR_JDB_PROBE_ERROR " + JSON.stringify({error: String(err?.stack || err)}));
+      }
+    })();
+  }
+
   const seriesDomains = [...new Set(
     String(process.env.SERIES_DOMAINS || "")
       .split(",")
