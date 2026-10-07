@@ -80,6 +80,7 @@ Use `docs/AGENT-POLICIES.md` as an on-demand policy index. Read the relevant sec
 - Vendor outreach or ToolScout email: `Vendor amplification sender contract` and `ToolScout outbound email visual contract`.
 - Visual redesign or UX: `Redesign tooling policy`, `Redesign editorial homepage requirement`, `Redesign motion requirement`, and `Private surface redesign requirement`.
 - AI interoperability and agent-facing product work: `AI interoperability editorial policy`.
+- Cross-cutting runtime regressions or previously learned operational failure classes: `docs/OPERATING-GUARDS.md`.
 - Historical implementation or an old regression: `docs/PRODUCTION-BASELINE.md` and, only when needed, `docs/OPERATING-MEMORY-HISTORY.md`.
 - Current incidents, queues, handoffs or operational journal entries: `docs/COMMAND-CENTER.md`.
 
