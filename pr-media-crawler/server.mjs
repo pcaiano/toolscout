@@ -301,11 +301,118 @@ async function fetchPage(url) {
   }
 }
 
+
+async function fetchAny(url) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 5500);
+  try {
+    const r = await fetch(url, {
+      redirect: "follow",
+      signal: ctrl.signal,
+      headers: {
+        "user-agent": USER_AGENT,
+        "accept": "application/json,application/xml,text/xml,text/plain,text/html,*/*"
+      }
+    });
+    if (!r.ok) return { ok: false, status: r.status, url: r.url || url, text: "" };
+    const text = (await r.text()).slice(0, 2_000_000);
+    return { ok: true, status: r.status, url: r.url || url, text };
+  } catch (e) {
+    return { ok: false, status: 0, url, text: "", error: String(e?.name || e) };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function personNameFromAuthorUrl(url) {
+  try {
+    const u = new URL(url);
+    const parts = u.pathname.split("/").filter(Boolean);
+    const idx = parts.findIndex(x => /^(author|authors|profile|user|users)$/i.test(x));
+    let slug = idx >= 0 ? parts[idx + 1] : "";
+    if (!slug) return "";
+    slug = decodeURIComponent(slug)
+      .replace(/[-_]+/g, " ")
+      .replace(/\b\d{4,}\b/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!slug || /^(admin|editor|editorial|staff|team|guest|news|redaction|redaktion|redacao)$/i.test(slug)) return "";
+    return slug.split(" ").map(x => x ? x[0].toUpperCase() + x.slice(1) : x).join(" ");
+  } catch {
+    return "";
+  }
+}
+
+async function discoverPublicAuthorDirectory(domain) {
+  const out = [];
+  const apiUrl = `https://${domain}/wp-json/wp/v2/users?per_page=100&_fields=name,link,slug`;
+  const sitemapUrls = [
+    `https://${domain}/wp-sitemap-users-1.xml`,
+    `https://${domain}/author-sitemap.xml`,
+    `https://${domain}/author-sitemap1.xml`,
+    `https://${domain}/author-sitemap_index.xml`
+  ];
+
+  const [api, ...maps] = await Promise.all([
+    fetchAny(apiUrl),
+    ...sitemapUrls.map(fetchAny)
+  ]);
+
+  if (api.ok) {
+    try {
+      const rows = JSON.parse(api.text);
+      if (Array.isArray(rows)) {
+        for (const row of rows.slice(0, 100)) {
+          const name = String(row?.name || "").trim();
+          const link = String(row?.link || "").trim();
+          if (!name || !link) continue;
+          out.push({
+            domain,
+            name,
+            role: "Journalist / Author",
+            source_url: link,
+            discovery: "wordpress_users_api"
+          });
+        }
+      }
+    } catch {}
+  }
+
+  for (const sm of maps) {
+    if (!sm.ok || !sm.text) continue;
+    for (const m of sm.text.matchAll(/<loc>\s*([^<]+)\s*<\/loc>/gi)) {
+      const url = decodeEntities(m[1].trim());
+      if (!/(\/author\/|\/authors\/|\/profile\/|\/user\/)/i.test(url)) continue;
+      const name = personNameFromAuthorUrl(url);
+      if (!name) continue;
+      out.push({
+        domain,
+        name,
+        role: "Journalist / Author",
+        source_url: url,
+        discovery: "public_author_sitemap"
+      });
+    }
+  }
+
+  const best = new Map();
+  for (const p of out) {
+    const key = p.name.toLowerCase();
+    if (!best.has(key)) best.set(key, p);
+  }
+  return [...best.values()].slice(0, 120);
+}
+
 async function crawlDomain(domain) {
   const seeds = new Set(COMMON_PATHS.map(p => `https://${domain}${p}`));
   const fetched = [];
   const contacts = [];
   const people = [];
+
+  try {
+    const directoryPeople = await discoverPublicAuthorDirectory(domain);
+    people.push(...directoryPeople);
+  } catch {}
   const authorLinks = new Map();
   const articleLinks = new Set();
 
