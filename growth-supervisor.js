@@ -191,7 +191,7 @@ async function executionRows(env){
   const [actions,submissions,audience]=await Promise.all([
     all(env,`SELECT engine,status,created_at,updated_at FROM growth_action_events WHERE created_at>=datetime('now','-7 days')`),
     all(env,`SELECT surface_slug,status,attempts,COALESCE(last_attempt_at,created_at) at FROM distribution_submissions WHERE surface_slug<>'indexnow' AND attempts>0 AND COALESCE(last_attempt_at,created_at)>=datetime('now','-7 days')`),
-    all(env,`SELECT event_type,status,platform,created_at FROM audience_events WHERE created_at>=datetime('now','-7 days') AND status='published'`)
+    all(env,`SELECT event_type,status,platform,source,created_at FROM audience_events WHERE created_at>=datetime('now','-7 days') AND status='published'`)
   ]);
   return{actions,submissions,audience};
 }
@@ -332,7 +332,8 @@ export async function runGrowthSupervisorAudit(env){
   const contentAction=r=>String(r.engine||'')==='content'&&valid(r);
   const d24=countSince(exec.actions,'created_at',24,distAction),d7=countSince(exec.actions,'created_at',168,distAction);
   const s24=countSince(exec.submissions,'at',24),s7=countSince(exec.submissions,'at',168);
-  const cp24=countSince(exec.audience,'created_at',24,r=>r.event_type==='content_published'),cp7=countSince(exec.audience,'created_at',168,r=>r.event_type==='content_published');
+  const verifiedContentPublish=r=>r.event_type==='content_published'&&['make_content_engine','make'].includes(String(r.source||''));
+  const cp24=countSince(exec.audience,'created_at',24,verifiedContentPublish),cp7=countSince(exec.audience,'created_at',168,verifiedContentPublish);
   const ca24=countSince(exec.actions,'created_at',24,contentAction),ca7=countSince(exec.actions,'created_at',168,contentAction);
   const au24=countSince(exec.audience,'created_at',24,r=>r.event_type==='outbound_reply'),au7=countSince(exec.audience,'created_at',168,r=>r.event_type==='outbound_reply');
   const gscTruthGeneratedAt=gscReality?.generatedAt||gsc?.generatedAt||null;
