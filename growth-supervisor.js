@@ -188,12 +188,13 @@ async function strictRows(env){
 }
 
 async function executionRows(env){
-  const [actions,submissions,audience]=await Promise.all([
+  const [actions,submissions,audience,contentMissions]=await Promise.all([
     all(env,`SELECT engine,status,created_at,updated_at FROM growth_action_events WHERE created_at>=datetime('now','-7 days')`),
     all(env,`SELECT surface_slug,status,attempts,COALESCE(last_attempt_at,created_at) at FROM distribution_submissions WHERE surface_slug<>'indexnow' AND attempts>0 AND COALESCE(last_attempt_at,created_at)>=datetime('now','-7 days')`),
-    all(env,`SELECT event_type,status,platform,source,created_at FROM audience_events WHERE created_at>=datetime('now','-7 days') AND status='published'`)
+    all(env,`SELECT event_type,status,platform,source,created_at FROM audience_events WHERE created_at>=datetime('now','-7 days') AND status='published'`),
+    all(env,`SELECT mission_id,MAX(observed_at) created_at FROM external_engine_evidence WHERE engine='content' AND status='completed' AND external_id IS NOT NULL AND observed_at>=datetime('now','-7 days') GROUP BY mission_id`).catch(()=>[])
   ]);
-  return{actions,submissions,audience};
+  return{actions,submissions,audience,contentMissions};
 }
 
 async function saveEngine(env,engine,role,global,ctx,p){
@@ -333,7 +334,9 @@ export async function runGrowthSupervisorAudit(env){
   const d24=countSince(exec.actions,'created_at',24,distAction),d7=countSince(exec.actions,'created_at',168,distAction);
   const s24=countSince(exec.submissions,'at',24),s7=countSince(exec.submissions,'at',168);
   const verifiedContentPublish=r=>r.event_type==='content_published'&&['make_content_engine','make'].includes(String(r.source||''));
-  const cp24=countSince(exec.audience,'created_at',24,verifiedContentPublish),cp7=countSince(exec.audience,'created_at',168,verifiedContentPublish);
+  const legacyCp24=countSince(exec.audience,'created_at',24,verifiedContentPublish),legacyCp7=countSince(exec.audience,'created_at',168,verifiedContentPublish);
+  const canonicalCp24=countSince(exec.contentMissions||[],'created_at',24),canonicalCp7=countSince(exec.contentMissions||[],'created_at',168);
+  const cp24=canonicalCp7.count>0?canonicalCp24:legacyCp24,cp7=canonicalCp7.count>0?canonicalCp7:legacyCp7;
   const ca24=countSince(exec.actions,'created_at',24,contentAction),ca7=countSince(exec.actions,'created_at',168,contentAction);
   const au24=countSince(exec.audience,'created_at',24,r=>r.event_type==='outbound_reply'),au7=countSince(exec.audience,'created_at',168,r=>r.event_type==='outbound_reply');
   const gscTruthGeneratedAt=gscReality?.generatedAt||gsc?.generatedAt||null;
