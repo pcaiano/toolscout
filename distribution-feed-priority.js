@@ -1,5 +1,6 @@
 const JSON_HEADERS={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'public, max-age=900'};
 const XML_HEADERS={'Content-Type':'application/rss+xml; charset=UTF-8','Cache-Control':'public, max-age=900'};
+const TOOLSCOUT_DESCRIPTOR='Independent Software Discovery & Decision Engine';
 const SPRINT_START=Date.parse('2026-09-18T23:00:00.000Z');
 const SPRINT_END=Date.parse('2026-09-28T23:00:00.000Z');
 const SPRINT_PATHS=Object.freeze([
@@ -36,8 +37,8 @@ export async function prioritizedDistributionFeed(request,env,format='json'){
   const sprintSet=new Set(sprint),prioritySet=new Set(priority),urls=[...new Set([...sprint,...priority,...rest])].slice(0,100);
   const items=urls.map(url=>({id:url,url,title:label(url),date_modified:new Date().toISOString(),toolscout_priority:sprintSet.has(url)?'human-acquisition-sprint':(prioritySet.has(url)?'gsc-observed':'catalog')}));
   if(format==='xml'){
-    const body=`<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>ToolScout Decision Feed</title><link>https://trytoolscout.org/</link><description>Independent software comparisons and decision resources from ToolScout. Pages with observed search demand are ordered first.</description>${items.map(i=>`<item><guid isPermaLink="true">${esc(i.url)}</guid><title>${esc(i.title)}</title><link>${esc(i.url)}</link><pubDate>${new Date(i.date_modified).toUTCString()}</pubDate></item>`).join('')}</channel></rss>`;
+    const body=`<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>ToolScout Decision Feed</title><link>https://trytoolscout.org/</link><description>ToolScout | ${esc(TOOLSCOUT_DESCRIPTOR)} | trytoolscout.org. Independent software comparisons and decision resources from ToolScout. Pages with observed search demand are ordered first.</description>${items.map(i=>`<item><guid isPermaLink="true">${esc(i.url)}</guid><title>${esc(i.title)}</title><link>${esc(i.url)}</link><pubDate>${new Date(i.date_modified).toUTCString()}</pubDate></item>`).join('')}</channel></rss>`;
     return new Response(body,{headers:XML_HEADERS});
   }
-  return Response.json({version:'https://jsonfeed.org/version/1.1',title:'ToolScout Decision Feed',home_page_url:'https://trytoolscout.org/',feed_url:'https://trytoolscout.org/api/distribution/feed.json',description:'Independent ToolScout comparisons, best-of pages and software decision resources for syndication. Human Acquisition Sprint targets are ordered first while the sprint is active, followed by pages with observed search demand.',items},{headers:JSON_HEADERS});
+  return Response.json({version:'https://jsonfeed.org/version/1.1',title:'ToolScout Decision Feed',home_page_url:'https://trytoolscout.org/',feed_url:'https://trytoolscout.org/api/distribution/feed.json',description:`ToolScout | ${TOOLSCOUT_DESCRIPTOR} | trytoolscout.org. Independent ToolScout comparisons, best-of pages and software decision resources for syndication. Human Acquisition Sprint targets are ordered first while the sprint is active, followed by pages with observed search demand.`,items},{headers:JSON_HEADERS});
 }
