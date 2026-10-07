@@ -56,9 +56,11 @@ function stripLegacyNavigation(html,surface){
 function normalizeToolProfileBackLink(html,surface){
   if(surface!=='tool-profile')return String(html||'');
   const back='<a class="ts2-back-tools" href="/tools" aria-label="Back to tools"><span aria-hidden="true">←</span><span>Back to tools</span></a>';
-  return String(html||'')
-    .replace(/<nav\b[^>]*class=["'][^"']*\bcrumbs\b[^"']*["'][^>]*>[\s\S]*?<\/nav>/i,back)
-    .replace(/<a\b[^>]*class=["'][^"']*\bbackTools\b[^"']*["'][^>]*>[\s\S]*?<\/a>/i,back);
+  let out=String(html||'')
+    .replace(/<nav\b[^>]*class=["'][^"']*\bcrumbs\b[^"']*["'][^>]*>[\s\S]*?<\/nav>/i,'')
+    .replace(/<a\b[^>]*class=["'][^"']*\bbackTools\b[^"']*["'][^>]*>[\s\S]*?<\/a>/i,'')
+    .replace(/<a\b[^>]*class=["'][^"']*\bts2-back-tools\b[^"']*["'][^>]*>[\s\S]*?<\/a>/i,'');
+  return out.replace(/<main\b([^>]*\bclass=["'][^"']*\bhero\b[^"']*["'][^>]*)>/i,(match)=>match+back);
 }
 
 function stripCommercialVendorSourceLinks(html){
@@ -224,8 +226,9 @@ html[data-toolscout-surface="trends"] .panel{border-radius:9px!important;box-sha
 
 /* ToolScout 2.0 tool profiles */
 html[data-toolscout-surface="tool-profile"] body>.wrap{max-width:1120px!important;padding-top:0!important;padding-bottom:88px!important}
-html[data-toolscout-surface="tool-profile"] .ts2-back-tools{display:inline-flex!important;gap:8px!important;align-items:center!important;padding:24px 0 0!important;margin:0!important;color:#545B54!important;font-size:12px!important;font-weight:800!important;text-decoration:none!important;transition:transform var(--ts-fast) var(--ts-ease),color var(--ts-fast) var(--ts-ease)!important}
-html[data-toolscout-surface="tool-profile"] .ts2-back-tools:hover{color:var(--ts-g)!important;transform:translateX(-2px)}
+html[data-toolscout-surface="tool-profile"] .ts2-back-tools{display:inline-flex!important;gap:8px!important;align-items:center!important;padding:0!important;margin:0 0 36px!important;color:#B8BEB8!important;font-size:12px!important;font-weight:800!important;text-decoration:none!important;transition:transform var(--ts-fast) var(--ts-ease),color var(--ts-fast) var(--ts-ease)!important}
+html[data-toolscout-surface="tool-profile"] .ts2-back-tools:hover{color:#fff!important;transform:translateX(-2px)}
+html[data-toolscout-surface="tool-profile"] .ts2-back-tools:focus-visible{outline:2px solid var(--ts-l)!important;outline-offset:4px!important;border-radius:4px!important}
 html[data-toolscout-surface="tool-profile"] .ts2-back-tools>span:first-child{font-size:17px!important;line-height:1!important}
 html[data-toolscout-surface="tool-profile"] .hero{max-width:900px!important;margin:0!important;padding:54px 0 34px!important;border-bottom:1px solid var(--ts-line)!important}
 html[data-toolscout-surface="tool-profile"] .heroHead{display:flex!important;align-items:center!important;gap:18px!important}
