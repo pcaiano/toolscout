@@ -7,6 +7,10 @@ on:
     paths:
       - '.github/workflows/toolscout-v2-engine-health-recovery.yml'
       - 'growth-architecture-escalation.js'
+      - 'growth-supervisor.js'
+      - 'growth-execution-contract.js'
+      - 'growth-command-center-v2-worker.js'
+      - 'distribution-orchestrator-worker.js'
 
 permissions:
   contents: read
