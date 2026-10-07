@@ -88,6 +88,7 @@ if(contract.memory){
   requireCheck(operatingMemory.length<=Number(contract.memory.operating_memory_max_chars||Infinity),'operating memory stays within compact startup budget');
   requireCheck(fs.existsSync(contract.memory.code_map),'configured code map exists');
   requireCheck(fs.existsSync(contract.memory.policy_index),'configured policy index exists');
+  requireCheck(fs.existsSync(contract.memory.guard_index),'configured operating guard index exists');
   for(const historyFile of contract.memory.historical_context||[]){
     requireCheck(fs.existsSync(historyFile),'historical/on-demand context exists '+historyFile);
   }
