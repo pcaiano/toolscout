@@ -1,9 +1,9 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "ToolScout Public Discovery API",
-    "version": "1.2.0",
-    "description": "Public discovery, recommendation and distribution endpoints for ToolScout. No authentication is required for the endpoints documented here."
+    "title": "ToolScout: Software Decision Engine API",
+    "version": "1.2.1",
+    "description": "ToolScout is the independent software discovery and decision engine at trytoolscout.org. This public read-only API exposes discovery, recommendation and distribution endpoints. No authentication is required for the endpoints documented here."
   },
   "servers": [
     {
