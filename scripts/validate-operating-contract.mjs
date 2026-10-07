@@ -73,11 +73,12 @@ requireCheck(fs.existsSync(codeMap.contracts?.scheduled_ownership||''),'code map
 
 if(contract.memory){
   const startupSection=(agents.split('## Mandatory startup context')[1]||'').split('\n## ')[0]||'';
+  const mandatoryStartupLines=startupSection.split('\n').filter(line=>/^\s*\d+\.\s+/.test(line));
   for(const startupFile of contract.memory.startup_files||[]){
-    requireCheck(startupSection.includes(startupFile),'startup context includes '+startupFile);
+    requireCheck(mandatoryStartupLines.some(line=>line.includes(startupFile)),'startup context includes '+startupFile);
   }
   for(const onDemandFile of contract.memory.on_demand_files||[]){
-    requireCheck(!startupSection.includes(onDemandFile),'startup context excludes on-demand '+onDemandFile);
+    requireCheck(!mandatoryStartupLines.some(line=>line.includes(onDemandFile)),'startup context does not mandate '+onDemandFile);
   }
   requireCheck(agents.includes(contract.memory.code_map),'AGENTS routes code localization through code map');
   requireCheck(agents.includes(contract.memory.policy_index),'AGENTS routes specialized policy through policy index');
