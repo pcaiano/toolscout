@@ -57,7 +57,7 @@ A conflict between these layers is drift. Reconcile it instead of choosing the c
 11. Infrastructure mutations require exact project and resource identity. Never infer ownership from a similar name or shared account.
 12. ToolScout work must never mutate BEARING resources unless the owner explicitly authorizes a separately scoped cross-project action.
 
-Detailed regression guards remain available in `docs/OPERATING-MEMORY-HISTORY.md` and subsystem policy in `docs/AGENT-POLICIES.md`. Load only what the current task needs.
+Detailed regression guards live in `docs/OPERATING-GUARDS.md`; subsystem policy lives in `docs/AGENT-POLICIES.md`. The historical memory snapshot is for regression archaeology only. Load only what the current task needs.
 
 ## Efficient task startup
 
