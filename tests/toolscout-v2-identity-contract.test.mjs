@@ -16,6 +16,7 @@ test('ToolScout public identity is consistent across discovery surfaces',()=>{
     'machine-discovery-catalog-runtime.js',
     'social-profiles.js',
     'distribution-embed-worker.js',
+    'distribution-feed-priority.js',
     'openai-plugin/README.md',
     '.well-known/ai-catalog.json',
     '.well-known/ard.json'
@@ -34,4 +35,14 @@ test('ToolScout public identity is consistent across discovery surfaces',()=>{
   assert.ok(home.includes('\"@type\":\"WebSite\"'));
   assert.ok(home.includes('\"@type\":\"Organization\"'));
   assert.ok(home.includes('\"slogan\":\"Independent Software Discovery & Decision Engine\"'));
+
+  const publisherKit=fs.readFileSync(new URL('../distribution/publisher-kit.html',import.meta.url),'utf8');
+  assert.ok(publisherKit.includes('\"@type\":\"SoftwareApplication\"'));
+  assert.ok(publisherKit.includes('\"@id\":\"https://trytoolscout.org/distribution/publisher-kit#finder\"'));
+  assert.ok(publisherKit.includes('\"@id\":\"https://trytoolscout.org/#organization\"'));
+
+  const routedFeed=fs.readFileSync(new URL('../distribution-feed-priority.js',import.meta.url),'utf8');
+  assert.ok(routedFeed.includes(descriptor));
+  assert.ok(routedFeed.includes('ToolScout | ${esc(TOOLSCOUT_DESCRIPTOR)} | trytoolscout.org.'));
+  assert.ok(routedFeed.includes('ToolScout | ${TOOLSCOUT_DESCRIPTOR} | trytoolscout.org.'));
 });
