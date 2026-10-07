@@ -832,7 +832,7 @@ export async function reconcileExecutionContracts(env){
       // verified after a real publication event has been recorded by the publisher.
       evidence=await first(env,`SELECT event_id,platform,post_uri,content_id,created_at
         FROM audience_events
-        WHERE source='make_content_engine' AND event_type='content_published' AND status='published'
+        WHERE source IN ('make_content_engine','make') AND event_type='content_published' AND status='published'
           AND created_at>=?
         ORDER BY created_at ASC LIMIT 1`,[created]);
       if(evidence)evidence={...evidence,verified:true,proof_scope:'published_content'};
