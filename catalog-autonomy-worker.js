@@ -23,6 +23,22 @@ const safeText=(v,n=4000)=>String(v??'').slice(0,n);
 function authorized(request,env){const token=(request.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');return Boolean(env.ADMIN_TOKEN&&token===env.ADMIN_TOKEN)}
 async function assetJson(env,path,fallback){try{const r=await env.ASSETS.fetch(new Request('https://trytoolscout.org'+path));return r.ok?await r.json():fallback}catch{return fallback}}
 function publicHttps(value){try{const u=new URL(String(value||''));return u.protocol==='https:'?u:null}catch{return null}}
+// Strictly separate marketing-page discovery from documented editorial admission.
+export function trustedManufacturerEvidence(tool) {
+  const review=tool?.editorialReview;
+  const url=review?.sourceUrl;
+  const evidence=Array.isArray(tool?.evidence)?tool.evidence:[];
+  if(!review||typeof review!=='object'||typeof review.summary!=='string'||review.summary.trim().length<100||
+     review.verificationStatus==='catalog_only'||review.handsOnTested===true)return false;
+  const primary=publicHttps(tool?.sourceUrl),document=publicHttps(url);
+  if(!primary||!document||document.pathname==='/'||!document.pathname)return false;
+  const home=primary.hostname.toLowerCase().replace(/^www[.]/,'');
+  const doc=document.hostname.toLowerCase().replace(/^www[.]/,'');
+  const extra=tool?.slug==='trello'&&(doc==='atlassian.com'||doc.endsWith('.atlassian.com'));
+  if(!(doc===home||doc.endsWith('.'+home)||extra))return false;
+  return evidence.some(x=>x?.claimScope==='toolscout_editorial_review'&&x?.sourceUrl===url&&
+    /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(x?.verifiedAt||'')&&!Number.isNaN(Date.parse(x.verifiedAt)));
+}
 function stripHtml(html){return String(html||'').replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/&[a-z#0-9]+;/gi,' ').replace(/\s+/g,' ').trim()}
 function meta(html,name){const a=new RegExp(`<meta[^>]+(?:name|property)=["']${name}["'][^>]+content=["']([^"']+)["']`,'i'),b=new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]+(?:name|property)=["']${name}["']`,'i');return (String(html).match(a)?.[1]||String(html).match(b)?.[1]||'').trim()}
 function releaseLinks(html,base){
@@ -375,9 +391,16 @@ export async function admitTrustedCandidates(env){
     const {raw,slug,priority}=item;considered++;
     const errors=validCandidate(raw,config);if(errors.length){held++;continue}
     const source=await fetchOfficial(raw.sourceUrl);if(config?.admission?.requireReachableOfficialSource!==false&&source.status!=='ok'){held++;continue}
+    if(!trustedManufacturerEvidence(raw)){
+      held++;
+      await logEvent(env,slug,'catalog_candidate_quality_hold','completed',
+        'Manufacturer documentation and dated editorial evidence required before runtime admission.',{reason:'manufacturer_editorial_documentation_required'});
+      continue;
+    }
     const aiIntegration=raw?.aiIntegration&&typeof raw.aiIntegration==='object'?raw.aiIntegration:{status:'unverified',tier:'unknown',mcp:'unknown',publicApi:null,assistants:[],summary:'ToolScout has not yet verified this tool\'s current ChatGPT, Claude, Gemini, MCP or agent integration options.',verifiedAt:null,sources:[]};
     let profile={...raw,aiIntegration,sourceUrl:source.finalUrl||raw.sourceUrl,lastVerified:new Date().toISOString().slice(0,10),rankingEligible:true,comparisonEligible:true,provenance:{...(raw.provenance||{}),mode:'runtime_trusted_catalog',admittedAt:new Date().toISOString(),affiliateNeutral:true,reviewMethod:'first_party_verified_structured_profile_v2',researchPriority:{score:priority.score,aiSignal:priority.aiSignal,affiliateSignal:priority.affiliateSignal}}};
-    profile.editorialReview=profile.editorialReview||runtimeEditorialView(profile);
+    profile.editorialReview=raw.editorialReview.summary;
+    profile.editorialEvidence={sourceUrl:raw.editorialReview.sourceUrl,verifiedAt:new Date().toISOString().slice(0,10),verificationStatus:'vendor_documented'};
     const quality=await auditCatalogTool(env,profile);
     if(!quality.publishable){held++;await logEvent(env,slug,'catalog_candidate_quality_hold','completed','Trusted candidate failed full catalog quality gate before publication.',{issues:quality.issues,warnings:quality.warnings,research_priority:priority});continue}
     profile=quality.repairedTool;
