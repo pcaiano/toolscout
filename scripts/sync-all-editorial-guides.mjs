@@ -8,6 +8,7 @@ const root=process.cwd();
 const ed=JSON.parse(fs.readFileSync(path.join(root,'data/organic-growth-engine.json'),'utf8')).editorialQuality;
 const intents=JSON.parse(fs.readFileSync(path.join(root,'data/intents.json'),'utf8'));
 const pairs=JSON.parse(fs.readFileSync(path.join(root,'data/comparisons.json'),'utf8'));
+const bySlug=new Map(JSON.parse(fs.readFileSync(path.join(root,'data/tools.json'),'utf8')).map(x=>[x.slug,x]));
 const holds=new Set((JSON.parse(fs.readFileSync(path.join(root,'reports/seo-publication-holds.json'),'utf8')).items||[]).map(x=>x.intent));
 const esc=v=>String(v??'').replace(/[\u2014\u2013]/g,'-').replace(/\s+/g,' ').trim()
   .replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
@@ -23,7 +24,20 @@ function materialize(slug,type,analysis,decision){
   if(!canonical)throw Error('Missing canonical '+slug);
   const regex=type==='guide'?g:c;
   if(!regex.test(before))throw Error('Missing editorial section '+slug);
-  const after=before.replace(regex,(_,a,b,d)=>type==='guide'?a+esc(analysis)+b:a+esc(analysis)+b+esc(decision)+d);
+  let after=before.replace(regex,(_,a,b,d)=>type==='guide'?a+esc(analysis)+b:a+esc(analysis)+b+esc(decision)+d);
+  if(type==='guide'){
+    after=after.replace(/<article class="card">[\s\S]*?<\/article>/g,block=>{
+      const slug=block.match(/href="\/go\/([a-z0-9-]+)"/)?.[1];
+      const tool=bySlug.get(slug);
+      if(!tool)throw Error('Unmapped guide card '+slug+' on '+path.basename(file));
+      if(tool.categoryReviewRequired)throw Error('Category review candidate appears in published guide: '+slug+' on '+path.basename(file));
+      if(tool.editorialReview?.verificationStatus!=='catalog_only')return block;
+      return block
+        .replace('first-party vendor source recorded and checked in the ToolScout catalog.','Catalog-based editorial assessment; vendor facts and plan limits not independently verified.')
+        .replace(/ · Free plan/g,tool.freePlanKnown===true?' · Verified free plan':'')
+        .replace(/ · Checked \d{4}-\d{2}-\d{2}/g,'');
+    });
+  }
   if(after.match(/<link rel="canonical" href="[^"]+">/)?.[0]!==canonical)throw Error('Canonical drift '+slug);
   if(after!==before){
     changed++;
