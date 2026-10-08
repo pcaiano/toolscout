@@ -4,6 +4,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
 
 export function vendorEvidenceIssues(tools, pendingSlugs) {
   const issues=[];
@@ -26,8 +27,7 @@ export function vendorEvidenceIssues(tools, pendingSlugs) {
     const evidence=(tool.evidence||[]).filter(x=>x?.claimScope==='toolscout_editorial_review'&&x.sourceUrl&&x.verifiedAt);
     const sourceLooksValid=typeof source==='string'&&/^https:\/\/[^\s/]+\//.test(source);
     const dated=evidence.some(x=>x.sourceUrl===source&&/^\d{4}-\d\d-\d\d$/.test(x.verifiedAt));
-    const homeDomain=rootDomain(tool.sourceUrl),docDomain=rootDomain(source);
-    const firstParty=Boolean(homeDomain&&docDomain&&(homeDomain===docDomain||(manufacturerDocDomains[slug]||[]).includes(docDomain)));
+    const firstParty=ownedSource(tool.sourceUrl,source,slug);
     const documented=r.verificationStatus!=='catalog_only'&&sourceLooksValid&&dated&&firstParty&&r.handsOnTested!==true;
     if(allow.has(slug)){
       if(documented)issues.push('Remove now-documented product from pending baseline: '+slug);
@@ -45,6 +45,19 @@ if(runningAsScript){
   const tools=JSON.parse(fs.readFileSync(path.join(root,'data/tools.json'),'utf8'));
   const baseline=JSON.parse(fs.readFileSync(path.join(root,'data/vendor-evidence-backlog.json'),'utf8'));
   const issues=vendorEvidenceIssues(tools,baseline.pendingSlugs);
+  // On pull requests the backlog must only shrink. A proposed change cannot
+  // whitelist new unsupported tools by modifying the baseline alongside them.
+  try {
+    const baseRef=process.env.TOOLSCOUT_VENDOR_EVIDENCE_BASE_REF||'origin/main';
+    const old=JSON.parse(execFileSync('git',['show',baseRef+':data/vendor-evidence-backlog.json'],{cwd:root,encoding:'utf8'}));
+    const prior=new Set(old.pendingSlugs||[]);
+    const added=(baseline.pendingSlugs||[]).filter(slug=>!prior.has(slug));
+    if(added.length)issues.push('Adding legacy documentation exceptions is forbidden: '+added.join(', '));
+  } catch (error) {
+    // Source checkout without a base ref (local isolated run) still exercises
+    // record checks; CI always fetches origin/main and sets the explicit flag.
+    if(process.env.TOOLSCOUT_VENDOR_EVIDENCE_REQUIRE_BASE==='1')issues.push('Cannot verify immutable legacy backlog against base: '+String(error.message).slice(0,240));
+  }
   console.log(JSON.stringify({catalog:tools.length,documented:tools.length-baseline.pendingSlugs.length,manufacturerDocsPending:baseline.pendingSlugs.length,gate:issues.length?'FAIL':'PASS',issues},null,2));
   if(issues.length)process.exitCode=1;
 }
