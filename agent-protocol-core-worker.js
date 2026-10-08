@@ -621,7 +621,7 @@ async function callCatalogTool(name,args,request,env){
       }
       const reasonLift=improvements.filter(x=>dims.includes(x.dimension)).reduce((s,x)=>s+x.to-x.from,0);
       return {...ev,improvements_over_source:improvements,tradeoffs_vs_source:sacrifices,alternative_score:ev.fit_score+reasonLift*4};
-    }).filter(x=>x.improvements_over_source.some(y=>dims.includes(y.dimension))||!dims.length).sort((a,b)=>b.alternative_score-a.alternative_score).slice(0,Math.max(1,Math.min(5,args.limit||3)));
+    }).filter(x=>(!args.must_have?.length||x.requirement_evidence.every(r=>r.matched))&&(x.improvements_over_source.some(y=>dims.includes(y.dimension))||!dims.length)).sort((a,b)=>b.alternative_score-a.alternative_score).slice(0,Math.max(1,Math.min(5,args.limit||3)));
     return {data:{source:publicTool(source),reason:args.dislike,decision_dimensions:dims,alternatives:candidates,affiliate_disclosure:disclosure}};
   }
   if(name==='check_stack_fit'){
