@@ -27,7 +27,7 @@ const logoChain=tool=>{const curated=assets?.[tool.slug]?.url||'',first=firstPar
 const logoUrl=tool=>logoChain(tool).src;
 const initials=name=>String(name||'').split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase()||'TS';
 const validTool=tool=>{try{if(!tool?.slug||!tool?.name||!tool?.description||!Array.isArray(tool.features)||!Array.isArray(tool.bestFor)||!tool.scores||typeof tool.scores!=='object')return false;const u=new URL(tool.sourceUrl);return /^https?:$/.test(u.protocol);}catch{return false;}};
-const safePricing=tool=>clean(tool?.pricingDetails?.freePlanStatus==='verified_available'&&tool?.freePlanKnown===true&&tool?.pricingDetails?.sourceUrl?tool.pricingDetails.freePlanSummary:(tool.pricing||'See the vendor for current pricing and plan details.'));
+const safePricing=tool=>clean(tool?.pricingDetails?.freePlanStatus==='verified_available'&&tool?.freePlanKnown===true&&tool?.pricingDetails?.sourceUrl?tool.pricingDetails.freePlanSummary:(tool?.pricingDetails?.trialStatus==='verified_available'&&tool?.pricingDetails?.sourceUrl?tool.pricingDetails.trialSummary:(tool.pricing||'See the vendor for current pricing and plan details.')));
 const canCompare=tool=>tool?.comparisonEligible!==false;
 const norm=v=>clean(v).toLowerCase();
 const setOf=values=>new Set((values||[]).map(norm).filter(Boolean));
