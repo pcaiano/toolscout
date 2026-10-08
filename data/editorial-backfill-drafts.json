@@ -395,6 +395,146 @@
       "Answers constrained to a chosen document collection",
       "NotebookLM is suited to research where uploaded sources define the evidence base. That is a different use case from open-web discovery, and the quality of the answer depends on what material the user supplies. Compare source coverage, quotation traceability and sharing permissions for the team's actual corpus.",
       "Upload a controlled research packet and verify each answer against the underlying documents."
+    ],
+    "cursor": [
+      "An AI coding editor should be judged on safe changes, not completions",
+      "Cursor brings codebase-aware editing and agentic development into the editor. Productivity gains depend on whether changes preserve tests, project conventions and secrets, not the speed of producing code. Before rolling it out broadly, compare review controls, data policy and model entitlements with the existing IDE.",
+      "Ask it to modify a tested module, inspect the diff and run the full regression suite."
+    ],
+    "github": [
+      "Code collaboration and automation with a clear source of truth",
+      "GitHub centers repositories, reviews, issues and automated delivery around shared code. Its value grows when branch policies and approvals make changes traceable, whereas ungoverned automation can create deployment risk. Decide which collaboration and security features are required before choosing subscription tiers.",
+      "Test a protected branch, code review, secret handling and a staged release workflow."
+    ],
+    "gitlab": [
+      "Integrated DevSecOps versus a modular developer stack",
+      "GitLab combines source control with pipelines, planning and security-oriented functions in the current catalog. An integrated workflow can reduce handoffs, but migration and runner governance may become significant commitments. Verify which scanning and administration controls belong to the selected deployment and licence.",
+      "Replicate a repository pipeline with a security gate, merge approval and deployment audit."
+    ],
+    "replit": [
+      "Browser-based development with deployment close to the editor",
+      "Replit is oriented toward building, running and sharing software without setting up every environment locally. That can accelerate prototyping and learning, while production ownership still depends on resource controls and a reliable release process. Evaluate secrets, hosting limits and exportability before treating it as a long-term platform.",
+      "Prototype a simple app, move it to production and test logs, data persistence and source export."
+    ],
+    "vercel": [
+      "Frontend release velocity and managed deployment operations",
+      "Vercel centers previews, deployment and web-application delivery, especially for teams with active frontend development. The buying decision hinges on performance, functions, build frequency and how the organization monitors production, rather than hosting a static page once. Check framework assumptions, data transfer and region requirements.",
+      "Publish a preview, measure edge/serverless usage and test rollback and alerts."
+    ],
+    "netlify": [
+      "Developer workflow and deployment for web properties",
+      "Netlify combines continuous deployment with managed functions and web forms in the catalog. This can simplify a content or app team's release cycle, but the value depends on the exact build, hosting and runtime usage. Compare it with Vercel using the same repository and workload, not only feature checkboxes.",
+      "Deploy a representative site with a form, build previews and production rollback."
+    ],
+    "sentry": [
+      "Operational error evidence before another dashboard",
+      "Sentry focuses on tracing real application errors, performance and affected user sessions. It is valuable when a team must connect incidents to specific releases and code paths. Noise from poor grouping or incomplete instrumentation can undermine that value, while event volume determines pricing exposure.",
+      "Inject a staging exception, follow its trace and measure whether an actionable alert reaches an owner."
+    ],
+    "google-ai-studio": [
+      "Prototyping Gemini behavior before API production",
+      "Google AI Studio is a browser workspace for testing model prompts and generating application starting points. It is the right sort of tool for developers comparing model behavior, not a finished customer-support platform by itself. Check actual model quotas, safety settings and the handoff from prototype keys to production credentials.",
+      "Evaluate a multimodal prompt, document rate limits and move the prototype behind a secure API service."
+    ],
+    "chatzy-ai": [
+      "Cross-channel agents require message delivery and handoff proof",
+      "Chatzy AI claims automation across messaging, voice and web channels. That is a real integration and compliance problem, not simply a chatbot feature. The submitted category tags provide insufficient independent evidence of channel permissions, agent reliability or cost.",
+      "Request a live channel demonstration with logging, user consent and human escalation."
+    ],
+    "deep-swap-ai": [
+      "Face replacement workflows require explicit media consent",
+      "Deep Swap AI is described as an image face-swap tool, not developer infrastructure. That category mismatch should be corrected before it can answer a developer-tools query. Buyers also need to review subject authorization, media retention and the usage-credit model before uploading images.",
+      "Check permitted source material, the preview/export terms and the product's true category."
+    ],
+    "face-swap-ai": [
+      "Media-editing feature claims do not establish developer fit",
+      "Face Swap AI focuses on replacing faces across photos and video, according to its catalog entry. Presenting it as a software-development platform is misleading without evidence of a real developer offering. Consent, output restrictions and processing retention should drive evaluation.",
+      "Verify the media editing workflow, API claims and subject permissions before categorizing."
+    ],
+    "lip-sync-ai": [
+      "Controlled lip-sync production rather than a generic API",
+      "Lip Sync AI is recorded as generating talking videos from footage and audio. The practical decision is about authorized materials, lip accuracy and usable export quality. Its current developer categorization and several feature labels are not yet verified and should not influence broad recommendations.",
+      "Use consenting footage and compare timing, watermarks and any available integration documentation."
+    ],
+    "resume-ai": [
+      "Job-application assistance deserves a career-software category",
+      "Resume AI is described as resume review, interview practice and job matching, not code-development tooling. Its current category could cause irrelevant engineering recommendations. Judge it on document quality, privacy of applicant information and whether suggestions improve real job applications.",
+      "Test an anonymized resume, an ATS-oriented revision and an interview prompt; review data handling."
+    ],
+    "talkpix-ai": [
+      "Photo-to-video creation for marketing assets",
+      "Talkpix AI appears to focus on talking images, advertisements and short creative clips. That is closer to content creation than a developer environment, despite some catalog API tags. Buyers should compare controllability, commercial rights and cost per acceptable output rather than assumed code integrations.",
+      "Create a consented product clip and verify output resolution, rights and the correct category."
+    ],
+    "wondershare-repairit": [
+      "File and media recovery, not general software development",
+      "Wondershare Repairit is positioned for repairing corrupted photos, video and documents. Recovery rate, local versus cloud handling and supported file formats matter far more than the broad developer feature labels currently in the catalog. These taxonomy errors need review before applying category-based ranks.",
+      "Test recovery on harmless duplicate corrupted files and document privacy and export constraints."
+    ],
+    "shopify": [
+      "Commerce operations and checkout before visual design",
+      "Shopify covers storefronts, payments, orders and a broad app ecosystem. It is useful when a merchant wants one operating center for selling, but payment fees, app dependencies and regional requirements materially change cost. Evaluate the complete order journey rather than only the storefront theme.",
+      "Simulate an order from product page to taxes, payment, fulfilment and returns."
+    ],
+    "bigcommerce": [
+      "Commerce architecture for growing catalog complexity",
+      "BigCommerce is a potential fit for merchants needing scalable catalog and multi-channel operations. Integration and B2B-related needs can outweigh template simplicity, but plan entitlements and implementation work must be checked with the actual store. Compare total running costs and catalog control with Shopify, not just a feature list.",
+      "Model product variants, customer groups, checkout and multichannel inventory sync."
+    ],
+    "woocommerce": [
+      "WordPress commerce flexibility with maintenance obligations",
+      "WooCommerce makes particular sense for a business already relying on WordPress content and extensibility. Its open-source core gives room for customization but does not eliminate hosting, payment, extension or maintenance costs. A store owner should compare operational responsibility with managed commerce platforms.",
+      "Build a sample store and calculate hosting, plugin updates, security and checkout costs."
+    ],
+    "pabbly-connect": [
+      "App automations requiring reliable execution accounting",
+      "Pabbly Connect is listed for webhook-driven workflows and app connections. It can be a candidate for simpler operational integrations, but the catalog does not verify exact connector behavior, error handling or pricing allowances. Test the workload against Zapier, Make and n8n rather than assuming equivalent capabilities.",
+      "Run a webhook-to-CRM scenario with retries, filters and actual volume reporting."
+    ],
+    "integrately": [
+      "Quick-start integrations with limited configuration overhead",
+      "Integrately emphasizes prebuilt automations and approachable app connections. That is useful for teams that need a known workflow running quickly, but templates can become restrictive when data validation and exception handling grow complicated. Verify the particular app pair and task allowance before ranking on ease alone.",
+      "Connect two required apps and test duplicates, a failed run and a changed field mapping."
+    ],
+    "workato": [
+      "Enterprise process integration as a governance decision",
+      "Workato focuses on orchestrating applications and data across larger organizations. Its value comes from controlled, observable operations with appropriate access policy, not a low-friction automation experiment. Implementation, security reviews and total licence cost should be evaluated early.",
+      "Prototype one approved cross-system workflow with audit trails and role permissions."
+    ],
+    "descript": [
+      "Transcript-first media editing with quality caveats",
+      "Descript combines recording, transcription and audio/video editing in a document-like workflow. It can save producers time when editing spoken content and generating clips, but transcription errors and export quality still matter. Test it against the actual language, accents and publication formats.",
+      "Edit an interview recording, check the corrected transcript and assess final audio/video output."
+    ],
+    "anijam-ai": [
+      "AI video agent claims need a controlled creative benchmark",
+      "Anijam AI is presented as a conversation-led system for generating films and social video. The broad list of styles is not independently validated, so treat it as an early creative tool rather than a guaranteed production pipeline. Reliability, permissions and export credits need checking.",
+      "Recreate one storyboard twice and compare continuity, iteration controls and commercial rights."
+    ],
+    "davinci-ai": [
+      "Multi-model image and video bundles need entitlement checks",
+      "DaVinci AI advertises access to several named image and video generators in a single interface. That packaging may help creative exploration, but the catalog does not verify current model versions or usage conditions. Compare output rights, credit cost and controls against direct access to the underlying services.",
+      "Run a fixed visual brief and verify model availability, licensing and export quality."
+    ],
+    "goenhance-ai": [
+      "Image and video enhancement should be measured on real assets",
+      "GoEnhance AI is positioned as a visual generation and enhancement environment. Its appeal is combining transformations that might otherwise need separate services, yet listed model access and actual editing quality remain unverified. Buyers should use their own content, not vendor promotional examples, in evaluation.",
+      "Try a short authorized clip, inspect visual artifacts and calculate the accepted output cost."
+    ],
+    "pixmax-ai": [
+      "Multimedia production around a canvas workflow",
+      "Pixmax AI describes image, video and audio creation in one creative workspace. The integrated workflow could be convenient for storyboarding, although the catalog offers limited evidence of consistency between modalities or available exports. Test whether iteration history and asset management suit team production.",
+      "Build a three-scene story and inspect audio sync, reuse and rights."
+    ],
+    "vidflux-ai": [
+      "Fast AI video promises require repeatability tests",
+      "Vidflux AI markets rapid text-to-video generation using several models. Speed claims should be treated as promotional until measured on a representative brief, including retries and unusable outputs. Its listing contains insufficient sourced pricing and production evidence to establish a high-confidence recommendation.",
+      "Produce five clips from the same brief and record successful outputs, elapsed time and credits."
+    ],
+    "vmaker-ai": [
+      "Recording and editing workflow versus synthetic-video generation",
+      "Vmaker AI is presented as a platform for capturing, editing and repurposing video. This can be more suitable for teams recording real demonstrations than services built around fully synthetic footage. Several catalog feature tags are unverified, so test transcription, recording quality and workflow fit directly.",
+      "Record a screen tutorial, trim it, add captions and test team publishing rights."
     ]
   }
 }
