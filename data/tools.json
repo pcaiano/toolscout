@@ -160,7 +160,18 @@
         "verifiedAt": "2026-10-08",
         "scope": "HubSpot-certified Gmail app supports logging and tracking email from the Gmail inbox; availability depends on the connected account and plan."
       }
-    ]
+    ],
+    "freePlanKnown": true,
+    "pricingDetails": {
+      "freePlanStatus": "verified_available",
+      "freePlanSummary": "Free foundational CRM tools; the cited vendor plan states up to two free users.",
+      "limits": [
+        "Up to two free users on the published free tier",
+        "Many automation and sales capabilities differ by subscription"
+      ],
+      "sourceUrl": "https://www.hubspot.com/pricing/crm",
+      "verifiedAt": "2026-10-08"
+    }
   },
   {
     "slug": "jotform",
@@ -681,7 +692,18 @@
         "verifiedAt": "2026-10-08",
         "scope": "Make HubSpot CRM app supports CRM record, contact, event and workflow modules; a HubSpot Super Admin must pre-approve the app."
       }
-    ]
+    ],
+    "freePlanKnown": true,
+    "pricingDetails": {
+      "freePlanStatus": "verified_available",
+      "freePlanSummary": "Free plan includes 1,000 credits per month and a 15-minute minimum scheduled interval at the time checked.",
+      "limits": [
+        "Free tier 1,000 credits per month",
+        "Scheduled scenario minimum interval 15 minutes"
+      ],
+      "sourceUrl": "https://www.make.com/en/pricing",
+      "verifiedAt": "2026-10-08"
+    }
   },
   {
     "slug": "zoho-crm",
@@ -919,6 +941,16 @@
       "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
       "verifiedAt": null,
       "sources": []
+    },
+    "freePlanKnown": true,
+    "pricingDetails": {
+      "freePlanStatus": "verified_available",
+      "freePlanSummary": "A free Ahrefs account exists with a narrower research allowance than its paid Starter plan.",
+      "limits": [
+        "Free accounts do not receive the same general research credits and rank tracking as paid plans"
+      ],
+      "sourceUrl": "https://help.ahrefs.com/en/articles/9419051-about-ahrefs-starter-plan",
+      "verifiedAt": "2026-10-08"
     }
   },
   {
@@ -1229,6 +1261,17 @@
       "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
       "verifiedAt": null,
       "sources": []
+    },
+    "freePlanKnown": true,
+    "pricingDetails": {
+      "freePlanStatus": "verified_available",
+      "freePlanSummary": "A Free workspace plan exists; database automations beyond Slack notifications require a paid plan.",
+      "limits": [
+        "Free workspace collaboration and file limits apply",
+        "Most database automations require paid plans"
+      ],
+      "sourceUrl": "https://www.notion.com/pricing",
+      "verifiedAt": "2026-10-08"
     }
   },
   {
@@ -1393,6 +1436,17 @@
       "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
       "verifiedAt": null,
       "sources": []
+    },
+    "freePlanKnown": true,
+    "pricingDetails": {
+      "freePlanStatus": "verified_available",
+      "freePlanSummary": "Free plan exists for individuals and very small teams, with a 1,000-record-per-base limit at the time checked.",
+      "limits": [
+        "Free tier 1,000 records per base",
+        "Free workspace API calls and storage are capped"
+      ],
+      "sourceUrl": "https://support.airtable.com/articles/2277136852-airtable-plans-overview",
+      "verifiedAt": "2026-10-08"
     }
   },
   {
