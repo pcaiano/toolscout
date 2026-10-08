@@ -14,7 +14,7 @@ test('tool profiles keep vendor evidence internal and commercial CTA routed thro
 
 test('commercial guides do not publish direct vendor source links',()=>{
   const src=read('scripts/generate-seo-pages.mjs');
-  assert.match(src,/Checked/);
+  assert.match(src,/Catalog checked|catalog-based editorial assessment/);
   assert.doesNotMatch(src,/Official source/);
   assert.doesNotMatch(src,/href="\${esc\(tool\.sourceUrl\)\}"/);
   assert.match(src,/href="\/go\/\${encodeURIComponent\(tool\.slug\)\}"/);
