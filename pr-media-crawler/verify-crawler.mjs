@@ -18,6 +18,7 @@ assert.deepEqual(Array.from(contacts,c=>c.email).sort(),["jane@example.org","joh
 assert.equal(ctx.extract('<p>News h.jones@publisher.org</p>',"https://publisher.org/","publisher.org")[0].name,"");
 const fixture = `import {parentPort,workerData} from "node:worker_threads";
 if(workerData.domain==="fast"){ parentPort.postMessage({domain:"fast",status:"complete",contacts:[],people:[],pages_fetched:1}); }
+else if(workerData.domain==="zero"){ parentPort.postMessage({domain:"zero",status:"complete",contacts:[],people:[],pages_fetched:0}); }
 else { parentPort.postMessage({progress:true,domain:workerData.domain,contacts:[{email:"editor@publisher.org"}],people:[],pages_fetched:2}); if(workerData.domain==="exit")process.exit(0); else while(true){} }`;
 const fixtureURL = new URL("data:text/javascript,"+encodeURIComponent(fixture));
 const bounded = source.slice(source.indexOf("async function crawlDomainBounded"),source.indexOf("const server = http.createServer"))
@@ -25,7 +26,7 @@ const bounded = source.slice(source.indexOf("async function crawlDomainBounded")
 const bounds = vm.createContext({Worker,fixtureURL,setTimeout,clearTimeout});
 vm.runInContext(bounded+";globalThis.run=crawlMany;",bounds);
 const streamed=[];
-const results = await bounds.run(["slow","fast","exit"],r=>streamed.push(r.domain));
+const results = await bounds.run(["slow","fast","exit","zero"],r=>streamed.push(r.domain));
 assert.equal(streamed[0],"fast");
 assert.equal(results[0].status,"timeout");
 assert.equal(results[0].retry_required,true);
@@ -33,6 +34,11 @@ assert.equal(results[0].contacts[0].email,"editor@publisher.org");
 assert.equal(results[2].status,"failed");
 assert.equal(results[2].retry_required,true);
 assert.equal(results[2].pages_fetched,2);
+assert.equal(results[3].status,"retry_required");
+assert.equal(results[3].retry_required,true);
+assert.equal(results[3].error,"zero_pages_fetched");
+assert(source.includes("domains_retry_required: retryRequired"));
+assert(source.includes("slice(0, 400)"));
 assert(source.includes("[...discovered, ...priority.map"));
 const ownership = vm.createContext({contacts:[{email:"editor@publisher.org",score:3,context:"",source_url:"staff"},{email:"editor@publisher.org",score:3,context:"Jane Doe, Editor, email editor@publisher.org",source_url:"author"}]});
 vm.runInContext(source.slice(source.indexOf("  const bestContacts = new Map();"), source.indexOf("  const bestPeople = new Map();"))+";globalThis.best=bestContacts;",ownership);
