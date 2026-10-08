@@ -297,3 +297,26 @@ test('decision benchmark: unverified AI assistant lists do not prove integration
   assert.equal(bySlug['crm-assistant-unknown'].stack_fit.pairs[0].status,'pair_unverified');
   assert.equal(bySlug['crm-assistant-verified'].stack_fit.pairs[0].status,'verified');
 });
+
+test('decision benchmark: catalog category intent takes precedence over unrelated feature scores',async()=>{
+  const catalog=JSON.parse(fs.readFileSync(new URL('../data/tools.json',import.meta.url),'utf8'));
+  for(const category of ['crm','seo','forms','automation','analytics','support','developer','website','design','ai-writing']){
+    const out=await benchmarkDecision(catalog,{job:category,priorities:['ease'],limit:3});
+    assert.equal(out.isError,false,'Expected a shortlist for '+category);
+    assert.ok(out.structuredContent.shortlist.length>0,'Empty shortlist for '+category);
+    assert.ok(out.structuredContent.shortlist.every(x=>x.category===category),'Unrelated category leaked into '+category);
+  }
+});
+
+test('decision benchmark: affiliate relationships cannot alter a contextual shortlist',async()=>{
+  const base={category:'crm',description:'CRM for teams',features:['crm','automation'],bestFor:['teams'],freePlan:false,scores:{ease:8,price:7}};
+  const catalog=[
+    {...base,slug:'alpha-crm',name:'Alpha CRM',affiliateUrl:'',commission:'none'},
+    {...base,slug:'beta-crm',name:'Beta CRM',affiliateUrl:'https://example.org/ref',commission:'50%'}
+  ];
+  const first=await benchmarkDecision(catalog,{priorities:['ease']});
+  assert.equal(first.isError,false);
+  const flipped=catalog.map(x=>({...x,affiliateUrl:x.affiliateUrl?'':'https://example.org/ref',commission:x.commission==='none'?'50%':'none'}));
+  const second=await benchmarkDecision(flipped,{priorities:['ease']});
+  assert.deepEqual(first.structuredContent.shortlist.map(x=>x.slug),second.structuredContent.shortlist.map(x=>x.slug));
+});
