@@ -25,7 +25,7 @@ def inspect(path=DATA):
     tools = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(tools, list):
         raise ValueError("Catalog must be a JSON array")
-    slugs = collections.Counter(t.get("slug") for t in tools if isinstance(t, dict))
+    slugs = collections.Counter(t.get("slug") for t in tools if isinstance(t, dict) and t.get("slug"))
     issues = []
     categories = collections.Counter()
     counters = collections.Counter()
@@ -45,7 +45,7 @@ def inspect(path=DATA):
             counters["missing_decision_fields"] += 1
         if GENERIC_PRICE.search(str(tool.get("pricing", ""))):
             counters["generic_pricing"] += 1
-        if tool.get("aiIntegration", {}).get("status") != "verified":
+        if (tool.get("aiIntegration") or {}).get("status") != "verified":
             counters["ai_integration_unverified"] += 1
         if not tool.get("affiliateUrl"):
             counters["no_explicit_affiliate_url"] += 1
