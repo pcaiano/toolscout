@@ -29,6 +29,7 @@ def inspect(path=DATA):
     issues = []
     categories = collections.Counter()
     counters = collections.Counter()
+    missing_field_counts = collections.Counter()
     rows = []
     today = date.today()
     for index, tool in enumerate(tools):
@@ -39,6 +40,7 @@ def inspect(path=DATA):
         categories[str(tool.get("category", "unknown"))] += 1
         missing_core = [k for k in CORE if not tool.get(k)]
         missing_decision = [k for k in FIELDS_FOR_DECISION if not tool.get(k)]
+        missing_field_counts.update(missing_decision)
         if missing_core:
             issues.append(f"{slug}: missing core fields: {', '.join(missing_core)}")
         if missing_decision:
@@ -54,6 +56,8 @@ def inspect(path=DATA):
         age = None
         try:
             age = (today - date.fromisoformat(tool["lastVerified"])).days
+            if age < 0:
+                counters["future_verification_date"] += 1
             if age > 90:
                 counters["verification_older_than_90_days"] += 1
         except (KeyError, TypeError, ValueError):
@@ -63,7 +67,7 @@ def inspect(path=DATA):
             "missing_core": missing_core,
             "missing_decision_fields": missing_decision,
             "verification_age_days": age,
-            "ai_verified": tool.get("aiIntegration", {}).get("status") == "verified",
+            "ai_verified": (tool.get("aiIntegration") or {}).get("status") == "verified",
             "generic_pricing": bool(GENERIC_PRICE.search(str(tool.get("pricing", "")))),
         })
     duplicates = sorted(str(k) for k, n in slugs.items() if n > 1)
@@ -73,6 +77,7 @@ def inspect(path=DATA):
         "catalog_count": len(tools),
         "categories": dict(sorted(categories.items())),
         "metrics": dict(sorted(counters.items())),
+        "missing_field_counts": dict(sorted(missing_field_counts.items())),
         "invalid_structure": bool(duplicates) or any(not isinstance(t, dict) for t in tools),
         "issues": issues,
         "tools": rows,
