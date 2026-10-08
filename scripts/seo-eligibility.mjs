@@ -34,6 +34,7 @@ const CAPABILITY_RULES = {
 };
 
 const COMPOUND_CAPABILITY_RULES = {
+  'best-ai-assistants': { groups: [['ai assistant','ai assistants'],['writing'],['coding','code generation','developer workflows']], minimumGroups: 3 },
   'best-ai-marketing-tools': { groups: [['ai','artificial intelligence','machine learning']], minimumGroups: 1 },
   'best-ai-ad-creative-tools': { groups: [['ai','artificial intelligence','generative ai']], minimumGroups: 1 },
   'best-ai-research-tools': { groups: [['ai','artificial intelligence','llm','large language model']], minimumGroups: 1 },
