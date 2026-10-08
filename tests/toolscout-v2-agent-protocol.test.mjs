@@ -320,3 +320,25 @@ test('decision benchmark: affiliate relationships cannot alter a contextual shor
   const second=await benchmarkDecision(flipped,{priorities:['ease']});
   assert.deepEqual(first.structuredContent.shortlist.map(x=>x.slug),second.structuredContent.shortlist.map(x=>x.slug));
 });
+
+test('decision evidence cohort: documented integrations qualify without generic stack guesses',async()=>{
+  const catalog=JSON.parse(fs.readFileSync(new URL('../data/tools.json',import.meta.url),'utf8'));
+  const cases=[
+    {job:'CRM',must_have:['Gmail'],existing_tools:['Gmail'],expected:'hubspot'},
+    {job:'SEO',must_have:['Google Search Console'],existing_tools:['Google Search Console'],expected:'semrush'},
+    {job:'automation',must_have:['HubSpot'],existing_tools:['HubSpot'],expected:'zapier'}
+  ];
+  for(const scenario of cases){
+    const out=await benchmarkDecision(catalog,scenario);
+    assert.equal(out.isError,false,'No qualified results for '+scenario.job);
+    const candidate=out.structuredContent.shortlist.find(x=>x.slug===scenario.expected);
+    assert.ok(candidate,'Missing sourced candidate '+scenario.expected);
+    assert.equal(candidate.requirement_evidence[0].matched,true);
+    const pair=candidate.stack_fit.pairs[0];
+    assert.equal(pair.status,'verified');
+    assert.match(pair.source_url,/^https:\/\//);
+    assert.match(pair.verified_at,/^\d{4}-\d{2}-\d{2}$/);
+  }
+  const make=catalog.find(x=>x.slug==='make');
+  assert.ok(make.integrations.some(p=>p.product==='HubSpot'&&p.status==='verified'&&/^https:\/\//.test(p.sourceUrl)));
+});
