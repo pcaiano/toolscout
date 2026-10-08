@@ -91,6 +91,61 @@ test('MCP decide_software returns an evidence-aware shortlist with trade-offs',a
   assert.ok(payload.result.structuredContent.shortlist.every(x=>Array.isArray(x.tradeoffs)&&x.stack_fit));
 });
 
+test('MCP decide_software keeps generic must-haves inside the requested software job',async()=>{
+  const catalog=JSON.parse(fs.readFileSync(new URL('../data/tools.json',import.meta.url),'utf8'));
+  const env={ASSETS:{fetch:async request=>new URL(request.url).pathname==='/data/tools.json'?Response.json(catalog):new Response('',{status:404})}};
+  const body={jsonrpc:'2.0',id:24,method:'tools/call',params:{name:'decide_software',arguments:{job:'SEO',must_have:['automation'],limit:5},_meta:{'io.modelcontextprotocol/protocolVersion':'2026-07-28','io.modelcontextprotocol/clientInfo':{name:'test-client',version:'1.0'}}}};
+  const response=await handleAgentProtocolRoute(
+    new Request('https://trytoolscout.org/mcp',{method:'POST',headers:{'Content-Type':'application/json','MCP-Protocol-Version':'2026-07-28','Mcp-Method':'tools/call','Mcp-Name':'decide_software'},body:JSON.stringify(body)}),
+    env,{waitUntil(){}}
+  );
+  assert.equal(response.status,200);
+  const payload=await response.json();
+  const shortlist=payload.result.structuredContent.shortlist;
+  assert.ok(shortlist.length>=2);
+  assert.ok(shortlist.every(x=>x.category==='seo'),JSON.stringify(shortlist.map(x=>({name:x.name,category:x.category}))));
+});
+
+test('MCP stack fit never treats incidental text such as sales teams as Microsoft Teams evidence',async()=>{
+  const catalog=JSON.parse(fs.readFileSync(new URL('../data/tools.json',import.meta.url),'utf8'));
+  const env={ASSETS:{fetch:async request=>new URL(request.url).pathname==='/data/tools.json'?Response.json(catalog):new Response('',{status:404})}};
+  const body={jsonrpc:'2.0',id:25,method:'tools/call',params:{name:'check_stack_fit',arguments:{candidates:['hubspot'],existing_tools:['Teams']},_meta:{'io.modelcontextprotocol/protocolVersion':'2026-07-28','io.modelcontextprotocol/clientInfo':{name:'test-client',version:'1.0'}}}};
+  const response=await handleAgentProtocolRoute(
+    new Request('https://trytoolscout.org/mcp',{method:'POST',headers:{'Content-Type':'application/json','MCP-Protocol-Version':'2026-07-28','Mcp-Method':'tools/call','Mcp-Name':'check_stack_fit'},body:JSON.stringify(body)}),
+    env,{waitUntil(){}}
+  );
+  assert.equal(response.status,200);
+  const payload=await response.json();
+  const fit=payload.result.structuredContent.candidates[0].stack_fit;
+  assert.equal(fit.verified_pairs,0);
+  assert.equal(fit.pairs[0].status,'pair_unverified');
+  assert.doesNotMatch(fit.pairs[0].evidence,/verified product-specific evidence/i);
+});
+
+test('MCP free-form constraints are evaluated and surfaced as verified, not_verified or conflict',async()=>{
+  const catalog=[
+    {slug:'crm-linux',name:'CRM Linux',category:'crm',description:'CRM for teams with Linux support.',pricing:'Free plan available',freePlan:true,features:['crm','automation','linux'],bestFor:['small businesses'],lastVerified:'2026-10-08',scores:{price:9,ease:7,automation:8,integrations:6,sales:8}},
+    {slug:'crm-cloud',name:'CRM Cloud',category:'crm',description:'Cloud CRM for sales teams.',pricing:'Paid plans',freePlan:false,features:['crm','automation'],bestFor:['sales teams'],lastVerified:'2026-10-08',scores:{price:6,ease:8,automation:8,integrations:7,sales:8}}
+  ];
+  const env={ASSETS:{fetch:async request=>new URL(request.url).pathname==='/data/tools.json'?Response.json(catalog):new Response('',{status:404})}};
+  const body={jsonrpc:'2.0',id:26,method:'tools/call',params:{name:'decide_software',arguments:{job:'CRM',constraints:['must support Linux','free plan'],limit:2},_meta:{'io.modelcontextprotocol/protocolVersion':'2026-07-28','io.modelcontextprotocol/clientInfo':{name:'test-client',version:'1.0'}}}};
+  const response=await handleAgentProtocolRoute(
+    new Request('https://trytoolscout.org/mcp',{method:'POST',headers:{'Content-Type':'application/json','MCP-Protocol-Version':'2026-07-28','Mcp-Method':'tools/call','Mcp-Name':'decide_software'},body:JSON.stringify(body)}),
+    env,{waitUntil(){}}
+  );
+  assert.equal(response.status,200);
+  const payload=await response.json();
+  const shortlist=payload.result.structuredContent.shortlist;
+  assert.equal(shortlist.length,2);
+  const linux=shortlist.find(x=>x.slug==='crm-linux');
+  const cloud=shortlist.find(x=>x.slug==='crm-cloud');
+  assert.deepEqual(linux.constraint_evidence.map(x=>x.status),['verified','verified']);
+  assert.deepEqual(cloud.constraint_evidence.map(x=>x.status),['not_verified','conflict']);
+  assert.ok(cloud.tradeoffs.some(x=>x.includes('constraint not verified')));
+  assert.ok(cloud.tradeoffs.some(x=>x.includes('constraint conflict')));
+});
+
+
 test('MCP compare_for_use_case exposes contextual trade-offs and affordability loss analysis',async()=>{
   const catalog=JSON.parse(fs.readFileSync(new URL('../data/tools.json',import.meta.url),'utf8'));
   const env={ASSETS:{fetch:async request=>new URL(request.url).pathname==='/data/tools.json'?Response.json(catalog):new Response('',{status:404})}};
