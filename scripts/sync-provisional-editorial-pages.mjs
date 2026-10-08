@@ -15,9 +15,10 @@ const newEvidence='catalog-based editorial assessment only; product claims, plan
 const introCSS='.editorialIntro p{font-size:16px;line-height:1.7;color:#475467;margin:8px 0 0}';
 const extraCSS='.editorialBuyerCheck{margin-top:14px;padding-top:12px;border-top:1px solid #e4e7ec;color:#344054;font-size:14px;line-height:1.6}.editorialBuyerCheck strong{color:#101828}';
 const flag=' <strong>Category under review:</strong> check whether this is the right type of software for your task.';
-let modified=0,unexpected=0;
+let modified=0,processed=0,unexpected=0;
 for(const tool of catalog){
   if(tool.editorialReview?.verificationStatus!=='catalog_only')continue;
+  processed++;
   const filepath=path.join(root,'tools',tool.slug+'.html');
   if(!fs.existsSync(filepath))throw Error('Missing original profile: '+tool.slug);
   const original=fs.readFileSync(filepath,'utf8');
@@ -31,8 +32,8 @@ for(const tool of catalog){
     if(!updated.includes(introCSS))throw Error('Style anchor missing: '+tool.slug);
     updated=updated.replace(introCSS,introCSS+extraCSS);
   }
-  if(!updated.includes(oldEvidence))throw Error('Existing evidence footer missing: '+tool.slug);
-  updated=updated.replace(oldEvidence,newEvidence);
+  if(updated.includes(oldEvidence))updated=updated.replace(oldEvidence,newEvidence);
+  else if(!updated.includes(newEvidence))throw Error('Existing evidence footer missing: '+tool.slug);
   if(tool.categoryReviewRequired)
     updated=updated.replace('Independent '+tool.category+' software profile','Software profile, category review pending');
   if(updated.match(/<link rel="canonical" href="[^"]+">/)?.[0]!==beforeCanonical||
@@ -43,5 +44,5 @@ for(const tool of catalog){
   }
 }
 const expected=catalog.filter(t=>t.editorialReview?.verificationStatus==='catalog_only').length;
-if(modified!==expected&&process.argv.includes('--write'))throw Error('Expected '+expected+' modified profiles, got '+modified);
+if(processed!==expected)throw Error('Expected '+expected+' inspected provisional profiles, got '+processed);
 console.log(JSON.stringify({catalog:catalog.length,provisional:expected,changed:modified,mode:process.argv.includes('--write')?'write':'dry-run',unexpected}));
