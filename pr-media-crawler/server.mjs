@@ -240,6 +240,14 @@ function extractPeopleFromText(html, url, domain) {
   return out.slice(0, 80);
 }
 
+// Decode only explicitly printed obfuscation tokens; never infer email patterns.
+function decodePublishedEmailTokens(text) {
+  return String(text || "").replace(
+    /\b([a-z0-9._%+-]{2,})\s*(?:\[at\]|\(at\)|\{at\})\s*([a-z0-9-]+(?:\s*(?:\.|\[dot\]|\(dot\)|\{dot\})\s*[a-z0-9-]+)+)\b/gi,
+    (_all, local, domain) => local + "@" + domain.replace(/\s*(?:\[dot\]|\(dot\)|\{dot\})\s*/gi, ".").replace(/\s+/g, "")
+  );
+}
+
 function extractContacts(html, url, domain) {
   const raw = decodeEntities(String(html || ""));
   // Public mailto/Cloudflare HTML may hide the address from visible text.
@@ -250,8 +258,10 @@ function extractContacts(html, url, domain) {
     const email = cf ? decodeCfEmail(cf[1]) : mailto ? mailto[1] : "";
     return email ? tag + " " + email + " " : tag;
   });
-  const text = stripHtml(contextualHtml);
+  const text = decodePublishedEmailTokens(stripHtml(contextualHtml));
   const emails = new Set();
+  // Public editorial addresses sometimes print [at]/[dot] instead of mailto.
+  for (const m of text.matchAll(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi)) emails.add(m[0].trim());
 
   for (const m of raw.matchAll(/mailto:([^"'?\s<>]+)/gi)) emails.add(m[1].trim());
   for (const m of raw.matchAll(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi)) emails.add(m[0].trim());
