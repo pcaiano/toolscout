@@ -374,16 +374,16 @@
       "asana": "Asana is a good fit when the job is coordinating responsibilities, milestones and repeatable projects across people. Tasks, boards and calendars make basic work visible, with further timeline, rule and portfolio capabilities in paid editions. The current Personal plan has a concrete collaboration ceiling: two seats per project and team for newer signups, even though tasks and projects are unlimited. This is a different buying decision from Trello's visual board simplicity or ClickUp's configurable Workspace. Choose Asana when assignments and project processes matter; check the paid plan before inviting a larger delivery team.",
       "clickup": "ClickUp appeals to teams that want tasks, documents, dashboards and multiple project views inside a configurable workspace. The flexibility can reduce separate tools, but a detailed workspace also needs consistent conventions and administration. The Free Forever plan provides up to five Spaces; ClickUp also documents a 60-use allowance for setting Custom Field values on free workspaces. Those are materially different limits: teams can create sophisticated structures before running out of capacity to populate them. Shortlist ClickUp when adaptability matters more than instant simplicity; choose Asana when clearer out-of-the-box project governance is preferable.",
       "typeform": "Typeform prioritizes the respondent's experience: questions progress through a guided interface rather than an ordinary long form. That presentation can be valuable for branded surveys and qualification flows, with logic, embedding and basic reporting supported even on its free plan. The commercial boundary is unusually important: the free plan permits only ten total responses a month across all forms, so even a successful lead-capture experiment can rapidly outgrow it. Choose Typeform when presentation and a guided conversation carry real value. Choose Tally when affordable response volume and straightforward form creation are more important.",
-      "systeme-io": "Systeme.io combines the funnel, email and course jobs into a single proposed operating stack. It is worth comparing when setup overhead matters more than selecting the strongest specialist in each category. Confirm how the paid tiers handle contacts, funnels and course access: the catalog alone cannot establish the lowest viable long-term package.",
-      "beehiiv": "beehiiv puts publishing, audience growth and newsletter monetization in the center of the product decision. That is a different job from CRM-driven segmentation or ecommerce lifecycle automation. Check ownership of subscriber data, referral features and the monetization conditions before moving an established list.",
-      "jotform": "Jotform extends basic form collection toward approvals, payments and structured workflow steps. It fits businesses where a submission initiates a process rather than simply delivers a contact email. Check what an actual plan permits in submissions, storage, signatures and integrations before treating every listed module as included.",
+      "systeme-io": "Systeme.io is worth shortlisting when a creator needs funnels, email sequences and course delivery in one service rather than separate landing-page, email and learning tools. Its published Free plan includes 2,000 contacts, three sales funnels and one workflow, making it a practical prototype tier rather than an unlimited operating plan. The trade-off is flexibility: check when your number of automations, funnels and contacts pushes you into a paid plan, and compare that total with separate specialist tools.",
+      "beehiiv": "beehiiv is designed around publishing a newsletter and growing its subscriber audience. The important buying distinction is between a simple publication and a multi-step subscriber lifecycle: beehiiv documents that automations are paid-plan functionality. Lite allows up to ten live automations, while Pro offers unlimited live automations and additional click-trigger options. A publisher sending a weekly issue may not need this depth; one monetizing segmented subscriber journeys should price the required plan before migrating a list.",
+      "jotform": "Jotform is an operational form-builder option when a submission needs to start an approval, payment or data-collection workflow rather than simply send a contact notification. Its Starter tier has material limits: the vendor describes a five-form allowance and 100 monthly submissions, alongside account-wide storage and upload limits. These limits are more decision-relevant than a long list of form features. Before purchasing, model monthly submissions, file sizes and any approval or payment steps under the exact plan.",
       "adcreative-ai": "AdCreative.ai is relevant when a paid media team needs more advertising asset variations for testing. Generating alternatives quickly is useful, but a creative score is not proof of incremental conversions. Judge the product by the quality of assets accepted by the ad platforms and by how cleanly real results feed back into the next iteration.",
       "jasper": "Jasper is positioned for teams that need recurring marketing copy and brand-voice controls across many assets. The question is whether review, governance and campaign reuse justify a dedicated writing environment over a general AI assistant. Output quality and factual accuracy still require editorial supervision.",
-      "zoho-crm": "Zoho CRM covers leads, pipelines, analytics and automation for teams that want to structure sales operations. Its wider ecosystem may be attractive to organizations already using related Zoho products, but that connection must be verified for each specific app. Compare setup and reporting needs with lighter CRMs before assuming extra configuration is worth it.",
+      "zoho-crm": "Zoho CRM merits consideration for a small sales team that needs leads, contacts and deals in a structured CRM, particularly if it already uses other Zoho applications. The manufacturer's edition guide documents a Free tier for up to three users, with basic lead, contact and deal tracking and limited workflow actions. That is a useful starting point, not evidence that advanced automation or every Zoho integration is included. Compare the configuration effort and reporting requirements with simpler CRMs before paying for a wider suite.",
       "monday-crm": "monday CRM is a candidate when salespeople and other teams need to collaborate around leads and work items. Its flexibility can help nonstandard sales processes, while also creating a risk of inconsistent board design. Test pipeline reporting and operational governance before treating visual configurability as a replacement for core CRM controls.",
       "claude": "Claude is an option for analysis, drafting and development tasks where working with lengthy context and revisions is central. Model choice should follow actual output evaluation, data-handling rules and available integrations, not a broad claim that one assistant is universally superior. Confirm plan limits and the client tools your team needs.",
       "calendly": "Calendly addresses meeting booking, availability and reminders, with team-routing potential where inbound leads must reach the right person. Calendar links alone are simple; multi-person assignment and follow-up logic need more scrutiny. Validate conflict handling, team permissions and paid routing entitlements.",
-      "posthog": "PostHog combines behavioral events with session replay, feature flags and testing-oriented workflows in the current catalog. This can simplify instrumentation ownership for a technical product team, but cost and privacy controls depend heavily on captured event volume. Consider it when product experimentation is continuous, not only when a website needs visitor totals.",
+      "posthog": "PostHog is a compelling choice when a product team wants behavioral analytics close to session replay, feature flags and experiments. Its vendor pricing is usage-based rather than a conventional seat-based analytics subscription: product analytics includes one million events each month at no charge, while other products have their own allowances. That helps small teams start, but event volume, retention, privacy obligations and the number of enabled products can change the bill. Estimate the events your real instrumentation will generate before choosing it over a simpler web analytics product.",
       "apollo": "Apollo combines B2B contact discovery, enrichment and outbound sequences. The decision should rest on relevant verified contacts and the resulting pipeline, not total records advertised. List freshness, jurisdictional outreach rules, CRM syncing and deliverability require direct validation.",
       "lemlist": "lemlist is positioned for coordinated prospecting via email and additional channels. That can help a small outbound team keep follow-ups structured, but deliverability and compliance still depend on list quality and sender reputation. Check each channel's supported permissions and actual sending limits.",
       "intercom": "Intercom brings inbox, help content and automated assistance into the same service workflow. AI resolution should be evaluated against real support cases, policy boundaries and escalation quality rather than an advertised percentage. Its commercial model must also be tested on forecast volume.",
@@ -712,26 +712,26 @@
       },
       "systeme-io": {
         "angle": "Selling a digital product without stitching five platforms together",
-        "buyerCheck": "Model one purchase journey from landing page to email follow-up and paid course access.",
-        "sourceUrl": null,
+        "buyerCheck": "Map a complete purchase journey, then count contacts, funnel steps, automation rules and the courses the chosen tier permits.",
+        "sourceUrl": "https://systeme.io/pricing",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "beehiiv": {
         "angle": "A newsletter business rather than a general marketing database",
-        "buyerCheck": "Test subscriber import, signup attribution and the recurring publication workflow.",
-        "sourceUrl": null,
+        "buyerCheck": "Separate newsletter publishing from automated subscriber journeys; compare the Lite and Pro automation rights with the workflow you need.",
+        "sourceUrl": "https://www.beehiiv.com/support/article/13080928484887",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "jotform": {
         "angle": "Operational forms that move work forward",
-        "buyerCheck": "Prototype a form with payment or approval, file uploads and an exception path.",
-        "sourceUrl": null,
+        "buyerCheck": "Build one real form and calculate monthly submissions, active forms, file storage and the approval or payment workflow.",
+        "sourceUrl": "https://www.jotform.com/help/408-understanding-your-account-usage-and-limits/",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "adcreative-ai": {
@@ -752,10 +752,10 @@
       },
       "zoho-crm": {
         "angle": "Sales CRM depth within a broader business stack",
-        "buyerCheck": "Map lead assignment, stages, duplicate control and required integrations.",
-        "sourceUrl": null,
+        "buyerCheck": "Test lead assignment, deal stages, reports and workflow actions; verify integrations separately for each exact Zoho application.",
+        "sourceUrl": "https://help.zoho.com/portal/en/kb/crm/getting-started/articles/choose-your-path-edition-and-role-guide",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "monday-crm": {
@@ -784,10 +784,10 @@
       },
       "posthog": {
         "angle": "Product analytics close to experiments and engineering",
-        "buyerCheck": "Define an event taxonomy, estimate volume and review consent, retention and feature-flag rollout.",
-        "sourceUrl": null,
+        "buyerCheck": "Estimate monthly events and replays, review consent and retention settings, and set billing limits before production rollout.",
+        "sourceUrl": "https://posthog.com/pricing",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "apollo": {
