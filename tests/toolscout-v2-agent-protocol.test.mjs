@@ -342,3 +342,33 @@ test('decision evidence cohort: documented integrations qualify without generic 
   const make=catalog.find(x=>x.slug==='make');
   assert.ok(make.integrations.some(p=>p.product==='HubSpot'&&p.status==='verified'&&/^https:\/\//.test(p.sourceUrl)));
 });
+
+test('decision engine MCP returns the same sourced editorial conclusion as the catalog',async()=>{
+  const catalog=JSON.parse(fs.readFileSync(new URL('../data/tools.json',import.meta.url),'utf8'));
+  const env={ASSETS:{fetch:async request=>new URL(request.url).pathname==='/data/tools.json'?Response.json(catalog):new Response('',{status:404})}};
+  const body={jsonrpc:'2.0',id:400,method:'tools/call',params:{name:'get_tool',arguments:{tool:'zapier'},_meta:{'io.modelcontextprotocol/protocolVersion':'2026-07-28','io.modelcontextprotocol/clientInfo':{name:'editorial-test',version:'1.0'}}}};
+  const response=await handleAgentProtocolRoute(new Request('https://trytoolscout.org/mcp',{method:'POST',headers:{'Content-Type':'application/json','MCP-Protocol-Version':'2026-07-28','Mcp-Method':'tools/call','Mcp-Name':'get_tool'},body:JSON.stringify(body)}),env,{waitUntil(){}});
+  assert.equal(response.status,200);
+  const content=(await response.json()).result.structuredContent.tool;
+  const source=catalog.find(x=>x.slug==='zapier');
+  assert.equal(content.editorial_review.conclusion,source.editorialReview.summary);
+  assert.equal(content.editorial_review.buyer_check,source.editorialReview.buyerCheck);
+  assert.deepEqual(content.editorial_review.limitations,source.limitations);
+  assert.deepEqual(content.editorial_review.tradeoffs,source.tradeoffs);
+  assert.equal(content.editorial_review.hands_on_tested,false);
+  assert.match(content.editorial_review.evidence_source,/^https:\/\//);
+  assert.match(content.profile_url,/^https:\/\/trytoolscout\.org\/tools\/zapier$/);
+  assert.match(content.tool_url,/^https:\/\/trytoolscout\.org\/go\/zapier/);
+  assert.equal('commission' in content,false);
+});
+
+test('decision engine shortlist carries a documented editorial basis for reviewed products',async()=>{
+  const catalog=JSON.parse(fs.readFileSync(new URL('../data/tools.json',import.meta.url),'utf8'));
+  const out=await benchmarkDecision(catalog,{job:'crm',priorities:['sales'],limit:5});
+  assert.equal(out.isError,false);
+  const hubspot=out.structuredContent.shortlist.find(x=>x.slug==='hubspot');
+  assert.ok(hubspot,'HubSpot not present in CRM shortlist');
+  assert.ok(hubspot.editorial_review?.conclusion?.includes('HubSpot'));
+  assert.ok(hubspot.editorial_review?.limitations?.length);
+  assert.equal(out.structuredContent.decision_basis.no_pay_to_rank,true);
+});

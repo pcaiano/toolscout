@@ -160,7 +160,46 @@
         "verifiedAt": "2026-10-08",
         "scope": "HubSpot-certified Gmail app supports logging and tracking email from the Gmail inbox; availability depends on the connected account and plan."
       }
-    ]
+    ],
+    "freePlanKnown": true,
+    "pricingDetails": {
+      "freePlanStatus": "verified_available",
+      "freePlanSummary": "Free foundational CRM tools; the cited vendor plan states up to two free users.",
+      "limits": [
+        "Up to two free users on the published free tier",
+        "Many automation and sales capabilities differ by subscription"
+      ],
+      "sourceUrl": "https://www.hubspot.com/pricing/crm",
+      "verifiedAt": "2026-10-08"
+    },
+    "strengths": [
+      "Shared CRM foundation spanning sales, marketing and service",
+      "Verified Gmail inbox connection"
+    ],
+    "limitations": [
+      "Vendor free-tools plan supports up to two free users; further capabilities vary by hub and tier"
+    ],
+    "tradeoffs": [
+      "Broad cross-team platform versus a focused sales-only pipeline"
+    ],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.hubspot.com/pricing/crm",
+        "verifiedAt": "2026-10-08",
+        "method": "vendor_documentation_and_toolscout_editorial_interpretation",
+        "handsOnTested": false
+      }
+    ],
+    "editorialReview": {
+      "summary": "HubSpot earns consideration when a business wants sales, marketing and service data to share one CRM rather than rely on multiple disconnected tools. Its catalog strengths are sales capability and integrations, but the purchasing question is how many hubs and paid seats the team will actually need. HubSpot's free CRM supports a small starting team, yet its own plan matrix limits free users and several automation capabilities. Choose it when connected customer operations matter more than a narrowly focused deal board; compare Pipedrive if pipeline discipline is the main job.",
+      "angle": "A connected customer platform, with plan boundaries that matter",
+      "buyerCheck": "Check users, marketing contacts, automation and inbox requirements in the exact subscription, not only the free CRM label.",
+      "reviewedAt": "2026-10-08",
+      "sourceUrl": "https://www.hubspot.com/pricing/crm",
+      "method": "vendor_documentation_and_toolscout_editorial_interpretation",
+      "handsOnTested": false
+    }
   },
   {
     "slug": "jotform",
@@ -306,6 +345,34 @@
       "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
       "verifiedAt": null,
       "sources": []
+    },
+    "strengths": [
+      "Customizable visual sales pipelines and activity tracking",
+      "Deal-oriented reporting through Insights"
+    ],
+    "limitations": [
+      "Exact automation, reporting and add-on entitlements require a paid-plan check"
+    ],
+    "tradeoffs": [
+      "Sales execution focus versus a combined marketing, service and CRM operating suite"
+    ],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.pipedrive.com/en/features/pipeline-management",
+        "verifiedAt": "2026-10-08",
+        "method": "vendor_documentation_and_toolscout_editorial_interpretation",
+        "handsOnTested": false
+      }
+    ],
+    "editorialReview": {
+      "summary": "Pipedrive starts with the salesperson's working day: deals, stages, activities and follow-up. Its customizable pipeline and Insights reporting make the buying argument clearer for a team that needs consistent sales execution rather than a combined marketing and service platform. ToolScout's scorecard rates its sales capability highly and its price dimension more cautiously, so test reporting, automations and integrations against the specific paid plan. Pick Pipedrive when activity ownership and deal visibility are the bottleneck; look at HubSpot when marketing and service workflows must share the same operational home.",
+      "angle": "Pipeline execution before all-in-one customer operations",
+      "buyerCheck": "Trial the team's real deal stages, required reporting and follow-up automations, then confirm which plan includes each feature.",
+      "reviewedAt": "2026-10-08",
+      "sourceUrl": "https://www.pipedrive.com/en/features/pipeline-management",
+      "method": "vendor_documentation_and_toolscout_editorial_interpretation",
+      "handsOnTested": false
     }
   },
   {
@@ -365,7 +432,35 @@
         "verifiedAt": "2026-10-08",
         "scope": "Semrush supports connecting Google Search Console to specified SEO analysis features, with account permissions required."
       }
-    ]
+    ],
+    "strengths": [
+      "Site Audit and location-specific Position Tracking workflows",
+      "Keyword, competitor and visibility research breadth"
+    ],
+    "limitations": [
+      "Tracking, site audit and toolkit usage limits depend on the subscription"
+    ],
+    "tradeoffs": [
+      "Broad SEO suite versus a narrower, potentially less costly specialist workflow"
+    ],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.semrush.com/kb/32-position-tracking",
+        "verifiedAt": "2026-10-08",
+        "method": "vendor_documentation_and_toolscout_editorial_interpretation",
+        "handsOnTested": false
+      }
+    ],
+    "editorialReview": {
+      "summary": "Semrush is an operational SEO suite for teams coordinating keyword research, site auditing, competitive work and ongoing visibility tracking. Its Position Tracking monitors selected terms by device and location, while Site Audit supports repeated technical checks, so it is useful when several SEO activities have to form one reporting cycle. The trade-off is scope and cost: ToolScout's price score sits well below its research and SEO scores, and limits depend on toolkit and tier. Shortlist Semrush for a broad agency workflow; choose a narrower tool if most of that suite would remain unused.",
+      "angle": "A broad SEO operating environment, not a one-task purchase",
+      "buyerCheck": "Confirm tracked-keyword allocation, projects, audit limits and the exact toolkit; a high SEO score is not proof that every module is included.",
+      "reviewedAt": "2026-10-08",
+      "sourceUrl": "https://www.semrush.com/kb/32-position-tracking",
+      "method": "vendor_documentation_and_toolscout_editorial_interpretation",
+      "handsOnTested": false
+    }
   },
   {
     "slug": "jasper",
@@ -618,7 +713,35 @@
         "verifiedAt": "2026-10-08",
         "scope": "Zapier HubSpot app provides supported triggers, searches and actions; connection requires appropriate HubSpot permissions."
       }
-    ]
+    ],
+    "strengths": [
+      "Trigger-and-action automation between supported apps",
+      "Documented HubSpot integration"
+    ],
+    "limitations": [
+      "Monthly task allowance counts successful action steps; runs may be held when the allowance is exhausted"
+    ],
+    "tradeoffs": [
+      "Simple onboarding versus cost and complexity of high-volume multi-step execution"
+    ],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://help.zapier.com/hc/en-us/articles/8496181445261-Zap-limits",
+        "verifiedAt": "2026-10-08",
+        "method": "vendor_documentation_and_toolscout_editorial_interpretation",
+        "handsOnTested": false
+      }
+    ],
+    "editorialReview": {
+      "summary": "Zapier suits teams that want to link everyday applications without building a custom integration layer. Its large automation ecosystem and familiar trigger-and-action model can accelerate straightforward handoffs, including a documented HubSpot connection. The purchase risk is usage growth: successful action steps count toward monthly task allowances, and workflows can be held when that allowance is exhausted. Choose Zapier for accessible cross-app routines; compare Make when branching, visual data transformation and detailed workflow control matter more than getting the first connection running.",
+      "angle": "Fast cross-app workflows with measurable task-volume exposure",
+      "buyerCheck": "Estimate monthly successful action steps, multi-step logic, recovery behavior and available plan limits, not just the advertised app count.",
+      "reviewedAt": "2026-10-08",
+      "sourceUrl": "https://help.zapier.com/hc/en-us/articles/8496181445261-Zap-limits",
+      "method": "vendor_documentation_and_toolscout_editorial_interpretation",
+      "handsOnTested": false
+    }
   },
   {
     "slug": "make",
@@ -681,7 +804,46 @@
         "verifiedAt": "2026-10-08",
         "scope": "Make HubSpot CRM app supports CRM record, contact, event and workflow modules; a HubSpot Super Admin must pre-approve the app."
       }
-    ]
+    ],
+    "freePlanKnown": true,
+    "pricingDetails": {
+      "freePlanStatus": "verified_available",
+      "freePlanSummary": "Free plan includes 1,000 credits per month and a 15-minute minimum scheduled interval at the time checked.",
+      "limits": [
+        "Free tier 1,000 credits per month",
+        "Scheduled scenario minimum interval 15 minutes"
+      ],
+      "sourceUrl": "https://www.make.com/en/pricing",
+      "verifiedAt": "2026-10-08"
+    },
+    "strengths": [
+      "Visual workflow design and data transformations",
+      "Documented HubSpot CRM integration"
+    ],
+    "limitations": [
+      "The cited Free plan carries monthly credit and scheduling limits"
+    ],
+    "tradeoffs": [
+      "Visual branching and orchestration versus workflow design and maintenance effort"
+    ],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.make.com/en/product",
+        "verifiedAt": "2026-10-08",
+        "method": "vendor_documentation_and_toolscout_editorial_interpretation",
+        "handsOnTested": false
+      }
+    ],
+    "editorialReview": {
+      "summary": "Make is strongest when a workflow must be inspected as a connected process rather than configured as a simple series of app triggers. Its visual canvas, routers and data-handling modules fit operations teams building more elaborate cross-system flows, and ToolScout now records a sourced HubSpot CRM integration. The counterweight is design and maintenance effort: teams should test error handling, scenario ownership and usage limits before scaling. Choose Make when the workflow's logic is itself a major requirement; choose Zapier when setup simplicity is more important.",
+      "angle": "Visual process orchestration with greater workflow-design responsibility",
+      "buyerCheck": "Prototype one multi-branch scenario and verify operations or credit consumption, recovery paths and team ownership.",
+      "reviewedAt": "2026-10-08",
+      "sourceUrl": "https://www.make.com/en/product",
+      "method": "vendor_documentation_and_toolscout_editorial_interpretation",
+      "handsOnTested": false
+    }
   },
   {
     "slug": "zoho-crm",
@@ -878,7 +1040,7 @@
     "name": "Ahrefs",
     "category": "seo",
     "description": "SEO and search marketing platform for keyword research, competitor analysis, backlinks and content research.",
-    "pricing": "Paid plans; verify current pricing before publication",
+    "pricing": "Limited free account; paid plans unlock broader research and tracking",
     "freePlan": true,
     "features": [
       "seo",
@@ -919,6 +1081,44 @@
       "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
       "verifiedAt": null,
       "sources": []
+    },
+    "freePlanKnown": true,
+    "pricingDetails": {
+      "freePlanStatus": "verified_available",
+      "freePlanSummary": "A free Ahrefs account exists with a narrower research allowance than its paid Starter plan.",
+      "limits": [
+        "Free accounts do not receive the same general research credits and rank tracking as paid plans"
+      ],
+      "sourceUrl": "https://help.ahrefs.com/en/articles/9419051-about-ahrefs-starter-plan",
+      "verifiedAt": "2026-10-08"
+    },
+    "strengths": [
+      "Backlink and competitor-page research through Site Explorer",
+      "Site Audit and keyword analysis within stated plan allowances"
+    ],
+    "limitations": [
+      "The free account has significantly narrower research and rank tracking allowances than paid plans"
+    ],
+    "tradeoffs": [
+      "Research depth versus subscriptions and usage credits needed across the team"
+    ],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://help.ahrefs.com/en/articles/9419051-about-ahrefs-starter-plan",
+        "verifiedAt": "2026-10-08",
+        "method": "vendor_documentation_and_toolscout_editorial_interpretation",
+        "handsOnTested": false
+      }
+    ],
+    "editorialReview": {
+      "summary": "Ahrefs is particularly relevant when link profiles, competitor pages and keyword opportunities drive the SEO research process. Site Explorer, Keywords Explorer and Site Audit cover different decisions, and Rank Tracker is a separate monitoring workflow rather than the same report with another name. The important caveat is access: Ahrefs' free account and Starter plan have materially different research credits, history and tracked-keyword allowances. For a backlink-led research team it deserves a close look beside Semrush; a buyer needing mostly scheduled multi-client reporting should compare the required limits first.",
+      "angle": "Backlink and competitor research, constrained by plan allowances",
+      "buyerCheck": "Check credits, tracked keywords, projects, report exports and whether work targets owned or third-party domains.",
+      "reviewedAt": "2026-10-08",
+      "sourceUrl": "https://help.ahrefs.com/en/articles/9419051-about-ahrefs-starter-plan",
+      "method": "vendor_documentation_and_toolscout_editorial_interpretation",
+      "handsOnTested": false
     }
   },
   {
@@ -966,6 +1166,34 @@
       "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
       "verifiedAt": null,
       "sources": []
+    },
+    "strengths": [
+      "Repeated technical website audits with historical comparison",
+      "Rank monitoring and SEO reporting orientation"
+    ],
+    "limitations": [
+      "Tracked-keyword, project, API and report limits require tier-specific verification"
+    ],
+    "tradeoffs": [
+      "Recurring agency monitoring versus broad competitor-research depth"
+    ],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://seranking.com/website-audit.html",
+        "verifiedAt": "2026-10-08",
+        "method": "vendor_documentation_and_toolscout_editorial_interpretation",
+        "handsOnTested": false
+      }
+    ],
+    "editorialReview": {
+      "summary": "SE Ranking is a practical shortlist candidate for agencies that need rank tracking and repeatable technical audits without making competitive intelligence the entire purchase. Its website audit covers crawl health, categorized issues and historical comparisons, including options for JavaScript-rendered sites. That does not establish that every client-reporting or API function is included in the same subscription. Choose it where recurring monitoring and client reporting form the core workflow; compare Ahrefs or Semrush when deeper exploratory competitor research is the first requirement.",
+      "angle": "Recurring agency monitoring and technical SEO execution",
+      "buyerCheck": "Verify tracked keywords, project and crawl allowances, reporting permissions, and API access before standardizing a client portfolio.",
+      "reviewedAt": "2026-10-08",
+      "sourceUrl": "https://seranking.com/website-audit.html",
+      "method": "vendor_documentation_and_toolscout_editorial_interpretation",
+      "handsOnTested": false
     }
   },
   {
@@ -1229,6 +1457,45 @@
       "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
       "verifiedAt": null,
       "sources": []
+    },
+    "freePlanKnown": true,
+    "pricingDetails": {
+      "freePlanStatus": "verified_available",
+      "freePlanSummary": "A Free workspace plan exists; database automations beyond Slack notifications require a paid plan.",
+      "limits": [
+        "Free workspace collaboration and file limits apply",
+        "Most database automations require paid plans"
+      ],
+      "sourceUrl": "https://www.notion.com/pricing",
+      "verifiedAt": "2026-10-08"
+    },
+    "strengths": [
+      "Connected pages, knowledge and databases",
+      "Project and collaboration workflows in one space"
+    ],
+    "limitations": [
+      "Most database automations require a paid plan; the free exception is narrow"
+    ],
+    "tradeoffs": [
+      "Flexible knowledge management versus specialist task, CRM or structured operations systems"
+    ],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.notion.com/help/database-automations",
+        "verifiedAt": "2026-10-08",
+        "method": "vendor_documentation_and_toolscout_editorial_interpretation",
+        "handsOnTested": false
+      }
+    ],
+    "editorialReview": {
+      "summary": "Notion is compelling when a team's documentation, knowledge base and lightweight work tracking are dispersed across too many places. Databases and linked pages can give that information a shared structure, while AI features extend the collaboration layer. But knowledge management is not the same job as a dedicated CRM or advanced project-control system, and Notion says most database automations require a paid plan, with a narrow free-plan exception for Slack notifications. Choose Notion for connected knowledge and adaptable team processes; compare Airtable when structured records and governed operational workflows are the center of the purchase.",
+      "angle": "Connected team knowledge with boundaries around operational automation",
+      "buyerCheck": "Test database permissions, offline needs, automation plan restrictions and whether a specialist system is still required.",
+      "reviewedAt": "2026-10-08",
+      "sourceUrl": "https://www.notion.com/help/database-automations",
+      "method": "vendor_documentation_and_toolscout_editorial_interpretation",
+      "handsOnTested": false
     }
   },
   {
@@ -1393,6 +1660,45 @@
       "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
       "verifiedAt": null,
       "sources": []
+    },
+    "freePlanKnown": true,
+    "pricingDetails": {
+      "freePlanStatus": "verified_available",
+      "freePlanSummary": "Free plan exists for individuals and very small teams, with a 1,000-record-per-base limit at the time checked.",
+      "limits": [
+        "Free tier 1,000 records per base",
+        "Free workspace API calls and storage are capped"
+      ],
+      "sourceUrl": "https://support.airtable.com/articles/2277136852-airtable-plans-overview",
+      "verifiedAt": "2026-10-08"
+    },
+    "strengths": [
+      "Related records, interface views and configurable automations",
+      "Database-oriented operational collaboration"
+    ],
+    "limitations": [
+      "Free plan limits records and API usage; runaway automations can queue or be paused"
+    ],
+    "tradeoffs": [
+      "Structured operational workflows versus a document-first knowledge platform"
+    ],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://support.airtable.com/articles/3199652922-managing-airtable-automations",
+        "verifiedAt": "2026-10-08",
+        "method": "vendor_documentation_and_toolscout_editorial_interpretation",
+        "handsOnTested": false
+      }
+    ],
+    "editorialReview": {
+      "summary": "Airtable is best understood as a structured operations layer, not just a more attractive spreadsheet. Related records, views, interfaces and automations help a team turn repeated data work into a shared application-like process. That flexibility also creates governance responsibilities: Airtable documents how self-triggering or high-volume automations can queue work or be paused, so automation design and run limits are part of the decision. Choose Airtable when records and process state need structure; choose Notion when documents, narrative knowledge and team context dominate.",
+      "angle": "Structured operational records, with automation governance to manage",
+      "buyerCheck": "Map record relationships, permissions, automation triggers, run limits and how exceptions will be detected and fixed.",
+      "reviewedAt": "2026-10-08",
+      "sourceUrl": "https://support.airtable.com/articles/3199652922-managing-airtable-automations",
+      "method": "vendor_documentation_and_toolscout_editorial_interpretation",
+      "handsOnTested": false
     }
   },
   {
@@ -1449,6 +1755,34 @@
       "sources": [
         "https://docs.n8n.io/"
       ]
+    },
+    "strengths": [
+      "Self-hosted deployment option and configurable workflow logic",
+      "AI-oriented workflow and integration capabilities recorded in catalog"
+    ],
+    "limitations": [
+      "Self-hosting requires infrastructure, credentials and upgrade ownership"
+    ],
+    "tradeoffs": [
+      "Deployment control and extensibility versus simpler managed onboarding"
+    ],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://docs.n8n.io/hosting/",
+        "verifiedAt": "2026-10-08",
+        "method": "vendor_documentation_and_toolscout_editorial_interpretation",
+        "handsOnTested": false
+      }
+    ],
+    "editorialReview": {
+      "summary": "n8n is the control-oriented option in this automation shortlist. It combines workflow building and AI-oriented nodes with a self-hosting route, which can matter to technical teams with specific deployment or data-handling requirements. Self-hosting is not automatically cheaper or simpler: infrastructure, credentials, updates and support become operational decisions, while managed cloud remains an alternative. Compared with Make and Zapier, n8n makes the most sense when customization and execution control outweigh the quickest no-code onboarding.",
+      "angle": "Deployment control and extensibility over fastest onboarding",
+      "buyerCheck": "Decide cloud versus self-hosting first; evaluate hosting skills, credential security, support and execution limits before estimating total cost.",
+      "reviewedAt": "2026-10-08",
+      "sourceUrl": "https://docs.n8n.io/hosting/",
+      "method": "vendor_documentation_and_toolscout_editorial_interpretation",
+      "handsOnTested": false
     }
   },
   {

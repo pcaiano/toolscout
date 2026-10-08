@@ -305,6 +305,18 @@ function publicTool(tool){
     best_for:Array.isArray(tool.bestFor)?tool.bestFor:[],
     ai_integration:aiIntegration(tool),
     last_verified:tool.lastVerified||null,
+    editorial_review:tool?.editorialReview&&typeof tool.editorialReview==='object'?{
+      angle:tool.editorialReview.angle||null,
+      conclusion:tool.editorialReview.summary||null,
+      buyer_check:tool.editorialReview.buyerCheck||null,
+      strengths:Array.isArray(tool.strengths)?tool.strengths:[],
+      limitations:Array.isArray(tool.limitations)?tool.limitations:[],
+      tradeoffs:Array.isArray(tool.tradeoffs)?tool.tradeoffs:[],
+      reviewed_at:tool.editorialReview.reviewedAt||null,
+      evidence_source:tool.editorialReview.sourceUrl||null,
+      evidence_method:tool.editorialReview.method||null,
+      hands_on_tested:tool.editorialReview.handsOnTested===true
+    }:null,
     profile_url:`https://trytoolscout.org/tools/${encodeURIComponent(tool.slug)}`,
     tool_url:`https://trytoolscout.org/go/${encodeURIComponent(tool.slug)}?source=ai-agent`
   };

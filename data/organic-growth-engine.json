@@ -298,17 +298,48 @@
       "framer|webflow": {
         "analysis": "Webflow and Framer overlap heavily in visual site building, but they pull in different directions once a team goes beyond the canvas. Framer's clearest advantage is AI capability, alongside slightly stronger ease of use and price. Webflow counters with smaller but broader advantages across integrations, SEO and agency fit, plus a more extensible content and marketing workflow. For buyers, this is less a question of which builder has more features than whether speed and AI-assisted creation matter more than depth around site operations, SEO and agency use.",
         "decision": "Choose Framer when rapid visual production, AI-assisted building and ease of use are the harder requirements. Choose Webflow when SEO control, integrations and agency-scale site management carry more weight."
+      },
+      "hubspot|pipedrive": {
+        "analysis": "HubSpot and Pipedrive solve adjacent but different CRM problems. HubSpot becomes more compelling as marketing, service and sales have to share customer context; Pipedrive concentrates more of the working experience on deals, activities and the sales pipeline. The cost comparison cannot be reduced to a single score: HubSpot has a limited free entry point while the practical needs of a growing team may move it into paid hubs, and Pipedrive's workflow and reporting depth should be checked against its subscription tier. Neither integration scores nor AI badges can substitute for testing the team's actual inbox, automation and reporting requirements.",
+        "decision": "Choose HubSpot for cross-team customer operations with room to expand into marketing and service. Choose Pipedrive when salespeople mainly need a clear, accountable pipeline. Verify the required paid features and total seats before deciding."
+      },
+      "ahrefs|semrush": {
+        "analysis": "For SEO research, these platforms overlap on keyword and competitor analysis but invite different buying tests. Ahrefs makes a strong case for backlink profiles, competitor pages and opportunity investigation; Semrush brings keyword research, technical auditing and location-specific position monitoring into a broad operational suite. The decisive questions are not the headline SEO scores, which are close, but how much research depth, tracking and reporting the team needs. Ahrefs' published plan allowances and Semrush's toolkit-specific limits mean the relevant package can change the conclusion.",
+        "decision": "Favor Ahrefs when backlink-led investigation and competitor discovery dominate the team's week. Favor Semrush when SEO projects need coordinated auditing, tracking and broader cross-channel visibility. Compare real plan allowances before treating either as the universal winner."
+      },
+      "make|zapier": {
+        "analysis": "Both tools automate app-to-app work, but the operating experience is different. Zapier is attractive for accessible trigger-and-action routines and broad application handoffs. Make gives teams a visual canvas for designing more complex process logic and transformations. The trade-off only becomes clear with a real workload: Zapier documents successful-action task allowances, while Make requires scenario and operations planning. A simple form-to-CRM handoff is not the same purchasing decision as a multi-branch process with exceptions and retries.",
+        "decision": "Choose Zapier when quick setup and routine app connectivity are the goal. Choose Make when visual branching, transformations and process ownership matter more. Price a representative month's executions rather than comparing entry-level subscription labels."
+      },
+      "make|n8n": {
+        "analysis": "Make and n8n both support sophisticated automations, but hosting and accountability distinguish them. Make focuses on a managed visual workflow environment; n8n offers managed cloud and a self-hosted deployment path for teams willing to own more of the runtime. That does not mean self-hosting automatically saves money: security, credentials, upgrades and incident handling are part of total cost. The deciding question is whether the team wants a managed platform for orchestration or needs stronger control over deployment and custom logic.",
+        "decision": "Choose Make for managed, visually inspectable processes with less infrastructure ownership. Choose n8n when technical control, custom execution patterns or self-hosting are explicit requirements and the team can operate them."
+      },
+      "airtable|notion": {
+        "analysis": "Airtable and Notion can both organize team work, but their centers of gravity differ. Airtable is oriented toward related records, interfaces and repeatable operational processes; Notion starts from pages and shared knowledge with databases embedded in the workspace. For Airtable, test data relationships, automation runs and governance. For Notion, test whether content organization and collaboration outweigh the need for specialist workflows, remembering that most database automations are limited to paid plans. Treat feature lists as starting points, not evidence that the same process will be equally maintainable in either product.",
+        "decision": "Choose Airtable if structured records drive the operation and non-technical teams need controlled interfaces. Choose Notion if the principal job is shared documentation and flexible team knowledge. Prototype the most difficult workflow before migrating."
+      },
+      "clickup|notion": {
+        "analysis": "ClickUp and Notion overlap in collaborative work, yet the first purchasing test should be whether tasks or knowledge are the system of record. ClickUp's task and project focus suits teams demanding planned assignments, statuses and delivery tracking. Notion is more flexible as a living documentation and knowledge environment that also supports projects. The risk is buying one platform to replace specialist processes it only partially covers. Compare the governance of assignments, project dependencies, knowledge search and automation limits using a representative team workflow.",
+        "decision": "Choose ClickUp when project execution and accountability are the core jobs. Choose Notion when documentation and team knowledge should lead and task tracking is comparatively lightweight."
       }
     },
     "fullRolloutAt": "2026-10-06",
     "profileOverrides": {
-      "hubspot": "HubSpot's case is breadth with relatively little stitching between sales, marketing, service and CRM work. ToolScout's catalog gives it top scores for integrations and sales capability, with automation and marketing close behind, so it is strongest when several customer-facing teams need to work from the same platform. The trade-off is value for money: price scores materially lower than its leading dimensions. A recorded free plan makes evaluation easier, and the newly verified ChatGPT, Claude, Gemini and MCP connections strengthen the case for teams building AI-assisted workflows.",
-      "notion": "Notion is most convincing when the problem is fragmented team knowledge rather than a single specialist workflow. Docs, wikis, projects, databases, forms and collaboration sit in one workspace, while ToolScout's scores are strongest for AI capability, ease of use, automation and integrations. That breadth is also the boundary to test: sales and SEO score much lower, so teams buying primarily for those jobs should compare dedicated products. The free plan gives teams a practical way to test whether Notion can replace several lighter tools without forcing it into work better handled by a specialist.",
-      "semrush": "Semrush is the broad-suite choice in this SEO shortlist. Its strongest ToolScout scores are research, SEO and agency fit, with marketing and content also high, which makes it particularly relevant to teams that want keyword, competitor and visibility work in one operating environment. The compromise is commercial rather than functional: value for money is its weakest recorded dimension and ToolScout does not record a free plan. That makes Semrush easier to justify when several teams or clients will use its breadth, and harder to justify when the requirement is one narrow SEO task."
+      "hubspot": "HubSpot earns consideration when a business wants sales, marketing and service data to share one CRM rather than rely on multiple disconnected tools. Its catalog strengths are sales capability and integrations, but the purchasing question is how many hubs and paid seats the team will actually need. HubSpot's free CRM supports a small starting team, yet its own plan matrix limits free users and several automation capabilities. Choose it when connected customer operations matter more than a narrowly focused deal board; compare Pipedrive if pipeline discipline is the main job.",
+      "notion": "Notion is compelling when a team's documentation, knowledge base and lightweight work tracking are dispersed across too many places. Databases and linked pages can give that information a shared structure, while AI features extend the collaboration layer. But knowledge management is not the same job as a dedicated CRM or advanced project-control system, and Notion says most database automations require a paid plan, with a narrow free-plan exception for Slack notifications. Choose Notion for connected knowledge and adaptable team processes; compare Airtable when structured records and governed operational workflows are the center of the purchase.",
+      "semrush": "Semrush is an operational SEO suite for teams coordinating keyword research, site auditing, competitive work and ongoing visibility tracking. Its Position Tracking monitors selected terms by device and location, while Site Audit supports repeated technical checks, so it is useful when several SEO activities have to form one reporting cycle. The trade-off is scope and cost: ToolScout's price score sits well below its research and SEO scores, and limits depend on toolkit and tier. Shortlist Semrush for a broad agency workflow; choose a narrower tool if most of that suite would remain unused.",
+      "pipedrive": "Pipedrive starts with the salesperson's working day: deals, stages, activities and follow-up. Its customizable pipeline and Insights reporting make the buying argument clearer for a team that needs consistent sales execution rather than a combined marketing and service platform. ToolScout's scorecard rates its sales capability highly and its price dimension more cautiously, so test reporting, automations and integrations against the specific paid plan. Pick Pipedrive when activity ownership and deal visibility are the bottleneck; look at HubSpot when marketing and service workflows must share the same operational home.",
+      "ahrefs": "Ahrefs is particularly relevant when link profiles, competitor pages and keyword opportunities drive the SEO research process. Site Explorer, Keywords Explorer and Site Audit cover different decisions, and Rank Tracker is a separate monitoring workflow rather than the same report with another name. The important caveat is access: Ahrefs' free account and Starter plan have materially different research credits, history and tracked-keyword allowances. For a backlink-led research team it deserves a close look beside Semrush; a buyer needing mostly scheduled multi-client reporting should compare the required limits first.",
+      "se-ranking": "SE Ranking is a practical shortlist candidate for agencies that need rank tracking and repeatable technical audits without making competitive intelligence the entire purchase. Its website audit covers crawl health, categorized issues and historical comparisons, including options for JavaScript-rendered sites. That does not establish that every client-reporting or API function is included in the same subscription. Choose it where recurring monitoring and client reporting form the core workflow; compare Ahrefs or Semrush when deeper exploratory competitor research is the first requirement.",
+      "zapier": "Zapier suits teams that want to link everyday applications without building a custom integration layer. Its large automation ecosystem and familiar trigger-and-action model can accelerate straightforward handoffs, including a documented HubSpot connection. The purchase risk is usage growth: successful action steps count toward monthly task allowances, and workflows can be held when that allowance is exhausted. Choose Zapier for accessible cross-app routines; compare Make when branching, visual data transformation and detailed workflow control matter more than getting the first connection running.",
+      "make": "Make is strongest when a workflow must be inspected as a connected process rather than configured as a simple series of app triggers. Its visual canvas, routers and data-handling modules fit operations teams building more elaborate cross-system flows, and ToolScout now records a sourced HubSpot CRM integration. The counterweight is design and maintenance effort: teams should test error handling, scenario ownership and usage limits before scaling. Choose Make when the workflow's logic is itself a major requirement; choose Zapier when setup simplicity is more important.",
+      "n8n": "n8n is the control-oriented option in this automation shortlist. It combines workflow building and AI-oriented nodes with a self-hosting route, which can matter to technical teams with specific deployment or data-handling requirements. Self-hosting is not automatically cheaper or simpler: infrastructure, credentials, updates and support become operational decisions, while managed cloud remains an alternative. Compared with Make and Zapier, n8n makes the most sense when customization and execution control outweigh the quickest no-code onboarding.",
+      "airtable": "Airtable is best understood as a structured operations layer, not just a more attractive spreadsheet. Related records, views, interfaces and automations help a team turn repeated data work into a shared application-like process. That flexibility also creates governance responsibilities: Airtable documents how self-triggering or high-volume automations can queue work or be paused, so automation design and run limits are part of the decision. Choose Airtable when records and process state need structure; choose Notion when documents, narrative knowledge and team context dominate."
     },
     "guideOverrides": {
-      "best-seo-tools-for-agencies": "For an agency, first place here is about breadth across repeatable client work, not a large gap in basic SEO capability. Semrush and Ahrefs both score 10 for SEO, research and agency fit in the current catalog, but Semrush has a small integrations advantage and combines competitive research, content and AI visibility in the same profile. Ahrefs remains a very close alternative when backlink analysis and competitor research are central to the agency's process. Surfer changes the decision rather than simply ranking third: its 10 for content and SEO makes it the specialist option when producing and improving search content matters more than running the broadest research stack.",
-      "best-workflow-automation-tools": "Integrately leads this particular ranking because its 10 for ease of use and 9 for price compensate for being one point behind Zapier and n8n on automation and integrations. That makes it the strongest fit for teams that value a quick no-code start. Zapier is the broader operational choice, scoring 10 for automation and integrations and carrying verified ChatGPT, Claude and MCP connectivity. n8n reaches the same 10s for automation and integrations, adds a 10 for AI capability and self-hosting in its recorded feature set, but scores 7 for ease. The real decision is therefore simplicity versus ecosystem convenience versus technical control."
+      "best-seo-tools-for-agencies": "An agency's SEO stack should be evaluated by the work it repeats across accounts: research, site auditing, tracked keywords, reporting and client handoff. Semrush is a broad operating-suite candidate; Ahrefs is especially relevant to backlink-led competitor investigation; Surfer is a narrower content optimization option. ToolScout's recorded scores are editorial signals, not live product tests or proof of current entitlements. Before adopting a winner, price the actual keyword, crawl and account allowances, and run one representative client campaign through the shortlisted workflow.",
+      "best-workflow-automation-tools": "Do not choose an automation platform from integration count alone. A simple event-to-action handoff, a process with conditional paths and a self-hosted workflow are different jobs. Zapier deserves attention for accessible cross-app connections, Make for visual process orchestration, and n8n for execution control where technical ownership is acceptable. Integrately may rank highly on ToolScout's catalog value and ease scores, but those scores do not verify migration cost or recovery behavior. Prototype the hardest branch, estimate monthly task or operation usage and test what happens when an execution fails before committing."
     },
     "newsOverrides": {
       "news/chatgpt-building-advertising-for-the-way-people-use-ai.html": {
@@ -335,6 +366,88 @@
         "changed": "GitHub has added daily per-user rate limits to new private vulnerability reports, covering both an individual repository and GitHub-wide submission volume. Repository administrators can also set a custom daily overall limit and allow-list trusted reporters so they are never rate limited. The controls apply to new reports only, not comments on existing advisories.",
         "why": "The change targets a real triage problem: automated or low-quality submissions can consume maintainer attention and obscure higher-value reports. For teams using private vulnerability reporting, the buying and governance question is now how aggressively to protect triage capacity without creating unnecessary friction for legitimate researchers. The allow list matters because it gives maintainers a way to preserve trusted reporting relationships while limiting bulk submissions.",
         "availability": "The controls are available for public repositories with private vulnerability reporting enabled on GitHub Free, Pro, Team and Enterprise Cloud. Security teams should set limits against their real report volume, define who qualifies as a trusted reporter and monitor whether rate limiting reduces noise without suppressing useful disclosures."
+      }
+    },
+    "profileDecisionEvidence": {
+      "hubspot": {
+        "angle": "A connected customer platform, with plan boundaries that matter",
+        "buyerCheck": "Check users, marketing contacts, automation and inbox requirements in the exact subscription, not only the free CRM label.",
+        "sourceUrl": "https://www.hubspot.com/pricing/crm",
+        "checkedOn": "2026-10-08",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      },
+      "pipedrive": {
+        "angle": "Pipeline execution before all-in-one customer operations",
+        "buyerCheck": "Trial the team's real deal stages, required reporting and follow-up automations, then confirm which plan includes each feature.",
+        "sourceUrl": "https://www.pipedrive.com/en/features/pipeline-management",
+        "checkedOn": "2026-10-08",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      },
+      "semrush": {
+        "angle": "A broad SEO operating environment, not a one-task purchase",
+        "buyerCheck": "Confirm tracked-keyword allocation, projects, audit limits and the exact toolkit; a high SEO score is not proof that every module is included.",
+        "sourceUrl": "https://www.semrush.com/kb/32-position-tracking",
+        "checkedOn": "2026-10-08",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      },
+      "ahrefs": {
+        "angle": "Backlink and competitor research, constrained by plan allowances",
+        "buyerCheck": "Check credits, tracked keywords, projects, report exports and whether work targets owned or third-party domains.",
+        "sourceUrl": "https://help.ahrefs.com/en/articles/9419051-about-ahrefs-starter-plan",
+        "checkedOn": "2026-10-08",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      },
+      "se-ranking": {
+        "angle": "Recurring agency monitoring and technical SEO execution",
+        "buyerCheck": "Verify tracked keywords, project and crawl allowances, reporting permissions, and API access before standardizing a client portfolio.",
+        "sourceUrl": "https://seranking.com/website-audit.html",
+        "checkedOn": "2026-10-08",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      },
+      "zapier": {
+        "angle": "Fast cross-app workflows with measurable task-volume exposure",
+        "buyerCheck": "Estimate monthly successful action steps, multi-step logic, recovery behavior and available plan limits, not just the advertised app count.",
+        "sourceUrl": "https://help.zapier.com/hc/en-us/articles/8496181445261-Zap-limits",
+        "checkedOn": "2026-10-08",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      },
+      "make": {
+        "angle": "Visual process orchestration with greater workflow-design responsibility",
+        "buyerCheck": "Prototype one multi-branch scenario and verify operations or credit consumption, recovery paths and team ownership.",
+        "sourceUrl": "https://www.make.com/en/product",
+        "checkedOn": "2026-10-08",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      },
+      "n8n": {
+        "angle": "Deployment control and extensibility over fastest onboarding",
+        "buyerCheck": "Decide cloud versus self-hosting first; evaluate hosting skills, credential security, support and execution limits before estimating total cost.",
+        "sourceUrl": "https://docs.n8n.io/hosting/",
+        "checkedOn": "2026-10-08",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      },
+      "notion": {
+        "angle": "Connected team knowledge with boundaries around operational automation",
+        "buyerCheck": "Test database permissions, offline needs, automation plan restrictions and whether a specialist system is still required.",
+        "sourceUrl": "https://www.notion.com/help/database-automations",
+        "checkedOn": "2026-10-08",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      },
+      "airtable": {
+        "angle": "Structured operational records, with automation governance to manage",
+        "buyerCheck": "Map record relationships, permissions, automation triggers, run limits and how exceptions will be detected and fixed.",
+        "sourceUrl": "https://support.airtable.com/articles/3199652922-managing-airtable-automations",
+        "checkedOn": "2026-10-08",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
       }
     }
   }
