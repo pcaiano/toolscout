@@ -189,14 +189,24 @@ test('all 38 guides and 15 comparisons publish their unique decision conclusions
   assert.equal(Object.keys(ed.guideOverrides).length,38);
   assert.equal(Object.keys(ed.comparisonOverrides).length,15);
   const uniqueGuides=new Set(),uniqueComparisons=new Set();
+  const holds=JSON.parse(read('reports/seo-publication-holds.json')).items||[];
+  const heldSlugs=new Set(holds.map(x=>x.intent));
+  let liveGuides=0;
   for(const item of intents){
-    const path=item.slug+'.html',copy=ed.guideOverrides[item.slug],html=read(path);
+    const path=item.slug+'.html',copy=ed.guideOverrides[item.slug];
     assert.ok(copy?.length>=220,'Missing substantial guide analysis: '+item.slug);
+    uniqueGuides.add(copy.slice(0,80).toLowerCase());
+    if(heldSlugs.has(item.slug)){
+      assert.equal(fs.existsSync(new URL('../'+path,import.meta.url)),false,'Held SEO guide must remain unpublished: '+item.slug);
+      continue;
+    }
+    const html=read(path);
+    liveGuides++;
     assert.ok(html.includes(esc(copy).slice(0,85)),'Stale guide analysis: '+item.slug);
     assert.ok(html.includes('<link rel="canonical" href="https://trytoolscout.org/'+item.slug+'">'),'Canonical drift '+item.slug);
     assert.ok(!html.includes('This is a genuine trade-off rather than a cosmetic tie.'),'Generic filler '+item.slug);
-    uniqueGuides.add(copy.slice(0,80).toLowerCase());
   }
+  assert.equal(liveGuides,36,'SEO publication holds must not be bypassed');
   for(const [a,b] of pairs){
     const id=a+'-vs-'+b,key=[a,b].sort().join('|'),copy=ed.comparisonOverrides[key],html=read(id+'.html');
     assert.ok(copy?.analysis?.length>=250,'Missing comparison analysis '+key);
