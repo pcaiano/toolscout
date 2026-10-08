@@ -559,8 +559,8 @@ async function callCatalogTool(name,args,request,env){
       const improvements=[],sacrifices=[];
       for(const d of [...new Set([...dims,'price','ease','automation','integrations'])]){
         const ss=scoreOf(source,d),cs=scoreOf(t,d);if(ss==null||cs==null)continue;
-        if(cs-ss>=2)improvements.push({dimension:d,from:ss,to:cs});
-        if(ss-cs>=2)sacrifices.push({dimension:d,from:ss,to:cs});
+        if(cs-ss>=1)improvements.push({dimension:d,from:ss,to:cs});
+        if(ss-cs>=1)sacrifices.push({dimension:d,from:ss,to:cs});
       }
       const reasonLift=improvements.filter(x=>dims.includes(x.dimension)).reduce((s,x)=>s+x.to-x.from,0);
       return {...ev,improvements_over_source:improvements,tradeoffs_vs_source:sacrifices,alternative_score:ev.fit_score+reasonLift*4};
