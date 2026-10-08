@@ -49,6 +49,29 @@ def inspect(path=DATA):
             counters["generic_pricing"] += 1
         if (tool.get("aiIntegration") or {}).get("status") != "verified":
             counters["ai_integration_unverified"] += 1
+        if tool.get("freePlanKnown") is not True:
+            counters["free_plan_status_unverified"] += 1
+        pairs = tool.get("integrations") or []
+        if not isinstance(pairs, list):
+            counters["invalid_integration_evidence"] += 1
+        else:
+            for pair in pairs:
+                if not isinstance(pair, dict):
+                    counters["invalid_integration_evidence"] += 1
+                    continue
+                if pair.get("status") == "verified":
+                    source = str(pair.get("sourceUrl") or pair.get("source_url") or "")
+                    verified_at = pair.get("verifiedAt") or pair.get("verified_at")
+                    name = pair.get("product") or pair.get("tool") or pair.get("name")
+                    try:
+                        date.fromisoformat(verified_at)
+                        valid_date = True
+                    except (TypeError, ValueError):
+                        valid_date = False
+                    if not name or not source.startswith("https://") or not valid_date:
+                        counters["invalid_integration_evidence"] += 1
+                    else:
+                        counters["verified_integration_pairs"] += 1
         if not tool.get("affiliateUrl"):
             counters["no_explicit_affiliate_url"] += 1
         if not tool.get("sourceUrl"):
