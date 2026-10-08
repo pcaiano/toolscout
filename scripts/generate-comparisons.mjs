@@ -173,7 +173,7 @@ function iconSources(t){
   const curated=assets?.[t.slug]?.url||'';
   return{src:curated||first||google,first:curated?first:'',google,stage:curated?0:1};
 }
-function priceLabel(t){return t?.freePlanKnown===true&&t?.pricingDetails?.freePlanStatus==='verified_available'&&t?.pricingDetails?.sourceUrl&&t?.pricingDetails?.freePlanSummary?t.pricingDetails.freePlanSummary:(t?.pricing||'See vendor');}
+function priceLabel(t){return t?.freePlanKnown===true&&t?.pricingDetails?.freePlanStatus==='verified_available'&&t?.pricingDetails?.sourceUrl&&t?.pricingDetails?.freePlanSummary?t.pricingDetails.freePlanSummary:t?.pricingDetails?.trialStatus==='verified_available'&&t?.pricingDetails?.sourceUrl&&t?.pricingDetails?.trialSummary?t.pricingDetails.trialSummary:(t?.pricing||'See vendor');}
 function freeLabel(t){return t.freePlanKnown!==true?'Unknown':t.freePlan?'Yes':'No';}
 function headHtml(t){
   const icon=iconSources(t);
