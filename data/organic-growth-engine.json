@@ -396,7 +396,7 @@
       "buffer": "Buffer documents recurring queue slots and individual time zones for connected social channels. Scheduled posts fill the next available slot, which can simplify a steady publishing rhythm for small teams. The same mechanism can misalign time-critical campaigns when people assume every queued post has a fixed date. Roles and queue allowances also merit checking. Compare reliable cadence, channel coverage and approvals rather than just a calendar view.",
       "webflow": "Webflow documents locale-specific page slugs, SEO metadata and dynamic collection content. It can therefore suit a design-led business maintaining structured marketing pages for several markets. But visual creation does not eliminate the workload of modelling content, translating variants or governing publication rights. Localization features may be plan-dependent and should be tested with the actual content model. Compare long-term CMS maintenance and multilingual SEO needs rather than evaluating only the visual editor.",
       "surfer": "Surfer's official Content Editor documentation describes Content Score as a combination of SEO and AI-search signals, including topical coverage and upfront answer alignment. These scores can make editorial briefs and revision priorities more repeatable. But optimizing to a score is not evidence of organic performance, and excessive term repetition can reduce readability. Teams should compare the content's factual distinctiveness, search intent and observed clicks rather than treating a high score as an outcome in itself.",
-      "mixpanel": "Mixpanel centers funnel conversion, retention and user journey analysis. Its usefulness depends on consistent event definitions and identity stitching rather than a more attractive dashboard. Compare it with PostHog when experimentation and session replay need to live in the same operating environment.",
+      "mixpanel": "Mixpanel's official training covers creating cohorts from behavior or profile attributes and reusing them in Funnels, Flows and Retention analysis. That is valuable when a product team needs to distinguish users who activate from those who return and become loyal. The challenge is event governance: a cohort created from inconsistent identity or event names can produce persuasive but invalid results. Compare Mixpanel through decisions the team can make from reliable product signals, not dashboard sophistication alone.",
       "freshdesk": "Freshdesk documents automation rules that classify and route newly created support tickets. This helps support teams distribute repetitive requests without manually opening every message. The trade-off is correct classification: a loosely defined subject condition can wrongly prioritize or assign a sensitive issue. Product versions, permissions and plan rights also warrant checking. Test a representative ticket mix and urgent fallback, not simply whether a rule can be created.",
       "framer": "Framer documents adding locales, choosing region fallbacks and providing manual or AI translation. This can accelerate multilingual campaign sites when the same design must reach several markets. The constraint is upkeep: each additional locale can demand translated calls to action, quality checks and accurate metadata, not just a language toggle. Evaluate the publishing workflow and the team's localization capacity before buying on visual polish.",
       "perplexity": "Perplexity's documentation describes Spaces as collaborative topic hubs with research threads and optional uploaded file search. That is useful for organizing recurring investigations rather than collecting unrelated answers. However, source citations still require checking against originals, and file-search eligibility and collaboration vary by subscription. A research assistant should not be confused with a verified system of record or transaction platform. Test the tool using factual questions with known reference answers and the privacy controls required by the team.",
@@ -442,7 +442,7 @@
       "getresponse": "GetResponse documents automation workflows made from conditions, actions and filters, including link clicks and other subscriber events. That breadth can support product launches and customer nurture alongside newsletters. But more paths mean more room for silent mistakes in contact segmentation or consent, while automation entitlements may vary by subscription. A business sending occasional campaigns may be better served by a simpler email platform. Compare the complete subscriber journey, not the list of possible triggers.",
       "omnisend": "Omnisend documents workflow triggers, filters and activation settings for automated marketing campaigns. These features matter when a store uses customer behavior to coordinate lifecycle emails and other channels. A visually complete workflow is not necessarily active or correctly scoped, and delayed store events can lead to mistimed messages. Evaluate segmentation, opt-in handling and order data quality before choosing an all-in-one automation platform over a simple newsletter sender.",
       "constant-contact": "Constant Contact documents an Automation Path Builder triggered by subscriber actions, calendar dates and commerce activity. Its help centre distinguishes current automation paths from earlier legacy email series, a meaningful issue for migrating users. Newsletter-only teams may not need complicated journeys; event-led marketers should verify entitlements, consent controls and audience segments first. Price the workflow the team actually uses rather than all available features.",
-      "basecamp": "Basecamp's combination of project messages, to-dos and schedules can reduce scattered conversations for a small team. The simplicity is intentional, but teams requiring deep dependencies, resourcing or portfolio analytics may need a different tool. Examine the complete project life cycle rather than just its to-do list.",
+      "basecamp": "Basecamp documents projects assembled from optional tools such as messages, to-do lists and schedules. Teams can turn off unnecessary modules and reuse common setups through templates. That is useful for smaller groups seeking clear coordination without maintaining a heavily configured project management system. The trade-off is breadth: complex dependency mapping, resource forecasting or granular portfolio reporting may require separate systems. Compare time spent coordinating real assignments rather than the number of features in a demo.",
       "wrike": "Wrike documents approvals used to request and track reviews of work items and attached files. This helps organizations handling creative assets, client deliverables and processes where acceptance has consequences. The trade-off is complexity: too many approval stages can delay projects, and plan entitlements govern availability. A new task manager is justified only if it makes accountable decisions clearer than existing project communication. Test rejections and re-submissions, not just the green approval state.",
       "jira": "Atlassian documents Jira workflows built from statuses and directed transitions. That is valuable when teams need formal handoffs from intake to implementation, review and completion. A poorly designed workflow can create unnecessary approvals or prevent legitimate rework, so more configurable does not always mean more productive. Compare reporting quality and administrative load against the team's actual release and exception process.",
       "pabbly-connect": "Pabbly Connect is listed for webhook-driven workflows and app connections. It can be a candidate for simpler operational integrations, but the catalog does not verify exact connector behavior, error handling or pricing allowances. Test the workload against Zapier, Make and n8n rather than assuming equivalent capabilities.",
@@ -887,11 +887,11 @@
         "handsOnTested": false
       },
       "mixpanel": {
-        "angle": "Analyze product behavior, not just page visits",
-        "buyerCheck": "Instrument signup and activation with clear anonymous-to-known identity transitions.",
-        "sourceUrl": null,
+        "angle": "Product retention needs cohorts defined around meaningful events",
+        "buyerCheck": "Define activation and return events, build two cohorts and confirm counts against instrumentation.",
+        "sourceUrl": "https://university.mixpanel.com/student/activity/3411675-cohorts-understanding-and-analyzing-user-groups",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "freshdesk": {
@@ -1255,11 +1255,11 @@
         "handsOnTested": false
       },
       "basecamp": {
-        "angle": "Project communication without elaborate administrative machinery",
-        "buyerCheck": "Pilot a client project including files, comments, deadlines and external participants.",
-        "sourceUrl": null,
+        "angle": "Project simplicity depends on the tools the team actually uses",
+        "buyerCheck": "Set up a client project template with messages, due dates and guests, and track one full handoff.",
+        "sourceUrl": "https://3.basecamp-help.com/article/25-projects",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "wrike": {
