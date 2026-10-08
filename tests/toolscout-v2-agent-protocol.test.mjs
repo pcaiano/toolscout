@@ -119,7 +119,7 @@ test('MCP stack fit never treats incidental text such as sales teams as Microsof
   const fit=payload.result.structuredContent.candidates[0].stack_fit;
   assert.equal(fit.verified_pairs,0);
   assert.equal(fit.pairs[0].status,'pair_unverified');
-  assert.doesNotMatch(fit.pairs[0].evidence,/verified product-specific evidence/i);
+  assert.match(fit.pairs[0].evidence,/does not currently store verified product-specific evidence for Teams/i);
 });
 
 test('MCP free-form constraints are evaluated and surfaced as verified, not_verified or conflict',async()=>{
