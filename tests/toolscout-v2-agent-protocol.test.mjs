@@ -20,7 +20,7 @@ test('agent card is served without legacy fallback',async()=>{
   );
   assert.equal(response.status,200);
   const body=await response.json();
-  assert.equal(body.name,'ToolScout Software Recommendation Agent');
+  assert.equal(body.name,'ToolScout Software Decision Agent');
   assert.equal(body.supportedInterfaces[0].url,'https://trytoolscout.org/a2a');
 });
 
@@ -55,7 +55,7 @@ test('MCP publishes the expanded ToolScout decision toolset',async()=>{
   );
   assert.equal(response.status,200);
   const payload=await response.json();
-  assert.deepEqual(payload.result.tools.map(x=>x.name),['recommend_tools','search_tools','get_tool','compare_tools','get_ai_compatibility']);
+  assert.deepEqual(payload.result.tools.map(x=>x.name),['decide_software','compare_for_use_case','find_alternatives','check_stack_fit','recent_changes','recommend_tools','search_tools','get_tool','compare_tools','get_ai_compatibility']);
 });
 
 test('MCP get_tool returns ToolScout URLs without exposing raw affiliate programme fields',async()=>{
@@ -73,6 +73,75 @@ test('MCP get_tool returns ToolScout URLs without exposing raw affiliate program
   assert.match(payload.result.structuredContent.tool.tool_url,/\/go\/hubspot\?source=ai-agent$/);
   assert.equal('affiliateUrl' in payload.result.structuredContent.tool,false);
   assert.equal('commission' in payload.result.structuredContent.tool,false);
+});
+
+
+test('MCP decide_software returns an evidence-aware shortlist with trade-offs',async()=>{
+  const catalog=JSON.parse(fs.readFileSync(new URL('../data/tools.json',import.meta.url),'utf8'));
+  const env={ASSETS:{fetch:async request=>new URL(request.url).pathname==='/data/tools.json'?Response.json(catalog):new Response('',{status:404})}};
+  const body={jsonrpc:'2.0',id:20,method:'tools/call',params:{name:'decide_software',arguments:{job:'CRM for a small consultancy with automation and integrations',budget:'low',team:'small',priorities:['ease','automation','integrations'],existing_tools:['ChatGPT'],limit:3},_meta:{'io.modelcontextprotocol/protocolVersion':'2026-07-28','io.modelcontextprotocol/clientInfo':{name:'test-client',version:'1.0'}}}};
+  const response=await handleAgentProtocolRoute(
+    new Request('https://trytoolscout.org/mcp',{method:'POST',headers:{'Content-Type':'application/json','MCP-Protocol-Version':'2026-07-28','Mcp-Method':'tools/call','Mcp-Name':'decide_software'},body:JSON.stringify(body)}),
+    env,{waitUntil(){}}
+  );
+  assert.equal(response.status,200);
+  const payload=await response.json();
+  assert.ok(payload.result.structuredContent.shortlist.length>=2);
+  assert.equal(payload.result.structuredContent.decision_basis.no_pay_to_rank,true);
+  assert.ok(payload.result.structuredContent.shortlist.every(x=>Array.isArray(x.tradeoffs)&&x.stack_fit));
+});
+
+test('MCP compare_for_use_case exposes contextual trade-offs and affordability loss analysis',async()=>{
+  const catalog=JSON.parse(fs.readFileSync(new URL('../data/tools.json',import.meta.url),'utf8'));
+  const env={ASSETS:{fetch:async request=>new URL(request.url).pathname==='/data/tools.json'?Response.json(catalog):new Response('',{status:404})}};
+  const body={jsonrpc:'2.0',id:21,method:'tools/call',params:{name:'compare_for_use_case',arguments:{tools:['hubspot','pipedrive'],use_case:'CRM for a small consultancy with automation and integrations',priorities:['price','ease','automation','integrations'],existing_tools:['ChatGPT']},_meta:{'io.modelcontextprotocol/protocolVersion':'2026-07-28','io.modelcontextprotocol/clientInfo':{name:'test-client',version:'1.0'}}}};
+  const response=await handleAgentProtocolRoute(
+    new Request('https://trytoolscout.org/mcp',{method:'POST',headers:{'Content-Type':'application/json','MCP-Protocol-Version':'2026-07-28','Mcp-Method':'tools/call','Mcp-Name':'compare_for_use_case'},body:JSON.stringify(body)}),
+    env,{waitUntil(){}}
+  );
+  assert.equal(response.status,200);
+  const payload=await response.json();
+  assert.equal(payload.result.structuredContent.tools.length,2);
+  assert.ok(['best_fit','close_call'].includes(payload.result.structuredContent.verdict.type));
+  assert.ok(Array.isArray(payload.result.structuredContent.tradeoffs));
+  assert.ok(payload.result.structuredContent.cheaper_option_analysis);
+});
+
+test('MCP alternatives improve the stated complaint without hiding sacrifices',async()=>{
+  const catalog=JSON.parse(fs.readFileSync(new URL('../data/tools.json',import.meta.url),'utf8'));
+  const env={ASSETS:{fetch:async request=>new URL(request.url).pathname==='/data/tools.json'?Response.json(catalog):new Response('',{status:404})}};
+  const body={jsonrpc:'2.0',id:22,method:'tools/call',params:{name:'find_alternatives',arguments:{tool:'hubspot',dislike:'too expensive and complex',must_have:['automation'],limit:3},_meta:{'io.modelcontextprotocol/protocolVersion':'2026-07-28','io.modelcontextprotocol/clientInfo':{name:'test-client',version:'1.0'}}}};
+  const response=await handleAgentProtocolRoute(
+    new Request('https://trytoolscout.org/mcp',{method:'POST',headers:{'Content-Type':'application/json','MCP-Protocol-Version':'2026-07-28','Mcp-Method':'tools/call','Mcp-Name':'find_alternatives'},body:JSON.stringify(body)}),
+    env,{waitUntil(){}}
+  );
+  assert.equal(response.status,200);
+  const payload=await response.json();
+  assert.equal(payload.result.structuredContent.source.slug,'hubspot');
+  assert.ok(payload.result.structuredContent.alternatives.length>=1);
+  assert.ok(payload.result.structuredContent.alternatives.every(x=>Array.isArray(x.improvements_over_source)&&Array.isArray(x.tradeoffs_vs_source)));
+});
+
+test('MCP recent_changes reads only ToolScout editorial evidence associated with the requested product',async()=>{
+  const catalog=JSON.parse(fs.readFileSync(new URL('../data/tools.json',import.meta.url),'utf8'));
+  const news='<!doctype html><a href="/news/hubspot-mcp-server-updates.html">HubSpot</a>';
+  const article='<!doctype html><script type="application/ld+json">'+JSON.stringify({'@context':'https://schema.org','@type':'NewsArticle',headline:'HubSpot expands MCP',description:'HubSpot expands MCP capabilities.',datePublished:'2026-09-15',mainEntityOfPage:'https://trytoolscout.org/news/hubspot-mcp-server-updates.html',about:{'@type':'SoftwareApplication',name:'HubSpot'}})+'</script>';
+  const env={ASSETS:{fetch:async request=>{
+    const p=new URL(request.url).pathname;
+    if(p==='/data/tools.json')return Response.json(catalog);
+    if(p==='/whats-new.html')return new Response(news,{status:200});
+    if(p==='/news/hubspot-mcp-server-updates.html')return new Response(article,{status:200});
+    return new Response('',{status:404});
+  }}};
+  const body={jsonrpc:'2.0',id:23,method:'tools/call',params:{name:'recent_changes',arguments:{tools:['hubspot'],limit_per_tool:2},_meta:{'io.modelcontextprotocol/protocolVersion':'2026-07-28','io.modelcontextprotocol/clientInfo':{name:'test-client',version:'1.0'}}}};
+  const response=await handleAgentProtocolRoute(
+    new Request('https://trytoolscout.org/mcp',{method:'POST',headers:{'Content-Type':'application/json','MCP-Protocol-Version':'2026-07-28','Mcp-Method':'tools/call','Mcp-Name':'recent_changes'},body:JSON.stringify(body)}),
+    env,{waitUntil(){}}
+  );
+  assert.equal(response.status,200);
+  const payload=await response.json();
+  assert.equal(payload.result.structuredContent.changes.length,1);
+  assert.equal(payload.result.structuredContent.changes[0].tool,'HubSpot');
 });
 
 
