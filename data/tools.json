@@ -694,9 +694,9 @@
       "summary": "Jasper documents a reusable knowledge base for product facts, audiences and brand context. This can reduce repeated briefing when several marketers produce campaign assets for one business. The limitation is governance: incorrect or stale knowledge can be repeatedly reproduced as confident promotional statements. Team review and approval are still necessary, and a generic assistant may be enough for infrequent content work. Compare review time and factual consistency across a real campaign.",
       "buyerCheck": "Create five campaign assets from an approved product brief and check every claim.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": "https://help.jasper.ai/hc/en-us/articles/18618707176347-Knowledge-Base",
+      "sourceUrl": "https://www.jasper.ai/knowledge-base",
       "sourceUrls": [
-        "https://help.jasper.ai/hc/en-us/articles/18618707176347-Knowledge-Base"
+        "https://www.jasper.ai/knowledge-base"
       ],
       "method": "first_party_documentation_plus_editorial_judgment",
       "verificationStatus": "vendor_documented",
@@ -716,7 +716,7 @@
     "evidence": [
       {
         "claimScope": "toolscout_editorial_review",
-        "sourceUrl": "https://help.jasper.ai/hc/en-us/articles/18618707176347-Knowledge-Base",
+        "sourceUrl": "https://www.jasper.ai/knowledge-base",
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
@@ -3733,13 +3733,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Analyze product behavior, not just page visits",
-      "summary": "Mixpanel centers funnel conversion, retention and user journey analysis. Its usefulness depends on consistent event definitions and identity stitching rather than a more attractive dashboard. Compare it with PostHog when experimentation and session replay need to live in the same operating environment.",
-      "buyerCheck": "Instrument signup and activation with clear anonymous-to-known identity transitions.",
+      "angle": "Funnel analysis matters only with a trustworthy event model",
+      "summary": "Mixpanel's own funnel-analysis guidance explains how a sequence of user events reveals where visitors drop out before conversion, with segment-level comparisons supporting investigation. This can guide teams optimizing onboarding, checkout or product activation. The significant constraint is instrumentation: missed events, incorrect identities and inconsistent step definitions can make funnel metrics misleading. The value of Mixpanel therefore depends on reliable data governance and experiments that follow from observed problems, not the number of reporting views. Compare investigation speed against analytics maintenance overhead.",
+      "buyerCheck": "Instrument signup, activation and purchase events; audit identity handling and one funnel drop-off against raw event records.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://mixpanel.com/blog/introduction-to-analytics-funnel-analysis/",
+      "sourceUrls": [
+        "https://mixpanel.com/blog/introduction-to-analytics-funnel-analysis/"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -3753,7 +3756,15 @@
     "tradeoffs": [
       "Analyze product behavior, not just page visits"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://mixpanel.com/blog/introduction-to-analytics-funnel-analysis/",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -6138,13 +6149,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Focused SEO utilities for keyword and SERP tasks",
-      "summary": "Mangools is oriented toward keyword discovery, SERP inspection and routine rank tracking. Its suite can be appealing when the buyer wants approachable tools for several discrete research steps rather than a large agency platform. Verify update frequency, geographic data and tracked-keyword quotas.",
-      "buyerCheck": "Research a competitor topic, track a set of terms and test data export.",
+      "angle": "Keyword research should separate volume from achievable opportunity",
+      "summary": "Mangools documents KWFinder's seed-keyword, domain-based and keyword-gap searches, alongside search-volume estimates, difficulty and SERP observations. This is useful for a marketer building a targeted content plan without adopting a broad enterprise SEO suite. The manufacturer also notes that keyword suggestions and quotas vary by subscription, and keyword difficulty is an estimation rather than a guarantee of ranking. The buying trade-off is depth versus workflow simplicity: compare useful opportunities found and verification effort, not just the number of reported keyword ideas.",
+      "buyerCheck": "Research one niche in a target country, compare difficulty with live search results and export an actionable content shortlist.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://mangools.com/blog/kwfinder-guide/",
+      "sourceUrls": [
+        "https://mangools.com/blog/kwfinder-guide/"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -6158,7 +6172,15 @@
     "tradeoffs": [
       "Focused SEO utilities for keyword and SERP tasks"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://mangools.com/blog/kwfinder-guide/",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -6710,9 +6732,9 @@
       "summary": "Crisp documents assigning support conversations to specific operators and applying automatic routing rules. This matters when a shared inbox starts to suffer from duplicate replies, missing owners or uneven workload. Routing functions and operator teams have plan-specific limits; configuration errors can leave an urgent request in the wrong queue. Evaluate workload distribution with actual enquiries rather than the appearance of the website widget.",
       "buyerCheck": "Route billing and technical tickets among available and unavailable operators.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": "https://help.crisp.chat/en/article/how-to-route-and-assign-conversations-to-operators-in-crisp-qjl2d2/",
+      "sourceUrl": "https://help.crisp.chat/en/article/how-to-route-and-assign-conversations-to-operators-bv8z4c/",
       "sourceUrls": [
-        "https://help.crisp.chat/en/article/how-to-route-and-assign-conversations-to-operators-in-crisp-qjl2d2/"
+        "https://help.crisp.chat/en/article/how-to-route-and-assign-conversations-to-operators-bv8z4c/"
       ],
       "method": "first_party_documentation_plus_editorial_judgment",
       "verificationStatus": "vendor_documented",
@@ -6732,7 +6754,7 @@
     "evidence": [
       {
         "claimScope": "toolscout_editorial_review",
-        "sourceUrl": "https://help.crisp.chat/en/article/how-to-route-and-assign-conversations-to-operators-in-crisp-qjl2d2/",
+        "sourceUrl": "https://help.crisp.chat/en/article/how-to-route-and-assign-conversations-to-operators-bv8z4c/",
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
@@ -7535,13 +7557,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Project communication without elaborate administrative machinery",
-      "summary": "Basecamp's combination of project messages, to-dos and schedules can reduce scattered conversations for a small team. The simplicity is intentional, but teams requiring deep dependencies, resourcing or portfolio analytics may need a different tool. Examine the complete project life cycle rather than just its to-do list.",
-      "buyerCheck": "Pilot a client project including files, comments, deadlines and external participants.",
+      "angle": "A shared project home reduces coordination overhead",
+      "summary": "Basecamp's current help documentation describes projects as configurable spaces with message boards, to-do lists, documents, calendars and automatic check-ins. Teams can choose which tools to include and whether a project is invite-only or broadly accessible. That makes Basecamp useful for agencies and small teams seeking one clear coordination home rather than a complex portfolio planning system. The trade-off is reporting depth and customization: simple project boards do not replace detailed resource forecasting or dependency maps. Assess visibility and client permissions using a representative project.",
+      "buyerCheck": "Set up a client project, restrict access, assign tasks and review how team members recover past decisions.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://5.basecamp-help.com/article/1176-creating-and-setting-up-a-project",
+      "sourceUrls": [
+        "https://5.basecamp-help.com/article/1176-creating-and-setting-up-a-project"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -7555,7 +7580,15 @@
     "tradeoffs": [
       "Project communication without elaborate administrative machinery"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://5.basecamp-help.com/article/1176-creating-and-setting-up-a-project",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -7862,13 +7895,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "App automations requiring reliable execution accounting",
-      "summary": "Pabbly Connect is listed for webhook-driven workflows and app connections. It can be a candidate for simpler operational integrations, but the catalog does not verify exact connector behavior, error handling or pricing allowances. Test the workload against Zapier, Make and n8n rather than assuming equivalent capabilities.",
-      "buyerCheck": "Run a webhook-to-CRM scenario with retries, filters and actual volume reporting.",
+      "angle": "Webhook automations require reliable triggers and task economics",
+      "summary": "Pabbly Connect's manufacturer documentation describes how applications send trigger events to workflow-specific webhook URLs and then process mapped actions. Its product guidance distinguishes chargeable action tasks from trigger checks and certain built-in processing steps. This can appeal to teams with frequent automations, provided the connected apps and event payloads are consistent. The trade-off is operational reliability: failed requests, duplicate events, data mapping changes and retries can matter more than attractive task allowances. Compare an actual cross-app process before migrating a working integration.",
+      "buyerCheck": "Build a webhook-to-CRM workflow, repeat a payload, test errors and calculate billable actions for normal volumes.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://docs.pabbly.com/pabbly/doc/how-to-integrate-your-application-with-pabbly-connect-integration-guide.21",
+      "sourceUrls": [
+        "https://docs.pabbly.com/pabbly/doc/how-to-integrate-your-application-with-pabbly-connect-integration-guide.21"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -7882,7 +7918,15 @@
     "tradeoffs": [
       "App automations requiring reliable execution accounting"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://docs.pabbly.com/pabbly/doc/how-to-integrate-your-application-with-pabbly-connect-integration-guide.21",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
