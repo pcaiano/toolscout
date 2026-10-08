@@ -1,0 +1,61 @@
+name: ToolScout editorial wave 5 one shot release
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/editorial-wave5-one-shot-20261008.yml'
+permissions:
+  contents: read
+concurrency:
+  group: toolscout-editorial-wave5-release
+  cancel-in-progress: false
+jobs:
+  deploy-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate editorial manufacturer sourcing
+        run: |
+          TOOLSCOUT_VENDOR_EVIDENCE_REQUIRE_BASE=1 node scripts/check-vendor-evidence.mjs
+          node --test tests/toolscout-v2-manufacturer-docs.test.mjs tests/toolscout-v2-editorial-evidence-generators.test.mjs
+      - name: Wrangler dry-run build
+        run: npx wrangler deploy --config wrangler.toml --dry-run --outdir /tmp/toolscout-wave5-wrangler
+      - name: Deploy Cloudflare Worker without D1 mutations
+        run: npx wrangler deploy --config wrangler.toml --latest
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      - name: Verify nine live profiles and commercial links
+        run: |
+          set -euo pipefail
+          for slug in getresponse screaming-frog sentry hotjar notebooklm close fillout sprout-social surfer; do
+            curl --retry 4 --retry-delay 2 --fail --silent --show-error -L "https://trytoolscout.org/tools/${slug}?toolscout_wave5_20261008=1" -o "/tmp/toolscout-${slug}.html"
+          done
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const catalog=JSON.parse(fs.readFileSync('data/tools.json','utf8'));
+          const slugs=['getresponse','screaming-frog','sentry','hotjar','notebooklm','close','fillout','sprout-social','surfer'];
+          const social=new Set(['www.linkedin.com','x.com','bsky.app','dev.to','www.pinterest.com','www.threads.com']);
+          for(const slug of slugs){
+            const tool=catalog.find(t=>t.slug===slug);
+            const html=fs.readFileSync('/tmp/toolscout-'+slug+'.html','utf8');
+            const title='<h1>'+tool.name+'</h1>';
+            if(!html.includes(title))throw Error('Brand H1 regression: '+slug);
+            const lead=tool.editorialReview.summary.slice(0,36);
+            if(!html.includes(lead)&&!html.includes(lead.replaceAll("'",'&#39;')))throw Error('Stale buyer review: '+slug);
+            if(!html.includes('href="/go/'+slug+'"'))throw Error('Missing affiliate redirect CTA: '+slug);
+            if(html.includes('Catalog-based; vendor claims and plan limits not independently verified'))throw Error('Provisional review still shown: '+slug);
+            const links=html.split('<a ').slice(1).map(s=>s.match(/href=["']([^"']+)["']/i)?.[1]).filter(Boolean);
+            const disallowed=links.filter(h=>{
+              if(!h.startsWith('https://')&&!h.startsWith('http://'))return false;
+              return !social.has(new URL(h).hostname);
+            });
+            if(disallowed.length)throw Error('Unauthorized external link '+slug+': '+disallowed.join(','));
+          }
+          console.log('WAVE5 LIVE VERIFIED: nine unique buyer reviews, internal documentation, affiliate CTAs and clean headings');
+          NODE
