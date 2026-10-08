@@ -1,0 +1,64 @@
+name: ToolScout editorial wave 4 verified production deployment
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/editorial-20261008-wave4-release.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: toolscout-editorial-wave4-release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Manufacturer evidence and editorial contract
+        run: |
+          node scripts/check-vendor-evidence.mjs
+          node --test tests/toolscout-v2-manufacturer-docs.test.mjs tests/toolscout-v2-editorial-evidence-generators.test.mjs
+      - name: Wrangler preview build
+        run: npx wrangler deploy --config wrangler.toml --dry-run --outdir /tmp/editorial-wave4-build
+      - name: Publish Worker without changing D1
+        run: npx wrangler deploy --config wrangler.toml --latest
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      - name: Confirm all 20 deployed pages, commercial links, private manufacturer sources
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/toolscout-wave4-pages
+          for slug in bigcommerce character-ai copper google-ai-studio hootsuite instantly later lemlist loom monday-crm omnisend otter-ai podia wix wrike workato socialbee matomo replit adobe-express; do
+            curl --retry 3 --retry-delay 2 --fail --silent --show-error -L "https://trytoolscout.org/tools/${slug}?ts_vendor_wave4_20261008=1" -o "/tmp/toolscout-wave4-pages/${slug}.html"
+          done
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const slugs='bigcommerce character-ai copper google-ai-studio hootsuite instantly later lemlist loom monday-crm omnisend otter-ai podia wix wrike workato socialbee matomo replit adobe-express'.split(' ');
+          const catalog=JSON.parse(fs.readFileSync('data/tools.json','utf8'));
+          const esc=v=>String(v).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll("'",'&#39;');
+          const allowSocial=['linkedin.com','x.com','bsky.app','dev.to','pinterest.com','threads.com'];
+          for(const slug of slugs){
+            const tool=catalog.find(t=>t.slug===slug),html=fs.readFileSync('/tmp/toolscout-wave4-pages/'+slug+'.html','utf8');
+            if(!tool)throw Error('Missing catalog entry: '+slug);
+            if(!html.includes('<h1>'+esc(tool.name)+'</h1>'))throw Error('Old profile heading: '+slug);
+            if(!html.includes(esc(tool.editorialReview.summary).slice(0,90)))throw Error('Stale live analysis: '+slug);
+            if(!html.includes(esc(tool.editorialReview.buyerCheck)))throw Error('Missing practical buyer check: '+slug);
+            if(!html.includes('href="/go/'+slug+'"'))throw Error('Missing commercial CTA: '+slug);
+            if(/Catalog-based; vendor claims and plan limits not independently verified|AI integration evidence:/i.test(html))throw Error('Provisional content or leaked citations: '+slug);
+            const links=html.split('<a ').slice(1).map(s=>s.match(/href=["']([^"']+)["']/i)?.[1]).filter(Boolean);
+            const external=links.filter(x=>x.startsWith('https://')||x.startsWith('http://'));
+            const unexpected=external.filter(url=>{const h=new URL(url).hostname.toLowerCase();return !allowSocial.some(d=>h===d||h.endsWith('.'+d));});
+            if(unexpected.length)throw Error('Manufacturer documentation link exposed or unauthorized direct outbound: '+slug+' '+unexpected.join(','));
+          }
+          console.log('WAVE 4 PRODUCTION VERIFIED: twenty decision analyses live, clean headings, private evidence, monetized CTA, no direct external documentation');
+          NODE
