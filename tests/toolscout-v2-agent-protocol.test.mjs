@@ -91,7 +91,7 @@ test('MCP decide_software returns an evidence-aware shortlist with trade-offs',a
   assert.ok(payload.result.structuredContent.shortlist.every(x=>Array.isArray(x.tradeoffs)&&x.stack_fit));
 });
 
-test('MCP decide_software keeps generic must-haves inside the requested software job',async()=>{
+test('MCP decide_software does not recommend tools without evidence for mandatory criteria',async()=>{
   const catalog=JSON.parse(fs.readFileSync(new URL('../data/tools.json',import.meta.url),'utf8'));
   const env={ASSETS:{fetch:async request=>new URL(request.url).pathname==='/data/tools.json'?Response.json(catalog):new Response('',{status:404})}};
   const body={jsonrpc:'2.0',id:24,method:'tools/call',params:{name:'decide_software',arguments:{job:'SEO',must_have:['automation'],limit:5},_meta:{'io.modelcontextprotocol/protocolVersion':'2026-07-28','io.modelcontextprotocol/clientInfo':{name:'test-client',version:'1.0'}}}};
@@ -102,8 +102,9 @@ test('MCP decide_software keeps generic must-haves inside the requested software
   assert.equal(response.status,200);
   const payload=await response.json();
   const shortlist=payload.result.structuredContent.shortlist;
-  assert.ok(shortlist.length>=2);
-  assert.ok(shortlist.every(x=>x.category==='seo'),JSON.stringify(shortlist.map(x=>({name:x.name,category:x.category}))));
+  assert.equal(payload.result.isError,true);
+  assert.deepEqual(payload.result.structuredContent.shortlist,[]);
+  assert.match(payload.result.content[0].text,/could not find enough catalog evidence/i);
 });
 
 test('MCP stack fit never treats incidental text such as sales teams as Microsoft Teams evidence',async()=>{
@@ -124,8 +125,8 @@ test('MCP stack fit never treats incidental text such as sales teams as Microsof
 
 test('MCP free-form constraints are evaluated and surfaced as verified, not_verified or conflict',async()=>{
   const catalog=[
-    {slug:'crm-linux',name:'CRM Linux',category:'crm',description:'CRM for teams with Linux support.',pricing:'Free plan available',freePlan:true,features:['crm','automation','linux'],bestFor:['small businesses'],lastVerified:'2026-10-08',scores:{price:9,ease:7,automation:8,integrations:6,sales:8}},
-    {slug:'crm-cloud',name:'CRM Cloud',category:'crm',description:'Cloud CRM for sales teams.',pricing:'Paid plans',freePlan:false,features:['crm','automation'],bestFor:['sales teams'],lastVerified:'2026-10-08',scores:{price:6,ease:8,automation:8,integrations:7,sales:8}}
+    {slug:'crm-linux',name:'CRM Linux',category:'crm',description:'CRM for teams with Linux support.',pricing:'Free plan available',freePlan:true,freePlanKnown:true,features:['crm','automation','linux'],bestFor:['small businesses'],lastVerified:'2026-10-08',scores:{price:9,ease:7,automation:8,integrations:6,sales:8}},
+    {slug:'crm-cloud',name:'CRM Cloud',category:'crm',description:'Cloud CRM for sales teams.',pricing:'Paid plans',freePlan:false,freePlanKnown:true,features:['crm','automation'],bestFor:['sales teams'],lastVerified:'2026-10-08',scores:{price:6,ease:8,automation:8,integrations:7,sales:8}}
   ];
   const env={ASSETS:{fetch:async request=>new URL(request.url).pathname==='/data/tools.json'?Response.json(catalog):new Response('',{status:404})}};
   const body={jsonrpc:'2.0',id:26,method:'tools/call',params:{name:'decide_software',arguments:{job:'CRM',constraints:['must support Linux','free plan'],limit:2},_meta:{'io.modelcontextprotocol/protocolVersion':'2026-07-28','io.modelcontextprotocol/clientInfo':{name:'test-client',version:'1.0'}}}};
@@ -230,4 +231,92 @@ test('MCP review contract remains read-only and does not write protocol telemetr
   assert.match(runtime,/readOnlyHint:true/);
   assert.match(runtime,/destructiveHint:false/);
   assert.match(runtime,/openWorldHint:false/);
+});
+
+async function benchmarkDecision(catalog,args){
+  const env={ASSETS:{fetch:async request=>new URL(request.url).pathname==='/data/tools.json'?Response.json(catalog):new Response('',{status:404})}};
+  const body={jsonrpc:'2.0',id:90,method:'tools/call',params:{name:'decide_software',arguments:{job:'CRM',limit:2,...args},_meta:{'io.modelcontextprotocol/protocolVersion':'2026-07-28','io.modelcontextprotocol/clientInfo':{name:'benchmark-client',version:'1.0'}}}};
+  const response=await handleAgentProtocolRoute(
+    new Request('https://trytoolscout.org/mcp',{method:'POST',headers:{'Content-Type':'application/json','MCP-Protocol-Version':'2026-07-28','Mcp-Method':'tools/call','Mcp-Name':'decide_software'},body:JSON.stringify(body)}),
+    env,{waitUntil(){}}
+  );
+  assert.equal(response.status,200);
+  const payload=await response.json();
+  return payload.result;
+}
+
+test('decision benchmark: separate words do not establish a mandatory capability',async()=>{
+  const catalog=[
+    {slug:'qualified-crm',name:'Qualified CRM',category:'crm',description:'CRM for small firms',features:['crm','SOC2 certified'],bestFor:['small business'],freePlan:false,scores:{price:null,ease:8}},
+    {slug:'unverified-crm',name:'Unverified CRM',category:'crm',description:'CRM for small firms',features:['crm','SOC2 dashboard','certified templates'],bestFor:['small business'],freePlan:false,scores:{price:10,ease:10}}
+  ];
+  const out=await benchmarkDecision(catalog,{must_have:['SOC2 certified'],priorities:['price','ease']});
+  assert.equal(out.isError,false);
+  assert.deepEqual(out.structuredContent.shortlist.map(x=>x.slug),['qualified-crm']);
+  const winner=out.structuredContent.shortlist[0];
+  assert.equal(winner.requirement_evidence[0].matched,true);
+  assert.equal(winner.requested_dimensions.some(x=>x.dimension==='price'),false,'null score is unknown, not zero');
+});
+
+test('decision benchmark: unverified free-plan flags are never considered verified evidence',async()=>{
+  const catalog=[
+    {slug:'free-unknown',name:'Free Unknown',category:'crm',description:'CRM',features:['crm'],bestFor:['teams'],freePlan:true,freePlanKnown:false,scores:{price:9,ease:8}},
+    {slug:'free-known',name:'Free Known',category:'crm',description:'CRM',features:['crm'],bestFor:['teams'],freePlan:true,freePlanKnown:true,scores:{price:9,ease:8}}
+  ];
+  const out=await benchmarkDecision(catalog,{constraints:['free plan'],priorities:['ease']});
+  assert.equal(out.isError,false);
+  const bySlug=Object.fromEntries(out.structuredContent.shortlist.map(x=>[x.slug,x]));
+  assert.equal(bySlug['free-unknown'].constraint_evidence[0].status,'not_verified');
+  assert.equal(bySlug['free-unknown'].free_plan_status,'unverified');
+  assert.equal(bySlug['free-known'].constraint_evidence[0].status,'verified');
+  assert.equal(bySlug['free-known'].free_plan_status,'verified_available');
+});
+
+test('decision benchmark: only sourced verified Gmail pairs meet Gmail must-haves',async()=>{
+  const catalog=[
+    {slug:'crm-verified',name:'CRM Verified',category:'crm',description:'CRM',features:['crm'],bestFor:['teams'],integrations:[{product:'Gmail',status:'verified',sourceUrl:'https://docs.example.com/gmail',verifiedAt:'2026-10-08'}],scores:{integrations:7,ease:8}},
+    {slug:'crm-unsourced',name:'CRM Unsourced',category:'crm',description:'CRM',features:['crm','integrations'],bestFor:['teams'],integrations:[{product:'Gmail',status:'verified',verifiedAt:'2026-10-08'}],scores:{integrations:10,ease:10}}
+  ];
+  const out=await benchmarkDecision(catalog,{must_have:['Gmail'],existing_tools:['Gmail'],priorities:['integrations']});
+  assert.equal(out.isError,false);
+  assert.deepEqual(out.structuredContent.shortlist.map(x=>x.slug),['crm-verified']);
+  const pair=out.structuredContent.shortlist[0].stack_fit.pairs[0];
+  assert.equal(pair.status,'verified');
+  assert.equal(pair.source_url,'https://docs.example.com/gmail');
+  assert.equal(pair.verified_at,'2026-10-08');
+});
+
+test('decision benchmark: unverified AI assistant lists do not prove integration',async()=>{
+  const catalog=[
+    {slug:'crm-assistant-unknown',name:'CRM Assistant Unknown',category:'crm',description:'CRM',features:['crm','integrations'],bestFor:['teams'],aiIntegration:{status:'unverified',assistants:['ChatGPT']},scores:{integrations:9,ease:8}},
+    {slug:'crm-assistant-verified',name:'CRM Assistant Verified',category:'crm',description:'CRM',features:['crm','integrations'],bestFor:['teams'],aiIntegration:{status:'verified',assistants:['ChatGPT']},scores:{integrations:9,ease:8}}
+  ];
+  const out=await benchmarkDecision(catalog,{existing_tools:['ChatGPT'],priorities:['integrations']});
+  assert.equal(out.isError,false);
+  const bySlug=Object.fromEntries(out.structuredContent.shortlist.map(x=>[x.slug,x]));
+  assert.equal(bySlug['crm-assistant-unknown'].stack_fit.pairs[0].status,'pair_unverified');
+  assert.equal(bySlug['crm-assistant-verified'].stack_fit.pairs[0].status,'verified');
+});
+
+test('decision benchmark: catalog category intent takes precedence over unrelated feature scores',async()=>{
+  const catalog=JSON.parse(fs.readFileSync(new URL('../data/tools.json',import.meta.url),'utf8'));
+  for(const category of ['crm','seo','forms','automation','analytics','support','developer','website','design','ai-writing']){
+    const out=await benchmarkDecision(catalog,{job:category,priorities:['ease'],limit:3});
+    assert.equal(out.isError,false,'Expected a shortlist for '+category);
+    assert.ok(out.structuredContent.shortlist.length>0,'Empty shortlist for '+category);
+    assert.ok(out.structuredContent.shortlist.every(x=>x.category===category),'Unrelated category leaked into '+category);
+  }
+});
+
+test('decision benchmark: affiliate relationships cannot alter a contextual shortlist',async()=>{
+  const base={category:'crm',description:'CRM for teams',features:['crm','automation'],bestFor:['teams'],freePlan:false,scores:{ease:8,price:7}};
+  const catalog=[
+    {...base,slug:'alpha-crm',name:'Alpha CRM',affiliateUrl:'',commission:'none'},
+    {...base,slug:'beta-crm',name:'Beta CRM',affiliateUrl:'https://example.org/ref',commission:'50%'}
+  ];
+  const first=await benchmarkDecision(catalog,{priorities:['ease']});
+  assert.equal(first.isError,false);
+  const flipped=catalog.map(x=>({...x,affiliateUrl:x.affiliateUrl?'':'https://example.org/ref',commission:x.commission==='none'?'50%':'none'}));
+  const second=await benchmarkDecision(flipped,{priorities:['ease']});
+  assert.deepEqual(first.structuredContent.shortlist.map(x=>x.slug),second.structuredContent.shortlist.map(x=>x.slug));
 });
