@@ -42,10 +42,10 @@ test('public product profiles do not link directly to manufacturer documentation
  const catalog=read('data/tools.json');
  for(const tool of catalog){
    const html=fs.readFileSync(new URL('../tools/'+tool.slug+'.html',import.meta.url),'utf8');
-   const anchors=[...html.matchAll(/<a\\b[^>]*href=["']([^"']+)["']/gi)].map(match=>match[1]);
+   const anchors=[...html.matchAll(/<a\b[^>]*href=["']([^"']+)["']/gi)].map(match=>match[1]);
    assert.ok(anchors.some(href=>href==='/go/'+tool.slug),'Monetized product CTA missing: '+tool.slug);
    for(const href of anchors){
-     assert.ok(!/^https?:\\/\\//i.test(href),'External direct link exposed in public profile: '+tool.slug+' '+href);
+     assert.ok(!/^https?:\/\//i.test(href),'External direct link exposed in public profile: '+tool.slug+' '+href);
    }
  }
  const generator=fs.readFileSync(new URL('../scripts/generate-tool-pages.mjs',import.meta.url),'utf8');
