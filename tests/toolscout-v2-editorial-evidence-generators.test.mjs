@@ -219,3 +219,16 @@ test('all 38 guides and 15 comparisons publish their unique decision conclusions
   assert.equal(uniqueGuides.size,38,'Guide editorial must not be copy-pasted');
   assert.equal(uniqueComparisons.size,15,'Comparison editorial must not be copy-pasted');
 });
+
+test('general AI assistant guide cannot rank niche personas or unresolved support agents as work assistants',()=>{
+  const html=read('best-ai-assistants.html');
+  for(const slug of ['chatgpt','gemini','claude'])
+    assert.ok(html.includes('href="/go/'+slug+'"'),'Missing general work assistant '+slug);
+  for(const slug of ['cosupport-ai','questie-ai','lorka-ai'])
+    assert.ok(!html.includes('href="/go/'+slug+'"'),'Niche assistant promoted into general work shortlist: '+slug);
+  const schema=JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)?.[1]||'{}');
+  assert.deepEqual(schema.mainEntity.itemListElement.map(x=>x.item.name),['ChatGPT','Gemini','Claude']);
+  const code=read('scripts/seo-eligibility.mjs');
+  assert.match(code,/best-ai-assistants/);
+  assert.match(code,/tool\?\.categoryReviewRequired !== true/);
+});
