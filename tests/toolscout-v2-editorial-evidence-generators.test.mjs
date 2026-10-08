@@ -178,3 +178,34 @@ test('third decision editorial cohort distinguishes verified trials from permane
   for(const slug of ['best-project-management-tools','best-lead-capture-forms'])
     assert.ok(read(slug+'.html').includes(esc(ed.guideOverrides[slug]).slice(0,100)));
 });
+
+test('all 38 guides and 15 comparisons publish their unique decision conclusions with canonicals intact',()=>{
+  const ed=JSON.parse(read('data/organic-growth-engine.json')).editorialQuality;
+  const intents=JSON.parse(read('data/intents.json'));
+  const pairs=JSON.parse(read('data/comparisons.json'));
+  const esc=v=>String(v||'').replace(/[\u2014\u2013]/g,'-').replace(/\s+/g,' ').trim().replaceAll('&','&amp;').replaceAll("'","&#39;").replaceAll('"','&quot;');
+  assert.equal(intents.length,38);
+  assert.equal(pairs.length,15);
+  assert.equal(Object.keys(ed.guideOverrides).length,38);
+  assert.equal(Object.keys(ed.comparisonOverrides).length,15);
+  const uniqueGuides=new Set(),uniqueComparisons=new Set();
+  for(const item of intents){
+    const path=item.slug+'.html',copy=ed.guideOverrides[item.slug],html=read(path);
+    assert.ok(copy?.length>=220,'Missing substantial guide analysis: '+item.slug);
+    assert.ok(html.includes(esc(copy).slice(0,85)),'Stale guide analysis: '+item.slug);
+    assert.ok(html.includes('<link rel="canonical" href="https://trytoolscout.org/'+item.slug+'">'),'Canonical drift '+item.slug);
+    assert.ok(!html.includes('This is a genuine trade-off rather than a cosmetic tie.'),'Generic filler '+item.slug);
+    uniqueGuides.add(copy.slice(0,80).toLowerCase());
+  }
+  for(const [a,b] of pairs){
+    const id=a+'-vs-'+b,key=[a,b].sort().join('|'),copy=ed.comparisonOverrides[key],html=read(id+'.html');
+    assert.ok(copy?.analysis?.length>=250,'Missing comparison analysis '+key);
+    assert.ok(copy?.decision?.length>=100,'Missing comparison decision '+key);
+    assert.ok(html.includes(esc(copy.analysis).slice(0,85)),'Stale comparison analysis: '+key);
+    assert.ok(html.includes(esc(copy.decision).slice(0,65)),'Stale comparison verdict: '+key);
+    assert.ok(html.includes('<link rel="canonical" href="https://trytoolscout.org/'+id+'">'),'Canonical drift '+key);
+    uniqueComparisons.add(copy.analysis.slice(0,80).toLowerCase());
+  }
+  assert.equal(uniqueGuides.size,38,'Guide editorial must not be copy-pasted');
+  assert.equal(uniqueComparisons.size,15,'Comparison editorial must not be copy-pasted');
+});
