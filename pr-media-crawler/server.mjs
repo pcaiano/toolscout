@@ -583,7 +583,13 @@ async function crawlDomainBounded(domain) {
     }), 60000);
     worker.on("message", result => {
       if (result.progress) { const {progress, ...data} = result; partial = data; }
-      else finish(result);
+      else {
+        // An inaccessible publisher is a retry, never a completed discovery.
+        const normalized = result?.status === "complete" && !Number(result.pages_fetched)
+          ? {...result, status: "retry_required", retry_required: true, error: "zero_pages_fetched"}
+          : result;
+        finish(normalized);
+      }
     });
     worker.once("error", error => finish({
       ...partial,
@@ -713,7 +719,7 @@ if (isMainThread) server.listen(PORT, "0.0.0.0", () => {
       .split(",")
       .map(normalizeDomain)
       .filter(Boolean)
-  )].slice(0, 100);
+  )].slice(0, 400);
 
   if (seriesDomains.length) {
     (async () => {
@@ -721,10 +727,13 @@ if (isMainThread) server.listen(PORT, "0.0.0.0", () => {
       console.log("PR_CRAWL_SERIES_START " + JSON.stringify({series_id: seriesId, domains: seriesDomains.length}));
       let totalContacts = 0;
       let totalPeople = 0;
-      let completed = 0;
-      for (let offset = 0; offset < seriesDomains.length; offset += 5) {
-        const group = seriesDomains.slice(offset, offset + 5);
-        const batchId = seriesId + "-" + String(offset / 5 + 1).padStart(2, "0");
+      let processed = 0;
+      let succeeded = 0;
+      let retryRequired = 0;
+      const uniqueCandidateEmails = new Set();
+      for (let offset = 0; offset < seriesDomains.length; offset += 20) {
+        const group = seriesDomains.slice(offset, offset + 20);
+        const batchId = seriesId + "-" + String(offset / 20 + 1).padStart(2, "0");
         const started = Date.now();
         console.log("PR_CRAWL_BATCH_START " + JSON.stringify({batch_id: batchId, domains: group}));
         try {
@@ -735,7 +744,10 @@ if (isMainThread) server.listen(PORT, "0.0.0.0", () => {
           const people = results.flatMap(r => r.people || []);
           totalContacts += contacts.length;
           totalPeople += people.length;
-          completed += group.length;
+          processed += group.length;
+          succeeded += results.filter(r => r.status === "complete" && r.pages_fetched > 0).length;
+          retryRequired += results.filter(r => r.retry_required || r.status !== "complete" || !r.pages_fetched).length;
+          for (const contact of contacts) if (contact.email) uniqueCandidateEmails.add(contact.email.toLowerCase());
           console.log("PR_CRAWL_BATCH_RESULT " + JSON.stringify({
             batch_id: batchId,
             domains_requested: group.length,
@@ -752,7 +764,10 @@ if (isMainThread) server.listen(PORT, "0.0.0.0", () => {
       console.log("PR_CRAWL_SERIES_RESULT " + JSON.stringify({
         series_id: seriesId,
         domains_requested: seriesDomains.length,
-        domains_completed: completed,
+        domains_processed: processed,
+        domains_completed: succeeded,
+        domains_retry_required: retryRequired,
+        unique_public_email_candidates: uniqueCandidateEmails.size,
         contacts_found: totalContacts,
         people_found: totalPeople
       }));
