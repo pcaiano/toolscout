@@ -138,7 +138,7 @@ export function attributeMatch(tool, intent) {
 
 export function editorialEligibility(tool, intent, minimumRelevance = 0.75) {
   const trust = editorialTrust(tool, null, { maxFactualAgeDays:45, strictSource:false });
-  const rankingEligible = tool?.rankingEligible !== false;
+  const rankingEligible = tool?.rankingEligible !== false && tool?.categoryReviewRequired !== true;
   const category = categoryMatch(tool, intent);
   const relevance = lexicalRelevance(tool, intent);
   const capability = capabilityAssessment(tool, intent);
