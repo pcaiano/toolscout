@@ -3733,14 +3733,17 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Analyze product behavior, not just page visits",
-      "summary": "Mixpanel centers funnel conversion, retention and user journey analysis. Its usefulness depends on consistent event definitions and identity stitching rather than a more attractive dashboard. Compare it with PostHog when experimentation and session replay need to live in the same operating environment.",
-      "buyerCheck": "Instrument signup and activation with clear anonymous-to-known identity transitions.",
+      "angle": "Product retention needs cohorts defined around meaningful events",
+      "summary": "Mixpanel's official training covers creating cohorts from behavior or profile attributes and reusing them in Funnels, Flows and Retention analysis. That is valuable when a product team needs to distinguish users who activate from those who return and become loyal. The challenge is event governance: a cohort created from inconsistent identity or event names can produce persuasive but invalid results. Compare Mixpanel through decisions the team can make from reliable product signals, not dashboard sophistication alone.",
+      "buyerCheck": "Define activation and return events, build two cohorts and confirm counts against instrumentation.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
-      "handsOnTested": false
+      "sourceUrl": "https://university.mixpanel.com/student/activity/3411675-cohorts-understanding-and-analyzing-user-groups",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false,
+      "sourceUrls": [
+        "https://university.mixpanel.com/student/activity/3411675-cohorts-understanding-and-analyzing-user-groups"
+      ]
     },
     "strengths": [
       "Catalog describes product analytics",
@@ -3753,7 +3756,15 @@
     "tradeoffs": [
       "Analyze product behavior, not just page visits"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://university.mixpanel.com/student/activity/3411675-cohorts-understanding-and-analyzing-user-groups",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -7535,14 +7546,17 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Project communication without elaborate administrative machinery",
-      "summary": "Basecamp's combination of project messages, to-dos and schedules can reduce scattered conversations for a small team. The simplicity is intentional, but teams requiring deep dependencies, resourcing or portfolio analytics may need a different tool. Examine the complete project life cycle rather than just its to-do list.",
-      "buyerCheck": "Pilot a client project including files, comments, deadlines and external participants.",
+      "angle": "Project simplicity depends on the tools the team actually uses",
+      "summary": "Basecamp documents projects assembled from optional tools such as messages, to-do lists and schedules. Teams can turn off unnecessary modules and reuse common setups through templates. That is useful for smaller groups seeking clear coordination without maintaining a heavily configured project management system. The trade-off is breadth: complex dependency mapping, resource forecasting or granular portfolio reporting may require separate systems. Compare time spent coordinating real assignments rather than the number of features in a demo.",
+      "buyerCheck": "Set up a client project template with messages, due dates and guests, and track one full handoff.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
-      "handsOnTested": false
+      "sourceUrl": "https://3.basecamp-help.com/article/25-projects",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false,
+      "sourceUrls": [
+        "https://3.basecamp-help.com/article/25-projects"
+      ]
     },
     "strengths": [
       "Catalog describes projects",
@@ -7555,7 +7569,15 @@
     "tradeoffs": [
       "Project communication without elaborate administrative machinery"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://3.basecamp-help.com/article/25-projects",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
