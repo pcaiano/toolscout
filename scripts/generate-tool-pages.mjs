@@ -149,11 +149,15 @@ function editorialView(tool){
 }
 function editorialBuyerCheck(tool){
   const record=editorialQuality?.profileDecisionEvidence?.[tool.slug];
-  if(!record?.buyerCheck||!record?.angle||!record?.sourceUrl||record?.evidenceType!=='first_party_documentation_plus_editorial_judgment')return '';
-  try{if(new URL(record.sourceUrl).protocol!=='https:')return ''}catch{return ''}
-  // Keep source metadata in the JSON audit record. Public editorial pages do not
-  // introduce non-monetized external CTAs; the note is a decision checklist.
-  return `<div class="editorialBuyerCheck"><strong>Before you choose:</strong> ${esc(record.buyerCheck)} <span class="small">Editorial review ${esc(record.checkedOn)}.</span></div>`;
+  if(!record?.buyerCheck||!record?.angle)return '';
+  const catalogOnly=record.evidenceType==='catalog_assessment_unverified';
+  if(!catalogOnly){
+    if(record.evidenceType!=='first_party_documentation_plus_editorial_judgment'||!record.sourceUrl)return '';
+    try{if(new URL(record.sourceUrl).protocol!=='https:')return ''}catch{return ''}
+  }
+  const reviewNote=catalogOnly?'Catalog-based assessment; vendor-specific claims and plan limits not independently verified.':'First-party documentation informed this editorial assessment.';
+  const categoryNote=tool.categoryReviewRequired?' <strong>Category under review:</strong> confirm this product fits your requested software category.':'';
+  return `<div class="editorialBuyerCheck"><strong>Before you choose:</strong> ${esc(record.buyerCheck)} <span class="small">Editorial assessment ${esc(record.checkedOn)}. ${esc(reviewNote)}</span>${categoryNote}</div>`;
 }
 function render(tool){
   const url=`${BASE}/tools/${tool.slug}`,pageTitle=`${tool.name} Tool Profile: Features, Pricing, AI Integrations and Best For`,description=`ToolScout profile for ${tool.name}, covering recorded use cases, key capabilities, pricing, AI interoperability and relevant software comparisons.`,brandLogo=logoUrl(tool);
