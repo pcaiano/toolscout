@@ -396,7 +396,7 @@
       "buffer": "Buffer documents recurring queue slots and individual time zones for connected social channels. Scheduled posts fill the next available slot, which can simplify a steady publishing rhythm for small teams. The same mechanism can misalign time-critical campaigns when people assume every queued post has a fixed date. Roles and queue allowances also merit checking. Compare reliable cadence, channel coverage and approvals rather than just a calendar view.",
       "webflow": "Webflow documents locale-specific page slugs, SEO metadata and dynamic collection content. It can therefore suit a design-led business maintaining structured marketing pages for several markets. But visual creation does not eliminate the workload of modelling content, translating variants or governing publication rights. Localization features may be plan-dependent and should be tested with the actual content model. Compare long-term CMS maintenance and multilingual SEO needs rather than evaluating only the visual editor.",
       "surfer": "Surfer's official Content Editor documentation describes Content Score as a combination of SEO and AI-search signals, including topical coverage and upfront answer alignment. These scores can make editorial briefs and revision priorities more repeatable. But optimizing to a score is not evidence of organic performance, and excessive term repetition can reduce readability. Teams should compare the content's factual distinctiveness, search intent and observed clicks rather than treating a high score as an outcome in itself.",
-      "mixpanel": "Mixpanel centers funnel conversion, retention and user journey analysis. Its usefulness depends on consistent event definitions and identity stitching rather than a more attractive dashboard. Compare it with PostHog when experimentation and session replay need to live in the same operating environment.",
+      "mixpanel": "Mixpanel describes funnels as sequential product events used to measure where users abandon a path before conversion. That is valuable when a product manager needs to diagnose onboarding or purchase journeys across specific cohorts. The trade off is implementation discipline: missing events, multiple identities and inconsistent definitions can distort the result even when the chart looks convincing. It also does not replace qualitative research explaining why people drop out. Compare Mixpanel with simpler analytics only after agreeing on the events and user identity rules.",
       "freshdesk": "Freshdesk documents automation rules that classify and route newly created support tickets. This helps support teams distribute repetitive requests without manually opening every message. The trade-off is correct classification: a loosely defined subject condition can wrongly prioritize or assign a sensitive issue. Product versions, permissions and plan rights also warrant checking. Test a representative ticket mix and urgent fallback, not simply whether a rule can be created.",
       "framer": "Framer documents adding locales, choosing region fallbacks and providing manual or AI translation. This can accelerate multilingual campaign sites when the same design must reach several markets. The constraint is upkeep: each additional locale can demand translated calls to action, quality checks and accurate metadata, not just a language toggle. Evaluate the publishing workflow and the team's localization capacity before buying on visual polish.",
       "perplexity": "Perplexity's documentation describes Spaces as collaborative topic hubs with research threads and optional uploaded file search. That is useful for organizing recurring investigations rather than collecting unrelated answers. However, source citations still require checking against originals, and file-search eligibility and collaboration vary by subscription. A research assistant should not be confused with a verified system of record or transaction platform. Test the tool using factual questions with known reference answers and the privacy controls required by the team.",
@@ -422,10 +422,10 @@
       "chatgpt": "OpenAI documents Projects that group conversations, reference files and instructions for related tasks. This is valuable for ongoing research or writing where repeating context wastes time. However, access and file limits vary by plan and the presence of reference files does not prove that every generated statement is correct. Evaluate source-grounding and approved connector permissions, not just the fluency of a single answer.",
       "gemini": "Google documents custom Gems with saved instructions and attached reference files, including files from Drive. This can suit organizations already storing approved material in Google Workspace. The trade-off is dependence on connected account settings, permissions and upkeep of the Gem's knowledge. A reusable assistant should be judged by consistent factual outputs across tasks, not simply ease of initial configuration.",
       "notebooklm": "Google's NotebookLM help explains source-based chats that use the text, quotes and images of uploaded material in answer citations. This makes NotebookLM attractive when research must stay close to a defined corpus rather than unrestricted web browsing. But citation visibility is not proof that synthesis or numerical interpretation is accurate; missing documents can also bias the result. The buying decision should consider source limits, permissions and the ability to trace every important claim back to the original.",
-      "copy-ai": "Copy.ai's catalog scope includes go-to-market content and repeatable marketing or sales processes. That makes process consistency more important than the number of writing prompts. Teams should confirm which workflow integrations and governance functions are actually available on their tier before replacing existing tools.",
+      "copy-ai": "Copy.ai documents a customizable workflow builder that chains research, content generation and other actions into reusable go to market processes. That is useful when sales and marketing teams repeat the same account research or campaign preparation steps. The risk is amplifying inaccurate research and generic messaging across many prospects. A workflow still needs approved inputs, review boundaries and a measurable commercial outcome. Compare the total cost and quality of completed campaigns against a general assistant and existing automation tools.",
       "moz-pro": "Moz Pro combines keyword research, audit and backlink-oriented functions in the catalog. It should be evaluated for recurring search work and reporting fit, especially when the team needs a consistent workflow more than an isolated metric. Site limits, data freshness and regional coverage require direct vendor checking.",
-      "ubersuggest": "Ubersuggest offers keyword and competitor research alongside tracking and site checks. It can be a starting point for a budget-conscious site owner, but usefulness depends on reliable data in the relevant country and enough reporting depth. A lower apparent subscription cost should not substitute for comparing actionable outputs.",
-      "mangools": "Mangools is oriented toward keyword discovery, SERP inspection and routine rank tracking. Its suite can be appealing when the buyer wants approachable tools for several discrete research steps rather than a large agency platform. Verify update frequency, geographic data and tracked-keyword quotas.",
+      "ubersuggest": "Ubersuggest's manufacturer guidance explains keyword ideas, search intent, volume and difficulty as separate signals for choosing content opportunities. That makes it relevant to small website owners who need a manageable shortlist rather than a full technical SEO stack. But a low difficulty estimate is not a promise of rankings, and apparent search demand may not translate into qualified visits. Compare the exact research limits and regional data with your marketing priorities, particularly if you need frequent competitor monitoring.",
+      "mangools": "Mangools documents KWFinder keyword lists, saved research and volume, CPC and keyword difficulty summaries. Its tools can suit consultants who want a focused research process instead of a much broader SEO platform. The practical limit is interpretation: a low difficulty score does not prove a query matches buyer intent, and cached search volume cannot predict traffic with certainty. Research quotas and included rank tracking also change the economic comparison with separate tools. Judge the suite using a real content shortlist in your target market.",
       "screaming-frog": "Screaming Frog's official SEO Spider guide distinguishes the free version's 500-URL crawl limit from licensed crawling at greater scale, with settings for crawl depth, URL patterns and rendering. This is especially useful for diagnosing structural SEO issues across templates. Yet collecting more URLs is not the same as identifying a business-critical fix: robots directives, canonicals and JavaScript rendering require experienced interpretation. A small publisher may learn enough from the free edition; agencies running large audits should account for licensing and hardware.",
       "wix": "Wix documents contributor roles and permissions for site management, allowing owners to delegate tasks without giving everyone identical administrative rights. This matters as a small business moves from one site editor to agencies, marketers and shop operators. The trade-off is managed convenience versus granular control and the ability to move data or integrations elsewhere. Choose the plan and collaborator setup after testing exactly who can change content, commerce and billing settings.",
       "squarespace": "Squarespace documents page sections in its 7.1 editor, allowing site owners to rearrange and style sections without maintaining custom frontend code. This can suit portfolios and small businesses seeking a consistent web presence. Limitations emerge when requirements extend to complex integrations, migrations or bespoke applications. Visual ease should therefore be weighed against long-term content portability and operating cost, rather than treating a template as a full custom platform.",
@@ -442,11 +442,11 @@
       "getresponse": "GetResponse documents automation workflows made from conditions, actions and filters, including link clicks and other subscriber events. That breadth can support product launches and customer nurture alongside newsletters. But more paths mean more room for silent mistakes in contact segmentation or consent, while automation entitlements may vary by subscription. A business sending occasional campaigns may be better served by a simpler email platform. Compare the complete subscriber journey, not the list of possible triggers.",
       "omnisend": "Omnisend documents workflow triggers, filters and activation settings for automated marketing campaigns. These features matter when a store uses customer behavior to coordinate lifecycle emails and other channels. A visually complete workflow is not necessarily active or correctly scoped, and delayed store events can lead to mistimed messages. Evaluate segmentation, opt-in handling and order data quality before choosing an all-in-one automation platform over a simple newsletter sender.",
       "constant-contact": "Constant Contact documents an Automation Path Builder triggered by subscriber actions, calendar dates and commerce activity. Its help centre distinguishes current automation paths from earlier legacy email series, a meaningful issue for migrating users. Newsletter-only teams may not need complicated journeys; event-led marketers should verify entitlements, consent controls and audience segments first. Price the workflow the team actually uses rather than all available features.",
-      "basecamp": "Basecamp's combination of project messages, to-dos and schedules can reduce scattered conversations for a small team. The simplicity is intentional, but teams requiring deep dependencies, resourcing or portfolio analytics may need a different tool. Examine the complete project life cycle rather than just its to-do list.",
+      "basecamp": "Basecamp documents Hill Charts as a way to show whether each to do list is still in the uncertain planning stage or has crossed into predictable execution. This is a useful distinction for small project teams that need honest progress conversations without elaborate resource planning. Yet Hill Charts require a person to move the progress markers; the tool does not automatically validate whether work is on schedule. If your organization needs dependencies, portfolio capacity or detailed forecasting, compare those needs against Basecamp's simpler workflow before committing.",
       "wrike": "Wrike documents approvals used to request and track reviews of work items and attached files. This helps organizations handling creative assets, client deliverables and processes where acceptance has consequences. The trade-off is complexity: too many approval stages can delay projects, and plan entitlements govern availability. A new task manager is justified only if it makes accountable decisions clearer than existing project communication. Test rejections and re-submissions, not just the green approval state.",
       "jira": "Atlassian documents Jira workflows built from statuses and directed transitions. That is valuable when teams need formal handoffs from intake to implementation, review and completion. A poorly designed workflow can create unnecessary approvals or prevent legitimate rework, so more configurable does not always mean more productive. Compare reporting quality and administrative load against the team's actual release and exception process.",
-      "pabbly-connect": "Pabbly Connect is listed for webhook-driven workflows and app connections. It can be a candidate for simpler operational integrations, but the catalog does not verify exact connector behavior, error handling or pricing allowances. Test the workload against Zapier, Make and n8n rather than assuming equivalent capabilities.",
-      "integrately": "Integrately emphasizes prebuilt automations and approachable app connections. That is useful for teams that need a known workflow running quickly, but templates can become restrictive when data validation and exception handling grow complicated. Verify the particular app pair and task allowance before ranking on ease alone.",
+      "pabbly-connect": "Pabbly documents how a workflow begins with a trigger event, then runs configured actions with mapped fields. That can help a small business connect forms, contact records and notifications without building a custom service. Its simplicity should not obscure the risks of duplicate events, failed authentication and unintended repeat actions. Pricing based on task use must be evaluated alongside operational support and audit history. Compare a complete error handling path rather than judging the software by how many applications it lists.",
+      "integrately": "Integrately's own documentation distinguishes ready made automations, custom triggers and actions, and an automation builder with multi app conditions and branching. That can reduce setup effort for straightforward workflows compared with writing custom integrations. The trade off begins when data mapping fails or a third party connection expires: automatic steps still require tests, execution history and an owner who investigates exceptions. Evaluate workflow complexity and available tasks before choosing a low advertised subscription price.",
       "workato": "Workato defines recipes as automations consisting of triggers, actions and authenticated connections between applications. This is valuable for organizations coordinating data across multiple systems without writing every integration from scratch. The trade-off is operational ownership: connector authorization, retry policy, task volume and error handling need monitoring. Choosing a broad automation platform on connector count alone can underestimate governance and license requirements. Compare a complete failed-and-recovered transaction rather than a demo of the happy path.",
       "paperform": "Paperform documents logic that can show questions, change workflow actions and apply conditional pricing to payment forms. It is a sensible candidate when customer inputs drive a booking or purchase, not just newsletter signup. Greater flexibility creates configuration risk, especially when amounts and fulfillment depend on hidden questions or custom conditions. Test edge cases and integration delivery before paying for a complex form stack.",
       "fillout": "Fillout documents page logic that routes respondents to different questions or endings according to earlier answers. This is useful when a form must qualify leads, support applications or guide users to the right service, rather than collect identical fields for everybody. Conditional paths also increase testing complexity: inconsistent branches can omit essential details or produce misleading success messages. Evaluate connected data destinations and the exact limits of each plan before replacing a simple form.",
@@ -887,11 +887,11 @@
         "handsOnTested": false
       },
       "mixpanel": {
-        "angle": "Analyze product behavior, not just page visits",
-        "buyerCheck": "Instrument signup and activation with clear anonymous-to-known identity transitions.",
-        "sourceUrl": null,
+        "angle": "Funnels expose conversion leakage only when events are reliable",
+        "buyerCheck": "Build a three step funnel from actual events, check identity stitching and investigate one unexpected drop off.",
+        "sourceUrl": "https://mixpanel.com/blog/introduction-to-analytics-funnel-analysis/",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "freshdesk": {
@@ -1095,11 +1095,11 @@
         "handsOnTested": false
       },
       "copy-ai": {
-        "angle": "Sales and marketing workflows, not just another copy generator",
-        "buyerCheck": "Pilot one approved outbound sequence, including personalization, human review and CRM handoff.",
-        "sourceUrl": null,
+        "angle": "Go to market workflows should deliver a repeatable decision, not more text",
+        "buyerCheck": "Build a bounded account research workflow, review each factual claim and measure usable outputs per run.",
+        "sourceUrl": "https://www.copy.ai/platform/building-workflows",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "moz-pro": {
@@ -1111,19 +1111,19 @@
         "handsOnTested": false
       },
       "ubersuggest": {
-        "angle": "Accessible SEO research for smaller publishing operations",
-        "buyerCheck": "Check 20 representative queries in the target market and compare the resulting opportunity list.",
-        "sourceUrl": null,
+        "angle": "Choose keyword opportunities by intent rather than volume alone",
+        "buyerCheck": "Research ten commercially relevant queries, inspect SERPs and track whether chosen terms actually attract qualified visitors.",
+        "sourceUrl": "https://neilpatel.com/blog/keyword-ideas-data-ubersuggest-answer-the-public/",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "mangools": {
-        "angle": "Focused SEO utilities for keyword and SERP tasks",
-        "buyerCheck": "Research a competitor topic, track a set of terms and test data export.",
-        "sourceUrl": null,
+        "angle": "Keyword research quality depends on meaningful local demand",
+        "buyerCheck": "Create a list for one regional niche, compare intent, volume, SERP difficulty and paid lookup allowances.",
+        "sourceUrl": "https://mangools.com/kwfinder/features/keyword-lists/",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "screaming-frog": {
@@ -1255,11 +1255,11 @@
         "handsOnTested": false
       },
       "basecamp": {
-        "angle": "Project communication without elaborate administrative machinery",
-        "buyerCheck": "Pilot a client project including files, comments, deadlines and external participants.",
-        "sourceUrl": null,
+        "angle": "Hill Charts reveal uncertainty instead of pretending all tasks are equal",
+        "buyerCheck": "Track three work streams on a Hill Chart, discuss blockers and test how clients access progress.",
+        "sourceUrl": "https://basecamp.com/hill-charts",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "wrike": {
@@ -1279,19 +1279,19 @@
         "handsOnTested": false
       },
       "pabbly-connect": {
-        "angle": "App automations requiring reliable execution accounting",
-        "buyerCheck": "Run a webhook-to-CRM scenario with retries, filters and actual volume reporting.",
-        "sourceUrl": null,
+        "angle": "Automation triggers should be tested as thoroughly as their actions",
+        "buyerCheck": "Create a form to CRM workflow, resend the event and check duplicate prevention and failure recovery.",
+        "sourceUrl": "https://www.pabbly.com/automation-basics-understanding-triggers-actions-with-pabbly-connect/",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "integrately": {
-        "angle": "Quick-start integrations with limited configuration overhead",
-        "buyerCheck": "Connect two required apps and test duplicates, a failed run and a changed field mapping.",
-        "sourceUrl": null,
+        "angle": "Prebuilt app automation saves setup work but still needs error handling",
+        "buyerCheck": "Connect two real apps, add a conditional branch and confirm error reporting and replay behavior.",
+        "sourceUrl": "https://integrately.com/docs",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "workato": {
