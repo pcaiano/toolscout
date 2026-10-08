@@ -48,13 +48,17 @@
     },
     "editorialReview": {
       "angle": "Selling a digital product without stitching five platforms together",
-      "summary": "Systeme.io combines the funnel, email and course jobs into a single proposed operating stack. It is worth comparing when setup overhead matters more than selecting the strongest specialist in each category. Confirm how the paid tiers handle contacts, funnels and course access: the catalog alone cannot establish the lowest viable long-term package.",
-      "buyerCheck": "Model one purchase journey from landing page to email follow-up and paid course access.",
+      "summary": "Systeme.io is worth shortlisting when a creator needs funnels, email sequences and course delivery in one service rather than separate landing-page, email and learning tools. Its published Free plan includes 2,000 contacts, three sales funnels and one workflow, making it a practical prototype tier rather than an unlimited operating plan. The trade-off is flexibility: check when your number of automations, funnels and contacts pushes you into a paid plan, and compare that total with separate specialist tools.",
+      "buyerCheck": "Map a complete purchase journey, then count contacts, funnel steps, automation rules and the courses the chosen tier permits.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
-      "handsOnTested": false
+      "sourceUrl": "https://systeme.io/pricing",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false,
+      "sourceUrls": [
+        "https://systeme.io/pricing",
+        "https://help.systeme.io/article/1615-how-to-give-free-access-to-a-course"
+      ]
     },
     "strengths": [
       "Catalog describes funnels",
@@ -67,7 +71,34 @@
     "tradeoffs": [
       "Selling a digital product without stitching five platforms together"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://systeme.io/pricing",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://help.systeme.io/article/1615-how-to-give-free-access-to-a-course",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ],
+    "freePlanKnown": true,
+    "pricingDetails": {
+      "freePlanStatus": "verified_available",
+      "freePlanSummary": "Vendor-documented Free plan: 2,000 contacts, 3 sales funnels and 1 workflow.",
+      "limits": [
+        "2,000 contacts",
+        "3 sales funnels",
+        "1 workflow"
+      ],
+      "sourceUrl": "https://systeme.io/pricing",
+      "verifiedAt": "2026-10-08"
+    }
   },
   {
     "slug": "beehiiv",
@@ -120,13 +151,17 @@
     },
     "editorialReview": {
       "angle": "A newsletter business rather than a general marketing database",
-      "summary": "beehiiv puts publishing, audience growth and newsletter monetization in the center of the product decision. That is a different job from CRM-driven segmentation or ecommerce lifecycle automation. Check ownership of subscriber data, referral features and the monetization conditions before moving an established list.",
-      "buyerCheck": "Test subscriber import, signup attribution and the recurring publication workflow.",
+      "summary": "beehiiv is designed around publishing a newsletter and growing its subscriber audience. The important buying distinction is between a simple publication and a multi-step subscriber lifecycle: beehiiv documents that automations are paid-plan functionality. Lite allows up to ten live automations, while Pro offers unlimited live automations and additional click-trigger options. A publisher sending a weekly issue may not need this depth; one monetizing segmented subscriber journeys should price the required plan before migrating a list.",
+      "buyerCheck": "Separate newsletter publishing from automated subscriber journeys; compare the Lite and Pro automation rights with the workflow you need.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
-      "handsOnTested": false
+      "sourceUrl": "https://www.beehiiv.com/support/article/13080928484887",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false,
+      "sourceUrls": [
+        "https://www.beehiiv.com/support/article/13080928484887",
+        "https://www.beehiiv.com/support/article/38813477234071-welcome-email-vs-welcome-automation-which-should-you-use"
+      ]
     },
     "strengths": [
       "Catalog describes newsletters",
@@ -139,7 +174,22 @@
     "tradeoffs": [
       "A newsletter business rather than a general marketing database"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.beehiiv.com/support/article/13080928484887",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.beehiiv.com/support/article/38813477234071-welcome-email-vs-welcome-automation-which-should-you-use",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "slug": "hubspot",
@@ -295,13 +345,17 @@
     },
     "editorialReview": {
       "angle": "Operational forms that move work forward",
-      "summary": "Jotform extends basic form collection toward approvals, payments and structured workflow steps. It fits businesses where a submission initiates a process rather than simply delivers a contact email. Check what an actual plan permits in submissions, storage, signatures and integrations before treating every listed module as included.",
-      "buyerCheck": "Prototype a form with payment or approval, file uploads and an exception path.",
+      "summary": "Jotform is an operational form-builder option when a submission needs to start an approval, payment or data-collection workflow rather than simply send a contact notification. Its Starter tier has material limits: the vendor describes a five-form allowance and 100 monthly submissions, alongside account-wide storage and upload limits. These limits are more decision-relevant than a long list of form features. Before purchasing, model monthly submissions, file sizes and any approval or payment steps under the exact plan.",
+      "buyerCheck": "Build one real form and calculate monthly submissions, active forms, file storage and the approval or payment workflow.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
-      "handsOnTested": false
+      "sourceUrl": "https://www.jotform.com/help/408-understanding-your-account-usage-and-limits/",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false,
+      "sourceUrls": [
+        "https://www.jotform.com/help/408-understanding-your-account-usage-and-limits/",
+        "https://www.jotform.com/help/does-jotform-offer-a-free-trial/"
+      ]
     },
     "strengths": [
       "Catalog describes forms",
@@ -314,7 +368,34 @@
     "tradeoffs": [
       "Operational forms that move work forward"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.jotform.com/help/408-understanding-your-account-usage-and-limits/",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.jotform.com/help/does-jotform-offer-a-free-trial/",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ],
+    "freePlanKnown": true,
+    "pricingDetails": {
+      "freePlanStatus": "verified_available",
+      "freePlanSummary": "Vendor-documented Starter (Free) plan: 5 active forms and 100 monthly submissions.",
+      "limits": [
+        "5 active forms",
+        "100 monthly submissions",
+        "Account-wide upload and submission storage ceilings"
+      ],
+      "sourceUrl": "https://www.jotform.com/help/408-understanding-your-account-usage-and-limits/",
+      "verifiedAt": "2026-10-08"
+    }
   },
   {
     "slug": "adcreative-ai",
@@ -1136,13 +1217,17 @@
     },
     "editorialReview": {
       "angle": "Sales CRM depth within a broader business stack",
-      "summary": "Zoho CRM covers leads, pipelines, analytics and automation for teams that want to structure sales operations. Its wider ecosystem may be attractive to organizations already using related Zoho products, but that connection must be verified for each specific app. Compare setup and reporting needs with lighter CRMs before assuming extra configuration is worth it.",
-      "buyerCheck": "Map lead assignment, stages, duplicate control and required integrations.",
+      "summary": "Zoho CRM merits consideration for a small sales team that needs leads, contacts and deals in a structured CRM, particularly if it already uses other Zoho applications. The manufacturer's edition guide documents a Free tier for up to three users, with basic lead, contact and deal tracking and limited workflow actions. That is a useful starting point, not evidence that advanced automation or every Zoho integration is included. Compare the configuration effort and reporting requirements with simpler CRMs before paying for a wider suite.",
+      "buyerCheck": "Test lead assignment, deal stages, reports and workflow actions; verify integrations separately for each exact Zoho application.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
-      "handsOnTested": false
+      "sourceUrl": "https://help.zoho.com/portal/en/kb/crm/getting-started/articles/choose-your-path-edition-and-role-guide",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false,
+      "sourceUrls": [
+        "https://help.zoho.com/portal/en/kb/crm/getting-started/articles/choose-your-path-edition-and-role-guide",
+        "https://help.zoho.com/portal/en/kb/crm/organization-settings/user-management/articles/add-import-modify-re-invite-users"
+      ]
     },
     "strengths": [
       "Catalog describes crm",
@@ -1155,7 +1240,33 @@
     "tradeoffs": [
       "Sales CRM depth within a broader business stack"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://help.zoho.com/portal/en/kb/crm/getting-started/articles/choose-your-path-edition-and-role-guide",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://help.zoho.com/portal/en/kb/crm/organization-settings/user-management/articles/add-import-modify-re-invite-users",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ],
+    "freePlanKnown": true,
+    "pricingDetails": {
+      "freePlanStatus": "verified_available",
+      "freePlanSummary": "Vendor-documented Free edition supports up to 3 users with basic CRM tracking and limited workflow actions.",
+      "limits": [
+        "3 users on Free edition",
+        "Advanced workflow and process capabilities depend on paid editions"
+      ],
+      "sourceUrl": "https://help.zoho.com/portal/en/kb/crm/getting-started/articles/choose-your-path-edition-and-role-guide",
+      "verifiedAt": "2026-10-08"
+    }
   },
   {
     "slug": "monday-crm",
@@ -1853,13 +1964,17 @@
     },
     "editorialReview": {
       "angle": "Product analytics close to experiments and engineering",
-      "summary": "PostHog combines behavioral events with session replay, feature flags and testing-oriented workflows in the current catalog. This can simplify instrumentation ownership for a technical product team, but cost and privacy controls depend heavily on captured event volume. Consider it when product experimentation is continuous, not only when a website needs visitor totals.",
-      "buyerCheck": "Define an event taxonomy, estimate volume and review consent, retention and feature-flag rollout.",
+      "summary": "PostHog is a compelling choice when a product team wants behavioral analytics close to session replay, feature flags and experiments. Its vendor pricing is usage-based rather than a conventional seat-based analytics subscription: product analytics includes one million events each month at no charge, while other products have their own allowances. That helps small teams start, but event volume, retention, privacy obligations and the number of enabled products can change the bill. Estimate the events your real instrumentation will generate before choosing it over a simpler web analytics product.",
+      "buyerCheck": "Estimate monthly events and replays, review consent and retention settings, and set billing limits before production rollout.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
-      "handsOnTested": false
+      "sourceUrl": "https://posthog.com/pricing",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false,
+      "sourceUrls": [
+        "https://posthog.com/pricing",
+        "https://posthog.com/product-analytics/pricing"
+      ]
     },
     "strengths": [
       "Catalog describes product analytics",
@@ -1872,7 +1987,33 @@
     "tradeoffs": [
       "Product analytics close to experiments and engineering"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://posthog.com/pricing",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://posthog.com/product-analytics/pricing",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ],
+    "freePlanKnown": true,
+    "pricingDetails": {
+      "freePlanStatus": "verified_available",
+      "freePlanSummary": "Vendor-documented product analytics includes 1 million events free each month; additional products have separate quotas.",
+      "limits": [
+        "1,000,000 free product analytics events per month",
+        "Separate usage allowances for session replay and feature flags"
+      ],
+      "sourceUrl": "https://posthog.com/pricing",
+      "verifiedAt": "2026-10-08"
+    }
   },
   {
     "affiliateUrl": "",
