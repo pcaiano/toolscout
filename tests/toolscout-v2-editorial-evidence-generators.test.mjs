@@ -28,11 +28,11 @@ test('comparisons keep vendor source URLs internal while preserving monetized CT
   assert.match(src,/href="\/go\/\${encodeURIComponent\(t\.slug\)\}/);
 });
 
-test('decision editorial cohort gives ten distinct profile analyses and source-anchored buyer checks',()=>{
+test('decision editorial cohort gives sixteen distinct profile analyses and source-anchored buyer checks',()=>{
   const cfg=JSON.parse(read('data/organic-growth-engine.json')).editorialQuality;
   const catalog=JSON.parse(read('data/tools.json'));
   const ids=Object.keys(cfg.profileDecisionEvidence||{});
-  assert.equal(ids.length,10);
+  assert.equal(ids.length,16);
   const opens=new Set();
   for(const slug of ids){
     const evidence=cfg.profileDecisionEvidence[slug];
@@ -88,4 +88,37 @@ test('verified free plans have dated vendor evidence and unknown status is not i
   assert.match(read('scripts/generate-tool-pages.mjs'),/tool\.freePlanKnown!==true/);
   assert.match(read('scripts/generate-comparisons.mjs'),/t\.freePlanKnown!==true/);
   assert.match(read('compare.html'),/t\.freePlanKnown!==true/);
+});
+
+test('second decision editorial cohort matches catalog, static pages, independent guides and comparisons',()=>{
+  const catalog=JSON.parse(read('data/tools.json')),ed=JSON.parse(read('data/organic-growth-engine.json')).editorialQuality;
+  const reviewed=['mailchimp','brevo','trello','linear','tally','figma'];
+  const esc=s=>s.replaceAll('&','&amp;').replaceAll("'","&#39;");
+  for(const slug of reviewed){
+    const t=catalog.find(x=>x.slug===slug),html=read('tools/'+slug+'.html');
+    assert.ok(t&&t.editorialReview,'Missing decision record '+slug);
+    assert.ok(html.includes(esc(t.editorialReview.summary).slice(0,75)),'Stale review '+slug);
+    assert.ok(html.includes(esc(t.editorialReview.buyerCheck).slice(0,65)),'Stale checklist '+slug);
+    assert.ok(html.includes(esc(t.pricingDetails.freePlanSummary).slice(0,35)),'Stale pricing summary '+slug);
+    assert.ok(html.includes('href="/go/'+slug+'"'),'Missing monetized route '+slug);
+    assert.ok(html.includes('rel="canonical"'),'Missing canonical '+slug);
+    assert.equal(t.editorialReview.handsOnTested,false);
+    assert.match(t.pricingDetails.sourceUrl,/^https:\/\//);
+    assert.equal(t.freePlanKnown,true);
+  }
+  for(const [a,b] of [['brevo','mailchimp'],['tally','typeform']]){
+    const id=a+'-vs-'+b, key=[a,b].sort().join('|'),html=read(id+'.html'),r=ed.comparisonOverrides[key];
+    assert.ok(r?.analysis?.length>400&&r?.decision?.length>100);
+    assert.ok(html.includes(esc(r.analysis).slice(0,80)));
+    assert.ok(html.includes(esc(r.decision).slice(0,80)));
+    assert.ok(html.includes('<link rel="canonical" href="https://trytoolscout.org/'+id+'">'));
+  }
+  for(const slug of ['best-email-marketing-tools','best-forms-for-small-business']){
+    assert.ok(read(slug+'.html').includes(esc(ed.guideOverrides[slug]).slice(0,90)));
+  }
+  const zap=catalog.find(x=>x.slug==='zapier');
+  assert.equal(zap.freePlanKnown,true);
+  assert.equal(zap.pricingDetails.verifiedAt,'2026-10-08');
+  assert.ok(read('tools/zapier.html').includes('Free plan recorded:</strong> Yes'));
+  assert.ok(read('tools/zapier.html').includes('100 monthly tasks'));
 });
