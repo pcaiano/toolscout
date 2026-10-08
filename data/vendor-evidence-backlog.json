@@ -3,22 +3,13 @@
   "purpose": "Finite inherited documentation debt; new catalog tools require vendor source evidence before entry. Keep pending internal and retire slugs as sourcing completes.",
   "pendingSlugs": [
     "anijam-ai",
-    "chatzy-ai",
-    "cosupport-ai",
     "davinci-ai",
-    "deep-swap-ai",
-    "face-swap-ai",
-    "lip-sync-ai",
-    "lorka-ai",
     "moz-pro",
     "paioclaw",
     "pine-ai",
     "pixmax-ai",
     "questie-ai",
     "resume-ai",
-    "talkpix-ai",
-    "teachquill",
-    "typli-ai",
     "vidflux-ai",
     "weryai"
   ]
