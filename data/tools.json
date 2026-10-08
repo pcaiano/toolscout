@@ -9239,13 +9239,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "AI video agent claims need a controlled creative benchmark",
-      "summary": "Anijam AI is presented as a conversation-led system for generating films and social video. The broad list of styles is not independently validated, so treat it as an early creative tool rather than a guaranteed production pipeline. Reliability, permissions and export credits need checking.",
-      "buyerCheck": "Recreate one storyboard twice and compare continuity, iteration controls and commercial rights.",
+      "angle": "Credits and output resolution set the true animation cost",
+      "summary": "Anijam's official pricing separates a Beginner tier with 720p exports from higher tiers with 1080p output, more concurrent jobs and a larger monthly credit allowance. The manufacturer also lists text, scripts, images and audio as starting points for animated clips. This breadth is useful for social creative work, but it does not establish consistent quality across styles or projects. Estimate how many acceptable rendered scenes a campaign needs before comparing the advertised credits with an alternative video editor.",
+      "buyerCheck": "Create a short three-scene script and test model availability, output resolution, failed renders and export rights.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://www.anijam.ai/pricing/",
+      "sourceUrls": [
+        "https://www.anijam.ai/pricing/"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -9259,7 +9262,15 @@
     "tradeoffs": [
       "AI video agent claims need a controlled creative benchmark"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.anijam.ai/pricing/",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -9529,13 +9540,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Multi-model image and video bundles need entitlement checks",
-      "summary": "DaVinci AI advertises access to several named image and video generators in a single interface. That packaging may help creative exploration, but the catalog does not verify current model versions or usage conditions. Compare output rights, credit cost and controls against direct access to the underlying services.",
-      "buyerCheck": "Run a fixed visual brief and verify model availability, licensing and export quality.",
+      "angle": "A creative multi-model subscription is a credit allocation decision",
+      "summary": "DaVinci's manufacturer documentation distinguishes free limited creative generation from web subscriptions with monthly credit allowances for image and video work. Priority processing, supported models and resolution rights depend on the chosen plan, making this a broader workflow than buying one standalone image tool. Different models can consume the allowance at different rates, so published output counts should be treated as estimates rather than guaranteed usable assets. Compare results from a fixed creative brief and track retries and export rights.",
+      "buyerCheck": "Generate two image and two video variants, recording credit consumption, queue time and usable outputs.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://help.davinci.ai/en/articles/232781-how-does-the-subscription-work-in-davinci",
+      "sourceUrls": [
+        "https://help.davinci.ai/en/articles/232781-how-does-the-subscription-work-in-davinci"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -9549,7 +9563,15 @@
     "tradeoffs": [
       "Multi-model image and video bundles need entitlement checks"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://help.davinci.ai/en/articles/232781-how-does-the-subscription-work-in-davinci",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -10120,13 +10142,16 @@
       "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
     },
     "editorialReview": {
-      "angle": "Personal agent promises need execution and permission controls",
-      "summary": "Paioclaw describes an assistant handling calendar and delegated tasks. This is a higher-risk use case than text generation because incorrect actions can affect other people. The current catalog description is too thin to establish reliability, supported accounts or how confirmations work.",
-      "buyerCheck": "Require a demonstrated calendar task with permission scoping, logs and human approval.",
+      "angle": "Delegated actions make permissions central to a personal agent",
+      "summary": "PaioClaw's pricing distinguishes a free Curious tier limited to three hours of daily use from paid tiers offering more credits, memory and activity logs. It positions the service as hosted OpenClaw access that can connect messaging services and run delegated tasks. This is meaningfully different from a text-only chatbot: a mistaken calendar or account action has consequences outside the conversation. Evaluate approval, account scoping and a recoverable audit trail before granting broad third-party permissions.",
+      "buyerCheck": "Connect only a test calendar, review activity logs and verify confirmation before any external action.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://paioclaw.ai/pricing/",
+      "sourceUrls": [
+        "https://paioclaw.ai/pricing/"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -10140,7 +10165,15 @@
     "tradeoffs": [
       "Personal agent promises need execution and permission controls"
     ],
-    "evidence": [],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://paioclaw.ai/pricing/",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ],
     "categoryReviewRequired": true
   },
   {
@@ -10208,13 +10241,16 @@
       "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
     },
     "editorialReview": {
-      "angle": "AI life administration where consent and accountability matter",
-      "summary": "Pine AI is positioned for making calls and negotiating everyday administrative matters. The value would come from verifiable outcomes and time saved, but it also raises consent, authorization and audit questions. Treat supported jurisdictions and success claims as unverified until demonstrated.",
-      "buyerCheck": "Check call recording consent, authorization methods, cancellation flow and verifiable task completion.",
+      "angle": "Life-admin negotiations require outcome and credit transparency",
+      "summary": "Pine AI's official subscription comparison specifies monthly credit allowances and higher-tier access to batch calling and bill negotiation. This can save administrative effort for cancellations or complaints that would otherwise require phone calls and repeated follow-ups. The constraint is authorization: the assistant acts on an account-holder's behalf and a negotiated result must be independently verifiable. Credit allowances are not equivalent to guaranteed completed tasks, so compare real resolutions, cancellation evidence and possible additional billing.",
+      "buyerCheck": "Test one authorized low-risk service call and verify account identity, transcript, outcome and credit use.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://www.19pine.ai/pricing",
+      "sourceUrls": [
+        "https://www.19pine.ai/pricing"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -10228,7 +10264,15 @@
     "tradeoffs": [
       "AI life administration where consent and accountability matter"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.19pine.ai/pricing",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -10298,13 +10342,16 @@
       "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
     },
     "editorialReview": {
-      "angle": "Multimedia production around a canvas workflow",
-      "summary": "Pixmax AI describes image, video and audio creation in one creative workspace. The integrated workflow could be convenient for storyboarding, although the catalog offers limited evidence of consistency between modalities or available exports. Test whether iteration history and asset management suit team production.",
-      "buyerCheck": "Build a three-scene story and inspect audio sync, reuse and rights.",
+      "angle": "Multi-model creative studios require per-model credit budgeting",
+      "summary": "Pixmax's manufacturer pricing explains pay-as-you-go credits alongside monthly and annual subscriptions. Its library covers video, image and audio models, but different model selections and output resolution consume different credit amounts. This offers flexibility for a team producing varied assets, while making a nominal credit balance hard to compare with a fixed-price editing service. Larger collaborative plans introduce shared assets and seat management; a solo creator may not need those benefits. Count acceptable final outputs, including reruns, across the intended model mix.",
+      "buyerCheck": "Price a storyboard using two video models and one image model, including revisions and storage.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://www.pixmax.ai/pricing.html",
+      "sourceUrls": [
+        "https://www.pixmax.ai/pricing.html"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -10318,7 +10365,15 @@
     "tradeoffs": [
       "Multimedia production around a canvas workflow"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.pixmax.ai/pricing.html",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -10389,13 +10444,16 @@
       "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
     },
     "editorialReview": {
-      "angle": "Gaming companion rather than a business AI assistant",
-      "summary": "Questie AI's recorded niche is interactive game conversation and voice response. This should not be conflated with general-purpose analysis or business decision support merely because both use conversational AI. Its category and marketing claims need product-level confirmation before it is eligible for generic work-assistant recommendations.",
-      "buyerCheck": "Test supported games, latency, permissions and age-appropriate content settings.",
+      "angle": "Gaming screen vision is distinct from an office AI assistant",
+      "summary": "Questie's features page describes an AI gaming companion that can receive screen context, respond through voice and keep a continuing character memory. That creates a specific gaming and streaming use case rather than general business productivity or research. A user considering it should verify desktop game compatibility, latency, screen-data permissions and behavior during live gameplay. Marketing claims of very low response delays are not independent performance benchmarks. Prioritize comfort, privacy controls and a reliable voice experience over general chatbot scores.",
+      "buyerCheck": "Run a supported game with explicit screen sharing, test microphone latency and inspect privacy controls.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://www.questie.ai/features",
+      "sourceUrls": [
+        "https://www.questie.ai/features"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -10409,7 +10467,15 @@
     "tradeoffs": [
       "Gaming companion rather than a business AI assistant"
     ],
-    "evidence": [],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.questie.ai/features",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ],
     "categoryReviewRequired": true
   },
   {
@@ -10872,13 +10938,16 @@
       "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
     },
     "editorialReview": {
-      "angle": "Fast AI video promises require repeatability tests",
-      "summary": "Vidflux AI markets rapid text-to-video generation using several models. Speed claims should be treated as promotional until measured on a representative brief, including retries and unusable outputs. Its listing contains insufficient sourced pricing and production evidence to establish a high-confidence recommendation.",
-      "buyerCheck": "Produce five clips from the same brief and record successful outputs, elapsed time and credits.",
+      "angle": "Video model credits need a consistent price-per-render comparison",
+      "summary": "VidFlux's published pricing includes credit-based video plans, with different allowances and an example video cost per generation. It promotes access to multiple visual models as well as text-to-video and image-to-video workflows. That can speed creative prototyping, but a fixed example cost does not prove the final price or quality for every model and resolution. Evaluate the number of attempts needed for one commercially acceptable clip and whether paid outputs meet branding and rights requirements.",
+      "buyerCheck": "Produce five clips from one prompt and record credits, retries, export quality and commercial terms.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://vidflux.ai/pricing",
+      "sourceUrls": [
+        "https://vidflux.ai/pricing"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -10892,7 +10961,15 @@
     "tradeoffs": [
       "Fast AI video promises require repeatability tests"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://vidflux.ai/pricing",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -11064,13 +11141,16 @@
       "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
     },
     "editorialReview": {
-      "angle": "Multi-model video and image creation needs quality measurement",
-      "summary": "WeryAI is presented as a platform aggregating visual generation and enhancement functions. The catalog does not independently verify which named models are accessible, in which regions, or at what cost. It warrants evaluation only after checking model availability and rights for exported output.",
-      "buyerCheck": "Compare a fixed creative brief across its supported modes and record the cost per accepted asset.",
+      "angle": "Visual generation subscriptions trade price for concurrency",
+      "summary": "WeryAI's own pricing distinguishes subscriptions by monthly credits, concurrent generation slots and benefits such as faster processing and watermark-free output. Access to multiple image and video model families can appeal to creators comparing several visual directions. The trade-off is unpredictable consumption across modes: a plan's headline image or video capacity is not a guarantee for every generation setting. Compare the true price per approved asset and confirm output rights before using the results in paid advertising.",
+      "buyerCheck": "Run the same brief in two models and compare successful exports, watermark rules and total credit cost.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://www.weryai.com/pricing",
+      "sourceUrls": [
+        "https://www.weryai.com/pricing"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -11084,7 +11164,15 @@
     "tradeoffs": [
       "Multi-model video and image creation needs quality measurement"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.weryai.com/pricing",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
