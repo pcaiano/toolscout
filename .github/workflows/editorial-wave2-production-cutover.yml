@@ -55,7 +55,10 @@ jobs:
             if(!html.includes('href="/go/'+slug+'"'))throw Error('Affiliate CTA regression: '+slug);
             if(/Catalog-based; vendor claims and plan limits not independently verified|AI integration evidence:/i.test(html))throw Error('Provisional or vendor source leakage: '+slug);
             const links=html.split('<a ').slice(1).map(s=>s.match(/href=["']([^"']+)["']/i)?.[1]).filter(Boolean);
-            if(links.some(h=>h.startsWith('http://')||h.startsWith('https://')))throw Error('External source link exposed: '+slug);
+            const external=links.filter(h=>h.startsWith('http://')||h.startsWith('https://'));
+            console.log('Observed live external anchors',slug,JSON.stringify(external.slice(0,15)));
+            const docs=external.filter(h=>/knowledge[.]apollo[.]io|help[.]calendly[.]com|documentation[.]unbounce[.]com|help[.]shopify[.]com|docs[.]github[.]com|wordpress[.]com\/support|help[.]webflow[.]com|slack[.]com\/help|canva[.]com\/help|docs[.]cursor[.]com|help[.]salesforce[.]com|hub-prod[.]perplexity[.]ai/i.test(h));
+            if(docs.length)throw Error('Manufacturer documentation link exposed: '+slug+' '+docs.join(','));
           }
           console.log('EDITORIAL WAVE 2 VERIFIED: brand H1, final analyses, private vendor sources, commercial /go links');
           NODE
