@@ -54,8 +54,8 @@ jobs:
             if(!html.includes(lead)&&!html.includes(lead.replaceAll("'",'&#39;')))throw Error('Stale editorial response: '+slug);
             if(!html.includes('href="/go/'+slug+'"'))throw Error('Affiliate CTA regression: '+slug);
             if(/Catalog-based; vendor claims and plan limits not independently verified|AI integration evidence:/i.test(html))throw Error('Provisional or vendor source leakage: '+slug);
-            const links=[...html.matchAll(/<a\\b[^>]*href=["']([^"']+)["']/gi)].map(m=>m[1]);
-            if(links.some(h=>/^https?:\\/\\//i.test(h)))throw Error('External source link exposed: '+slug);
+            const links=html.split('<a ').slice(1).map(s=>s.match(/href=["']([^"']+)["']/i)?.[1]).filter(Boolean);
+            if(links.some(h=>h.startsWith('http://')||h.startsWith('https://')))throw Error('External source link exposed: '+slug);
           }
           console.log('EDITORIAL WAVE 2 VERIFIED: brand H1, final analyses, private vendor sources, commercial /go links');
           NODE
