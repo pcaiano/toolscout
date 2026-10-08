@@ -10,7 +10,7 @@ const read=p=>JSON.parse(fs.readFileSync(new URL('../'+p,import.meta.url),'utf8'
 test('every future tool requires a dated first-party manufacturer source',()=>{
  const catalog=read('data/tools.json'), pending=read('data/vendor-evidence-backlog.json').pendingSlugs;
  assert.equal(catalog.length,127);
- assert.equal(pending.length,2);
+ assert.equal(pending.length,0);
  assert.deepEqual(vendorEvidenceIssues(catalog,pending),[]);
  const invented={...catalog[0],slug:'unsourced-new-software',editorialReview:{summary:'Unsupported',verificationStatus:'catalog_only',sourceUrl:null},evidence:[]};
  assert.match(vendorEvidenceIssues([...catalog,invented],pending).join(' '),/Manufacturer documentation required/);

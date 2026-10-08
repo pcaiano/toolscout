@@ -6037,13 +6037,18 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "A broad SEO workflow built around research and tracking",
-      "summary": "Moz Pro combines keyword research, audit and backlink-oriented functions in the catalog. It should be evaluated for recurring search work and reporting fit, especially when the team needs a consistent workflow more than an isolated metric. Site limits, data freshness and regional coverage require direct vendor checking.",
-      "buyerCheck": "Evaluate one site audit, backlink question and a location-specific ranking report.",
+      "angle": "Campaign tracking and keyword research must match the target market",
+      "summary": "Moz's official Help Hub documents weekly Moz Pro Campaign ranking updates, alongside keyword research and tracked positions for chosen markets. Its reporting emphasizes movement within the top search-result pages rather than an exhaustive record of every keyword. The distinction matters for agencies: a weekly ranking workflow may serve recurring client reports, while an analyst investigating daily volatility or small-market terms needs more granular data. Compare crawl allowances, keyword quotas and the campaign refresh cadence with actual reporting requirements.",
+      "buyerCheck": "Track one representative site, review a technical crawl and check ranking freshness for the client's target region.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://dc8hdnsmzapvm.cloudfront.net/help/moz-pro/rankings/overview",
+      "sourceUrls": [
+        "https://dc8hdnsmzapvm.cloudfront.net/help/moz-pro/rankings/overview",
+        "https://dc8hdnsmzapvm.cloudfront.net/help/moz-pro/getting-started/campaign-setup"
+      ],
+      "sourceType": "manufacturer_help_hub_hosted_on_dedicated_cdn",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -6057,7 +6062,24 @@
     "tradeoffs": [
       "A broad SEO workflow built around research and tracking"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://dc8hdnsmzapvm.cloudfront.net/help/moz-pro/rankings/overview",
+        "verifiedAt": "2026-10-08",
+        "sourceType": "manufacturer_help_hub_hosted_on_dedicated_cdn",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://dc8hdnsmzapvm.cloudfront.net/help/moz-pro/getting-started/campaign-setup",
+        "verifiedAt": "2026-10-08",
+        "sourceType": "manufacturer_help_hub_hosted_on_dedicated_cdn",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -10547,13 +10569,17 @@
       "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
     },
     "editorialReview": {
-      "angle": "Job-application assistance deserves a career-software category",
-      "summary": "Resume AI is described as resume review, interview practice and job matching, not code-development tooling. Its current category could cause irrelevant engineering recommendations. Judge it on document quality, privacy of applicant information and whether suggestions improve real job applications.",
-      "buyerCheck": "Test an anonymized resume, an ATS-oriented revision and an interview prompt; review data handling.",
+      "angle": "A resume tool should be measured by document quality, not hiring promises",
+      "summary": "Resume AI's manufacturer-published product and pricing page describes a free tier with one resume audit per month and entry-level job matching, while paid plans add greater audit capacity, resume building and interview tools. This is career-application software, not a developer environment, regardless of its inherited catalog classification. A reported ATS score is a product-generated estimate rather than proof of recruiter outcomes. Evaluate whether the suggestions remain truthful, relevant to the job and easy to export without exposing unnecessary personal information.",
+      "buyerCheck": "Test an anonymized resume against a real job description, audit all rewritten claims and confirm plan and privacy terms.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://resume-ai.com/",
+      "sourceUrls": [
+        "https://resume-ai.com/"
+      ],
+      "sourceType": "manufacturer_product_specification_and_embedded_pricing",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -10567,7 +10593,16 @@
     "tradeoffs": [
       "Job-application assistance deserves a career-software category"
     ],
-    "evidence": [],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://resume-ai.com/",
+        "verifiedAt": "2026-10-08",
+        "sourceType": "manufacturer_product_specification_and_embedded_pricing",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ],
     "categoryReviewRequired": true
   },
   {

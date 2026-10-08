@@ -1,8 +1,5 @@
 {
   "baselineDate": "2026-10-08",
   "purpose": "Finite inherited documentation debt; new catalog tools require vendor source evidence before entry. Keep pending internal and retire slugs as sourcing completes.",
-  "pendingSlugs": [
-    "moz-pro",
-    "resume-ai"
-  ]
+  "pendingSlugs": []
 }
