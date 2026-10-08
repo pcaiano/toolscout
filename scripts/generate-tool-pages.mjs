@@ -27,7 +27,7 @@ const logoChain=tool=>{const curated=assets?.[tool.slug]?.url||'',first=firstPar
 const logoUrl=tool=>logoChain(tool).src;
 const initials=name=>String(name||'').split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase()||'TS';
 const validTool=tool=>{try{if(!tool?.slug||!tool?.name||!tool?.description||!Array.isArray(tool.features)||!Array.isArray(tool.bestFor)||!tool.scores||typeof tool.scores!=='object')return false;const u=new URL(tool.sourceUrl);return /^https?:$/.test(u.protocol);}catch{return false;}};
-const safePricing=tool=>clean(tool.pricing||'See the vendor for current pricing and plan details.');
+const safePricing=tool=>clean(tool?.pricingDetails?.freePlanStatus==='verified_available'&&tool?.freePlanKnown===true&&tool?.pricingDetails?.sourceUrl?tool.pricingDetails.freePlanSummary:(tool.pricing||'See the vendor for current pricing and plan details.'));
 const canCompare=tool=>tool?.comparisonEligible!==false;
 const norm=v=>clean(v).toLowerCase();
 const setOf=values=>new Set((values||[]).map(norm).filter(Boolean));
@@ -153,7 +153,7 @@ function editorialBuyerCheck(tool){
   try{if(new URL(record.sourceUrl).protocol!=='https:')return ''}catch{return ''}
   // Keep source metadata in the JSON audit record. Public editorial pages do not
   // introduce non-monetized external CTAs; the note is a decision checklist.
-  return `<div class="editorialBuyerCheck"><strong>Before you choose:</strong> ${esc(record.buyerCheck)}</div>`;
+  return `<div class="editorialBuyerCheck"><strong>Before you choose:</strong> ${esc(record.buyerCheck)} <span class="small">Editorial review ${esc(record.checkedOn)}.</span></div>`;
 }
 function render(tool){
   const url=`${BASE}/tools/${tool.slug}`,pageTitle=`${tool.name} Tool Profile: Features, Pricing, AI Integrations and Best For`,description=`ToolScout profile for ${tool.name}, covering recorded use cases, key capabilities, pricing, AI interoperability and relevant software comparisons.`,brandLogo=logoUrl(tool);
@@ -164,7 +164,7 @@ function render(tool){
   const freeAnswer=tool.freePlanKnown!==true
     ? `ToolScout has not yet verified whether ${tool.name} currently offers a free plan. Check the vendor for current offers.`
     : tool.freePlan
-      ? 'The current ToolScout catalog records a free plan. Check the vendor for current limits and eligibility.'
+      ? tool?.pricingDetails?.freePlanStatus==='verified_available'&&tool?.pricingDetails?.sourceUrl?'Vendor documentation confirms a free entry plan with defined usage limits. Check current eligibility and allowances.':'The current ToolScout catalog records a free plan. Check the vendor for current limits and eligibility.'
       : 'The current ToolScout catalog does not record a free plan. Check the vendor for current offers.';
   const faq=[[`What is ${tool.name} best for?`,`${tool.name} is recorded in the ToolScout catalog for ${(tool.bestFor||[]).join(', ')||'the use cases shown on this page'}.`],[`Does ${tool.name} have a free plan?`,freeAnswer],[`Does ${tool.name} work with ChatGPT, Claude, Gemini or AI agents?`,aiIntegrationAnswer(tool)],[`How current is this ${tool.name} profile?`,verificationDate?`The source data for this profile was last checked ${verificationDate}. Vendor pricing and capabilities can change.`:'ToolScout uses the current catalog record for this profile. Check the vendor for the latest pricing and capabilities.']];
   const schemas=[{'@context':'https://schema.org','@type':'WebPage',name:clean(pageTitle),description:clean(description),url,isPartOf:{'@type':'WebSite',name:'ToolScout',url:BASE+'/'},about:{'@type':'SoftwareApplication',name:clean(tool.name),applicationCategory:clean(tool.category),description:clean(tool.description),url:tool.sourceUrl,image:brandLogo||undefined,featureList:[...(tool.features||[]),...(aiProfile(tool).status==='verified'?[aiIntegrationAnswer(tool)]:[])]}},{'@context':'https://schema.org','@type':'BreadcrumbList',itemListElement:[{'@type':'ListItem',position:1,name:'Home',item:BASE+'/'},{'@type':'ListItem',position:2,name:'Tools',item:BASE+'/tools'},{'@type':'ListItem',position:3,name:clean(tool.name),item:url}]},{'@context':'https://schema.org','@type':'FAQPage',mainEntity:faq.map(([q,a])=>({'@type':'Question',name:clean(q),acceptedAnswer:{'@type':'Answer',text:clean(a)}}))}];

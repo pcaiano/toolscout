@@ -152,14 +152,15 @@ async function boot(){
   if(qa&&tools.some(t=>t.slug===qa))a.value=qa;
   if(qb&&tools.some(t=>t.slug===qb))b.value=qb;else b.value=(tools.find(t=>t.slug!==a.value)||tools[1]).slug;
   if(a.value===b.value)b.value=(tools.find(t=>t.slug!==a.value)||tools[1]).slug;
-  function freeLabel(t){return t.freePlanKnown!==true?'Unknown':t.freePlan?'Yes':'No'}
+  function priceLabel(t){return t?.freePlanKnown===true&&t?.pricingDetails?.freePlanStatus==='verified_available'&&t?.pricingDetails?.sourceUrl&&t?.pricingDetails?.freePlanSummary?t.pricingDetails.freePlanSummary:(t?.pricing||'See vendor');}
+function freeLabel(t){return t.freePlanKnown!==true?'Unknown':t.freePlan?'Yes':'No'}
   function updateUrl(){const p=new URLSearchParams(location.search);const cleanStaticDefault=defaultA&&defaultB&&!p.get('a')&&!p.get('b')&&!legacy&&a.value===defaultA&&b.value===defaultB;if(cleanStaticDefault)return;p.delete('tool');p.set('a',a.value);p.set('b',b.value);history.replaceState(null,'',location.pathname+'?'+p.toString())}
   function render(){
     if(a.value===b.value){const alt=tools.find(t=>t.slug!==a.value);if(alt)b.value=alt.slug}
     const x=tools.find(t=>t.slug===a.value),y=tools.find(t=>t.slug===b.value);if(!x||!y)return;
     updateUrl();
     const pair=pairSlug(x.slug,y.slug);pairNote.innerHTML='<div class="pairNote">Comparing <strong>'+x.name+'</strong> with <strong>'+y.name+'</strong>. Change either selector to explore another pair.</div>';
-    const rows=[['Category',x.category,y.category],['Pricing',x.pricing||'See vendor',y.pricing||'See vendor'],['Free plan',freeLabel(x),freeLabel(y)],['AI interoperability',aiTier(x),aiTier(y)],['AI assistants',aiAssistants(x),aiAssistants(y)],['Agent connectivity',aiMcp(x),aiMcp(y)],['Features',(x.features||[]).join(', '),(y.features||[]).join(', ')],['Best for',(x.bestFor||[]).join(', '),(y.bestFor||[]).join(', ')],['Last verified',x.lastVerified||'Not recorded',y.lastVerified||'Not recorded']];
+    const rows=[['Category',x.category,y.category],['Pricing',priceLabel(x),priceLabel(y)],['Free plan',freeLabel(x),freeLabel(y)],['AI interoperability',aiTier(x),aiTier(y)],['AI assistants',aiAssistants(x),aiAssistants(y)],['Agent connectivity',aiMcp(x),aiMcp(y)],['Features',(x.features||[]).join(', '),(y.features||[]).join(', ')],['Best for',(x.bestFor||[]).join(', '),(y.bestFor||[]).join(', ')],['Last verified',x.lastVerified||'Not recorded',y.lastVerified||'Not recorded']];
     const head=t=>{const icon=iconSources(t,assets);const img=icon.src?'<img src="'+icon.src+'" data-first="'+icon.first+'" data-google="'+icon.google+'" data-stage="'+icon.stage+'" alt="'+t.name+' logo" width="25" height="25" loading="lazy" referrerpolicy="no-referrer" onerror="nextIcon(this)">':'';return '<div class="head"><div class="logo"><span class="logo-fallback">'+initials(t.name)+'</span>'+img+'</div>'+t.name+'</div>'};
     const cta=t=>'<div class="actions"><a class="btn secondary" href="./tools/'+encodeURIComponent(t.slug)+'">Profile</a><a class="btn" href="/go/'+encodeURIComponent(t.slug)+'?source=compare" target="_blank" rel="nofollow sponsored noopener">Visit '+t.name+'</a></div>';
     table.innerHTML='<div class="row"><div class="cell label">Compare</div><div class="cell">'+head(x)+cta(x)+'</div><div class="cell">'+head(y)+cta(y)+'</div></div>'+rows.map(r=>'<div class="row"><div class="cell label">'+r[0]+'</div><div class="cell value">'+r[1]+'</div><div class="cell value">'+r[2]+'</div></div>').join('');
