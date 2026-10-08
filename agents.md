@@ -46,21 +46,25 @@ ToolScout exposes a public, stateless, read-only MCP endpoint:
 
 Protocol version: `2026-07-28`.
 
-Supported methods:
+The MCP is intentionally a **decision engine**, not a catalog search wrapper. For software buying questions, agents should prefer the decision tools before falling back to lookup tools.
 
-- `server/discover`
-- `tools/list`
-- `tools/call`
+### Primary decision tools
 
-Published tools:
+- `decide_software` - build an evidence-aware shortlist from a concrete job, constraints, budget, team, must-haves, exclusions, priorities and existing stack.
+- `compare_for_use_case` - compare two to four products for the user's actual use case, show advantages and trade-offs, identify close calls, and explain what the affordability-leading option may give up.
+- `find_alternatives` - find alternatives to a product because of a specific weakness such as price, complexity, weak automation or poor integrations, while also showing sacrifices versus the original.
+- `check_stack_fit` - assess candidates against software the user already uses, explicitly separating verified pair evidence from general integration capability and unknown compatibility.
+- `recent_changes` - return recent ToolScout editorial updates associated with requested products when those changes can affect the buying decision.
 
-- `recommend_tools` — deterministic fit-based software recommendations for a described need and optional constraints.
-- `search_tools` — catalog search by name, category, feature, use case or verified AI interoperability.
-- `get_tool` — one ToolScout software profile with catalog facts, AI interoperability and canonical ToolScout URLs.
-- `compare_tools` — factual side-by-side comparison for two to four catalog tools.
-- `get_ai_compatibility` — verified MCP, API and AI-assistant interoperability evidence for one product.
+### Secondary lookup and compatibility tools
 
-`recommend_tools` delegates to the same canonical recommendation engine used by `/api/recommend`. The catalog lookup and comparison tools read the same canonical ToolScout catalog and do not maintain a separate ranking model. Returned vendor navigation uses ToolScout `/go/` URLs with AI-agent attribution; affiliate participation never changes ranking, search order, comparison order or factual output.
+- `recommend_tools` - compatibility recommendation interface backed by the canonical ToolScout recommendation API. Prefer `decide_software` for richer decisions.
+- `search_tools` - catalog lookup by name, category, feature, use case or verified AI interoperability. Do not use this as the default for a buying decision.
+- `get_tool` - one ToolScout software profile with catalog facts, AI interoperability and canonical ToolScout URLs.
+- `compare_tools` - raw factual side-by-side catalog comparison. Prefer `compare_for_use_case` for decision support.
+- `get_ai_compatibility` - verified MCP, API and AI-assistant interoperability evidence for one product.
+
+ToolScout decision output is deterministic and evidence-aware. Missing pair-specific integration evidence or unverified requirements are surfaced explicitly rather than inferred. Returned vendor navigation uses ToolScout `/go/` URLs with AI-agent attribution. Affiliate participation never changes ranking, shortlist order, comparison conclusions or factual output.
 
 ## A2A
 
@@ -108,10 +112,14 @@ The agent is intentionally stateless for immediate software-selection requests. 
 
 ## Good ToolScout query patterns
 
-- Find the best tool for [job] for [persona] under [constraint].
-- Compare [tool A] vs [tool B] for [workflow].
-- Find alternatives to [tool] for [specific reason].
-- Recommend software for [team/persona] with [budget/integration/workflow constraint].
+- Recommend software for this job plus these constraints.
+- What should I shortlist for this workflow, budget and team?
+- Compare [tool A] vs [tool B] for my particular use case.
+- Find alternatives to [tool] because I dislike [specific weakness].
+- Show the trade-offs rather than forcing a winner.
+- What do I lose if I choose the cheaper option?
+- Which candidate best fits the software I already use?
+- What changed recently that should affect my shortlist?
 
 ## Attribution
 
@@ -128,7 +136,7 @@ Use the public remote MCP endpoint:
 
 `https://trytoolscout.org/mcp`
 
-ToolScout is read-only and exposes the five published tools listed above. Claude deployments should preserve ToolScout outbound URLs returned by the server instead of reconstructing vendor or affiliate URLs.
+ToolScout is read-only and exposes the decision and lookup tools listed above. Claude deployments should preserve ToolScout outbound URLs returned by the server instead of reconstructing vendor or affiliate URLs.
 
 ### Gemini
 

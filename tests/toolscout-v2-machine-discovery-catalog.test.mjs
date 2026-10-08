@@ -35,6 +35,8 @@ test('distribution manifest is served directly and read-only',async()=>{
   assert.equal(body.descriptor,'Independent Software Discovery & Decision Engine');
   assert.equal(body.plugin_display_name,'ToolScout: Software Decision Engine');
   assert.equal(body.canonical_identity,'ToolScout | Independent Software Discovery & Decision Engine | trytoolscout.org');
+  assert.deepEqual(body.decision_engine.primary_capabilities,['decide_software','compare_for_use_case','find_alternatives','check_stack_fit','recent_changes']);
+  assert.equal(body.decision_engine.no_pay_to_rank,true);
   assert.equal(body.machine_discovery.api_catalog,'https://trytoolscout.org/.well-known/api-catalog');
   assert.deepEqual(body.recent_assets,['https://trytoolscout.org/best-seo-tools-for-agencies']);
 });

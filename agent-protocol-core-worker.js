@@ -2,7 +2,7 @@ import base from './content-engine-intelligence-worker.js';
 
 const PROTOCOL_VERSION='2026-07-28';
 const A2A_VERSION='1.0';
-const SERVER_INFO={name:'ToolScout',version:'1.1.0',websiteUrl:'https://trytoolscout.org/'};
+const SERVER_INFO={name:'ToolScout: Software Decision Engine',version:'2.0.0',websiteUrl:'https://trytoolscout.org/'};
 const SERVER_META_KEY='io.modelcontextprotocol/serverInfo';
 const JSON_HEADERS={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store','Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'Content-Type, Accept, MCP-Protocol-Version, Mcp-Method, Mcp-Name','Access-Control-Allow-Methods':'POST, OPTIONS'};
 const A2A_HEADERS={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'no-store','Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'Content-Type, Accept, A2A-Version','Access-Control-Allow-Methods':'GET, POST, OPTIONS'};
@@ -41,9 +41,96 @@ function toolDefinitions(){
   const readOnly={readOnlyHint:true,destructiveHint:false,idempotentHint:true,openWorldHint:false};
   return [
     {
+      name:'decide_software',
+      title:'Decide which software fits',
+      description:'Primary ToolScout decision tool. Turn a job, constraints, priorities, budget, team, must-haves, exclusions and existing stack into an evidence-aware shortlist with reasons, trade-offs and uncertainty. Use this instead of catalog search when the user is choosing software.',
+      inputSchema:{
+        type:'object',additionalProperties:false,required:['job'],
+        properties:{
+          job:{type:'string',minLength:3,maxLength:500,description:'The concrete job, workflow or outcome the software must support.'},
+          constraints:{type:'array',maxItems:12,items:{type:'string',minLength:1,maxLength:160}},
+          must_have:{type:'array',maxItems:12,items:{type:'string',minLength:1,maxLength:100}},
+          avoid:{type:'array',maxItems:12,items:{type:'string',minLength:1,maxLength:100}},
+          budget:{type:'string',enum:['free','low','mid','high']},
+          team:{type:'string',enum:['solo','small','team','large','agency']},
+          priorities:{type:'array',maxItems:6,uniqueItems:true,items:{type:'string',enum:['price','ease','automation','integrations','sales','ai','marketing','seo','research','content','agency']}},
+          existing_tools:{type:'array',maxItems:12,items:{type:'string',minLength:1,maxLength:100}},
+          limit:{type:'integer',minimum:2,maximum:5,default:3}
+        }
+      },
+      outputSchema:{type:'object',required:['job','shortlist','decision_basis','affiliate_disclosure'],properties:{job:{type:'string'},shortlist:{type:'array',items:{type:'object'}},decision_basis:{type:'object'},affiliate_disclosure:{type:'string'}}},
+      annotations:readOnly
+    },
+    {
+      name:'compare_for_use_case',
+      title:'Compare software for a specific use case',
+      description:'Compare two to four products for the user\'s actual use case and priorities. Explain advantages, trade-offs, close calls, uncertainty, and what the affordability-leading option may give up.',
+      inputSchema:{
+        type:'object',additionalProperties:false,required:['tools','use_case'],
+        properties:{
+          tools:{type:'array',minItems:2,maxItems:4,uniqueItems:true,items:{type:'string',minLength:1,maxLength:120}},
+          use_case:{type:'string',minLength:3,maxLength:500},
+          must_have:{type:'array',maxItems:12,items:{type:'string',minLength:1,maxLength:100}},
+          budget:{type:'string',enum:['free','low','mid','high']},
+          team:{type:'string',enum:['solo','small','team','large','agency']},
+          priorities:{type:'array',maxItems:6,uniqueItems:true,items:{type:'string',enum:['price','ease','automation','integrations','sales','ai','marketing','seo','research','content','agency']}},
+          existing_tools:{type:'array',maxItems:12,items:{type:'string',minLength:1,maxLength:100}}
+        }
+      },
+      outputSchema:{type:'object',required:['use_case','tools','verdict','tradeoffs','affiliate_disclosure'],properties:{use_case:{type:'string'},tools:{type:'array',items:{type:'object'}},verdict:{type:'object'},tradeoffs:{type:'array',items:{type:'object'}},cheaper_option_analysis:{type:'object'},affiliate_disclosure:{type:'string'}}},
+      annotations:readOnly
+    },
+    {
+      name:'find_alternatives',
+      title:'Find better alternatives for a reason',
+      description:'Find alternatives to a product because the user dislikes something specific, such as price, complexity, weak automation, poor integrations or another constraint. Returns improvements and what each alternative may sacrifice.',
+      inputSchema:{
+        type:'object',additionalProperties:false,required:['tool','dislike'],
+        properties:{
+          tool:{type:'string',minLength:1,maxLength:120},
+          dislike:{type:'string',minLength:2,maxLength:300},
+          must_have:{type:'array',maxItems:12,items:{type:'string',minLength:1,maxLength:100}},
+          budget:{type:'string',enum:['free','low','mid','high']},
+          existing_tools:{type:'array',maxItems:12,items:{type:'string',minLength:1,maxLength:100}},
+          limit:{type:'integer',minimum:1,maximum:5,default:3}
+        }
+      },
+      outputSchema:{type:'object',required:['source','reason','alternatives','affiliate_disclosure'],properties:{source:{type:'object'},reason:{type:'string'},alternatives:{type:'array',items:{type:'object'}},affiliate_disclosure:{type:'string'}}},
+      annotations:readOnly
+    },
+    {
+      name:'check_stack_fit',
+      title:'Check fit with an existing software stack',
+      description:'Assess candidate software against tools the user already uses. Distinguishes verified pair evidence from general integration capability and unknown compatibility instead of inventing integrations.',
+      inputSchema:{
+        type:'object',additionalProperties:false,required:['candidates','existing_tools'],
+        properties:{
+          candidates:{type:'array',minItems:1,maxItems:5,uniqueItems:true,items:{type:'string',minLength:1,maxLength:120}},
+          existing_tools:{type:'array',minItems:1,maxItems:12,uniqueItems:true,items:{type:'string',minLength:1,maxLength:100}},
+          use_case:{type:'string',maxLength:300}
+        }
+      },
+      outputSchema:{type:'object',required:['existing_tools','candidates','evidence_note'],properties:{existing_tools:{type:'array',items:{type:'string'}},candidates:{type:'array',items:{type:'object'}},evidence_note:{type:'string'}}},
+      annotations:readOnly
+    },
+    {
+      name:'recent_changes',
+      title:'Show recent changes that affect a software decision',
+      description:'Return recent ToolScout editorial updates for one to five products, focusing on changes that can alter a buying decision such as pricing, integrations, AI capabilities, security or product direction.',
+      inputSchema:{
+        type:'object',additionalProperties:false,required:['tools'],
+        properties:{
+          tools:{type:'array',minItems:1,maxItems:5,uniqueItems:true,items:{type:'string',minLength:1,maxLength:120}},
+          limit_per_tool:{type:'integer',minimum:1,maximum:5,default:3}
+        }
+      },
+      outputSchema:{type:'object',required:['tools','changes','evidence_note'],properties:{tools:{type:'array',items:{type:'object'}},changes:{type:'array',items:{type:'object'}},evidence_note:{type:'string'}}},
+      annotations:readOnly
+    },
+    {
       name:'recommend_tools',
       title:'Recommend software with ToolScout',
-      description:'Return deterministic ToolScout software recommendations for a job, persona, budget, team and priority. Affiliate relationships do not influence ranking.',
+      description:'Compatibility recommendation tool for a job, persona, budget, team and priority. Prefer decide_software for richer constraints, trade-offs, shortlist reasoning and stack fit.',
       inputSchema:{
         type:'object',additionalProperties:false,required:['q'],
         properties:{
@@ -60,8 +147,8 @@ function toolDefinitions(){
     },
     {
       name:'search_tools',
-      title:'Search the ToolScout software catalog',
-      description:'Search ToolScout by tool name, category, feature, use case or AI interoperability. Returns catalog matches without inventing personalised match percentages.',
+      title:'Look up the ToolScout software catalog',
+      description:'Secondary lookup tool for names, categories, features or AI interoperability. Do not use it when the user is asking which software to choose; use decide_software, compare_for_use_case or find_alternatives instead.',
       inputSchema:{
         type:'object',additionalProperties:false,required:['q'],
         properties:{
@@ -84,8 +171,8 @@ function toolDefinitions(){
     },
     {
       name:'compare_tools',
-      title:'Compare software with ToolScout',
-      description:'Return a factual side-by-side comparison of two to four ToolScout catalog tools. Affiliate participation never changes the comparison order or facts.',
+      title:'Compare raw software facts',
+      description:'Compatibility tool for factual side-by-side catalog data. Prefer compare_for_use_case when a user is making a decision and needs trade-offs or a recommendation.',
       inputSchema:{type:'object',additionalProperties:false,required:['tools'],properties:{tools:{type:'array',minItems:2,maxItems:4,uniqueItems:true,items:{type:'string',minLength:1,maxLength:120}}}},
       outputSchema:{type:'object',required:['count','tools','missing','affiliate_disclosure'],properties:{count:{type:'integer'},tools:{type:'array',items:{type:'object'}},missing:{type:'array',items:{type:'string'}},affiliate_disclosure:{type:'string'}}},
       annotations:readOnly
@@ -110,7 +197,43 @@ function validRecommendArguments(a){
 }
 function validToolArguments(name,a){
   if(!a||typeof a!=='object'||Array.isArray(a))return 'arguments must be an object';
+  const validBudget=v=>v===undefined||['free','low','mid','high'].includes(v);
+  const validTeam=v=>v===undefined||['solo','small','team','large','agency'].includes(v);
+  const validPriorities=v=>v===undefined||(Array.isArray(v)&&v.length<=6&&new Set(v).size===v.length&&v.every(x=>['price','ease','automation','integrations','sales','ai','marketing','seo','research','content','agency'].includes(x)));
+  const validStrings=(v,maxItems,maxLen)=>v===undefined||(Array.isArray(v)&&v.length<=maxItems&&v.every(x=>typeof x==='string'&&x.trim()&&x.length<=maxLen));
   if(name==='recommend_tools')return validRecommendArguments(a);
+  if(name==='decide_software'){
+    if(typeof a.job!=='string'||a.job.trim().length<3||a.job.length>500)return 'job must be a string between 3 and 500 characters';
+    if(!validStrings(a.constraints,12,160)||!validStrings(a.must_have,12,100)||!validStrings(a.avoid,12,100)||!validStrings(a.existing_tools,12,100))return 'constraints, must_have, avoid and existing_tools must be valid string arrays';
+    if(!validBudget(a.budget)||!validTeam(a.team)||!validPriorities(a.priorities))return 'budget, team or priorities is invalid';
+    if(a.limit!==undefined&&(!Number.isInteger(a.limit)||a.limit<2||a.limit>5))return 'limit must be an integer from 2 to 5';
+    return null;
+  }
+  if(name==='compare_for_use_case'){
+    if(!Array.isArray(a.tools)||a.tools.length<2||a.tools.length>4||new Set(a.tools.map(x=>String(x).trim().toLowerCase())).size!==a.tools.length)return 'tools must contain 2 to 4 unique tool names or slugs';
+    if(a.tools.some(x=>typeof x!=='string'||!x.trim()||x.length>120))return 'each tool must be a non-empty string up to 120 characters';
+    if(typeof a.use_case!=='string'||a.use_case.trim().length<3||a.use_case.length>500)return 'use_case must be a string between 3 and 500 characters';
+    if(!validStrings(a.must_have,12,100)||!validStrings(a.existing_tools,12,100)||!validBudget(a.budget)||!validTeam(a.team)||!validPriorities(a.priorities))return 'comparison constraints are invalid';
+    return null;
+  }
+  if(name==='find_alternatives'){
+    if(typeof a.tool!=='string'||!a.tool.trim()||a.tool.length>120)return 'tool must be a non-empty string up to 120 characters';
+    if(typeof a.dislike!=='string'||a.dislike.trim().length<2||a.dislike.length>300)return 'dislike must be a string between 2 and 300 characters';
+    if(!validStrings(a.must_have,12,100)||!validStrings(a.existing_tools,12,100)||!validBudget(a.budget))return 'alternative constraints are invalid';
+    if(a.limit!==undefined&&(!Number.isInteger(a.limit)||a.limit<1||a.limit>5))return 'limit must be an integer from 1 to 5';
+    return null;
+  }
+  if(name==='check_stack_fit'){
+    if(!validStrings(a.candidates,5,120)||!Array.isArray(a.candidates)||!a.candidates.length)return 'candidates must contain 1 to 5 tool names or slugs';
+    if(!validStrings(a.existing_tools,12,100)||!Array.isArray(a.existing_tools)||!a.existing_tools.length)return 'existing_tools must contain 1 to 12 software names';
+    if(a.use_case!==undefined&&(typeof a.use_case!=='string'||a.use_case.length>300))return 'use_case is invalid';
+    return null;
+  }
+  if(name==='recent_changes'){
+    if(!validStrings(a.tools,5,120)||!Array.isArray(a.tools)||!a.tools.length)return 'tools must contain 1 to 5 tool names or slugs';
+    if(a.limit_per_tool!==undefined&&(!Number.isInteger(a.limit_per_tool)||a.limit_per_tool<1||a.limit_per_tool>5))return 'limit_per_tool must be an integer from 1 to 5';
+    return null;
+  }
   if(name==='search_tools'){
     if(typeof a.q!=='string'||a.q.trim().length<2||a.q.length>160)return 'q must be a string between 2 and 160 characters';
     if(a.category!==undefined&&(typeof a.category!=='string'||a.category.length>60))return 'category is invalid';
@@ -199,9 +322,264 @@ function catalogSearchScore(tool,args){
   if(args.ai_interoperability==='official_mcp'&&ai.mcp!=='official')return -1;
   return score;
 }
+const DECISION_DIMENSIONS=Object.freeze({
+  price:['price','pricing','cost','budget','cheap','cheaper','affordable','free','expensive','too expensive'],
+  ease:['ease','easy','simple','simplicity','usability','beginner','setup','learning curve','complex','complexity','complicated'],
+  automation:['automation','automate','workflow','workflows','automatic'],
+  integrations:['integration','integrations','integrate','stack','connect','connector'],
+  sales:['sales','crm','pipeline','lead','leads','prospecting'],
+  ai:['ai','artificial intelligence','agent','agents','mcp','chatgpt','claude','gemini'],
+  marketing:['marketing','campaign','campaigns','email marketing','growth'],
+  seo:['seo','search engine','keyword','keywords','organic'],
+  research:['research','analysis','analytics','insight','insights'],
+  content:['content','writing','newsletter','publishing','creative'],
+  agency:['agency','agencies','client','clients']
+});
+const STOP_WORDS=new Set(['the','and','for','with','that','this','from','into','our','your','you','my','we','software','tool','tools','app','apps','need','want','best','right','which','use','using','to','of','a','an','in','on','or','is','are']);
+function clamp(n,min,max){return Math.max(min,Math.min(max,n))}
+function scoreOf(tool,key){const n=Number(tool?.scores?.[key]);return Number.isFinite(n)?clamp(n,0,10):null}
+function textTerms(value){return catalogNormalize(value).split(' ').filter(x=>x.length>1&&!STOP_WORDS.has(x))}
+function toolHay(tool){return catalogNormalize([tool?.name,tool?.slug,tool?.category,tool?.description,...(tool?.features||[]),...(tool?.bestFor||[])].join(' '))}
+function requestedDimensions(args){
+  const direct=Array.isArray(args?.priorities)?args.priorities.filter(x=>DECISION_DIMENSIONS[x]):[];
+  if(direct.length)return direct;
+  const text=catalogNormalize([args?.job,args?.use_case,args?.dislike,...(args?.constraints||[]),...(args?.must_have||[]),...(args?.avoid||[])].join(' '));
+  const found=[];
+  for(const [key,aliases] of Object.entries(DECISION_DIMENSIONS))if(aliases.some(x=>text.includes(catalogNormalize(x))))found.push(key);
+  return found.length?found:['ease','integrations'];
+}
+function requirementMatch(tool,requirement){
+  const hay=toolHay(tool),needle=catalogNormalize(requirement);
+  if(!needle)return {matched:false,strength:0};
+  if(hay.includes(needle))return {matched:true,strength:1};
+  const terms=textTerms(needle);
+  const hits=terms.filter(t=>hay.includes(t)).length;
+  const strength=terms.length?hits/terms.length:0;
+  return {matched:strength>=0.6,strength};
+}
+function budgetSignal(tool,budget){
+  const price=scoreOf(tool,'price');
+  if(!budget)return {points:0,label:'not specified'};
+  if(budget==='free')return tool?.freePlan?{points:12,label:'free plan available'}:{points:-18,label:'no verified free plan'};
+  if(price==null)return {points:0,label:'price fit unverified'};
+  if(budget==='low')return {points:(price-5)*3,label:price>=8?'strong affordability signal':price>=6?'moderate affordability signal':'weaker affordability signal'};
+  if(budget==='mid')return {points:Math.abs(price-6)<=2?7:2,label:'mid-budget fit estimated from ToolScout price score'};
+  return {points:price<=6?6:2,label:'budget is flexible; capability can outweigh price'};
+}
+function teamSignal(tool,team){
+  if(!team)return {points:0,label:null};
+  const hay=toolHay(tool),aliases={
+    solo:['solo','creator','freelancer','individual'],
+    small:['small business','small businesses','small team','startup'],
+    team:['team','teams','company','business'],
+    large:['enterprise','large','organization','organisation'],
+    agency:['agency','agencies','client']
+  };
+  const matched=(aliases[team]||[team]).some(x=>hay.includes(catalogNormalize(x)));
+  return {points:matched?7:0,label:matched?'catalog evidence matches '+team+' context':'team-size fit not explicit in catalog'};
+}
+function stackAssessment(tool,existingTools=[]){
+  const ai=aiIntegration(tool),hay=toolHay(tool),pairs=[];
+  for(const existing of existingTools||[]){
+    const n=catalogNormalize(existing);
+    if(!n)continue;
+    const assistant=(ai.assistants||[]).find(x=>catalogNormalize(x)===n);
+    if(assistant){pairs.push({existing_tool:existing,status:'verified',evidence:'Verified AI interoperability with '+assistant+'.'});continue}
+    if(hay.includes(n)){pairs.push({existing_tool:existing,status:'catalog_evidence',evidence:'The ToolScout catalog explicitly references '+existing+' in the candidate evidence.'});continue}
+    if((tool.features||[]).some(x=>catalogNormalize(x)==='integrations')||scoreOf(tool,'integrations')>=8){
+      pairs.push({existing_tool:existing,status:'pair_unverified',evidence:'Strong general integration capability, but ToolScout does not currently store verified pair-specific evidence for '+existing+'.'});
+      continue;
+    }
+    pairs.push({existing_tool:existing,status:'unknown',evidence:'No pair-specific integration evidence is currently stored for '+existing+'.'});
+  }
+  const verified=pairs.filter(x=>x.status==='verified'||x.status==='catalog_evidence').length;
+  return {pairs,verified_pairs:verified,unknown_pairs:pairs.length-verified,summary:pairs.length?verified===pairs.length?'All requested stack links have catalog evidence.':verified?'Some stack links are evidenced; the rest should be verified before switching.':'ToolScout does not currently have pair-specific evidence for this stack; do not assume compatibility.':'No existing stack supplied.'};
+}
+function decisionEvaluation(tool,args){
+  const job=String(args.job||args.use_case||args.q||'').trim(),hay=toolHay(tool),terms=textTerms(job);
+  let relevance=0;
+  if(terms.length){
+    const category=catalogNormalize(tool.category);
+    for(const term of terms){
+      if(category===term)relevance+=10;
+      else if(hay.includes(term))relevance+=4;
+    }
+  }
+  for(const req of args.must_have||[])if(requirementMatch(tool,req).matched)relevance+=5;
+  const dims=requestedDimensions(args);
+  const dimScores=dims.map(key=>({dimension:key,score:scoreOf(tool,key)})).filter(x=>x.score!=null);
+  const dimAvg=dimScores.length?dimScores.reduce((s,x)=>s+x.score,0)/dimScores.length:5;
+  const budget=budgetSignal(tool,args.budget),team=teamSignal(tool,args.team);
+  const must=(args.must_have||[]).map(x=>({requirement:x,...requirementMatch(tool,x)}));
+  const avoids=(args.avoid||[]).map(x=>({requirement:x,...requirementMatch(tool,x)}));
+  const mustMatched=must.filter(x=>x.matched).length;
+  const avoidHits=avoids.filter(x=>x.matched).length;
+  const raw=28+Math.min(28,relevance)+((dimAvg-5)*4)+budget.points+team.points+mustMatched*3-avoidHits*8;
+  const fit=clamp(Math.round(raw),0,95);
+  const stack=stackAssessment(tool,args.existing_tools||[]);
+  const advantages=[];
+  for(const d of [...dimScores].sort((a,b)=>b.score-a.score).slice(0,3))if(d.score>=7)advantages.push(d.dimension+': '+d.score+'/10');
+  if(tool.freePlan&&args.budget==='free')advantages.push('free plan available');
+  for(const x of must.filter(x=>x.matched).slice(0,3))advantages.push('must-have evidence: '+x.requirement);
+  const tradeoffs=[];
+  for(const d of dimScores.filter(x=>x.score<=5))tradeoffs.push(d.dimension+' is only '+d.score+'/10 in the current ToolScout scorecard');
+  for(const x of must.filter(x=>!x.matched).slice(0,4))tradeoffs.push('must-have not verified in catalog: '+x.requirement);
+  if(avoidHits)for(const x of avoids.filter(x=>x.matched).slice(0,3))tradeoffs.push('possible conflict with avoid constraint: '+x.requirement);
+  if(args.budget==='free'&&!tool.freePlan)tradeoffs.push('no verified free plan in the current catalog');
+  const evidenceCount=dimScores.length+mustMatched+stack.verified_pairs+(tool.lastVerified?1:0);
+  const confidence=evidenceCount>=5?'high':evidenceCount>=3?'medium':'limited';
+  return {
+    ...publicTool(tool),
+    fit_score:fit,
+    evidence_confidence:confidence,
+    advantages,
+    tradeoffs,
+    requested_dimensions:dimScores,
+    requirement_evidence:must,
+    stack_fit:stack
+  };
+}
+function decisionCandidates(tools,args){
+  const evaluated=tools.map(t=>decisionEvaluation(t,args));
+  const jobTerms=textTerms(args.job||args.use_case||'');
+  const relevant=evaluated.filter(x=>{
+    if(!jobTerms.length)return true;
+    const source=tools.find(t=>t.slug===x.slug);
+    const hay=toolHay(source);
+    return jobTerms.some(term=>hay.includes(term)||catalogNormalize(source.category)===term)||(args.must_have||[]).some(r=>requirementMatch(source,r).matched);
+  });
+  return relevant.sort((a,b)=>b.fit_score-a.fit_score||String(a.name).localeCompare(String(b.name)));
+}
+function pairwiseTradeoffs(evaluated,dims){
+  const out=[];
+  for(let i=0;i<evaluated.length;i++)for(let j=i+1;j<evaluated.length;j++){
+    const a=evaluated[i],b=evaluated[j],differences=[];
+    for(const d of dims){
+      const av=(a.requested_dimensions.find(x=>x.dimension===d)||{}).score;
+      const bv=(b.requested_dimensions.find(x=>x.dimension===d)||{}).score;
+      if(av==null||bv==null||av===bv)continue;
+      const winner=av>bv?a.name:b.name,loser=av>bv?b.name:a.name;
+      differences.push({dimension:d,winner,loser,difference:Math.abs(av-bv),scores:{[a.name]:av,[b.name]:bv}});
+    }
+    out.push({a:a.name,b:b.name,differences});
+  }
+  return out;
+}
+async function assetText(request,env,path){
+  if(!env?.ASSETS?.fetch)return null;
+  try{const u=new URL(path,request.url);const r=await env.ASSETS.fetch(new Request(u.toString(),{method:'GET'}));return r.ok?await r.text():null}catch{return null}
+}
+function newsJsonLd(html){
+  const matches=[...String(html||'').matchAll(/<script type=["']application\/ld\+json["']>([\s\S]*?)<\/script>/gi)];
+  for(const m of matches){try{const j=JSON.parse(m[1]);if(j&&j['@type']==='NewsArticle')return j}catch{}}
+  return null;
+}
+async function recentChangesForTool(tool,request,env,limit=3){
+  const index=await assetText(request,env,'/whats-new.html');
+  if(!index)return [];
+  const links=[...new Set([...index.matchAll(/href=["'](\/news\/[^"'?#]+(?:\.html)?)["']/gi)].map(m=>m[1]))].slice(0,40);
+  const pages=await Promise.all(links.map(async path=>({path,html:await assetText(request,env,path)})));
+  const needle=catalogNormalize(tool.name),slug=catalogNormalize(tool.slug);
+  const changes=[];
+  for(const page of pages){
+    const j=newsJsonLd(page.html);if(!j)continue;
+    const about=typeof j.about==='string'?j.about:(j.about?.name||'');
+    if(![catalogNormalize(about),catalogNormalize(j.headline),catalogNormalize(j.description)].some(x=>x.includes(needle)||x.includes(slug)))continue;
+    changes.push({
+      tool:tool.name,
+      headline:j.headline||null,
+      summary:j.description||null,
+      date:j.datePublished||j.dateModified||null,
+      url:j.mainEntityOfPage||new URL(page.path,request.url).toString(),
+      decision_relevance:'ToolScout editorial update selected for buyer relevance.'
+    });
+  }
+  changes.sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
+  return changes.slice(0,limit);
+}
 async function callCatalogTool(name,args,request,env){
   let tools;
   try{tools=await loadCatalog(request,env)}catch{return {error:'ToolScout catalog is temporarily unavailable.',status:503}}
+  const disclosure='ToolScout may earn a commission from some outbound links. Affiliate relationships do not influence ranking, shortlist order, comparison conclusions or factual output.';
+  if(name==='decide_software'){
+    const limit=Math.max(2,Math.min(5,args.limit||3));
+    const shortlist=decisionCandidates(tools,args).filter(x=>x.fit_score>0).slice(0,limit);
+    if(!shortlist.length)return {error:'ToolScout could not find enough catalog evidence for this software decision. Add a more concrete job, category or must-have constraint.',status:422,data:{job:args.job,shortlist:[]}};
+    const dims=requestedDimensions(args);
+    return {data:{
+      job:args.job,
+      shortlist,
+      decision_basis:{
+        dimensions:dims,
+        constraints:args.constraints||[],
+        must_have:args.must_have||[],
+        avoid:args.avoid||[],
+        budget:args.budget||null,
+        team:args.team||null,
+        existing_tools:args.existing_tools||[],
+        methodology:'Deterministic ToolScout catalog fit. Scores combine job relevance, explicit priorities, budget/team signals, must-have evidence and known stack evidence. Missing evidence is surfaced rather than invented.',
+        no_pay_to_rank:true
+      },
+      affiliate_disclosure:disclosure
+    }};
+  }
+  if(name==='compare_for_use_case'){
+    const found=[],missing=[];
+    for(const value of args.tools){const tool=findCatalogTool(tools,value);if(tool)found.push(tool);else missing.push(value)}
+    if(found.length<2)return {error:'At least two requested tools must exist in the ToolScout catalog.',status:404,data:{missing}};
+    const evalArgs={job:args.use_case,use_case:args.use_case,must_have:args.must_have||[],budget:args.budget,team:args.team,priorities:args.priorities||[],existing_tools:args.existing_tools||[]};
+    const evaluated=found.map(t=>decisionEvaluation(t,evalArgs)).sort((a,b)=>b.fit_score-a.fit_score);
+    const dims=requestedDimensions(evalArgs),gap=evaluated[0].fit_score-evaluated[1].fit_score;
+    const priceRank=[...evaluated].filter(x=>scoreOf(found.find(t=>t.slug===x.slug),'price')!=null)
+      .sort((a,b)=>(scoreOf(found.find(t=>t.slug===b.slug),'price')||0)-(scoreOf(found.find(t=>t.slug===a.slug),'price')||0));
+    const affordable=priceRank[0]||null;
+    const leader=evaluated[0];
+    const losses=affordable?dims.filter(d=>d!=='price').map(d=>{
+      const at=found.find(t=>t.slug===affordable.slug),lt=found.find(t=>t.slug===leader.slug);
+      const av=scoreOf(at,d),lv=scoreOf(lt,d);
+      return av!=null&&lv!=null&&lv-av>=2?{dimension:d,affordability_leader:av,best_fit_leader:lv,gap:lv-av}:null;
+    }).filter(Boolean):[];
+    return {data:{
+      use_case:args.use_case,
+      tools:evaluated,
+      missing,
+      verdict:gap>=4?{type:'best_fit',tool:leader.name,reason:'Highest evidence-weighted fit for the supplied use case and constraints.',score_gap:gap}:{type:'close_call',tools:evaluated.slice(0,2).map(x=>x.name),reason:'The leading fit scores are close; the decision should follow the explicit trade-offs rather than a forced winner.',score_gap:gap},
+      tradeoffs:pairwiseTradeoffs(evaluated,dims),
+      cheaper_option_analysis:affordable?{affordability_leader:affordable.name,pricing_signal:affordable.pricing,note:'Affordability is inferred from ToolScout price score and catalog pricing text, not a live quote.',what_you_may_lose_vs_best_fit:losses}: {note:'No comparable affordability score is available.'},
+      affiliate_disclosure:disclosure
+    }};
+  }
+  if(name==='find_alternatives'){
+    const source=findCatalogTool(tools,args.tool);
+    if(!source)return {error:'Source tool not found in the ToolScout catalog.',status:404,data:{tool:args.tool}};
+    const dims=requestedDimensions({dislike:args.dislike});
+    const sourceEval=decisionEvaluation(source,{job:source.category,priorities:dims,must_have:args.must_have||[],budget:args.budget,existing_tools:args.existing_tools||[]});
+    const candidates=tools.filter(t=>t.slug!==source.slug&&catalogNormalize(t.category)===catalogNormalize(source.category)).map(t=>{
+      const ev=decisionEvaluation(t,{job:source.category,priorities:dims,must_have:args.must_have||[],budget:args.budget,existing_tools:args.existing_tools||[]});
+      const improvements=[],sacrifices=[];
+      for(const d of [...new Set([...dims,'price','ease','automation','integrations'])]){
+        const ss=scoreOf(source,d),cs=scoreOf(t,d);if(ss==null||cs==null)continue;
+        if(cs-ss>=1)improvements.push({dimension:d,from:ss,to:cs});
+        if(ss-cs>=1)sacrifices.push({dimension:d,from:ss,to:cs});
+      }
+      const reasonLift=improvements.filter(x=>dims.includes(x.dimension)).reduce((s,x)=>s+x.to-x.from,0);
+      return {...ev,improvements_over_source:improvements,tradeoffs_vs_source:sacrifices,alternative_score:ev.fit_score+reasonLift*4};
+    }).filter(x=>x.improvements_over_source.some(y=>dims.includes(y.dimension))||!dims.length).sort((a,b)=>b.alternative_score-a.alternative_score).slice(0,Math.max(1,Math.min(5,args.limit||3)));
+    return {data:{source:publicTool(source),reason:args.dislike,decision_dimensions:dims,alternatives:candidates,affiliate_disclosure:disclosure}};
+  }
+  if(name==='check_stack_fit'){
+    const found=[],missing=[];
+    for(const value of args.candidates){const tool=findCatalogTool(tools,value);if(tool)found.push(tool);else missing.push(value)}
+    const candidates=found.map(t=>({tool:publicTool(t),stack_fit:stackAssessment(t,args.existing_tools),integration_score:scoreOf(t,'integrations'),use_case:args.use_case||null}));
+    return {data:{existing_tools:args.existing_tools,candidates,missing,evidence_note:'ToolScout distinguishes exact catalog/AI evidence from general integration capability. pair_unverified and unknown mean compatibility must be checked before a migration or purchase.'}};
+  }
+  if(name==='recent_changes'){
+    const found=[],missing=[];
+    for(const value of args.tools){const tool=findCatalogTool(tools,value);if(tool)found.push(tool);else missing.push(value)}
+    const limit=Math.max(1,Math.min(5,args.limit_per_tool||3));
+    const nested=await Promise.all(found.map(async t=>({tool:publicTool(t),changes:await recentChangesForTool(t,request,env,limit)})));
+    return {data:{tools:nested.map(x=>x.tool),missing,changes:nested.flatMap(x=>x.changes),evidence_note:'Recent changes come from ToolScout editorial news assets and are returned only when the article is associated with the requested product. Absence of a result does not mean the vendor made no changes.'}};
+  }
   if(name==='search_tools'){
     const limit=Math.max(1,Math.min(10,args.limit||5));
     const ranked=tools.map(t=>({tool:t,score:catalogSearchScore(t,args)})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score||String(a.tool.name).localeCompare(String(b.tool.name))).slice(0,limit);
@@ -235,7 +613,7 @@ async function handleMcp(request,env,ctx){
   if(!body||body.jsonrpc!=='2.0'||body.id===undefined||typeof body.method!=='string')return rpcError(body?.id??null,-32600,'Invalid Request',undefined,400);
   const envelopeError=validateEnvelope(request,body);
   if(envelopeError){return rpcError(body.id,envelopeError.code,envelopeError.message,envelopeError.data,400)}
-  if(body.method==='server/discover'){return rpc(body.id,{supportedVersions:[PROTOCOL_VERSION],capabilities:{tools:{listChanged:false}},instructions:'ToolScout is a read-only software decision engine. Use recommend_tools for fit-based ranking, search_tools for catalog discovery, get_tool for product facts, compare_tools for side-by-side facts, and get_ai_compatibility for verified AI interoperability. Affiliate relationships never influence ranking, search order, comparison order or factual output.',ttlMs:3600000,cacheScope:'public'})}
+  if(body.method==='server/discover'){return rpc(body.id,{supportedVersions:[PROTOCOL_VERSION],capabilities:{tools:{listChanged:false}},instructions:'ToolScout is a read-only software decision engine, not a generic software directory. Prefer decide_software when the user is choosing what to buy or shortlist; compare_for_use_case for contextual comparisons and cheaper-option trade-offs; find_alternatives when a user dislikes something about an existing tool; check_stack_fit for integration fit with an existing stack; recent_changes for buyer-relevant product changes. Use search_tools only for lookup. Affiliate relationships never influence ranking, shortlist order, comparison conclusions or factual output.',ttlMs:3600000,cacheScope:'public'})}
   if(body.method==='tools/list'){return rpc(body.id,{tools:toolDefinitions(),ttlMs:3600000,cacheScope:'public'})}
   if(body.method==='tools/call'){
     const name=String(body?.params?.name||''),known=new Set(toolDefinitions().map(t=>t.name));
@@ -250,9 +628,9 @@ async function handleMcp(request,env,ctx){
 }
 function agentCard(){
   return {
-    name:'ToolScout Software Recommendation Agent',
-    description:'Read-only software decision agent that turns a software job, persona and constraints into deterministic ToolScout recommendations. Affiliate relationships do not influence ranking.',
-    version:'1.0.0',
+    name:'ToolScout Software Decision Agent',
+    description:'Read-only software decision agent that helps buyers decide which software fits a real job, constraints and existing stack. It can shortlist, compare for a use case, surface trade-offs, find alternatives, check stack fit and explain recent buyer-relevant changes. Affiliate relationships do not influence decisions.',
+    version:'2.0.0',
     provider:{organization:'ToolScout',url:'https://trytoolscout.org/'},
     documentationUrl:'https://trytoolscout.org/agents.md',
     iconUrl:'https://trytoolscout.org/embed/badge.svg',
@@ -260,15 +638,11 @@ function agentCard(){
     capabilities:{streaming:false,pushNotifications:false,extendedAgentCard:false},
     defaultInputModes:['text/plain','application/json'],
     defaultOutputModes:['text/plain','application/json'],
-    skills:[{
-      id:'recommend_software',
-      name:'Recommend software',
-      description:'Recommend and rank software for a described job with optional budget, team and priority constraints.',
-      tags:['software-discovery','software-recommendations','decision-support'],
-      examples:['CRM for a small sales team under $25/month','SEO tools for an agency','Workflow automation for a small business'],
-      inputModes:['text/plain','application/json'],
-      outputModes:['text/plain','application/json']
-    }]
+    skills:[
+      {id:'decide_software',name:'Decide which software fits',description:'Build an evidence-aware shortlist from a job, constraints, budget, team, must-haves and existing stack.',tags:['software-decision','shortlist','buyer-fit'],examples:['CRM for a five-person consultancy that uses Gmail and needs automation under a low budget','Project management for a client services agency that needs easy onboarding'],inputModes:['text/plain','application/json'],outputModes:['text/plain','application/json']},
+      {id:'compare_for_use_case',name:'Compare for a use case',description:'Compare products for a specific workflow and explain trade-offs, close calls and cheaper-option losses.',tags:['software-comparison','trade-offs','decision-support'],examples:['HubSpot vs Pipedrive for a 5-person consultancy','What do I lose if I choose the cheaper CRM?'],inputModes:['text/plain','application/json'],outputModes:['text/plain','application/json']},
+      {id:'find_alternatives',name:'Find alternatives for a reason',description:'Find alternatives because a user dislikes a specific weakness in a current product.',tags:['alternatives','switching','software-decision'],examples:['Alternatives to HubSpot because I find it too expensive','Alternatives to Notion because I want stronger automation'],inputModes:['text/plain','application/json'],outputModes:['text/plain','application/json']}
+    ]
   };
 }
 function a2aArgs(message){
@@ -277,14 +651,15 @@ function a2aArgs(message){
   const dataParts=message.parts.filter(p=>p&&p.data&&typeof p.data==='object'&&!Array.isArray(p.data)).map(p=>p.data);
   const data=Object.assign({},...dataParts);
   const args={...data};
-  if(!args.q&&texts.length)args.q=texts.join('\n');
-  if(!args.q)return {error:'message must include text or application/json data with q'};
-  const invalid=validRecommendArguments(args);if(invalid)return {error:invalid};
+  if(!args.job&&args.q)args.job=args.q;
+  if(!args.job&&texts.length)args.job=texts.join('\n');
+  if(!args.job)return {error:'message must include text or application/json data with job'};
+  const invalid=validToolArguments('decide_software',args);if(invalid)return {error:invalid};
   return {args};
 }
 function recommendationText(data){
-  const names=(data?.recommendations||[]).map((r,i)=>`${i+1}. ${r.name} (${r.match}% match)`).join('\n');
-  return `ToolScout recommendations for: ${data.query}\n${names}\n\nAffiliate relationships do not influence ranking.`;
+  const names=(data?.shortlist||[]).map((r,i)=>`${i+1}. ${r.name} (${r.fit_score}/95 fit, ${r.evidence_confidence} evidence confidence)`).join('\n');
+  return `ToolScout shortlist for: ${data.job}\n${names}\n\nToolScout surfaces trade-offs and missing evidence rather than forcing a universal winner. Affiliate relationships do not influence shortlist order.`;
 }
 async function handleA2A(request,env,ctx){
   if(request.method==='OPTIONS')return new Response(null,{status:204,headers:A2A_HEADERS});
@@ -296,11 +671,11 @@ async function handleA2A(request,env,ctx){
   if(body.method!=='SendMessage'){ctx.waitUntil(logProtocol(env,'a2a',body.method,{success:false}));return a2aError(body.id,-32601,'Method not found','METHOD_NOT_FOUND',400)}
   const extracted=a2aArgs(body?.params?.message);
   if(extracted.error){ctx.waitUntil(logProtocol(env,'a2a','SendMessage',{success:false}));return a2aError(body.id,-32602,'Invalid parameters','INVALID_PARAMS',400)}
-  const out=await callRecommend(extracted.args,request,env,ctx);
-  if(out.error){ctx.waitUntil(logProtocol(env,'a2a','SendMessage',{success:false}));return a2aError(body.id,-32603,'Internal error','RECOMMENDATION_UNAVAILABLE',500)}
+  const out=await callCatalogTool('decide_software',extracted.args,request,env);
+  if(out.error){ctx.waitUntil(logProtocol(env,'a2a','SendMessage',{success:false}));return a2aError(body.id,-32603,'Internal error','DECISION_UNAVAILABLE',500)}
   const incoming=body.params.message,contextId=incoming.contextId||crypto.randomUUID();
   const message={messageId:crypto.randomUUID(),contextId,role:'ROLE_AGENT',parts:[{text:recommendationText(out.data),mediaType:'text/plain'},{data:out.data,mediaType:'application/json'}]};
-  ctx.waitUntil(logProtocol(env,'a2a','SendMessage',{resultCount:Number(out.data?.count||0)}));
+  ctx.waitUntil(logProtocol(env,'a2a','SendMessage',{resultCount:Number(out.data?.shortlist?.length||0)}));
   return Response.json({jsonrpc:'2.0',id:body.id,result:{message}},{headers:A2A_HEADERS});
 }
 
