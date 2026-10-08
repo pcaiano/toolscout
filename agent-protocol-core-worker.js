@@ -378,6 +378,50 @@ function teamSignal(tool,team){
   const matched=(aliases[team]||[team]).some(x=>hay.includes(catalogNormalize(x)));
   return {points:matched?7:0,label:matched?'catalog evidence matches '+team+' context':'team-size fit not explicit in catalog'};
 }
+function explicitTextMatch(tool,value){
+  const needle=catalogNormalize(value);
+  if(!needle)return false;
+  const fields=[
+    tool?.description,
+    ...(tool?.features||[]),
+    ...(tool?.bestFor||[])
+  ].map(catalogNormalize).filter(Boolean);
+  return fields.some(field=>field===needle||field.includes(' '+needle+' ')||field.startsWith(needle+' ')||field.endsWith(' '+needle));
+}
+function constraintEvidence(tool,constraints=[]){
+  return (constraints||[]).map(raw=>{
+    const constraint=String(raw||'').trim(),norm=catalogNormalize(constraint);
+    if(!norm)return {constraint,status:'not_verified',evidence:'Empty constraint cannot be evaluated.'};
+    const freeIntent=/\b(?:free|free plan|no cost)\b/.test(norm);
+    if(freeIntent){
+      return tool?.freePlan
+        ?{constraint,status:'verified',evidence:'ToolScout catalog records a free plan.'}
+        :{constraint,status:'conflict',evidence:'ToolScout catalog does not record a free plan for this product.'};
+    }
+    const stripped=norm.replace(/\b(?:must|needs?|need|requires?|require|required|support|supports|with|only|be|have|has)\b/g,' ').replace(/\s+/g,' ').trim();
+    const exact=explicitTextMatch(tool,norm)||(stripped&&explicitTextMatch(tool,stripped));
+    if(exact)return {constraint,status:'verified',evidence:'The current ToolScout catalog explicitly contains this requirement in product evidence.'};
+    return {constraint,status:'not_verified',evidence:'ToolScout does not currently store explicit evidence that this product satisfies the requirement.'};
+  });
+}
+function jobIntentProfile(tools,job){
+  const normalized=catalogNormalize(job),categories=[...new Set(tools.map(t=>catalogNormalize(t?.category)).filter(Boolean))];
+  const explicitCategories=categories.filter(cat=>{
+    const phrase=cat.replace(/\s+/g,' ');
+    return normalized===phrase||normalized.startsWith(phrase+' ')||normalized.endsWith(' '+phrase)||normalized.includes(' '+phrase+' ');
+  });
+  const dimensionTerms=new Set(Object.values(DECISION_DIMENSIONS).flat().flatMap(textTerms));
+  const contextTerms=new Set(['small','large','team','teams','company','business','businesses','consultancy','consulting','agency','agencies','solo','startup','startups','workflow','workflows','platform','solution','solutions']);
+  const intentTerms=textTerms(job).filter(term=>!dimensionTerms.has(term)&&!contextTerms.has(term));
+  return {normalized,explicitCategories,intentTerms};
+}
+function matchesJobIntent(tool,profile){
+  const category=catalogNormalize(tool?.category),hay=toolHay(tool);
+  if(profile.explicitCategories.length)return profile.explicitCategories.includes(category);
+  if(!profile.intentTerms.length)return true;
+  const matches=profile.intentTerms.filter(term=>category===term||hay.includes(term));
+  return matches.length>=1;
+}
 function stackAssessment(tool,existingTools=[]){
   const ai=aiIntegration(tool),hay=toolHay(tool),pairs=[];
   for(const existing of existingTools||[]){
@@ -385,14 +429,13 @@ function stackAssessment(tool,existingTools=[]){
     if(!n)continue;
     const assistant=(ai.assistants||[]).find(x=>catalogNormalize(x)===n);
     if(assistant){pairs.push({existing_tool:existing,status:'verified',evidence:'Verified AI interoperability with '+assistant+'.'});continue}
-    if(hay.includes(n)){pairs.push({existing_tool:existing,status:'catalog_evidence',evidence:'The ToolScout catalog explicitly references '+existing+' in the candidate evidence.'});continue}
     if((tool.features||[]).some(x=>catalogNormalize(x)==='integrations')||scoreOf(tool,'integrations')>=8){
-      pairs.push({existing_tool:existing,status:'pair_unverified',evidence:'Strong general integration capability, but ToolScout does not currently store verified pair-specific evidence for '+existing+'.'});
+      pairs.push({existing_tool:existing,status:'pair_unverified',evidence:'Strong general integration capability, but ToolScout does not currently store verified product-specific evidence for '+existing+'.'});
       continue;
     }
-    pairs.push({existing_tool:existing,status:'unknown',evidence:'No pair-specific integration evidence is currently stored for '+existing+'.'});
+    pairs.push({existing_tool:existing,status:'unknown',evidence:'No product-specific integration evidence is currently stored for '+existing+'.'});
   }
-  const verified=pairs.filter(x=>x.status==='verified'||x.status==='catalog_evidence').length;
+  const verified=pairs.filter(x=>x.status==='verified').length;
   return {pairs,verified_pairs:verified,unknown_pairs:pairs.length-verified,summary:pairs.length?verified===pairs.length?'All requested stack links have catalog evidence.':verified?'Some stack links are evidenced; the rest should be verified before switching.':'ToolScout does not currently have pair-specific evidence for this stack; do not assume compatibility.':'No existing stack supplied.'};
 }
 function decisionEvaluation(tool,args){
@@ -412,9 +455,13 @@ function decisionEvaluation(tool,args){
   const budget=budgetSignal(tool,args.budget),team=teamSignal(tool,args.team);
   const must=(args.must_have||[]).map(x=>({requirement:x,...requirementMatch(tool,x)}));
   const avoids=(args.avoid||[]).map(x=>({requirement:x,...requirementMatch(tool,x)}));
+  const constraints=constraintEvidence(tool,args.constraints||[]);
   const mustMatched=must.filter(x=>x.matched).length;
   const avoidHits=avoids.filter(x=>x.matched).length;
-  const raw=28+Math.min(28,relevance)+((dimAvg-5)*4)+budget.points+team.points+mustMatched*3-avoidHits*8;
+  const constraintVerified=constraints.filter(x=>x.status==='verified').length;
+  const constraintUnverified=constraints.filter(x=>x.status==='not_verified').length;
+  const constraintConflicts=constraints.filter(x=>x.status==='conflict').length;
+  const raw=28+Math.min(28,relevance)+((dimAvg-5)*4)+budget.points+team.points+mustMatched*3+constraintVerified*3-constraintUnverified*6-constraintConflicts*20-avoidHits*8;
   const fit=clamp(Math.round(raw),0,95);
   const stack=stackAssessment(tool,args.existing_tools||[]);
   const advantages=[];
@@ -424,9 +471,11 @@ function decisionEvaluation(tool,args){
   const tradeoffs=[];
   for(const d of dimScores.filter(x=>x.score<=5))tradeoffs.push(d.dimension+' is only '+d.score+'/10 in the current ToolScout scorecard');
   for(const x of must.filter(x=>!x.matched).slice(0,4))tradeoffs.push('must-have not verified in catalog: '+x.requirement);
+  for(const x of constraints.filter(x=>x.status==='not_verified').slice(0,4))tradeoffs.push('constraint not verified: '+x.constraint);
+  for(const x of constraints.filter(x=>x.status==='conflict').slice(0,4))tradeoffs.push('constraint conflict: '+x.constraint);
   if(avoidHits)for(const x of avoids.filter(x=>x.matched).slice(0,3))tradeoffs.push('possible conflict with avoid constraint: '+x.requirement);
   if(args.budget==='free'&&!tool.freePlan)tradeoffs.push('no verified free plan in the current catalog');
-  const evidenceCount=dimScores.length+mustMatched+stack.verified_pairs+(tool.lastVerified?1:0);
+  const evidenceCount=dimScores.length+mustMatched+constraintVerified+stack.verified_pairs+(tool.lastVerified?1:0);
   const confidence=evidenceCount>=5?'high':evidenceCount>=3?'medium':'limited';
   return {
     ...publicTool(tool),
@@ -436,17 +485,17 @@ function decisionEvaluation(tool,args){
     tradeoffs,
     requested_dimensions:dimScores,
     requirement_evidence:must,
+    constraint_evidence:constraints,
+    constraint_summary:{verified:constraintVerified,not_verified:constraintUnverified,conflicts:constraintConflicts},
     stack_fit:stack
   };
 }
 function decisionCandidates(tools,args){
   const evaluated=tools.map(t=>decisionEvaluation(t,args));
-  const jobTerms=textTerms(args.job||args.use_case||'');
+  const profile=jobIntentProfile(tools,args.job||args.use_case||'');
   const relevant=evaluated.filter(x=>{
-    if(!jobTerms.length)return true;
     const source=tools.find(t=>t.slug===x.slug);
-    const hay=toolHay(source);
-    return jobTerms.some(term=>hay.includes(term)||catalogNormalize(source.category)===term)||(args.must_have||[]).some(r=>requirementMatch(source,r).matched);
+    return source?matchesJobIntent(source,profile):false;
   });
   return relevant.sort((a,b)=>b.fit_score-a.fit_score||String(a.name).localeCompare(String(b.name)));
 }
@@ -517,7 +566,7 @@ async function callCatalogTool(name,args,request,env){
         budget:args.budget||null,
         team:args.team||null,
         existing_tools:args.existing_tools||[],
-        methodology:'Deterministic ToolScout catalog fit. Scores combine job relevance, explicit priorities, budget/team signals, must-have evidence and known stack evidence. Missing evidence is surfaced rather than invented.',
+        methodology:'Deterministic ToolScout catalog fit. Candidates must first match the requested job/category. Scores then combine explicit priorities, budget/team signals, must-have evidence, free-form constraint evidence and known stack evidence. Every free-form constraint is returned as verified, not_verified or conflict; missing product-specific integration evidence is never upgraded from a generic text match.',
         no_pay_to_rank:true
       },
       affiliate_disclosure:disclosure
