@@ -504,8 +504,8 @@ function decisionEvaluation(tool,args){
   const stack=stackAssessment(tool,args.existing_tools||[]);
   const advantages=[];
   for(const d of [...dimScores].sort((a,b)=>b.score-a.score).slice(0,3))if(d.score>=7)advantages.push(d.dimension+': '+d.score+'/10');
-  if(tool.freePlan&&args.budget==='free')advantages.push('free plan available');
-  for(const x of must.filter(x=>x.matched).slice(0,3))advantages.push('must-have evidence: '+x.requirement);
+  if(tool.freePlanKnown===true&&tool.freePlan&&args.budget==='free')advantages.push('verified catalog free plan');
+  for(const x of must.filter(x=>x.matched).slice(0,3))advantages.push((verifiedIntegrationPair(tool,x.requirement)?'verified named integration: ':'catalog-listed capability, confirm with vendor: ')+x.requirement);
   const tradeoffs=[];
   for(const d of dimScores.filter(x=>x.score<=5))tradeoffs.push(d.dimension+' is only '+d.score+'/10 in the current ToolScout scorecard');
   for(const x of must.filter(x=>!x.matched).slice(0,4))tradeoffs.push('must-have not verified in catalog: '+x.requirement);
@@ -514,7 +514,7 @@ function decisionEvaluation(tool,args){
   if(avoidHits)for(const x of avoids.filter(x=>x.matched).slice(0,3))tradeoffs.push('possible conflict with avoid constraint: '+x.requirement);
   if(args.budget==='free'&&!tool.freePlan)tradeoffs.push('no verified free plan in the current catalog');
   const evidenceCount=dimScores.length+mustMatched+constraintVerified+stack.verified_pairs+(tool.lastVerified?1:0);
-  const confidence=evidenceCount>=5?'high':evidenceCount>=3?'medium':'limited';
+  const confidence=tool.editorialReview?.verificationStatus==='catalog_only'?'limited':evidenceCount>=5?'high':evidenceCount>=3?'medium':'limited';
   return {
     ...publicTool(tool),
     fit_score:fit,
