@@ -1,0 +1,62 @@
+# One-shot Cloudflare publication for the tested ToolScout decision-editorial cohort.
+name: ToolScout Editorial Cohort 2 Cutover
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/decision-editorial-cutover-20261008.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: toolscout-worker-production-recovery
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify catalog and original editorial evidence
+        run: |
+          set -euo pipefail
+          node --check agent-protocol-core-worker.js
+          node --check scripts/generate-tool-pages.mjs
+          node --check scripts/generate-comparisons.mjs
+          node --test tests/toolscout-v2-editorial-evidence-generators.test.mjs tests/toolscout-v2-agent-protocol.test.mjs tests/toolscout-v2-canonical-contract.test.mjs
+          python3 -m unittest discover -s tests -p 'test_decision_quality.py'
+          python3 scripts/audit_decision_quality.py --json >/tmp/toolscout-decision-audit.json
+          node scripts/validate-v2-preservation.mjs
+      - name: Wrangler build without publishing
+        run: npx wrangler deploy --config wrangler.toml --dry-run --outdir /tmp/toolscout-editorial-cutover-dry-run
+      - name: Publish canonical Worker without D1 migrations
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo 'Missing Cloudflare deployment token'; exit 1; }
+          npx wrangler deploy --config wrangler.toml --latest
+      - name: Verify editorial copy at production URLs
+        run: |
+          set -euo pipefail
+          for n in 1 2 3 4 5; do
+            if curl -fsSL "https://trytoolscout.org/tools/mailchimp?cutover=20261008b" | grep -Fq 'Mailchimp makes sense for a small organization' && \
+               curl -fsSL "https://trytoolscout.org/tools/zapier?cutover=20261008b" | grep -Fq '100 monthly tasks' && \
+               curl -fsSL "https://trytoolscout.org/brevo-vs-mailchimp?cutover=20261008b" | grep -Fq 'Mailchimp and Brevo cannot be compared'; then
+              echo "ToolScout decision-editorial cutover verified"
+              exit 0
+            fi
+            sleep 8
+          done
+          echo 'Production pages did not reflect this release' >&2
+          exit 1
