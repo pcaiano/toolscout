@@ -151,7 +151,16 @@
         "https://ecosystem.hubspot.com/marketplace/featured/hubspot-connectors",
         "https://developers.hubspot.com/docs/apps/developer-platform/build-apps/integrate-with-the-remote-hubspot-mcp-server"
       ]
-    }
+    },
+    "integrations": [
+      {
+        "product": "Gmail",
+        "status": "verified",
+        "sourceUrl": "https://ecosystem.hubspot.com/marketplace/apps/gmail",
+        "verifiedAt": "2026-10-08",
+        "scope": "HubSpot-certified Gmail app supports logging and tracking email from the Gmail inbox; availability depends on the connected account and plan."
+      }
+    ]
   },
   {
     "slug": "jotform",
@@ -347,7 +356,16 @@
       "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
       "verifiedAt": null,
       "sources": []
-    }
+    },
+    "integrations": [
+      {
+        "product": "Google Search Console",
+        "status": "verified",
+        "sourceUrl": "https://www.semrush.com/kb/857-google-analytics-and-search-console",
+        "verifiedAt": "2026-10-08",
+        "scope": "Semrush supports connecting Google Search Console to specified SEO analysis features, with account permissions required."
+      }
+    ]
   },
   {
     "slug": "jasper",
@@ -591,7 +609,16 @@
         "https://help.zapier.com/hc/en-us/articles/48308034391821-What-is-Zapier-MCP",
         "https://zapier.com/mcp"
       ]
-    }
+    },
+    "integrations": [
+      {
+        "product": "HubSpot",
+        "status": "verified",
+        "sourceUrl": "https://help.zapier.com/hc/en-us/articles/8495919882253-How-to-get-started-with-HubSpot-on-Zapier",
+        "verifiedAt": "2026-10-08",
+        "scope": "Zapier HubSpot app provides supported triggers, searches and actions; connection requires appropriate HubSpot permissions."
+      }
+    ]
   },
   {
     "slug": "make",
@@ -645,7 +672,16 @@
         "https://help.make.com/make-now-a-built-in-connector-on-anthropic-claude",
         "https://help.make.com/official-make-plugin-for-chatgpt-is-now-available"
       ]
-    }
+    },
+    "integrations": [
+      {
+        "product": "HubSpot",
+        "status": "verified",
+        "sourceUrl": "https://apps.make.com/hubspotcrm",
+        "verifiedAt": "2026-10-08",
+        "scope": "Make HubSpot CRM app supports CRM record, contact, event and workflow modules; a HubSpot Super Admin must pre-approve the app."
+      }
+    ]
   },
   {
     "slug": "zoho-crm",
