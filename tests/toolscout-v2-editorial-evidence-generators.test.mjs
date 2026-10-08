@@ -54,8 +54,8 @@ test('decision editorial catalog has 127 individual assessments with transparent
   assert.equal(opens.size,ids.length,'Repeated lead architecture detected in decision-grade profiles');
   const provisional=catalog.filter(x=>x.editorialReview?.verificationStatus==='catalog_only');
   const sourced=catalog.filter(x=>x.editorialReview&&!provisional.includes(x));
-  assert.equal(provisional.length,102);
-  assert.equal(sourced.length,25);
+  assert.equal(provisional.length,90);
+  assert.equal(sourced.length,37);
   for(const tool of provisional){
     const html=read('tools/'+tool.slug+'.html');
     assert.match(html,/Catalog-based; vendor claims and plan limits not independently verified/i);
