@@ -286,6 +286,9 @@ function extractContacts(html, url, domain) {
     if (/^(samplemail|yourname|youremail|dinemail|test|example)@/i.test(email)) continue;
     const idx = text.toLowerCase().indexOf(email.toLowerCase());
     const context = idx >= 0 ? text.slice(Math.max(0, idx - 220), Math.min(text.length, idx + email.length + 220)) : "";
+    // External vendors on a publisher page are not media contacts; require an explicit editorial role.
+    const belongsToPublisher = emailDomain === domain || emailDomain.endsWith("." + domain);
+    if (!belongsToPublisher && !/\b(editor(?:ial)?|newsroom|reporter|journalist|writer|correspondent|staff|managing editor|chief editor)\b/i.test(context)) continue;
     const c = classify(email, context, new URL(url).pathname);
     if (!c.relevant) continue;
     const local = email.split("@")[0];
