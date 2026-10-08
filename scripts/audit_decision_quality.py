@@ -38,6 +38,17 @@ def inspect(path=DATA):
             continue
         slug = tool.get("slug") or f"row-{index}"
         categories[str(tool.get("category", "unknown"))] += 1
+        review = tool.get("editorialReview") or {}
+        if not review.get("summary"):
+            counters["missing_editorial_reviews"] += 1
+        elif review.get("verificationStatus") == "catalog_only":
+            counters["catalog_only_editorial_reviews"] += 1
+        elif review.get("sourceUrl") and review.get("handsOnTested") is not True:
+            counters["sourced_editorial_reviews"] += 1
+        else:
+            counters["editorial_review_provenance_incomplete"] += 1
+        if tool.get("categoryReviewRequired") is True:
+            counters["category_review_required"] += 1
         missing_core = [k for k in CORE if not tool.get(k)]
         missing_decision = [k for k in FIELDS_FOR_DECISION if not tool.get(k)]
         missing_field_counts.update(missing_decision)

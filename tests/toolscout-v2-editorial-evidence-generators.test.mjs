@@ -14,7 +14,7 @@ test('tool profiles keep vendor evidence internal and commercial CTA routed thro
 
 test('commercial guides do not publish direct vendor source links',()=>{
   const src=read('scripts/generate-seo-pages.mjs');
-  assert.match(src,/Checked/);
+  assert.match(src,/Catalog checked|catalog-based editorial assessment/);
   assert.doesNotMatch(src,/Official source/);
   assert.doesNotMatch(src,/href="\${esc\(tool\.sourceUrl\)\}"/);
   assert.match(src,/href="\/go\/\${encodeURIComponent\(tool\.slug\)\}"/);
@@ -28,20 +28,21 @@ test('comparisons keep vendor source URLs internal while preserving monetized CT
   assert.match(src,/href="\/go\/\${encodeURIComponent\(t\.slug\)\}/);
 });
 
-test('decision editorial cohort gives twenty distinct profile analyses and source-anchored buyer checks',()=>{
+test('decision editorial catalog has 127 individual assessments with transparent provenance',()=>{
   const cfg=JSON.parse(read('data/organic-growth-engine.json')).editorialQuality;
   const catalog=JSON.parse(read('data/tools.json'));
   const ids=Object.keys(cfg.profileDecisionEvidence||{});
-  assert.equal(ids.length,20);
+  assert.equal(ids.length,127);
   const opens=new Set();
   for(const slug of ids){
     const evidence=cfg.profileDecisionEvidence[slug];
     const review=cfg.profileOverrides[slug];
     const html=read('tools/'+slug+'.html');
     assert.ok(catalog.some(x=>x.slug===slug),'Missing catalog product '+slug);
-    assert.ok(review&&review.length>=350,'Weak profile analysis '+slug);
+    assert.ok(review&&review.length>=190,'Weak profile analysis '+slug);
     assert.ok(evidence.angle&&evidence.buyerCheck&&evidence.checkedOn==='2026-10-08','Missing buyer evidence '+slug);
-    assert.match(evidence.sourceUrl,/^https:\/\//);
+    if(evidence.evidenceType==='catalog_assessment_unverified')assert.equal(evidence.sourceUrl,null,'Catalog-only is not verified vendor evidence '+slug);
+    else assert.match(evidence.sourceUrl,/^https:\/\//);
     assert.equal(evidence.handsOnTested,false,'No unperformed hands-on tests may be asserted');
     assert.ok(html.includes('editorialBuyerCheck'),'Missing displayed buyer checklist on '+slug);
     assert.ok(html.includes(evidence.buyerCheck.replaceAll('&','&amp;').replaceAll("'","&#39;")),'Mismatch buyer checklist '+slug);
@@ -51,6 +52,24 @@ test('decision editorial cohort gives twenty distinct profile analyses and sourc
     opens.add(review.split(/\s+/).slice(0,6).join(' ').toLowerCase());
   }
   assert.equal(opens.size,ids.length,'Repeated lead architecture detected in decision-grade profiles');
+  const provisional=catalog.filter(x=>x.editorialReview?.verificationStatus==='catalog_only');
+  const sourced=catalog.filter(x=>x.editorialReview&&!provisional.includes(x));
+  assert.equal(provisional.length,107);
+  assert.equal(sourced.length,20);
+  for(const tool of provisional){
+    const html=read('tools/'+tool.slug+'.html');
+    assert.match(html,/Catalog-based; vendor claims and plan limits not independently verified/i);
+    assert.match(html,/catalog-based editorial assessment only/i);
+    assert.equal(tool.editorialReview.sourceUrl,null);
+    assert.equal(tool.editorialReview.handsOnTested,false);
+    assert.ok(!tool.evidence?.length,'Unverified assertions cannot masquerade as evidence '+tool.slug);
+  }
+  const disputed=catalog.filter(x=>x.categoryReviewRequired);
+  assert.equal(disputed.length,10);
+  for(const tool of disputed){
+    assert.match(read('tools/'+tool.slug+'.html'),/Category under review/);
+    assert.ok(['developer','forms','ai-assistant'].includes(tool.category));
+  }
 });
 
 test('six prebuilt comparisons and two guides share editorial conclusions with their source config',()=>{
@@ -158,4 +177,58 @@ test('third decision editorial cohort distinguishes verified trials from permane
   }
   for(const slug of ['best-project-management-tools','best-lead-capture-forms'])
     assert.ok(read(slug+'.html').includes(esc(ed.guideOverrides[slug]).slice(0,100)));
+});
+
+test('all 38 guides and 15 comparisons publish their unique decision conclusions with canonicals intact',()=>{
+  const ed=JSON.parse(read('data/organic-growth-engine.json')).editorialQuality;
+  const intents=JSON.parse(read('data/intents.json'));
+  const pairs=JSON.parse(read('data/comparisons.json'));
+  const esc=v=>String(v||'').replace(/[\u2014\u2013]/g,'-').replace(/\s+/g,' ').trim().replaceAll('&','&amp;').replaceAll("'","&#39;").replaceAll('"','&quot;');
+  assert.equal(intents.length,38);
+  assert.equal(pairs.length,15);
+  assert.equal(Object.keys(ed.guideOverrides).length,38);
+  assert.equal(Object.keys(ed.comparisonOverrides).length,15);
+  const uniqueGuides=new Set(),uniqueComparisons=new Set();
+  const holds=JSON.parse(read('reports/seo-publication-holds.json')).items||[];
+  const heldSlugs=new Set(holds.map(x=>x.intent));
+  let liveGuides=0;
+  for(const item of intents){
+    const path=item.slug+'.html',copy=ed.guideOverrides[item.slug];
+    assert.ok(copy?.length>=220,'Missing substantial guide analysis: '+item.slug);
+    uniqueGuides.add(copy.slice(0,80).toLowerCase());
+    if(heldSlugs.has(item.slug)){
+      assert.equal(fs.existsSync(new URL('../'+path,import.meta.url)),false,'Held SEO guide must remain unpublished: '+item.slug);
+      continue;
+    }
+    const html=read(path);
+    liveGuides++;
+    assert.ok(html.includes(esc(copy).slice(0,85)),'Stale guide analysis: '+item.slug);
+    assert.ok(html.includes('<link rel="canonical" href="https://trytoolscout.org/'+item.slug+'">'),'Canonical drift '+item.slug);
+    assert.ok(!html.includes('This is a genuine trade-off rather than a cosmetic tie.'),'Generic filler '+item.slug);
+  }
+  assert.equal(liveGuides,36,'SEO publication holds must not be bypassed');
+  for(const [a,b] of pairs){
+    const id=a+'-vs-'+b,key=[a,b].sort().join('|'),copy=ed.comparisonOverrides[key],html=read(id+'.html');
+    assert.ok(copy?.analysis?.length>=250,'Missing comparison analysis '+key);
+    assert.ok(copy?.decision?.length>=100,'Missing comparison decision '+key);
+    assert.ok(html.includes(esc(copy.analysis).slice(0,85)),'Stale comparison analysis: '+key);
+    assert.ok(html.includes(esc(copy.decision).slice(0,65)),'Stale comparison verdict: '+key);
+    assert.ok(html.includes('<link rel="canonical" href="https://trytoolscout.org/'+id+'">'),'Canonical drift '+key);
+    uniqueComparisons.add(copy.analysis.slice(0,80).toLowerCase());
+  }
+  assert.equal(uniqueGuides.size,38,'Guide editorial must not be copy-pasted');
+  assert.equal(uniqueComparisons.size,15,'Comparison editorial must not be copy-pasted');
+});
+
+test('general AI assistant guide cannot rank niche personas or unresolved support agents as work assistants',()=>{
+  const html=read('best-ai-assistants.html');
+  for(const slug of ['chatgpt','gemini','claude'])
+    assert.ok(html.includes('href="/go/'+slug+'"'),'Missing general work assistant '+slug);
+  for(const slug of ['cosupport-ai','questie-ai','lorka-ai'])
+    assert.ok(!html.includes('href="/go/'+slug+'"'),'Niche assistant promoted into general work shortlist: '+slug);
+  const schema=JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)?.[1]||'{}');
+  assert.deepEqual(schema.mainEntity.itemListElement.map(x=>x.item.name),['ChatGPT','Gemini','Claude']);
+  const code=read('scripts/seo-eligibility.mjs');
+  assert.match(code,/best-ai-assistants/);
+  assert.match(code,/tool\?\.categoryReviewRequired !== true/);
 });
