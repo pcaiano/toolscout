@@ -50,7 +50,7 @@ test('decision editorial cohort gives sixteen distinct profile analyses and sour
     assert.ok(html.includes('href="/go/'+slug+'"'),'Lost affiliate-routing CTA on '+slug);
     opens.add(review.split(/\s+/).slice(0,6).join(' ').toLowerCase());
   }
-  assert.equal(opens.size,10,'Repeated lead architecture detected in decision-grade profiles');
+  assert.equal(opens.size,ids.length,'Repeated lead architecture detected in decision-grade profiles');
 });
 
 test('six prebuilt comparisons and two guides share editorial conclusions with their source config',()=>{
