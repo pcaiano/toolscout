@@ -1,21 +1,21 @@
 {
-  "generatedAt": "2026-10-07T14:53:00.274Z",
+  "generatedAt": "2026-10-08T13:49:04.409Z",
   "source": "Google Search Console Search Analytics API",
   "property": "sc-domain:trytoolscout.org",
   "dataState": "all",
   "includesFreshData": true,
-  "startDate": "2026-09-10",
-  "endDate": "2026-10-07",
+  "startDate": "2026-09-11",
+  "endDate": "2026-10-08",
   "siteTotals": {
     "clicks": 8,
-    "impressions": 7376,
-    "ctr": 0.1085
+    "impressions": 7396,
+    "ctr": 0.1082
   },
   "pageTypeSummary": {
     "comparison": {
       "pages": 10,
       "clicks": 0,
-      "impressions": 151
+      "impressions": 153
     },
     "directory": {
       "pages": 3,
@@ -23,27 +23,27 @@
       "impressions": 55
     },
     "guide": {
-      "pages": 39,
+      "pages": 38,
       "clicks": 0,
-      "impressions": 5116
+      "impressions": 5204
     },
     "home": {
       "pages": 1,
       "clicks": 2,
-      "impressions": 81
+      "impressions": 70
     },
     "other": {
       "pages": 12,
       "clicks": 3,
-      "impressions": 182
+      "impressions": 180
     },
     "tool-profile": {
       "pages": 75,
       "clicks": 1,
-      "impressions": 1791
+      "impressions": 1734
     }
   },
-  "pageCount": 140,
+  "pageCount": 139,
   "pages": [
     {
       "page": "https://trytoolscout.org/best-seo-tools-for-agencies",
@@ -52,69 +52,69 @@
       "type": "guide",
       "intent": "best-seo-tools-for-agencies",
       "clicks": 0,
-      "impressions": 3160,
+      "impressions": 3256,
       "ctr": 0,
-      "position": 80.3364,
+      "position": 80.3065,
       "topQueries": [
         {
           "query": "seo software for agencies",
           "clicks": 0,
-          "impressions": 238,
-          "position": 87.3403
+          "impressions": 257,
+          "position": 87.0389
         },
         {
           "query": "seo tool for agencies",
           "clicks": 0,
-          "impressions": 194,
-          "position": 82.2835
+          "impressions": 206,
+          "position": 82.2233
         },
         {
           "query": "seo tools for agencies",
           "clicks": 0,
-          "impressions": 165,
-          "position": 83.7455
+          "impressions": 173,
+          "position": 83.5029
         },
         {
           "query": "seo agency tools",
           "clicks": 0,
-          "impressions": 162,
-          "position": 81.7407
+          "impressions": 169,
+          "position": 81.6331
         },
         {
           "query": "seo platform for agencies",
           "clicks": 0,
-          "impressions": 154,
-          "position": 83.974
+          "impressions": 156,
+          "position": 84.0128
         },
         {
           "query": "agency seo tools",
           "clicks": 0,
-          "impressions": 137,
-          "position": 80.7664
+          "impressions": 145,
+          "position": 80.7103
         },
         {
           "query": "best seo tools for agency",
           "clicks": 0,
-          "impressions": 130,
-          "position": 69.5077
+          "impressions": 122,
+          "position": 69.3033
         },
         {
           "query": "best seo software for agencies",
           "clicks": 0,
-          "impressions": 115,
-          "position": 73.313
+          "impressions": 121,
+          "position": 73.0826
         },
         {
           "query": "seo agency tool",
           "clicks": 0,
-          "impressions": 111,
-          "position": 85.1892
+          "impressions": 115,
+          "position": 84.7304
         },
         {
           "query": "seo software for agency",
           "clicks": 0,
-          "impressions": 109,
-          "position": 86.8716
+          "impressions": 115,
+          "position": 86.6435
         }
       ]
     },
@@ -125,33 +125,33 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 460,
+      "impressions": 446,
       "ctr": 0,
-      "position": 73.7283,
+      "position": 73.6166,
       "topQueries": [
         {
           "query": "airtable",
           "clicks": 0,
-          "impressions": 112,
-          "position": 63.9821
+          "impressions": 109,
+          "position": 63.945
         },
         {
           "query": "what is airtable",
           "clicks": 0,
-          "impressions": 65,
-          "position": 86.8769
+          "impressions": 61,
+          "position": 86.9016
         },
         {
           "query": "what is airtable used for",
           "clicks": 0,
-          "impressions": 46,
-          "position": 91.1304
+          "impressions": 43,
+          "position": 91.1628
         },
         {
           "query": "airtable software",
           "clicks": 0,
-          "impressions": 41,
-          "position": 70.6098
+          "impressions": 40,
+          "position": 70.75
         },
         {
           "query": "airtbale",
@@ -162,8 +162,8 @@
         {
           "query": "airtabel",
           "clicks": 0,
-          "impressions": 36,
-          "position": 67.1944
+          "impressions": 34,
+          "position": 67.4412
         },
         {
           "query": "what is airtable and how it works",
@@ -174,8 +174,8 @@
         {
           "query": "airtable ticketing system",
           "clicks": 0,
-          "impressions": 12,
-          "position": 62.25
+          "impressions": 11,
+          "position": 62.2727
         },
         {
           "query": "air table",
@@ -184,10 +184,10 @@
           "position": 64
         },
         {
-          "query": "is airtable free",
+          "query": "airtable services",
           "clicks": 0,
           "impressions": 5,
-          "position": 82.2
+          "position": 94.2
         }
       ]
     },
@@ -198,9 +198,9 @@
       "type": "guide",
       "intent": "best-crm-for-small-business",
       "clicks": 0,
-      "impressions": 343,
+      "impressions": 348,
       "ctr": 0,
-      "position": 76.6735,
+      "position": 76.6494,
       "topQueries": [
         {
           "query": "best crm for small business",
@@ -215,16 +215,16 @@
           "position": 81.0667
         },
         {
+          "query": "best crm tools for small business",
+          "clicks": 0,
+          "impressions": 29,
+          "position": 75
+        },
+        {
           "query": "crm tools for small business",
           "clicks": 0,
           "impressions": 29,
           "position": 76.4483
-        },
-        {
-          "query": "best crm tools for small business",
-          "clicks": 0,
-          "impressions": 27,
-          "position": 74
         },
         {
           "query": "best small business crm",
@@ -233,16 +233,16 @@
           "position": 80
         },
         {
+          "query": "small business crm",
+          "clicks": 0,
+          "impressions": 11,
+          "position": 70.3636
+        },
+        {
           "query": "best sales crm for small business",
           "clicks": 0,
           "impressions": 11,
           "position": 72.4545
-        },
-        {
-          "query": "small business crm",
-          "clicks": 0,
-          "impressions": 10,
-          "position": 71
         },
         {
           "query": "best crm tool for small business",
@@ -271,27 +271,27 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 241,
+      "impressions": 219,
       "ctr": 0,
-      "position": 56.0332,
+      "position": 55.9315,
       "topQueries": [
         {
           "query": "semrush tool",
           "clicks": 0,
-          "impressions": 90,
-          "position": 56.6778
+          "impressions": 79,
+          "position": 56.6582
         },
         {
           "query": "semrush software",
           "clicks": 0,
-          "impressions": 80,
-          "position": 57.7375
+          "impressions": 73,
+          "position": 57.8219
         },
         {
           "query": "tool semrush",
           "clicks": 0,
-          "impressions": 32,
-          "position": 51.5938
+          "impressions": 29,
+          "position": 51.6207
         },
         {
           "query": "semrush tools",
@@ -328,85 +328,6 @@
           "clicks": 0,
           "impressions": 1,
           "position": 68
-        },
-        {
-          "query": "what is semrush tool",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 78
-        }
-      ]
-    },
-    {
-      "page": "https://trytoolscout.org/best-seo-keyword-research-tools",
-      "pathname": "/best-seo-keyword-research-tools",
-      "key": "best-seo-keyword-research-tools",
-      "type": "guide",
-      "intent": "best-seo-keyword-research-tools",
-      "clicks": 0,
-      "impressions": 204,
-      "ctr": 0,
-      "position": 77.0098,
-      "topQueries": [
-        {
-          "query": "website research tool",
-          "clicks": 0,
-          "impressions": 68,
-          "position": 69.2794
-        },
-        {
-          "query": "seo search tool",
-          "clicks": 0,
-          "impressions": 15,
-          "position": 69.2667
-        },
-        {
-          "query": "seo research tools",
-          "clicks": 0,
-          "impressions": 14,
-          "position": 75.7143
-        },
-        {
-          "query": "competitor keyword research tools for seo",
-          "clicks": 0,
-          "impressions": 13,
-          "position": 85.0769
-        },
-        {
-          "query": "keyword discovery tool",
-          "clicks": 0,
-          "impressions": 13,
-          "position": 92.7692
-        },
-        {
-          "query": "seo search tools",
-          "clicks": 0,
-          "impressions": 11,
-          "position": 79.5455
-        },
-        {
-          "query": "keyword analysis seo tool",
-          "clicks": 0,
-          "impressions": 11,
-          "position": 79.8182
-        },
-        {
-          "query": "keyword analysis tool for seo",
-          "clicks": 0,
-          "impressions": 8,
-          "position": 86.875
-        },
-        {
-          "query": "research seo tool",
-          "clicks": 0,
-          "impressions": 7,
-          "position": 53.2857
-        },
-        {
-          "query": "best seo research tool",
-          "clicks": 0,
-          "impressions": 6,
-          "position": 81.5
         }
       ]
     },
@@ -417,15 +338,15 @@
       "type": "guide",
       "intent": "best-social-media-management-tools",
       "clicks": 0,
-      "impressions": 197,
+      "impressions": 205,
       "ctr": 0,
-      "position": 57.0761,
+      "position": 55.5317,
       "topQueries": [
         {
           "query": "social media management tools",
           "clicks": 0,
-          "impressions": 66,
-          "position": 57.6364
+          "impressions": 67,
+          "position": 57.5224
         },
         {
           "query": "social media management tool",
@@ -436,8 +357,8 @@
         {
           "query": "best social media management tools",
           "clicks": 0,
-          "impressions": 32,
-          "position": 42.5313
+          "impressions": 37,
+          "position": 37.8649
         },
         {
           "query": "best social media management tool",
@@ -454,20 +375,20 @@
         {
           "query": "social media manager tools",
           "clicks": 0,
+          "impressions": 7,
+          "position": 62.1429
+        },
+        {
+          "query": "social media tool",
+          "clicks": 0,
           "impressions": 6,
-          "position": 70.8333
+          "position": 63.6667
         },
         {
           "query": "best tools for social media managers",
           "clicks": 0,
           "impressions": 5,
           "position": 64
-        },
-        {
-          "query": "social media tool",
-          "clicks": 0,
-          "impressions": 5,
-          "position": 68.4
         },
         {
           "query": "social media managing tools",
@@ -484,6 +405,79 @@
       ]
     },
     {
+      "page": "https://trytoolscout.org/best-seo-keyword-research-tools",
+      "pathname": "/best-seo-keyword-research-tools",
+      "key": "best-seo-keyword-research-tools",
+      "type": "guide",
+      "intent": "best-seo-keyword-research-tools",
+      "clicks": 0,
+      "impressions": 188,
+      "ctr": 0,
+      "position": 76.7606,
+      "topQueries": [
+        {
+          "query": "website research tool",
+          "clicks": 0,
+          "impressions": 64,
+          "position": 69.3594
+        },
+        {
+          "query": "seo research tools",
+          "clicks": 0,
+          "impressions": 14,
+          "position": 75.7143
+        },
+        {
+          "query": "seo search tool",
+          "clicks": 0,
+          "impressions": 13,
+          "position": 68.6923
+        },
+        {
+          "query": "competitor keyword research tools for seo",
+          "clicks": 0,
+          "impressions": 13,
+          "position": 85.0769
+        },
+        {
+          "query": "keyword discovery tool",
+          "clicks": 0,
+          "impressions": 12,
+          "position": 92.9167
+        },
+        {
+          "query": "keyword analysis seo tool",
+          "clicks": 0,
+          "impressions": 11,
+          "position": 79.8182
+        },
+        {
+          "query": "seo search tools",
+          "clicks": 0,
+          "impressions": 9,
+          "position": 79.4444
+        },
+        {
+          "query": "research seo tool",
+          "clicks": 0,
+          "impressions": 7,
+          "position": 53.2857
+        },
+        {
+          "query": "keyword analysis tool for seo",
+          "clicks": 0,
+          "impressions": 7,
+          "position": 87.8571
+        },
+        {
+          "query": "best seo research tool",
+          "clicks": 0,
+          "impressions": 6,
+          "position": 81.5
+        }
+      ]
+    },
+    {
       "page": "https://trytoolscout.org/best-free-crm",
       "pathname": "/best-free-crm",
       "key": "best-free-crm",
@@ -492,31 +486,31 @@
       "clicks": 0,
       "impressions": 181,
       "ctr": 0,
-      "position": 77.2597,
+      "position": 77.3978,
       "topQueries": [
         {
           "query": "best free crm",
           "clicks": 0,
-          "impressions": 25,
-          "position": 81.28
+          "impressions": 26,
+          "position": 81.5385
         },
         {
           "query": "best free crm tools",
           "clicks": 0,
-          "impressions": 20,
-          "position": 81.55
-        },
-        {
-          "query": "best free crm tools",
-          "clicks": 0,
-          "impressions": 17,
-          "position": 69.0588
+          "impressions": 21,
+          "position": 81.6667
         },
         {
           "query": "best free crm software",
           "clicks": 0,
           "impressions": 17,
           "position": 81.5882
+        },
+        {
+          "query": "best free crm tools",
+          "clicks": 0,
+          "impressions": 16,
+          "position": 69.3125
         },
         {
           "query": "best free free crm",
@@ -543,16 +537,16 @@
           "position": 79.1667
         },
         {
-          "query": "crm free tools",
-          "clicks": 0,
-          "impressions": 6,
-          "position": 79.8333
-        },
-        {
           "query": "free crm tool",
           "clicks": 0,
           "impressions": 5,
           "position": 79
+        },
+        {
+          "query": "crm free tools",
+          "clicks": 0,
+          "impressions": 5,
+          "position": 79.4
         }
       ]
     },
@@ -563,33 +557,27 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 162,
+      "impressions": 153,
       "ctr": 0,
-      "position": 68.4259,
+      "position": 68.4052,
       "topQueries": [
         {
           "query": "moz pro tools",
           "clicks": 0,
-          "impressions": 55,
-          "position": 69.7091
+          "impressions": 48,
+          "position": 69.7708
         },
         {
           "query": "moz free trial",
           "clicks": 0,
-          "impressions": 33,
-          "position": 68.0303
+          "impressions": 32,
+          "position": 68
         },
         {
           "query": "moz pro tools",
           "clicks": 0,
-          "impressions": 28,
-          "position": 66.9643
-        },
-        {
-          "query": "moz pro free trial",
-          "clicks": 0,
-          "impressions": 8,
-          "position": 64.75
+          "impressions": 30,
+          "position": 66.8333
         },
         {
           "query": "moz pro overview",
@@ -598,16 +586,16 @@
           "position": 73.875
         },
         {
+          "query": "moz pro free trial",
+          "clicks": 0,
+          "impressions": 7,
+          "position": 65.2857
+        },
+        {
           "query": "moz trial",
           "clicks": 0,
           "impressions": 6,
           "position": 66.5
-        },
-        {
-          "query": "moz pro trial",
-          "clicks": 0,
-          "impressions": 5,
-          "position": 66.4
         },
         {
           "query": "moz pro free",
@@ -616,10 +604,16 @@
           "position": 64.5
         },
         {
+          "query": "moz pro trial",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 66.5
+        },
+        {
           "query": "what is moz pro",
           "clicks": 0,
-          "impressions": 3,
-          "position": 69.3333
+          "impressions": 2,
+          "position": 70
         },
         {
           "query": "moz pro seo tool",
@@ -636,9 +630,9 @@
       "type": "guide",
       "intent": "best-project-management-tools",
       "clicks": 0,
-      "impressions": 138,
+      "impressions": 133,
       "ctr": 0,
-      "position": 47.5,
+      "position": 47.782,
       "topQueries": [
         {
           "query": "management tool",
@@ -655,14 +649,14 @@
         {
           "query": "project automation tools",
           "clicks": 0,
-          "impressions": 13,
-          "position": 37.6154
+          "impressions": 11,
+          "position": 35.8182
         },
         {
           "query": "project management workflow tools",
           "clicks": 0,
-          "impressions": 11,
-          "position": 30.4545
+          "impressions": 9,
+          "position": 30.3333
         },
         {
           "query": "automated project management tools",
@@ -691,8 +685,8 @@
         {
           "query": "project workflow tools",
           "clicks": 0,
-          "impressions": 5,
-          "position": 41
+          "impressions": 4,
+          "position": 40.5
         },
         {
           "query": "projects tool",
@@ -709,21 +703,21 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 135,
+      "impressions": 130,
       "ctr": 0,
-      "position": 62.4741,
+      "position": 62.5538,
       "topQueries": [
         {
           "query": "klaviyo",
           "clicks": 0,
-          "impressions": 58,
-          "position": 61.5
+          "impressions": 54,
+          "position": 61.3889
         },
         {
           "query": "klayvio",
           "clicks": 0,
-          "impressions": 13,
-          "position": 63.4615
+          "impressions": 12,
+          "position": 63.5
         },
         {
           "query": "what is klaviyo",
@@ -742,12 +736,6 @@
           "clicks": 0,
           "impressions": 3,
           "position": 59.6667
-        },
-        {
-          "query": "kalviyo",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 65
         },
         {
           "query": "klaviyo inc. software",
@@ -772,79 +760,12 @@
           "clicks": 0,
           "impressions": 2,
           "position": 60.5
-        }
-      ]
-    },
-    {
-      "page": "https://trytoolscout.org/best-funnel-builder",
-      "pathname": "/best-funnel-builder",
-      "key": "best-funnel-builder",
-      "type": "guide",
-      "intent": "best-funnel-builder",
-      "clicks": 0,
-      "impressions": 117,
-      "ctr": 0,
-      "position": 74.4701,
-      "topQueries": [
-        {
-          "query": "best funnel builder",
-          "clicks": 0,
-          "impressions": 24,
-          "position": 68.9583
         },
         {
-          "query": "funnel builder",
-          "clicks": 0,
-          "impressions": 22,
-          "position": 81.3182
-        },
-        {
-          "query": "marketing funnel builder",
-          "clicks": 0,
-          "impressions": 17,
-          "position": 83.8824
-        },
-        {
-          "query": "best sales funnel builder",
-          "clicks": 0,
-          "impressions": 5,
-          "position": 72
-        },
-        {
-          "query": "funnelbuilder",
-          "clicks": 0,
-          "impressions": 5,
-          "position": 80.4
-        },
-        {
-          "query": "best funnel builders",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 60.6667
-        },
-        {
-          "query": "funnel building tools",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 69.6667
-        },
-        {
-          "query": "online funnel builder",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 80
-        },
-        {
-          "query": "segmentation funnel builder",
+          "query": "klaviyp",
           "clicks": 0,
           "impressions": 2,
-          "position": 26
-        },
-        {
-          "query": "internet marketing funnel builder",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 64
+          "position": 61
         }
       ]
     },
@@ -922,15 +843,88 @@
       ]
     },
     {
+      "page": "https://trytoolscout.org/best-funnel-builder",
+      "pathname": "/best-funnel-builder",
+      "key": "best-funnel-builder",
+      "type": "guide",
+      "intent": "best-funnel-builder",
+      "clicks": 0,
+      "impressions": 106,
+      "ctr": 0,
+      "position": 74,
+      "topQueries": [
+        {
+          "query": "best funnel builder",
+          "clicks": 0,
+          "impressions": 22,
+          "position": 69.3182
+        },
+        {
+          "query": "funnel builder",
+          "clicks": 0,
+          "impressions": 19,
+          "position": 80.5789
+        },
+        {
+          "query": "marketing funnel builder",
+          "clicks": 0,
+          "impressions": 15,
+          "position": 83.4667
+        },
+        {
+          "query": "best sales funnel builder",
+          "clicks": 0,
+          "impressions": 5,
+          "position": 72
+        },
+        {
+          "query": "best funnel builders",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 60.6667
+        },
+        {
+          "query": "funnel building tools",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 69.6667
+        },
+        {
+          "query": "funnelbuilder",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 80
+        },
+        {
+          "query": "online funnel builder",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 80
+        },
+        {
+          "query": "segmentation funnel builder",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 26
+        },
+        {
+          "query": "internet marketing funnel builder",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 64
+        }
+      ]
+    },
+    {
       "page": "https://trytoolscout.org/best-developer-tools",
       "pathname": "/best-developer-tools",
       "key": "best-developer-tools",
       "type": "guide",
       "intent": "best-developer-tools",
       "clicks": 0,
-      "impressions": 87,
+      "impressions": 91,
       "ctr": 0,
-      "position": 68.6897,
+      "position": 68.5495,
       "topQueries": [
         {
           "query": "best developer tools software",
@@ -945,16 +939,16 @@
           "position": 60.8333
         },
         {
+          "query": "tool developers",
+          "clicks": 0,
+          "impressions": 6,
+          "position": 73.6667
+        },
+        {
           "query": "best tool for developer",
           "clicks": 0,
           "impressions": 6,
           "position": 77
-        },
-        {
-          "query": "tool developers",
-          "clicks": 0,
-          "impressions": 5,
-          "position": 74
         },
         {
           "query": "developer tools comparison for integrated platforms vs separate tools",
@@ -1001,9 +995,9 @@
       "type": "guide",
       "intent": "best-crm-with-automation",
       "clicks": 0,
-      "impressions": 85,
+      "impressions": 87,
       "ctr": 0,
-      "position": 75.9412,
+      "position": 76.1954,
       "topQueries": [
         {
           "query": "crm with workflow automation",
@@ -1014,8 +1008,8 @@
         {
           "query": "best crm for automation",
           "clicks": 0,
-          "impressions": 12,
-          "position": 74.0833
+          "impressions": 13,
+          "position": 74.0769
         },
         {
           "query": "crm with automation",
@@ -1074,9 +1068,9 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 82,
+      "impressions": 79,
       "ctr": 0,
-      "position": 37.0732,
+      "position": 37.7468,
       "topQueries": [
         {
           "query": "tally software",
@@ -1085,16 +1079,16 @@
           "position": 42.4
         },
         {
-          "query": "tallykey",
-          "clicks": 0,
-          "impressions": 13,
-          "position": 14.3077
-        },
-        {
           "query": "tally",
           "clicks": 0,
-          "impressions": 13,
-          "position": 50.5385
+          "impressions": 12,
+          "position": 52.6667
+        },
+        {
+          "query": "tallykey",
+          "clicks": 0,
+          "impressions": 11,
+          "position": 13.9091
         },
         {
           "query": "what is tally",
@@ -1129,43 +1123,6 @@
       ]
     },
     {
-      "page": "https://trytoolscout.org/",
-      "pathname": "/",
-      "key": "home",
-      "type": "home",
-      "intent": null,
-      "clicks": 2,
-      "impressions": 81,
-      "ctr": 2.4691,
-      "position": 8.642,
-      "topQueries": [
-        {
-          "query": "toolscout",
-          "clicks": 0,
-          "impressions": 44,
-          "position": 8.7045
-        },
-        {
-          "query": "tool scout",
-          "clicks": 0,
-          "impressions": 5,
-          "position": 7.8
-        },
-        {
-          "query": "trucscout",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 7
-        },
-        {
-          "query": "trytoolkit",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 96
-        }
-      ]
-    },
-    {
       "page": "https://trytoolscout.org/tools/netlify",
       "pathname": "/tools/netlify",
       "key": "netlify",
@@ -1174,13 +1131,13 @@
       "clicks": 0,
       "impressions": 77,
       "ctr": 0,
-      "position": 61.3636,
+      "position": 61.1039,
       "topQueries": [
         {
           "query": "netlify",
           "clicks": 0,
-          "impressions": 23,
-          "position": 62.2174
+          "impressions": 24,
+          "position": 61.875
         },
         {
           "query": "what is netlify",
@@ -1245,15 +1202,15 @@
       "type": "guide",
       "intent": "best-crm-for-sales-teams",
       "clicks": 0,
-      "impressions": 75,
+      "impressions": 76,
       "ctr": 0,
-      "position": 58.4,
+      "position": 58.3158,
       "topQueries": [
         {
           "query": "crm for sales team",
           "clicks": 0,
-          "impressions": 23,
-          "position": 64.5217
+          "impressions": 24,
+          "position": 64.7917
         },
         {
           "query": "crm for sales teams",
@@ -1280,16 +1237,16 @@
           "position": 72.8333
         },
         {
+          "query": "best crm for sales team",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 60
+        },
+        {
           "query": "best crm for managing sales pipeline",
           "clicks": 0,
           "impressions": 2,
           "position": 11
-        },
-        {
-          "query": "best crm for sales team",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 59
         },
         {
           "query": "best crm pipeline management",
@@ -1298,16 +1255,16 @@
           "position": 75
         },
         {
-          "query": "crm for sales team",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 75.5
-        },
-        {
           "query": "what’s the best crm for sales automation and pipeline tracking?",
           "clicks": 0,
           "impressions": 1,
           "position": 7
+        },
+        {
+          "query": "best crm for sales teams",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 61
         }
       ]
     },
@@ -1318,15 +1275,15 @@
       "type": "guide",
       "intent": "best-keyword-research-tools",
       "clicks": 0,
-      "impressions": 74,
+      "impressions": 73,
       "ctr": 0,
-      "position": 75.0135,
+      "position": 75.0137,
       "topQueries": [
         {
           "query": "keyword discovery tool",
           "clicks": 0,
-          "impressions": 43,
-          "position": 71.6512
+          "impressions": 40,
+          "position": 71.575
         },
         {
           "query": "competitive keyword research tools",
@@ -1343,8 +1300,8 @@
         {
           "query": "keyword discovery tools",
           "clicks": 0,
-          "impressions": 4,
-          "position": 69.5
+          "impressions": 6,
+          "position": 70.1667
         },
         {
           "query": "the best tool for keyword analysis",
@@ -1367,33 +1324,70 @@
       ]
     },
     {
+      "page": "https://trytoolscout.org/",
+      "pathname": "/",
+      "key": "home",
+      "type": "home",
+      "intent": null,
+      "clicks": 2,
+      "impressions": 70,
+      "ctr": 2.8571,
+      "position": 8.8286,
+      "topQueries": [
+        {
+          "query": "toolscout",
+          "clicks": 0,
+          "impressions": 38,
+          "position": 8.6579
+        },
+        {
+          "query": "tool scout",
+          "clicks": 0,
+          "impressions": 5,
+          "position": 7.8
+        },
+        {
+          "query": "trucscout",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 7
+        },
+        {
+          "query": "trytoolkit",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 96
+        }
+      ]
+    },
+    {
       "page": "https://trytoolscout.org/best-no-code-automation-tools",
       "pathname": "/best-no-code-automation-tools",
       "key": "best-no-code-automation-tools",
       "type": "guide",
       "intent": "best-no-code-automation-tools",
       "clicks": 0,
-      "impressions": 71,
+      "impressions": 66,
       "ctr": 0,
-      "position": 76.5211,
+      "position": 76.303,
       "topQueries": [
         {
           "query": "no code automation tools",
           "clicks": 0,
-          "impressions": 25,
-          "position": 76.28
+          "impressions": 23,
+          "position": 76
         },
         {
           "query": "no-code automation tools",
           "clicks": 0,
-          "impressions": 17,
-          "position": 78.0588
+          "impressions": 15,
+          "position": 78
         },
         {
           "query": "which workflow automation tools are the most popular for no-code platforms?",
           "clicks": 0,
-          "impressions": 10,
-          "position": 80.7
+          "impressions": 9,
+          "position": 80.6667
         },
         {
           "query": "best no code automation tools",
@@ -1440,15 +1434,15 @@
       "type": "guide",
       "intent": "best-free-project-management-tools",
       "clicks": 0,
-      "impressions": 62,
+      "impressions": 60,
       "ctr": 0,
-      "position": 64.1613,
+      "position": 64.0667,
       "topQueries": [
         {
           "query": "free online project manager tools",
           "clicks": 0,
-          "impressions": 18,
-          "position": 67.5
+          "impressions": 16,
+          "position": 67.5625
         },
         {
           "query": "best free project management tools",
@@ -1586,15 +1580,15 @@
       "type": "guide",
       "intent": "best-team-collaboration-tools",
       "clicks": 0,
-      "impressions": 46,
+      "impressions": 49,
       "ctr": 0,
-      "position": 84.913,
+      "position": 84.6122,
       "topQueries": [
         {
           "query": "team collaboration tool",
           "clicks": 0,
-          "impressions": 14,
-          "position": 95
+          "impressions": 15,
+          "position": 95.2667
         },
         {
           "query": "team collaboration tools",
@@ -1605,8 +1599,8 @@
         {
           "query": "team collaboration platform",
           "clicks": 0,
-          "impressions": 6,
-          "position": 88.8333
+          "impressions": 8,
+          "position": 84.25
         },
         {
           "query": "teamwork websites",
@@ -1653,9 +1647,9 @@
       "type": "tool-profile",
       "intent": null,
       "clicks": 0,
-      "impressions": 38,
+      "impressions": 39,
       "ctr": 0,
-      "position": 62.6842,
+      "position": 63.2821,
       "topQueries": [
         {
           "query": "crm software zoho",
@@ -1837,40 +1831,15 @@
       ]
     },
     {
-      "page": "https://trytoolscout.org/tools/miro",
-      "pathname": "/tools/miro",
-      "key": "miro",
-      "type": "tool-profile",
-      "intent": null,
-      "clicks": 0,
-      "impressions": 35,
-      "ctr": 0,
-      "position": 48.0286,
-      "topQueries": [
-        {
-          "query": "miro tool",
-          "clicks": 0,
-          "impressions": 19,
-          "position": 52.7895
-        },
-        {
-          "query": "miro features list",
-          "clicks": 0,
-          "impressions": 7,
-          "position": 86.2857
-        }
-      ]
-    },
-    {
       "page": "https://trytoolscout.org/best-ecommerce-platforms",
       "pathname": "/best-ecommerce-platforms",
       "key": "best-ecommerce-platforms",
       "type": "guide",
       "intent": "best-ecommerce-platforms",
       "clicks": 0,
-      "impressions": 34,
+      "impressions": 35,
       "ctr": 0,
-      "position": 35,
+      "position": 36.6571,
       "topQueries": [
         {
           "query": "best ecommerce platform",
@@ -1895,6 +1864,12 @@
           "clicks": 0,
           "impressions": 2,
           "position": 76.5
+        },
+        {
+          "query": "best e-commerce platforms?",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 94.5
         },
         {
           "query": "ecommerce platforms",
@@ -1925,12 +1900,31 @@
           "clicks": 0,
           "impressions": 1,
           "position": 67
+        }
+      ]
+    },
+    {
+      "page": "https://trytoolscout.org/tools/miro",
+      "pathname": "/tools/miro",
+      "key": "miro",
+      "type": "tool-profile",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 35,
+      "ctr": 0,
+      "position": 48.0286,
+      "topQueries": [
+        {
+          "query": "miro tool",
+          "clicks": 0,
+          "impressions": 19,
+          "position": 52.7895
         },
         {
-          "query": "best ecommerce platform comparison",
+          "query": "miro features list",
           "clicks": 0,
-          "impressions": 1,
-          "position": 75
+          "impressions": 7,
+          "position": 86.2857
         }
       ]
     },
@@ -1993,6 +1987,37 @@
           "clicks": 0,
           "impressions": 1,
           "position": 2
+        }
+      ]
+    },
+    {
+      "page": "https://trytoolscout.org/notion-vs-clickup",
+      "pathname": "/notion-vs-clickup",
+      "key": "notion-vs-clickup",
+      "type": "comparison",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 31,
+      "ctr": 0,
+      "position": 67.5806,
+      "topQueries": [
+        {
+          "query": "clickup vs notion",
+          "clicks": 0,
+          "impressions": 22,
+          "position": 78.3182
+        },
+        {
+          "query": "notion vs clickup",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 77
+        },
+        {
+          "query": "notion versus clickup",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 81
         }
       ]
     },
@@ -2070,37 +2095,6 @@
       ]
     },
     {
-      "page": "https://trytoolscout.org/notion-vs-clickup",
-      "pathname": "/notion-vs-clickup",
-      "key": "notion-vs-clickup",
-      "type": "comparison",
-      "intent": null,
-      "clicks": 0,
-      "impressions": 29,
-      "ctr": 0,
-      "position": 67,
-      "topQueries": [
-        {
-          "query": "clickup vs notion",
-          "clicks": 0,
-          "impressions": 20,
-          "position": 78.55
-        },
-        {
-          "query": "notion vs clickup",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 77
-        },
-        {
-          "query": "notion versus clickup",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 81
-        }
-      ]
-    },
-    {
       "page": "https://trytoolscout.org/tools",
       "pathname": "/tools",
       "key": "tools",
@@ -2109,13 +2103,86 @@
       "clicks": 1,
       "impressions": 28,
       "ctr": 3.5714,
-      "position": 10.8214,
+      "position": 10.6071,
       "topQueries": [
         {
           "query": "company scouting software",
           "clicks": 0,
           "impressions": 1,
           "position": 91
+        }
+      ]
+    },
+    {
+      "page": "https://trytoolscout.org/best-competitor-seo-tools",
+      "pathname": "/best-competitor-seo-tools",
+      "key": "best-competitor-seo-tools",
+      "type": "guide",
+      "intent": "best-competitor-seo-tools",
+      "clicks": 0,
+      "impressions": 27,
+      "ctr": 0,
+      "position": 56.2593,
+      "topQueries": [
+        {
+          "query": "seo competitors search engine",
+          "clicks": 0,
+          "impressions": 6,
+          "position": 46.6667
+        },
+        {
+          "query": "seo competitor research tool",
+          "clicks": 0,
+          "impressions": 5,
+          "position": 75.6
+        },
+        {
+          "query": "seo competitors tool",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 89.6667
+        },
+        {
+          "query": "seo competitors search engine",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 49.5
+        },
+        {
+          "query": "seo competitors ranking tool",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 31
+        },
+        {
+          "query": "seo competitor research tool free",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 69
+        },
+        {
+          "query": "seo competitive research tool",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 84
+        },
+        {
+          "query": "seo competitor research tool",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 96
+        },
+        {
+          "query": "seo competitor research tools",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 97
+        },
+        {
+          "query": "seo competitor analysis tools",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 100
         }
       ]
     },
@@ -2157,106 +2224,63 @@
       ]
     },
     {
-      "page": "https://trytoolscout.org/best-competitor-seo-tools",
-      "pathname": "/best-competitor-seo-tools",
-      "key": "best-competitor-seo-tools",
+      "page": "https://trytoolscout.org/best-lead-capture-forms",
+      "pathname": "/best-lead-capture-forms",
+      "key": "best-lead-capture-forms",
       "type": "guide",
-      "intent": "best-competitor-seo-tools",
+      "intent": "best-lead-capture-forms",
       "clicks": 0,
       "impressions": 24,
       "ctr": 0,
-      "position": 54.875,
+      "position": 46.6667,
       "topQueries": [
         {
-          "query": "seo competitors search engine",
+          "query": "lead validation forms",
           "clicks": 0,
-          "impressions": 6,
-          "position": 46.6667
+          "impressions": 7,
+          "position": 46
         },
         {
-          "query": "seo competitor research tool",
+          "query": "lead capture forms",
           "clicks": 0,
-          "impressions": 4,
-          "position": 74.5
+          "impressions": 5,
+          "position": 36.4
         },
         {
-          "query": "seo competitors tool",
+          "query": "secure lead capture forms",
+          "clicks": 0,
+          "impressions": 5,
+          "position": 63.2
+        },
+        {
+          "query": "lead capture forms and surveys",
           "clicks": 0,
           "impressions": 2,
-          "position": 93
+          "position": 70
         },
         {
-          "query": "seo competitor research tool",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 98
-        },
-        {
-          "query": "seo competitors search engine",
+          "query": "which form tool should i sign up for if i want payments and lead capture on the free plan",
           "clicks": 0,
           "impressions": 1,
-          "position": 29
+          "position": 9
         },
         {
-          "query": "seo competitors ranking tool",
+          "query": "lead-capture forms",
           "clicks": 0,
           "impressions": 1,
-          "position": 31
+          "position": 28
         },
         {
-          "query": "seo competitive research tool",
+          "query": "best lead capture forms",
           "clicks": 0,
           "impressions": 1,
-          "position": 84
+          "position": 39
         },
         {
-          "query": "seo competitor research tools",
+          "query": "top lead certification products for online forms",
           "clicks": 0,
           "impressions": 1,
-          "position": 97
-        },
-        {
-          "query": "seo competitor analysis tools",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 100
-        }
-      ]
-    },
-    {
-      "page": "https://trytoolscout.org/tools/mixpanel",
-      "pathname": "/tools/mixpanel",
-      "key": "mixpanel",
-      "type": "tool-profile",
-      "intent": null,
-      "clicks": 0,
-      "impressions": 24,
-      "ctr": 0,
-      "position": 79.5833,
-      "topQueries": [
-        {
-          "query": "mixpanel",
-          "clicks": 0,
-          "impressions": 14,
-          "position": 87.2857
-        },
-        {
-          "query": "mixpannel",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 87.3333
-        },
-        {
-          "query": "mix panel",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 87.5
-        },
-        {
-          "query": "mixpnel",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 87.5
+          "position": 54
         }
       ]
     },
@@ -2311,6 +2335,43 @@
       ]
     },
     {
+      "page": "https://trytoolscout.org/tools/mixpanel",
+      "pathname": "/tools/mixpanel",
+      "key": "mixpanel",
+      "type": "tool-profile",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 22,
+      "ctr": 0,
+      "position": 78.9545,
+      "topQueries": [
+        {
+          "query": "mixpanel",
+          "clicks": 0,
+          "impressions": 12,
+          "position": 87.4167
+        },
+        {
+          "query": "mixpannel",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 87.3333
+        },
+        {
+          "query": "mix panel",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 87.5
+        },
+        {
+          "query": "mixpnel",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 87.5
+        }
+      ]
+    },
+    {
       "page": "https://trytoolscout.org/best-ai-assistants",
       "pathname": "/best-ai-assistants",
       "key": "best-ai-assistants",
@@ -2338,61 +2399,6 @@
           "clicks": 0,
           "impressions": 1,
           "position": 60
-        }
-      ]
-    },
-    {
-      "page": "https://trytoolscout.org/best-lead-capture-forms",
-      "pathname": "/best-lead-capture-forms",
-      "key": "best-lead-capture-forms",
-      "type": "guide",
-      "intent": "best-lead-capture-forms",
-      "clicks": 0,
-      "impressions": 21,
-      "ctr": 0,
-      "position": 49.4762,
-      "topQueries": [
-        {
-          "query": "lead validation forms",
-          "clicks": 0,
-          "impressions": 6,
-          "position": 46.5
-        },
-        {
-          "query": "secure lead capture forms",
-          "clicks": 0,
-          "impressions": 5,
-          "position": 63.2
-        },
-        {
-          "query": "lead capture forms",
-          "clicks": 0,
-          "impressions": 4,
-          "position": 38.25
-        },
-        {
-          "query": "lead capture forms and surveys",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 70
-        },
-        {
-          "query": "lead-capture forms",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 28
-        },
-        {
-          "query": "best lead capture forms",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 39
-        },
-        {
-          "query": "top lead certification products for online forms",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 54
         }
       ]
     },
@@ -2430,43 +2436,6 @@
           "clicks": 0,
           "impressions": 1,
           "position": 71
-        }
-      ]
-    },
-    {
-      "page": "https://trytoolscout.org/tools/monday-crm",
-      "pathname": "/tools/monday-crm",
-      "key": "monday-crm",
-      "type": "tool-profile",
-      "intent": null,
-      "clicks": 0,
-      "impressions": 21,
-      "ctr": 0,
-      "position": 66.0476,
-      "topQueries": [
-        {
-          "query": "crm tool monday",
-          "clicks": 0,
-          "impressions": 16,
-          "position": 60.9375
-        },
-        {
-          "query": "what is monday crm",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 84.6667
-        },
-        {
-          "query": "monday crm features",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 71
-        },
-        {
-          "query": "monday as a crm",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 87
         }
       ]
     },
@@ -2557,6 +2526,37 @@
       ]
     },
     {
+      "page": "https://trytoolscout.org/tools/monday-crm",
+      "pathname": "/tools/monday-crm",
+      "key": "monday-crm",
+      "type": "tool-profile",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 20,
+      "ctr": 0,
+      "position": 66.15,
+      "topQueries": [
+        {
+          "query": "crm tool monday",
+          "clicks": 0,
+          "impressions": 16,
+          "position": 61.375
+        },
+        {
+          "query": "what is monday crm",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 84.6667
+        },
+        {
+          "query": "monday as a crm",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 87
+        }
+      ]
+    },
+    {
       "page": "https://trytoolscout.org/news/hubspot-mcp-server-updates",
       "pathname": "/news/hubspot-mcp-server-updates",
       "key": "hubspot-mcp-server-updates",
@@ -2628,61 +2628,6 @@
           "clicks": 0,
           "impressions": 1,
           "position": 60
-        }
-      ]
-    },
-    {
-      "page": "https://trytoolscout.org/tools/matomo",
-      "pathname": "/tools/matomo",
-      "key": "matomo",
-      "type": "tool-profile",
-      "intent": null,
-      "clicks": 0,
-      "impressions": 16,
-      "ctr": 0,
-      "position": 46.5,
-      "topQueries": [
-        {
-          "query": "matomo analytics",
-          "clicks": 0,
-          "impressions": 5,
-          "position": 42
-        },
-        {
-          "query": "matomo services",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 40.3333
-        },
-        {
-          "query": "matomo",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 54.3333
-        },
-        {
-          "query": "matomo review",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 50.5
-        },
-        {
-          "query": "matomo erfahrung",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 20
-        },
-        {
-          "query": "motomo analytics",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 44
-        },
-        {
-          "query": "matomo pros and cons",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 85
         }
       ]
     },
@@ -2782,6 +2727,61 @@
           "clicks": 0,
           "impressions": 1,
           "position": 67
+        }
+      ]
+    },
+    {
+      "page": "https://trytoolscout.org/tools/matomo",
+      "pathname": "/tools/matomo",
+      "key": "matomo",
+      "type": "tool-profile",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 15,
+      "ctr": 0,
+      "position": 47.4,
+      "topQueries": [
+        {
+          "query": "matomo analytics",
+          "clicks": 0,
+          "impressions": 4,
+          "position": 44.25
+        },
+        {
+          "query": "matomo services",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 40.3333
+        },
+        {
+          "query": "matomo",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 54.3333
+        },
+        {
+          "query": "matomo review",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 50.5
+        },
+        {
+          "query": "matomo erfahrung",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 20
+        },
+        {
+          "query": "motomo analytics",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 44
+        },
+        {
+          "query": "matomo pros and cons",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 85
         }
       ]
     },
@@ -2888,31 +2888,6 @@
           "clicks": 0,
           "impressions": 1,
           "position": 29
-        }
-      ]
-    },
-    {
-      "page": "https://trytoolscout.org/tools/surfer",
-      "pathname": "/tools/surfer",
-      "key": "surfer",
-      "type": "tool-profile",
-      "intent": null,
-      "clicks": 0,
-      "impressions": 12,
-      "ctr": 0,
-      "position": 59.4167,
-      "topQueries": [
-        {
-          "query": "surfer tool",
-          "clicks": 0,
-          "impressions": 8,
-          "position": 70.5
-        },
-        {
-          "query": "surfer tools",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 92
         }
       ]
     },
@@ -3078,6 +3053,62 @@
       ]
     },
     {
+      "page": "https://trytoolscout.org/tools/fillout",
+      "pathname": "/tools/fillout",
+      "key": "fillout",
+      "type": "tool-profile",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 10,
+      "ctr": 0,
+      "position": 30.2,
+      "topQueries": [
+        {
+          "query": "fill out survey",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 41.5
+        },
+        {
+          "query": "fill out form",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 50
+        },
+        {
+          "query": "fill out",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 66
+        }
+      ]
+    },
+    {
+      "page": "https://trytoolscout.org/tools/surfer",
+      "pathname": "/tools/surfer",
+      "key": "surfer",
+      "type": "tool-profile",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 10,
+      "ctr": 0,
+      "position": 57.2,
+      "topQueries": [
+        {
+          "query": "surfer tool",
+          "clicks": 0,
+          "impressions": 6,
+          "position": 70.5
+        },
+        {
+          "query": "surfer tools",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 92
+        }
+      ]
+    },
+    {
       "page": "https://trytoolscout.org/news/github-ssh-security-changes-2026",
       "pathname": "/news/github-ssh-security-changes-2026",
       "key": "github-ssh-security-changes-2026",
@@ -3133,33 +3164,39 @@
       ]
     },
     {
-      "page": "https://trytoolscout.org/tools/fillout",
-      "pathname": "/tools/fillout",
-      "key": "fillout",
-      "type": "tool-profile",
-      "intent": null,
+      "page": "https://trytoolscout.org/best-website-builders",
+      "pathname": "/best-website-builders",
+      "key": "best-website-builders",
+      "type": "guide",
+      "intent": "best-website-builders",
       "clicks": 0,
-      "impressions": 9,
+      "impressions": 8,
       "ctr": 0,
-      "position": 32.3333,
+      "position": 64.25,
       "topQueries": [
         {
-          "query": "fill out survey",
+          "query": "builder comparison website",
           "clicks": 0,
-          "impressions": 2,
-          "position": 41.5
+          "impressions": 3,
+          "position": 73.6667
         },
         {
-          "query": "fill out form",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 50
-        },
-        {
-          "query": "fill out",
+          "query": "best website builder tools",
           "clicks": 0,
           "impressions": 1,
-          "position": 66
+          "position": 71
+        },
+        {
+          "query": "best tool for building websites",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 76
+        },
+        {
+          "query": "tooltester",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 99
         }
       ]
     },
@@ -3281,64 +3318,76 @@
       ]
     },
     {
-      "page": "https://trytoolscout.org/tool",
-      "pathname": "/tool",
-      "key": "tool",
-      "type": "other",
-      "intent": null,
+      "page": "https://trytoolscout.org/best-crm-for-consultants",
+      "pathname": "/best-crm-for-consultants",
+      "key": "best-crm-for-consultants",
+      "type": "guide",
+      "intent": "best-crm-for-consultants",
       "clicks": 0,
       "impressions": 7,
       "ctr": 0,
-      "position": 46.8571,
+      "position": 89.4286,
       "topQueries": [
         {
-          "query": "crm tool monday",
+          "query": "crm for independent consultants",
           "clicks": 0,
           "impressions": 2,
-          "position": 62.5
+          "position": 82.5
         },
         {
-          "query": "activecampaign affiliate",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 68
-        },
-        {
-          "query": "tally survey",
+          "query": "best crm for consultants",
           "clicks": 0,
           "impressions": 1,
-          "position": 58
+          "position": 86
+        },
+        {
+          "query": "best crm for solo consultants",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 92
+        },
+        {
+          "query": "crm selection consultant",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 92
+        },
+        {
+          "query": "crm for consultants",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 94
+        },
+        {
+          "query": "independent crm consultants",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 97
         }
       ]
     },
     {
-      "page": "https://trytoolscout.org/best-website-builders",
-      "pathname": "/best-website-builders",
-      "key": "best-website-builders",
+      "page": "https://trytoolscout.org/best-funnel-builder-for-beginners",
+      "pathname": "/best-funnel-builder-for-beginners",
+      "key": "best-funnel-builder-for-beginners",
       "type": "guide",
-      "intent": "best-website-builders",
+      "intent": "best-funnel-builder-for-beginners",
       "clicks": 0,
       "impressions": 7,
       "ctr": 0,
-      "position": 62.5714,
+      "position": 87.8571,
       "topQueries": [
         {
-          "query": "builder comparison website",
-          "clicks": 0,
-          "impressions": 3,
-          "position": 73.6667
-        },
-        {
-          "query": "best website builder tools",
+          "query": "best free funnel builder",
           "clicks": 0,
           "impressions": 1,
-          "position": 71
+          "position": 69
         },
         {
-          "query": "tooltester",
+          "query": "free funnel building software",
           "clicks": 0,
           "impressions": 1,
-          "position": 99
+          "position": 98
         }
       ]
     },
@@ -3468,68 +3517,6 @@
       ]
     },
     {
-      "page": "https://trytoolscout.org/best-crm-for-consultants",
-      "pathname": "/best-crm-for-consultants",
-      "key": "best-crm-for-consultants",
-      "type": "guide",
-      "intent": "best-crm-for-consultants",
-      "clicks": 0,
-      "impressions": 6,
-      "ctr": 0,
-      "position": 88.6667,
-      "topQueries": [
-        {
-          "query": "crm for independent consultants",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 82.5
-        },
-        {
-          "query": "best crm for consultants",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 86
-        },
-        {
-          "query": "best crm for solo consultants",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 92
-        },
-        {
-          "query": "crm selection consultant",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 92
-        },
-        {
-          "query": "independent crm consultants",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 97
-        }
-      ]
-    },
-    {
-      "page": "https://trytoolscout.org/best-funnel-builder-for-beginners",
-      "pathname": "/best-funnel-builder-for-beginners",
-      "key": "best-funnel-builder-for-beginners",
-      "type": "guide",
-      "intent": "best-funnel-builder-for-beginners",
-      "clicks": 0,
-      "impressions": 6,
-      "ctr": 0,
-      "position": 86.1667,
-      "topQueries": [
-        {
-          "query": "best free funnel builder",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 69
-        }
-      ]
-    },
-    {
       "page": "https://trytoolscout.org/best-productivity-tools-for-teams",
       "pathname": "/best-productivity-tools-for-teams",
       "key": "best-productivity-tools-for-teams",
@@ -3645,6 +3632,31 @@
       "ctr": 0,
       "position": 19.6,
       "topQueries": []
+    },
+    {
+      "page": "https://trytoolscout.org/tool",
+      "pathname": "/tool",
+      "key": "tool",
+      "type": "other",
+      "intent": null,
+      "clicks": 0,
+      "impressions": 5,
+      "ctr": 0,
+      "position": 38.4,
+      "topQueries": [
+        {
+          "query": "crm tool monday",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 62.5
+        },
+        {
+          "query": "tally survey",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 58
+        }
+      ]
     },
     {
       "page": "https://trytoolscout.org/tools/freshdesk",
@@ -4299,25 +4311,6 @@
       "topQueries": []
     },
     {
-      "page": "https://trytoolscout.org/best-free-funnel-builder",
-      "pathname": "/best-free-funnel-builder",
-      "key": "best-free-funnel-builder",
-      "type": "guide",
-      "intent": "best-free-funnel-builder",
-      "clicks": 0,
-      "impressions": 1,
-      "ctr": 0,
-      "position": 71,
-      "topQueries": [
-        {
-          "query": "funnel creator free",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 71
-        }
-      ]
-    },
-    {
       "page": "https://trytoolscout.org/best-marketing-automation-tools",
       "pathname": "/best-marketing-automation-tools",
       "key": "best-marketing-automation-tools",
@@ -4550,75 +4543,75 @@
       "topQueries": []
     }
   ],
-  "count": 39,
+  "count": 38,
   "items": [
     {
       "intent": "best-seo-tools-for-agencies",
       "page": "https://trytoolscout.org/best-seo-tools-for-agencies",
       "clicks": 0,
-      "impressions": 3160,
+      "impressions": 3256,
       "ctr": 0,
-      "position": 80.3364,
+      "position": 80.3065,
       "topQueries": [
         {
           "query": "seo software for agencies",
           "clicks": 0,
-          "impressions": 238,
-          "position": 87.3403
+          "impressions": 257,
+          "position": 87.0389
         },
         {
           "query": "seo tool for agencies",
           "clicks": 0,
-          "impressions": 194,
-          "position": 82.2835
+          "impressions": 206,
+          "position": 82.2233
         },
         {
           "query": "seo tools for agencies",
           "clicks": 0,
-          "impressions": 165,
-          "position": 83.7455
+          "impressions": 173,
+          "position": 83.5029
         },
         {
           "query": "seo agency tools",
           "clicks": 0,
-          "impressions": 162,
-          "position": 81.7407
+          "impressions": 169,
+          "position": 81.6331
         },
         {
           "query": "seo platform for agencies",
           "clicks": 0,
-          "impressions": 154,
-          "position": 83.974
+          "impressions": 156,
+          "position": 84.0128
         },
         {
           "query": "agency seo tools",
           "clicks": 0,
-          "impressions": 137,
-          "position": 80.7664
+          "impressions": 145,
+          "position": 80.7103
         },
         {
           "query": "best seo tools for agency",
           "clicks": 0,
-          "impressions": 130,
-          "position": 69.5077
+          "impressions": 122,
+          "position": 69.3033
         },
         {
           "query": "best seo software for agencies",
           "clicks": 0,
-          "impressions": 115,
-          "position": 73.313
+          "impressions": 121,
+          "position": 73.0826
         },
         {
           "query": "seo agency tool",
           "clicks": 0,
-          "impressions": 111,
-          "position": 85.1892
+          "impressions": 115,
+          "position": 84.7304
         },
         {
           "query": "seo software for agency",
           "clicks": 0,
-          "impressions": 109,
-          "position": 86.8716
+          "impressions": 115,
+          "position": 86.6435
         }
       ]
     },
@@ -4626,9 +4619,9 @@
       "intent": "best-crm-for-small-business",
       "page": "https://trytoolscout.org/best-crm-for-small-business",
       "clicks": 0,
-      "impressions": 343,
+      "impressions": 348,
       "ctr": 0,
-      "position": 76.6735,
+      "position": 76.6494,
       "topQueries": [
         {
           "query": "best crm for small business",
@@ -4643,16 +4636,16 @@
           "position": 81.0667
         },
         {
+          "query": "best crm tools for small business",
+          "clicks": 0,
+          "impressions": 29,
+          "position": 75
+        },
+        {
           "query": "crm tools for small business",
           "clicks": 0,
           "impressions": 29,
           "position": 76.4483
-        },
-        {
-          "query": "best crm tools for small business",
-          "clicks": 0,
-          "impressions": 27,
-          "position": 74
         },
         {
           "query": "best small business crm",
@@ -4661,16 +4654,16 @@
           "position": 80
         },
         {
+          "query": "small business crm",
+          "clicks": 0,
+          "impressions": 11,
+          "position": 70.3636
+        },
+        {
           "query": "best sales crm for small business",
           "clicks": 0,
           "impressions": 11,
           "position": 72.4545
-        },
-        {
-          "query": "small business crm",
-          "clicks": 0,
-          "impressions": 10,
-          "position": 71
         },
         {
           "query": "best crm tool for small business",
@@ -4693,88 +4686,18 @@
       ]
     },
     {
-      "intent": "best-seo-keyword-research-tools",
-      "page": "https://trytoolscout.org/best-seo-keyword-research-tools",
-      "clicks": 0,
-      "impressions": 204,
-      "ctr": 0,
-      "position": 77.0098,
-      "topQueries": [
-        {
-          "query": "website research tool",
-          "clicks": 0,
-          "impressions": 68,
-          "position": 69.2794
-        },
-        {
-          "query": "seo search tool",
-          "clicks": 0,
-          "impressions": 15,
-          "position": 69.2667
-        },
-        {
-          "query": "seo research tools",
-          "clicks": 0,
-          "impressions": 14,
-          "position": 75.7143
-        },
-        {
-          "query": "competitor keyword research tools for seo",
-          "clicks": 0,
-          "impressions": 13,
-          "position": 85.0769
-        },
-        {
-          "query": "keyword discovery tool",
-          "clicks": 0,
-          "impressions": 13,
-          "position": 92.7692
-        },
-        {
-          "query": "seo search tools",
-          "clicks": 0,
-          "impressions": 11,
-          "position": 79.5455
-        },
-        {
-          "query": "keyword analysis seo tool",
-          "clicks": 0,
-          "impressions": 11,
-          "position": 79.8182
-        },
-        {
-          "query": "keyword analysis tool for seo",
-          "clicks": 0,
-          "impressions": 8,
-          "position": 86.875
-        },
-        {
-          "query": "research seo tool",
-          "clicks": 0,
-          "impressions": 7,
-          "position": 53.2857
-        },
-        {
-          "query": "best seo research tool",
-          "clicks": 0,
-          "impressions": 6,
-          "position": 81.5
-        }
-      ]
-    },
-    {
       "intent": "best-social-media-management-tools",
       "page": "https://trytoolscout.org/best-social-media-management-tools",
       "clicks": 0,
-      "impressions": 197,
+      "impressions": 205,
       "ctr": 0,
-      "position": 57.0761,
+      "position": 55.5317,
       "topQueries": [
         {
           "query": "social media management tools",
           "clicks": 0,
-          "impressions": 66,
-          "position": 57.6364
+          "impressions": 67,
+          "position": 57.5224
         },
         {
           "query": "social media management tool",
@@ -4785,8 +4708,8 @@
         {
           "query": "best social media management tools",
           "clicks": 0,
-          "impressions": 32,
-          "position": 42.5313
+          "impressions": 37,
+          "position": 37.8649
         },
         {
           "query": "best social media management tool",
@@ -4803,20 +4726,20 @@
         {
           "query": "social media manager tools",
           "clicks": 0,
+          "impressions": 7,
+          "position": 62.1429
+        },
+        {
+          "query": "social media tool",
+          "clicks": 0,
           "impressions": 6,
-          "position": 70.8333
+          "position": 63.6667
         },
         {
           "query": "best tools for social media managers",
           "clicks": 0,
           "impressions": 5,
           "position": 64
-        },
-        {
-          "query": "social media tool",
-          "clicks": 0,
-          "impressions": 5,
-          "position": 68.4
         },
         {
           "query": "social media managing tools",
@@ -4833,36 +4756,106 @@
       ]
     },
     {
+      "intent": "best-seo-keyword-research-tools",
+      "page": "https://trytoolscout.org/best-seo-keyword-research-tools",
+      "clicks": 0,
+      "impressions": 188,
+      "ctr": 0,
+      "position": 76.7606,
+      "topQueries": [
+        {
+          "query": "website research tool",
+          "clicks": 0,
+          "impressions": 64,
+          "position": 69.3594
+        },
+        {
+          "query": "seo research tools",
+          "clicks": 0,
+          "impressions": 14,
+          "position": 75.7143
+        },
+        {
+          "query": "seo search tool",
+          "clicks": 0,
+          "impressions": 13,
+          "position": 68.6923
+        },
+        {
+          "query": "competitor keyword research tools for seo",
+          "clicks": 0,
+          "impressions": 13,
+          "position": 85.0769
+        },
+        {
+          "query": "keyword discovery tool",
+          "clicks": 0,
+          "impressions": 12,
+          "position": 92.9167
+        },
+        {
+          "query": "keyword analysis seo tool",
+          "clicks": 0,
+          "impressions": 11,
+          "position": 79.8182
+        },
+        {
+          "query": "seo search tools",
+          "clicks": 0,
+          "impressions": 9,
+          "position": 79.4444
+        },
+        {
+          "query": "research seo tool",
+          "clicks": 0,
+          "impressions": 7,
+          "position": 53.2857
+        },
+        {
+          "query": "keyword analysis tool for seo",
+          "clicks": 0,
+          "impressions": 7,
+          "position": 87.8571
+        },
+        {
+          "query": "best seo research tool",
+          "clicks": 0,
+          "impressions": 6,
+          "position": 81.5
+        }
+      ]
+    },
+    {
       "intent": "best-free-crm",
       "page": "https://trytoolscout.org/best-free-crm",
       "clicks": 0,
       "impressions": 181,
       "ctr": 0,
-      "position": 77.2597,
+      "position": 77.3978,
       "topQueries": [
         {
           "query": "best free crm",
           "clicks": 0,
-          "impressions": 25,
-          "position": 81.28
+          "impressions": 26,
+          "position": 81.5385
         },
         {
           "query": "best free crm tools",
           "clicks": 0,
-          "impressions": 20,
-          "position": 81.55
-        },
-        {
-          "query": "best free crm tools",
-          "clicks": 0,
-          "impressions": 17,
-          "position": 69.0588
+          "impressions": 21,
+          "position": 81.6667
         },
         {
           "query": "best free crm software",
           "clicks": 0,
           "impressions": 17,
           "position": 81.5882
+        },
+        {
+          "query": "best free crm tools",
+          "clicks": 0,
+          "impressions": 16,
+          "position": 69.3125
         },
         {
           "query": "best free free crm",
@@ -4889,16 +4882,16 @@
           "position": 79.1667
         },
         {
-          "query": "crm free tools",
-          "clicks": 0,
-          "impressions": 6,
-          "position": 79.8333
-        },
-        {
           "query": "free crm tool",
           "clicks": 0,
           "impressions": 5,
           "position": 79
+        },
+        {
+          "query": "crm free tools",
+          "clicks": 0,
+          "impressions": 5,
+          "position": 79.4
         }
       ]
     },
@@ -4906,9 +4899,9 @@
       "intent": "best-project-management-tools",
       "page": "https://trytoolscout.org/best-project-management-tools",
       "clicks": 0,
-      "impressions": 138,
+      "impressions": 133,
       "ctr": 0,
-      "position": 47.5,
+      "position": 47.782,
       "topQueries": [
         {
           "query": "management tool",
@@ -4925,14 +4918,14 @@
         {
           "query": "project automation tools",
           "clicks": 0,
-          "impressions": 13,
-          "position": 37.6154
+          "impressions": 11,
+          "position": 35.8182
         },
         {
           "query": "project management workflow tools",
           "clicks": 0,
-          "impressions": 11,
-          "position": 30.4545
+          "impressions": 9,
+          "position": 30.3333
         },
         {
           "query": "automated project management tools",
@@ -4961,8 +4954,8 @@
         {
           "query": "project workflow tools",
           "clicks": 0,
-          "impressions": 5,
-          "position": 41
+          "impressions": 4,
+          "position": 40.5
         },
         {
           "query": "projects tool",
@@ -4976,39 +4969,33 @@
       "intent": "best-funnel-builder",
       "page": "https://trytoolscout.org/best-funnel-builder",
       "clicks": 0,
-      "impressions": 117,
+      "impressions": 106,
       "ctr": 0,
-      "position": 74.4701,
+      "position": 74,
       "topQueries": [
         {
           "query": "best funnel builder",
           "clicks": 0,
-          "impressions": 24,
-          "position": 68.9583
+          "impressions": 22,
+          "position": 69.3182
         },
         {
           "query": "funnel builder",
           "clicks": 0,
-          "impressions": 22,
-          "position": 81.3182
+          "impressions": 19,
+          "position": 80.5789
         },
         {
           "query": "marketing funnel builder",
           "clicks": 0,
-          "impressions": 17,
-          "position": 83.8824
+          "impressions": 15,
+          "position": 83.4667
         },
         {
           "query": "best sales funnel builder",
           "clicks": 0,
           "impressions": 5,
           "position": 72
-        },
-        {
-          "query": "funnelbuilder",
-          "clicks": 0,
-          "impressions": 5,
-          "position": 80.4
         },
         {
           "query": "best funnel builders",
@@ -5021,6 +5008,12 @@
           "clicks": 0,
           "impressions": 3,
           "position": 69.6667
+        },
+        {
+          "query": "funnelbuilder",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 80
         },
         {
           "query": "online funnel builder",
@@ -5046,9 +5039,9 @@
       "intent": "best-developer-tools",
       "page": "https://trytoolscout.org/best-developer-tools",
       "clicks": 0,
-      "impressions": 87,
+      "impressions": 91,
       "ctr": 0,
-      "position": 68.6897,
+      "position": 68.5495,
       "topQueries": [
         {
           "query": "best developer tools software",
@@ -5063,16 +5056,16 @@
           "position": 60.8333
         },
         {
+          "query": "tool developers",
+          "clicks": 0,
+          "impressions": 6,
+          "position": 73.6667
+        },
+        {
           "query": "best tool for developer",
           "clicks": 0,
           "impressions": 6,
           "position": 77
-        },
-        {
-          "query": "tool developers",
-          "clicks": 0,
-          "impressions": 5,
-          "position": 74
         },
         {
           "query": "developer tools comparison for integrated platforms vs separate tools",
@@ -5116,9 +5109,9 @@
       "intent": "best-crm-with-automation",
       "page": "https://trytoolscout.org/best-crm-with-automation",
       "clicks": 0,
-      "impressions": 85,
+      "impressions": 87,
       "ctr": 0,
-      "position": 75.9412,
+      "position": 76.1954,
       "topQueries": [
         {
           "query": "crm with workflow automation",
@@ -5129,8 +5122,8 @@
         {
           "query": "best crm for automation",
           "clicks": 0,
-          "impressions": 12,
-          "position": 74.0833
+          "impressions": 13,
+          "position": 74.0769
         },
         {
           "query": "crm with automation",
@@ -5186,15 +5179,15 @@
       "intent": "best-crm-for-sales-teams",
       "page": "https://trytoolscout.org/best-crm-for-sales-teams",
       "clicks": 0,
-      "impressions": 75,
+      "impressions": 76,
       "ctr": 0,
-      "position": 58.4,
+      "position": 58.3158,
       "topQueries": [
         {
           "query": "crm for sales team",
           "clicks": 0,
-          "impressions": 23,
-          "position": 64.5217
+          "impressions": 24,
+          "position": 64.7917
         },
         {
           "query": "crm for sales teams",
@@ -5221,16 +5214,16 @@
           "position": 72.8333
         },
         {
+          "query": "best crm for sales team",
+          "clicks": 0,
+          "impressions": 3,
+          "position": 60
+        },
+        {
           "query": "best crm for managing sales pipeline",
           "clicks": 0,
           "impressions": 2,
           "position": 11
-        },
-        {
-          "query": "best crm for sales team",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 59
         },
         {
           "query": "best crm pipeline management",
@@ -5239,16 +5232,16 @@
           "position": 75
         },
         {
-          "query": "crm for sales team",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 75.5
-        },
-        {
           "query": "what’s the best crm for sales automation and pipeline tracking?",
           "clicks": 0,
           "impressions": 1,
           "position": 7
+        },
+        {
+          "query": "best crm for sales teams",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 61
         }
       ]
     },
@@ -5256,15 +5249,15 @@
       "intent": "best-keyword-research-tools",
       "page": "https://trytoolscout.org/best-keyword-research-tools",
       "clicks": 0,
-      "impressions": 74,
+      "impressions": 73,
       "ctr": 0,
-      "position": 75.0135,
+      "position": 75.0137,
       "topQueries": [
         {
           "query": "keyword discovery tool",
           "clicks": 0,
-          "impressions": 43,
-          "position": 71.6512
+          "impressions": 40,
+          "position": 71.575
         },
         {
           "query": "competitive keyword research tools",
@@ -5281,8 +5274,8 @@
         {
           "query": "keyword discovery tools",
           "clicks": 0,
-          "impressions": 4,
-          "position": 69.5
+          "impressions": 6,
+          "position": 70.1667
         },
         {
           "query": "the best tool for keyword analysis",
@@ -5308,27 +5301,27 @@
       "intent": "best-no-code-automation-tools",
       "page": "https://trytoolscout.org/best-no-code-automation-tools",
       "clicks": 0,
-      "impressions": 71,
+      "impressions": 66,
       "ctr": 0,
-      "position": 76.5211,
+      "position": 76.303,
       "topQueries": [
         {
           "query": "no code automation tools",
           "clicks": 0,
-          "impressions": 25,
-          "position": 76.28
+          "impressions": 23,
+          "position": 76
         },
         {
           "query": "no-code automation tools",
           "clicks": 0,
-          "impressions": 17,
-          "position": 78.0588
+          "impressions": 15,
+          "position": 78
         },
         {
           "query": "which workflow automation tools are the most popular for no-code platforms?",
           "clicks": 0,
-          "impressions": 10,
-          "position": 80.7
+          "impressions": 9,
+          "position": 80.6667
         },
         {
           "query": "best no code automation tools",
@@ -5372,15 +5365,15 @@
       "intent": "best-free-project-management-tools",
       "page": "https://trytoolscout.org/best-free-project-management-tools",
       "clicks": 0,
-      "impressions": 62,
+      "impressions": 60,
       "ctr": 0,
-      "position": 64.1613,
+      "position": 64.0667,
       "topQueries": [
         {
           "query": "free online project manager tools",
           "clicks": 0,
-          "impressions": 18,
-          "position": 67.5
+          "impressions": 16,
+          "position": 67.5625
         },
         {
           "query": "best free project management tools",
@@ -5512,15 +5505,15 @@
       "intent": "best-team-collaboration-tools",
       "page": "https://trytoolscout.org/best-team-collaboration-tools",
       "clicks": 0,
-      "impressions": 46,
+      "impressions": 49,
       "ctr": 0,
-      "position": 84.913,
+      "position": 84.6122,
       "topQueries": [
         {
           "query": "team collaboration tool",
           "clicks": 0,
-          "impressions": 14,
-          "position": 95
+          "impressions": 15,
+          "position": 95.2667
         },
         {
           "query": "team collaboration tools",
@@ -5531,8 +5524,8 @@
         {
           "query": "team collaboration platform",
           "clicks": 0,
-          "impressions": 6,
-          "position": 88.8333
+          "impressions": 8,
+          "position": 84.25
         },
         {
           "query": "teamwork websites",
@@ -5576,9 +5569,9 @@
       "intent": "best-ecommerce-platforms",
       "page": "https://trytoolscout.org/best-ecommerce-platforms",
       "clicks": 0,
-      "impressions": 34,
+      "impressions": 35,
       "ctr": 0,
-      "position": 35,
+      "position": 36.6571,
       "topQueries": [
         {
           "query": "best ecommerce platform",
@@ -5603,6 +5596,12 @@
           "clicks": 0,
           "impressions": 2,
           "position": 76.5
+        },
+        {
+          "query": "best e-commerce platforms?",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 94.5
         },
         {
           "query": "ecommerce platforms",
@@ -5633,12 +5632,6 @@
           "clicks": 0,
           "impressions": 1,
           "position": 67
-        },
-        {
-          "query": "best ecommerce platform comparison",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 75
         }
       ]
     },
@@ -5646,9 +5639,9 @@
       "intent": "best-competitor-seo-tools",
       "page": "https://trytoolscout.org/best-competitor-seo-tools",
       "clicks": 0,
-      "impressions": 24,
+      "impressions": 27,
       "ctr": 0,
-      "position": 54.875,
+      "position": 56.2593,
       "topQueries": [
         {
           "query": "seo competitors search engine",
@@ -5659,26 +5652,20 @@
         {
           "query": "seo competitor research tool",
           "clicks": 0,
-          "impressions": 4,
-          "position": 74.5
+          "impressions": 5,
+          "position": 75.6
         },
         {
           "query": "seo competitors tool",
           "clicks": 0,
-          "impressions": 2,
-          "position": 93
-        },
-        {
-          "query": "seo competitor research tool",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 98
+          "impressions": 3,
+          "position": 89.6667
         },
         {
           "query": "seo competitors search engine",
           "clicks": 0,
-          "impressions": 1,
-          "position": 29
+          "impressions": 2,
+          "position": 49.5
         },
         {
           "query": "seo competitors ranking tool",
@@ -5687,10 +5674,22 @@
           "position": 31
         },
         {
+          "query": "seo competitor research tool free",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 69
+        },
+        {
           "query": "seo competitive research tool",
           "clicks": 0,
           "impressions": 1,
           "position": 84
+        },
+        {
+          "query": "seo competitor research tool",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 96
         },
         {
           "query": "seo competitor research tools",
@@ -5703,6 +5702,64 @@
           "clicks": 0,
           "impressions": 1,
           "position": 100
+        }
+      ]
+    },
+    {
+      "intent": "best-lead-capture-forms",
+      "page": "https://trytoolscout.org/best-lead-capture-forms",
+      "clicks": 0,
+      "impressions": 24,
+      "ctr": 0,
+      "position": 46.6667,
+      "topQueries": [
+        {
+          "query": "lead validation forms",
+          "clicks": 0,
+          "impressions": 7,
+          "position": 46
+        },
+        {
+          "query": "lead capture forms",
+          "clicks": 0,
+          "impressions": 5,
+          "position": 36.4
+        },
+        {
+          "query": "secure lead capture forms",
+          "clicks": 0,
+          "impressions": 5,
+          "position": 63.2
+        },
+        {
+          "query": "lead capture forms and surveys",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 70
+        },
+        {
+          "query": "which form tool should i sign up for if i want payments and lead capture on the free plan",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 9
+        },
+        {
+          "query": "lead-capture forms",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 28
+        },
+        {
+          "query": "best lead capture forms",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 39
+        },
+        {
+          "query": "top lead certification products for online forms",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 54
         }
       ]
     },
@@ -5731,58 +5788,6 @@
           "clicks": 0,
           "impressions": 1,
           "position": 60
-        }
-      ]
-    },
-    {
-      "intent": "best-lead-capture-forms",
-      "page": "https://trytoolscout.org/best-lead-capture-forms",
-      "clicks": 0,
-      "impressions": 21,
-      "ctr": 0,
-      "position": 49.4762,
-      "topQueries": [
-        {
-          "query": "lead validation forms",
-          "clicks": 0,
-          "impressions": 6,
-          "position": 46.5
-        },
-        {
-          "query": "secure lead capture forms",
-          "clicks": 0,
-          "impressions": 5,
-          "position": 63.2
-        },
-        {
-          "query": "lead capture forms",
-          "clicks": 0,
-          "impressions": 4,
-          "position": 38.25
-        },
-        {
-          "query": "lead capture forms and surveys",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 70
-        },
-        {
-          "query": "lead-capture forms",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 28
-        },
-        {
-          "query": "best lead capture forms",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 39
-        },
-        {
-          "query": "top lead certification products for online forms",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 54
         }
       ]
     },
@@ -5996,9 +6001,9 @@
       "intent": "best-website-builders",
       "page": "https://trytoolscout.org/best-website-builders",
       "clicks": 0,
-      "impressions": 7,
+      "impressions": 8,
       "ctr": 0,
-      "position": 62.5714,
+      "position": 64.25,
       "topQueries": [
         {
           "query": "builder comparison website",
@@ -6013,10 +6018,84 @@
           "position": 71
         },
         {
+          "query": "best tool for building websites",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 76
+        },
+        {
           "query": "tooltester",
           "clicks": 0,
           "impressions": 1,
           "position": 99
+        }
+      ]
+    },
+    {
+      "intent": "best-crm-for-consultants",
+      "page": "https://trytoolscout.org/best-crm-for-consultants",
+      "clicks": 0,
+      "impressions": 7,
+      "ctr": 0,
+      "position": 89.4286,
+      "topQueries": [
+        {
+          "query": "crm for independent consultants",
+          "clicks": 0,
+          "impressions": 2,
+          "position": 82.5
+        },
+        {
+          "query": "best crm for consultants",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 86
+        },
+        {
+          "query": "best crm for solo consultants",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 92
+        },
+        {
+          "query": "crm selection consultant",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 92
+        },
+        {
+          "query": "crm for consultants",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 94
+        },
+        {
+          "query": "independent crm consultants",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 97
+        }
+      ]
+    },
+    {
+      "intent": "best-funnel-builder-for-beginners",
+      "page": "https://trytoolscout.org/best-funnel-builder-for-beginners",
+      "clicks": 0,
+      "impressions": 7,
+      "ctr": 0,
+      "position": 87.8571,
+      "topQueries": [
+        {
+          "query": "best free funnel builder",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 69
+        },
+        {
+          "query": "free funnel building software",
+          "clicks": 0,
+          "impressions": 1,
+          "position": 98
         }
       ]
     },
@@ -6045,62 +6124,6 @@
           "clicks": 0,
           "impressions": 2,
           "position": 88
-        }
-      ]
-    },
-    {
-      "intent": "best-crm-for-consultants",
-      "page": "https://trytoolscout.org/best-crm-for-consultants",
-      "clicks": 0,
-      "impressions": 6,
-      "ctr": 0,
-      "position": 88.6667,
-      "topQueries": [
-        {
-          "query": "crm for independent consultants",
-          "clicks": 0,
-          "impressions": 2,
-          "position": 82.5
-        },
-        {
-          "query": "best crm for consultants",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 86
-        },
-        {
-          "query": "best crm for solo consultants",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 92
-        },
-        {
-          "query": "crm selection consultant",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 92
-        },
-        {
-          "query": "independent crm consultants",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 97
-        }
-      ]
-    },
-    {
-      "intent": "best-funnel-builder-for-beginners",
-      "page": "https://trytoolscout.org/best-funnel-builder-for-beginners",
-      "clicks": 0,
-      "impressions": 6,
-      "ctr": 0,
-      "position": 86.1667,
-      "topQueries": [
-        {
-          "query": "best free funnel builder",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 69
         }
       ]
     },
@@ -6254,22 +6277,6 @@
           "clicks": 0,
           "impressions": 1,
           "position": 76
-        }
-      ]
-    },
-    {
-      "intent": "best-free-funnel-builder",
-      "page": "https://trytoolscout.org/best-free-funnel-builder",
-      "clicks": 0,
-      "impressions": 1,
-      "ctr": 0,
-      "position": 71,
-      "topQueries": [
-        {
-          "query": "funnel creator free",
-          "clicks": 0,
-          "impressions": 1,
-          "position": 71
         }
       ]
     },
