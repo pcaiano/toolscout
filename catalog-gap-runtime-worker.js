@@ -278,6 +278,18 @@ export async function executeCatalogGrowthTask(env,task={}){
   let examples=[],sources=[];try{examples=JSON.parse(gap.examples_json||'[]')}catch{}try{sources=JSON.parse(gap.sources_json||'[]')}catch{}
   const official=await discover(slug,examples);
   if(!official)return{ok:true,verified:false,reason:'official_source_not_resolved',slug};
+  // A verified homepage alone does not establish a source-backed editorial decision.
+  // Leave new tools in research until the named manufacturer's documentation is recorded.
+  const documentedReview=hint?.editorialReview;
+  const documentedSource=documentedReview?.sourceUrl;
+  const documentedEvidence=Array.isArray(hint?.evidence)?hint.evidence:[];
+  const datedDocument=documentedEvidence.some(x=>x?.claimScope==='toolscout_editorial_review'&&x?.sourceUrl===documentedSource&&/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(x?.verifiedAt||''));
+  const vendorHost=u=>{try{return new URL(u).hostname.replace(/^www\./,'').split('.').slice(-2).join('.')}catch{return null}};
+  const officialDocument=Boolean(documentedSource&&vendorHost(documentedSource)===vendorHost(official.url));
+  if(!documentedReview?.summary||documentedReview.verificationStatus==='catalog_only'||documentedReview?.handsOnTested===true||!datedDocument||!officialDocument){
+    await env.DB.prepare("UPDATE catalog_market_gaps SET status='research_required',updated_at=datetime('now') WHERE tool_slug=?").bind(slug).run().catch(()=>{});
+    return{ok:true,verified:false,admitted:false,reason:'manufacturer_editorial_documentation_required',slug};
+  }
   const corpus=official.title+' '+official.description+' '+official.text,extractedFeatures=capabilities(corpus);
   const evidenceFeatures=Array.isArray(hint?.features)&&hint.features.length?hint.features:extractedFeatures;
   if(evidenceFeatures.length<2)return{ok:true,verified:false,reason:'first_party_capabilities_too_thin',slug,sourceUrl:official.url,capabilities:evidenceFeatures.length};
@@ -299,7 +311,9 @@ export async function executeCatalogGrowthTask(env,task={}){
     rankingEligible:true,comparisonEligible:true,directOfficialCta:false,
     provenance:{mode:'verified_catalog_runtime',admittedAt:new Date().toISOString(),marketSignals:{count:Number(gap.signals||0),sources},affiliateNeutral:true,competitorContentUsedForEditorialFacts:false,reviewMethod:'first_party_verified_structured_profile_v2'}
   };
-  profile.editorialReview=editorialReview(profile);
+  profile.editorialReview=clean(documentedReview.summary);
+  profile.editorialEvidence={sourceUrl:documentedSource,verifiedAt:new Date().toISOString().slice(0,10),verificationStatus:'vendor_documented',handsOnTested:false};
+  profile.evidence=documentedEvidence;
   const quality=await auditCatalogTool(env,profile,{officialPage:official});
   if(!quality.publishable){
     await env.DB.prepare("UPDATE catalog_market_gaps SET status='research_required',updated_at=datetime('now') WHERE tool_slug=?").bind(slug).run().catch(()=>{});
