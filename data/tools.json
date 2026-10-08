@@ -643,6 +643,43 @@
       "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
       "verifiedAt": null,
       "sources": []
+    },
+    "strengths": [
+      "Email journey automation and lead nurturing",
+      "CRM-related handoff and segmentation"
+    ],
+    "limitations": [
+      "Vendor free trial lasts 14 days, includes up to 100 sends and one user",
+      "Complex workflows require configuration and paid-tier budgeting"
+    ],
+    "tradeoffs": [
+      "Advanced journey control versus setup effort and paid operation"
+    ],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://help.activecampaign.com/hc/en-us/articles/218789987-Free-trial-capabilities",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ],
+    "editorialReview": {
+      "summary": "ActiveCampaign is worth shortlisting when a team needs coordinated email journeys, segmentation and sales handoff rather than occasional broadcasts. Its automation model can cover complex lead-nurturing sequences, but that depth adds configuration and measurement work. The vendor documents a 14-day trial with up to 100 email sends and one user, not an indefinitely free sending tier. That distinction matters: the test can validate workflows but does not represent ongoing campaign economics. Choose ActiveCampaign when automation structure is the buying requirement; choose Mailchimp or Brevo when a modest newsletter and cost predictability dominate.",
+      "angle": "Automation depth with a time-limited trial, not a free sending commitment",
+      "buyerCheck": "Build a representative multi-stage customer journey, then check required contacts, automation triggers, seats and paid-tier pricing.",
+      "reviewedAt": "2026-10-08",
+      "sourceUrl": "https://help.activecampaign.com/hc/en-us/articles/218789987-Free-trial-capabilities",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "handsOnTested": false
+    },
+    "freePlanKnown": false,
+    "pricingDetails": {
+      "freePlanStatus": "unverified",
+      "trialStatus": "verified_available",
+      "trialSummary": "14-day trial, up to 100 email sends and one user; trial features mirror Professional plan.",
+      "sourceUrl": "https://help.activecampaign.com/hc/en-us/articles/218789987-Free-trial-capabilities",
+      "verifiedAt": "2026-10-08"
     }
   },
   {
@@ -1081,6 +1118,45 @@
       "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
       "verifiedAt": null,
       "sources": []
+    },
+    "strengths": [
+      "Guided form experience and branching logic",
+      "Embeds and response export with basic reports"
+    ],
+    "limitations": [
+      "Free plan permits only ten responses per month across all forms",
+      "Advanced metrics and higher response allowances vary by paid tier"
+    ],
+    "tradeoffs": [
+      "Brand-led form experience versus strict free response throughput"
+    ],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://help.typeform.com/hc/en-us/articles/360032972852-Free-plan",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ],
+    "editorialReview": {
+      "summary": "Typeform prioritizes the respondent's experience: questions progress through a guided interface rather than an ordinary long form. That presentation can be valuable for branded surveys and qualification flows, with logic, embedding and basic reporting supported even on its free plan. The commercial boundary is unusually important: the free plan permits only ten total responses a month across all forms, so even a successful lead-capture experiment can rapidly outgrow it. Choose Typeform when presentation and a guided conversation carry real value. Choose Tally when affordable response volume and straightforward form creation are more important.",
+      "angle": "Guided respondent experience versus a ten-response free ceiling",
+      "buyerCheck": "Model expected monthly submissions across all forms, mobile completion and integrations before paying for conversational presentation.",
+      "reviewedAt": "2026-10-08",
+      "sourceUrl": "https://help.typeform.com/hc/en-us/articles/360032972852-Free-plan",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "handsOnTested": false
+    },
+    "freePlanKnown": true,
+    "pricingDetails": {
+      "freePlanStatus": "verified_available",
+      "freePlanSummary": "Free plan collects up to ten responses per month across all forms.",
+      "limits": [
+        "Ten responses monthly across all forms"
+      ],
+      "sourceUrl": "https://help.typeform.com/hc/en-us/articles/360032972852-Free-plan",
+      "verifiedAt": "2026-10-08"
     }
   },
   {
@@ -1377,6 +1453,46 @@
       "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
       "verifiedAt": null,
       "sources": []
+    },
+    "strengths": [
+      "Multi-view project and task organization",
+      "Custom fields, docs and configurable team processes"
+    ],
+    "limitations": [
+      "Free Forever Workspaces have five Spaces",
+      "Free Custom Field values are limited to 60 uses"
+    ],
+    "tradeoffs": [
+      "Extensive configuration versus setup and free usage ceilings"
+    ],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://help.clickup.com/hc/en-us/articles/6309390855319-Create-and-edit-Spaces",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ],
+    "editorialReview": {
+      "summary": "ClickUp appeals to teams that want tasks, documents, dashboards and multiple project views inside a configurable workspace. The flexibility can reduce separate tools, but a detailed workspace also needs consistent conventions and administration. The Free Forever plan provides up to five Spaces; ClickUp also documents a 60-use allowance for setting Custom Field values on free workspaces. Those are materially different limits: teams can create sophisticated structures before running out of capacity to populate them. Shortlist ClickUp when adaptability matters more than instant simplicity; choose Asana when clearer out-of-the-box project governance is preferable.",
+      "angle": "Flexible work organization constrained by free workspace and custom-field usage",
+      "buyerCheck": "Prototype one cross-team project, count required Spaces and Custom Field updates, and test governance before paying to scale.",
+      "reviewedAt": "2026-10-08",
+      "sourceUrl": "https://help.clickup.com/hc/en-us/articles/6309390855319-Create-and-edit-Spaces",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "handsOnTested": false
+    },
+    "freePlanKnown": true,
+    "pricingDetails": {
+      "freePlanStatus": "verified_available",
+      "freePlanSummary": "Free Forever includes five Spaces and 60 Custom Field uses.",
+      "limits": [
+        "Five Spaces",
+        "60 Custom Field value uses"
+      ],
+      "sourceUrl": "https://help.clickup.com/hc/en-us/articles/6309390855319-Create-and-edit-Spaces",
+      "verifiedAt": "2026-10-08"
     }
   },
   {
@@ -1685,6 +1801,46 @@
       "summary": "ToolScout has not yet verified this tool's current AI assistant, MCP or agent integration options.",
       "verifiedAt": null,
       "sources": []
+    },
+    "strengths": [
+      "Tasks, projects, boards and calendars",
+      "Structured collaboration and project responsibility tracking"
+    ],
+    "limitations": [
+      "Current Personal plan permits two seats per project and team",
+      "Timeline, automation rules and advanced reports depend on paid plans"
+    ],
+    "tradeoffs": [
+      "Project coordination depth versus free collaboration capacity"
+    ],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://help.asana.com/s/article/asana-personal-plan-details",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ],
+    "editorialReview": {
+      "summary": "Asana is a good fit when the job is coordinating responsibilities, milestones and repeatable projects across people. Tasks, boards and calendars make basic work visible, with further timeline, rule and portfolio capabilities in paid editions. The current Personal plan has a concrete collaboration ceiling: two seats per project and team for newer signups, even though tasks and projects are unlimited. This is a different buying decision from Trello's visual board simplicity or ClickUp's configurable Workspace. Choose Asana when assignments and project processes matter; check the paid plan before inviting a larger delivery team.",
+      "angle": "Structured team work with a two-seat free collaboration boundary",
+      "buyerCheck": "Test the actual project team size, required dependencies, reporting and rule automation rather than relying on unlimited task claims.",
+      "reviewedAt": "2026-10-08",
+      "sourceUrl": "https://help.asana.com/s/article/asana-personal-plan-details",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "handsOnTested": false
+    },
+    "freePlanKnown": true,
+    "pricingDetails": {
+      "freePlanStatus": "verified_available",
+      "freePlanSummary": "Asana Personal supports two seats per team and project, with unlimited tasks and projects.",
+      "limits": [
+        "Two seats per team and project on current Personal",
+        "Automation rules and timeline require paid features"
+      ],
+      "sourceUrl": "https://help.asana.com/s/article/asana-personal-plan-details",
+      "verifiedAt": "2026-10-08"
     }
   },
   {
