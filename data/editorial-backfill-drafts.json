@@ -175,6 +175,121 @@
       "Fast writing prompts rather than a verified research system",
       "Typli AI focuses on producing and refining written text. That can help an individual writer overcome a blank page, but the catalog does not verify underlying research, source attribution or advanced multimodal features. Buyers should decide whether draft speed or editorial correctness is the primary requirement.",
       "Check originality, editing control, export and the provenance of factual statements."
+    ],
+    "calendly": [
+      "Scheduling reduces friction only if routing matches the business",
+      "Calendly addresses meeting booking, availability and reminders, with team-routing potential where inbound leads must reach the right person. Calendar links alone are simple; multi-person assignment and follow-up logic need more scrutiny. Validate conflict handling, team permissions and paid routing entitlements.",
+      "Test a meeting across time zones with two calendars, rescheduling and lead qualification."
+    ],
+    "slack": [
+      "Conversation is not the same as durable knowledge",
+      "Slack brings channel-based messaging and collaboration into one work environment. It is a strong candidate for fast team coordination but may require a deliberate document or knowledge system to prevent decisions disappearing into chat. Verify message retention, external sharing and AI feature entitlements before moving sensitive work.",
+      "Run a real project with channels, an external guest and an archival search requirement."
+    ],
+    "loom": [
+      "Asynchronous video can replace recurring status meetings",
+      "Loom focuses on recorded explanations that colleagues can watch without booking another call. Its utility depends on viewers finding the right clip, receiving updates and responding when something changes. A searchable transcript and sensible retention policy can matter more than recording effects.",
+      "Test one handoff, caption quality, view permissions and long-term retrieval."
+    ],
+    "miro": [
+      "Workshop facilitation rather than task execution",
+      "Miro supports visual thinking, diagrams and collaborative planning, especially when people need to explore ideas together. A whiteboard should not automatically become the system of record for project delivery. Compare facilitation tools, exports and handoff to the actual task platform.",
+      "Run a planning workshop, capture decisions and transfer actions into the team's work manager."
+    ],
+    "basecamp": [
+      "Project communication without elaborate administrative machinery",
+      "Basecamp's combination of project messages, to-dos and schedules can reduce scattered conversations for a small team. The simplicity is intentional, but teams requiring deep dependencies, resourcing or portfolio analytics may need a different tool. Examine the complete project life cycle rather than just its to-do list.",
+      "Pilot a client project including files, comments, deadlines and external participants."
+    ],
+    "wrike": [
+      "Project delivery when resourcing and process control matter",
+      "Wrike belongs on the shortlist for organizations coordinating many projects, workload and approvals. The potential value comes from visibility across teams, not from another task editor. That breadth should be weighed against training, permissions and the plan level needed for resource or reporting views.",
+      "Build a cross-functional project with approvals, resource allocation and executive reporting."
+    ],
+    "jira": [
+      "Engineering issues linked to delivery workflows",
+      "Jira is designed around tracked issues and configurable agile workflows. This can be useful for software teams that need triage, sprint visibility and handoffs, but poorly governed configurations can add administrative overhead. Compare it with Linear or a simpler task manager using the same issue set.",
+      "Import a backlog, run a sprint, test permissions and inspect the reporting developers actually use."
+    ],
+    "otter-ai": [
+      "Meeting transcripts must become usable decisions",
+      "Otter.ai captures and summarizes spoken meetings, which is valuable when notes are otherwise lost or manually rewritten. Accuracy, attendee consent and action-item extraction matter more than the existence of a transcription feature. Validate the real meeting platforms and export requirements before relying on it for records.",
+      "Record a permitted meeting with jargon, compare the transcript and extract assigned actions."
+    ],
+    "posthog": [
+      "Product analytics close to experiments and engineering",
+      "PostHog combines behavioral events with session replay, feature flags and testing-oriented workflows in the current catalog. This can simplify instrumentation ownership for a technical product team, but cost and privacy controls depend heavily on captured event volume. Consider it when product experimentation is continuous, not only when a website needs visitor totals.",
+      "Define an event taxonomy, estimate volume and review consent, retention and feature-flag rollout."
+    ],
+    "mixpanel": [
+      "Analyze product behavior, not just page visits",
+      "Mixpanel centers funnel conversion, retention and user journey analysis. Its usefulness depends on consistent event definitions and identity stitching rather than a more attractive dashboard. Compare it with PostHog when experimentation and session replay need to live in the same operating environment.",
+      "Instrument signup and activation with clear anonymous-to-known identity transitions."
+    ],
+    "hotjar": [
+      "Qualitative behavior to explain a conversion drop",
+      "Hotjar's catalog focus is heatmaps, recordings and visitor feedback. That can uncover usability friction that aggregate analytics cannot explain, but small or biased recording samples can mislead. Review privacy redaction and the exact capture allowance before treating observed sessions as representative.",
+      "Investigate one high-exit page with consented recordings and validate findings with a survey."
+    ],
+    "amplitude": [
+      "Behavioral cohorts and experiments for growth teams",
+      "Amplitude is relevant to product organizations asking why users return, churn or progress between activation stages. Strong analytics require a reliable event model, and a platform cannot compensate for inconsistent tagging. Assess warehouse integration, attribution and experimentation entitlements against the team's actual cadence.",
+      "Reproduce a retention cohort, user journey and experiment readout from known event definitions."
+    ],
+    "plausible": [
+      "Lightweight site metrics and a smaller tracking footprint",
+      "Plausible Analytics is oriented toward privacy-conscious website measurement with relatively simple dashboards. It is worth considering when marketing needs traffic and conversion trends rather than granular product behavior. Compliance still depends on the implementation, and complex funnels may exceed the intended scope.",
+      "Implement a goal and referral report while checking consent and campaign attribution."
+    ],
+    "matomo": [
+      "Web analytics with hosting and data governance choices",
+      "Matomo offers a privacy-oriented analytics path that can include self-hosting. Hosting control may help organizations with stricter data policies, but it also transfers maintenance and security responsibilities. Evaluate what is included in cloud versus self-hosted editions before declaring one less expensive.",
+      "Compare deployment requirements, anonymization, goal reporting and maintenance ownership."
+    ],
+    "apollo": [
+      "Prospecting data is only valuable when it converts responsibly",
+      "Apollo combines B2B contact discovery, enrichment and outbound sequences. The decision should rest on relevant verified contacts and the resulting pipeline, not total records advertised. List freshness, jurisdictional outreach rules, CRM syncing and deliverability require direct validation.",
+      "Sample 50 ideal accounts, verify contact accuracy and track legitimate replies through the CRM."
+    ],
+    "lemlist": [
+      "Outbound personalization and multichannel operations",
+      "lemlist is positioned for coordinated prospecting via email and additional channels. That can help a small outbound team keep follow-ups structured, but deliverability and compliance still depend on list quality and sender reputation. Check each channel's supported permissions and actual sending limits.",
+      "Pilot a low-volume consent-aware sequence with reply tracking, stop rules and domain health."
+    ],
+    "instantly": [
+      "Outbound scale exposes list and sender quality",
+      "Instantly's catalog pitch combines cold-email sending tools with leads and deliverability functions. More sending accounts do not compensate for poor segmentation or unverified contacts. Focus on verified human replies and sender reputation rather than email volume as the performance indicator.",
+      "Test a small clean audience, monitor bounces and distinguish real prospect replies from automated responses."
+    ],
+    "intercom": [
+      "Support platform decisions increasingly include AI escalation",
+      "Intercom brings inbox, help content and automated assistance into the same service workflow. AI resolution should be evaluated against real support cases, policy boundaries and escalation quality rather than an advertised percentage. Its commercial model must also be tested on forecast volume.",
+      "Replay representative tickets and measure verified resolutions, failed handoffs and cost per handled conversation."
+    ],
+    "zendesk": [
+      "Broad service processes with governance to match",
+      "Zendesk covers ticketing and multiple customer channels alongside knowledge and analytics. That scope is attractive to larger support operations, but configuration, licensing and integrations may be excessive for a small inbox team. Prioritize service-level reporting and channel continuity over maximum feature count.",
+      "Test routing across email, chat and voice with permissions and service-level targets."
+    ],
+    "freshdesk": [
+      "Helpdesk structure for growing service teams",
+      "Freshdesk provides a ticket-centric path for businesses moving beyond shared email. Knowledge articles and automation can reduce repeated requests, provided their plan actually includes the required functions. Evaluate ease of setup alongside agent permissions, channel coverage and reporting.",
+      "Route a recurring issue, escalate a complex case and check the customer conversation history."
+    ],
+    "help-scout": [
+      "Human-centered support without an oversized ticket stack",
+      "Help Scout is oriented toward shared inbox work and customer-facing help content. It can suit teams that prioritize personal replies and straightforward collaboration over extensive contact-center operations. Confirm workflows, seat-based pricing and messaging limits before migrating historical conversations.",
+      "Move a small shared inbox and test assignments, saved replies and help center search."
+    ],
+    "gorgias": [
+      "Ecommerce support linked to order context",
+      "Gorgias is positioned for stores whose support questions frequently concern purchases, shipments and returns. Connecting support with order data can reduce context switching, but each ecommerce integration and automation entitlement requires verification. Measure service quality rather than just ticket closure counts.",
+      "Recreate an order-status and return case and verify permitted store actions."
+    ],
+    "crisp": [
+      "Live messaging as the front door to support",
+      "Crisp combines live chat, shared inbox and knowledge content for customer communication. It is relevant when website visitors need immediate guidance and operators need continuity across conversations. Test routing and response-time coverage before assuming a chatbot will resolve all incoming questions.",
+      "Install on a staging site and verify offline forms, assignments and transcript handoff."
     ]
   }
 }
