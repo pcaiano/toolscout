@@ -13,8 +13,11 @@ test('every future tool requires a dated first-party manufacturer source',()=>{
  assert.deepEqual(vendorEvidenceIssues(catalog,pending),[]);
  const invented={...catalog[0],slug:'unsourced-new-software',editorialReview:{summary:'Unsupported',verificationStatus:'catalog_only',sourceUrl:null},evidence:[]};
  assert.match(vendorEvidenceIssues([...catalog,invented],pending).join(' '),/Manufacturer documentation required/);
- const copied={...catalog.find(x=>x.slug==='posthog'),slug:'new-tool-with-dated-sources'};
- assert.deepEqual(vendorEvidenceIssues([...catalog,copied],pending),[]);
+ const original=catalog.find(x=>x.slug==='posthog');
+ const copied={...original,slug:'copied-product-with-fake-evidence'};
+ assert.match(vendorEvidenceIssues([...catalog,copied],pending).join(' '),/Duplicate or empty product name/);
+ const documented={...original,slug:'future-verified-example',name:'Future Verified Example',sourceUrl:'https://example-vendor.test/',editorialReview:{...original.editorialReview,sourceUrl:'https://example-vendor.test/docs',verificationStatus:'vendor_documented'},evidence:[{claimScope:'toolscout_editorial_review',sourceUrl:'https://example-vendor.test/docs',verifiedAt:'2026-10-08'}]};
+ assert.deepEqual(vendorEvidenceIssues([...catalog,documented],pending),[]);
 });
 
 test('generated profiles use the product name as the only H1',()=>{
