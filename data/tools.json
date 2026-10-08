@@ -1339,13 +1339,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Customizable sales workflows anchored in a shared workspace",
-      "summary": "monday CRM is a candidate when salespeople and other teams need to collaborate around leads and work items. Its flexibility can help nonstandard sales processes, while also creating a risk of inconsistent board design. Test pipeline reporting and operational governance before treating visual configurability as a replacement for core CRM controls.",
-      "buyerCheck": "Recreate pipeline stages, team permissions, automations and forecasting reports.",
+      "angle": "A visual pipeline is useful only with explicit deal movement rules",
+      "summary": "monday.com's CRM support documents pipeline boards that organize prospects and opportunities across sales stages. This is attractive when salespeople need to see current ownership and coordinate tasks with other departments. Yet custom board flexibility can lead to inconsistent stages and unreliable forecasts unless definitions are established centrally. The buying decision is therefore about repeatable process governance and reporting, not the appeal of colorful columns or drag-and-drop movement.",
+      "buyerCheck": "Configure a five-stage deal flow, calculate stage-level conversion and test duplicate ownership and reporting.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://support.monday.com/hc/en-us/articles/360013348719-Sales-pipeline-management-with-monday-CRM",
+      "sourceUrls": [
+        "https://support.monday.com/hc/en-us/articles/360013348719-Sales-pipeline-management-with-monday-CRM"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -1359,7 +1362,15 @@
     "tradeoffs": [
       "Customizable sales workflows anchored in a shared workspace"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://support.monday.com/hc/en-us/articles/360013348719-Sales-pipeline-management-with-monday-CRM",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "slug": "typeform",
@@ -2661,13 +2672,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Outbound personalization and multichannel operations",
-      "summary": "lemlist is positioned for coordinated prospecting via email and additional channels. That can help a small outbound team keep follow-ups structured, but deliverability and compliance still depend on list quality and sender reputation. Check each channel's supported permissions and actual sending limits.",
-      "buyerCheck": "Pilot a low-volume consent-aware sequence with reply tracking, stop rules and domain health.",
+      "angle": "Follow-up automation cannot repair poor sender reputation",
+      "summary": "lemlist documents a deliverability checklist that covers domain records, mailbox setup and outreach hygiene. This is more important to sustainable outbound performance than simply adding extra follow-up steps. Teams should distinguish inbox infrastructure from message relevance and lawful contact acquisition; no software can guarantee placement or positive responses. Compare the work required to maintain a healthy sender domain and review real conversations before expanding automated sequences.",
+      "buyerCheck": "Check SPF, DKIM and sender reputation, then inspect a small consent-appropriate outreach sample.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://help.lemlist.com/en/articles/4452683-use-the-email-deliverability-checklist",
+      "sourceUrls": [
+        "https://help.lemlist.com/en/articles/4452683-use-the-email-deliverability-checklist"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -2681,7 +2695,15 @@
     "tradeoffs": [
       "Outbound personalization and multichannel operations"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://help.lemlist.com/en/articles/4452683-use-the-email-deliverability-checklist",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -2914,13 +2936,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Outbound scale exposes list and sender quality",
-      "summary": "Instantly's catalog pitch combines cold-email sending tools with leads and deliverability functions. More sending accounts do not compensate for poor segmentation or unverified contacts. Focus on verified human replies and sender reputation rather than email volume as the performance indicator.",
-      "buyerCheck": "Test a small clean audience, monitor bounces and distinguish real prospect replies from automated responses.",
+      "angle": "Cold-email infrastructure requires observable deliverability discipline",
+      "summary": "Instantly documents mailbox warmup readiness and email account health as inputs to starting outreach campaigns. This is relevant to outbound teams that need sequencing and operational visibility, but a warmup indicator cannot establish recipient consent, verified addresses or guaranteed inbox placement. Poor targeting may damage reputation even when automation runs correctly. Compare campaign outcomes on qualified contacts and monitor bounce, complaint and reply quality before increasing sending volume.",
+      "buyerCheck": "Audit domain authentication and warmup health, then test a permission-compliant sample sequence and replies.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://help.instantly.ai/en/articles/13938078-when-your-email-account-is-ready-for-campaigns",
+      "sourceUrls": [
+        "https://help.instantly.ai/en/articles/13938078-when-your-email-account-is-ready-for-campaigns"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -2934,7 +2959,15 @@
     "tradeoffs": [
       "Outbound scale exposes list and sender quality"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://help.instantly.ai/en/articles/13938078-when-your-email-account-is-ready-for-campaigns",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -4288,13 +4321,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Asynchronous video can replace recurring status meetings",
-      "summary": "Loom focuses on recorded explanations that colleagues can watch without booking another call. Its utility depends on viewers finding the right clip, receiving updates and responding when something changes. A searchable transcript and sensible retention policy can matter more than recording effects.",
-      "buyerCheck": "Test one handoff, caption quality, view permissions and long-term retrieval.",
+      "angle": "Sharing controls determine whether async video stays private",
+      "summary": "Loom's first-party support documentation under Atlassian describes recording-sharing options with different viewer permissions. Short videos can reduce recurring explanatory meetings, particularly for internal demonstrations and handovers. The risk is treating a shareable URL as an acceptable access policy for client or internal information. Searchability, permission changes and viewer access need review when content outlives the initial discussion. Compare whether a recipient can actually discover and use a recording safely.",
+      "buyerCheck": "Share a confidential explanation with one approved viewer and check link access, revocation and viewing rights.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://support.atlassian.com/loom/docs/share-your-recording",
+      "sourceUrls": [
+        "https://support.atlassian.com/loom/docs/share-your-recording"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -4308,7 +4344,15 @@
     "tradeoffs": [
       "Asynchronous video can replace recurring status meetings"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://support.atlassian.com/loom/docs/share-your-recording",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -4447,13 +4491,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Multi-channel social operations and team process",
-      "summary": "Hootsuite is relevant when publishing, engagement and reporting need a shared operational view. Teams should weigh the breadth of supported workflows against the setup and licensing required to keep each channel active. Do not treat a social listening label as verification of particular sources or report access.",
-      "buyerCheck": "Test inbox triage, content approval and a report for the organization's core networks.",
+      "angle": "Recommended posting times depend on actual channel history",
+      "summary": "Hootsuite documents recommended publishing times derived from recent social engagement data. That can help established accounts schedule content more intelligently than relying only on generic industry timing charts. Yet sparse posting history, changing audiences and irregular campaigns can weaken the recommendation. For a small team the cost of a broader social management suite only pays off if approval, monitoring and reporting are also used. Verify time-zone handling and actual engagement uplift before relying on recommendations.",
+      "buyerCheck": "Compare recommended and controlled posting slots over a representative month, with approval and channel access checks.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://help.hootsuite.com/s/article/recommended-times",
+      "sourceUrls": [
+        "https://help.hootsuite.com/s/article/recommended-times"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -4467,7 +4514,15 @@
     "tradeoffs": [
       "Multi-channel social operations and team process"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://help.hootsuite.com/s/article/recommended-times",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -4589,13 +4644,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Visual campaign planning for creator-led channels",
-      "summary": "Later's catalog focus is visual scheduling, media organization and link-in-bio tools. This can suit teams whose production schedule is built around image and video content, while a company needing deep support inboxes may prefer another platform. Verify the exact accounts, platforms and analytics available per tier.",
-      "buyerCheck": "Plan and publish a visual campaign and check link attribution and account limits.",
+      "angle": "Link in Bio connects published content to measurable destinations",
+      "summary": "Later documents assigning links to individual Instagram or TikTok posts through its Link in Bio tools. This gives publishers a clearer path from a social impression to product, editorial or campaign destinations without repeatedly editing one profile URL. The trade-off is dependency on supported channels and link-maintenance discipline: a visual grid can point visitors to outdated offers if it is not updated alongside posts. Evaluate conversion tracking and supported profiles before paying for social commerce features.",
+      "buyerCheck": "Create links for three live posts and audit destination accuracy and attributable clicks.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://help.later.com/hc/en-us/articles/4409220791447-Add-and-Edit-Post-Links-in-Link-in-Bio",
+      "sourceUrls": [
+        "https://help.later.com/hc/en-us/articles/4409220791447-Add-and-Edit-Post-Links-in-Link-in-Bio"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -4609,7 +4667,15 @@
     "tradeoffs": [
       "Visual campaign planning for creator-led channels"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://help.later.com/hc/en-us/articles/4409220791447-Add-and-Edit-Post-Links-in-Link-in-Bio",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -4661,13 +4727,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Content categories and reuse as a publishing strategy",
-      "summary": "SocialBee emphasizes categorizing content and repeating useful posts through a schedule. The fit is strongest for a small team maintaining evergreen publishing without producing every post from scratch. Repetition must still be balanced with timeliness, channel rules and editorial judgment.",
-      "buyerCheck": "Test category-based publishing over two weeks and review duplicate-content controls.",
+      "angle": "Evergreen scheduling requires deliberate content diversity",
+      "summary": "SocialBee documents scheduling posts from content categories, including evergreen recycling and category-based posting slots. This can help a small publisher maintain regular output from a reusable library instead of rebuilding a posting calendar every day. Yet uncontrolled recycling risks repetitive messaging and low audience response, especially where product facts change frequently. Evaluate how easily the team reviews outdated posts and pauses a category before choosing it over a simpler scheduler.",
+      "buyerCheck": "Build three posting categories, schedule a week and test approval, recycling and outdated-content removal.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://help.socialbee.com/hc/en-us/articles/29979201786903-Content-Categories-All-You-Need-to-Know",
+      "sourceUrls": [
+        "https://help.socialbee.com/hc/en-us/articles/29979201786903-Content-Categories-All-You-Need-to-Know"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -4681,7 +4750,15 @@
     "tradeoffs": [
       "Content categories and reuse as a publishing strategy"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://help.socialbee.com/hc/en-us/articles/29979201786903-Content-Categories-All-You-Need-to-Know",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -4972,13 +5049,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Web analytics with hosting and data governance choices",
-      "summary": "Matomo offers a privacy-oriented analytics path that can include self-hosting. Hosting control may help organizations with stricter data policies, but it also transfers maintenance and security responsibilities. Evaluate what is included in cloud versus self-hosted editions before declaring one less expensive.",
-      "buyerCheck": "Compare deployment requirements, anonymization, goal reporting and maintenance ownership.",
+      "angle": "Goal configuration makes privacy-oriented web analytics actionable",
+      "summary": "Matomo documents configuring website conversion goals with measurable actions and conditions. This distinguishes meaningful marketing outcomes from merely observing visits, particularly for organizations preferring greater control over their analytics deployment. However, a self-hosted or privacy-focused analytics service still depends on correct event setup, consent choices and reliable tag delivery. Evaluate the accuracy of signups and transactions against server records rather than dashboard aesthetics.",
+      "buyerCheck": "Configure a signup goal and reconcile goal conversions with first-party server transactions.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://matomo.org/faq/reports/create-a-goal-in-matomo/",
+      "sourceUrls": [
+        "https://matomo.org/faq/reports/create-a-goal-in-matomo/"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -4992,7 +5072,15 @@
     "tradeoffs": [
       "Web analytics with hosting and data governance choices"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://matomo.org/faq/reports/create-a-goal-in-matomo/",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -5219,13 +5307,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Browser-based development with deployment close to the editor",
-      "summary": "Replit is oriented toward building, running and sharing software without setting up every environment locally. That can accelerate prototyping and learning, while production ownership still depends on resource controls and a reliable release process. Evaluate secrets, hosting limits and exportability before treating it as a long-term platform.",
-      "buyerCheck": "Prototype a simple app, move it to production and test logs, data persistence and source export.",
+      "angle": "Application deployment brings usage and operating constraints",
+      "summary": "Replit documents Autoscale Deployments for serving an application with resources scaled to demand. This helps prototypes and educational projects reach users without manually configuring every hosting component. The trade-off is predictability of production costs, secrets, dependencies and runtime requirements as usage increases. A convenient coding workspace is not automatically a durable deployment policy. Compare a real release, failure recovery and measured traffic cost before adopting it for a critical service.",
+      "buyerCheck": "Deploy a representative app, inspect autoscaling cost rules, secrets and failure recovery.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://docs.replit.com/pt/references/publishing/autoscale-deployments",
+      "sourceUrls": [
+        "https://docs.replit.com/pt/references/publishing/autoscale-deployments"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -5239,7 +5330,15 @@
     "tradeoffs": [
       "Browser-based development with deployment close to the editor"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://docs.replit.com/pt/references/publishing/autoscale-deployments",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -6128,13 +6227,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Business website and commerce needs in one managed environment",
-      "summary": "Wix combines site design, templates and services for running a small business online. Managed convenience may reduce setup time, but portability, application dependencies and transaction requirements can become important as a business grows. Evaluate the whole customer path, not just template appearance.",
-      "buyerCheck": "Build a sample business site with lead capture, mobile checkout and export requirements.",
+      "angle": "Contributor permissions are a real website governance requirement",
+      "summary": "Wix documents contributor roles and permissions for site management, allowing owners to delegate tasks without giving everyone identical administrative rights. This matters as a small business moves from one site editor to agencies, marketers and shop operators. The trade-off is managed convenience versus granular control and the ability to move data or integrations elsewhere. Choose the plan and collaborator setup after testing exactly who can change content, commerce and billing settings.",
+      "buyerCheck": "Invite a content editor and an external agency collaborator and verify each role's sensitive permissions.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://support.wix.com/en/article/about-contributor-roles-permissions",
+      "sourceUrls": [
+        "https://support.wix.com/en/article/about-contributor-roles-permissions"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -6148,7 +6250,15 @@
     "tradeoffs": [
       "Business website and commerce needs in one managed environment"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://support.wix.com/en/article/about-contributor-roles-permissions",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -6768,13 +6878,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "CRM for teams living inside Google Workspace",
-      "summary": "Copper is positioned for relationship management close to Gmail and Google tools. That workflow can be advantageous where adoption depends on reducing context switches, but the depth of the exact Workspace connection needs direct confirmation. Do not mistake an integration label for proof of bidirectional data sync.",
-      "buyerCheck": "Check Gmail, Calendar and contact permissions, sync direction and duplicate handling.",
+      "angle": "CRM workflow automation is narrower than full campaign automation",
+      "summary": "Copper documents workflow rules with conditions and actions to automate record updates in its CRM. The manufacturer distinguishes these record-management rules from separate email automation functionality. That matters for teams expecting a single trigger to manage every stage of sales outreach. Copper may be a good fit for an organization wanting structured relationship work with less spreadsheet handling, but buyers must verify permissions and the limits of each automation surface.",
+      "buyerCheck": "Build a record-based assignment rule and an email-follow-up scenario, then confirm which system executes each action.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://support.copper.com/en/articles/15926316-create-a-workflow-automation-rule",
+      "sourceUrls": [
+        "https://support.copper.com/en/articles/15926316-create-a-workflow-automation-rule"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -6788,7 +6901,15 @@
     "tradeoffs": [
       "CRM for teams living inside Google Workspace"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://support.copper.com/en/articles/15926316-create-a-workflow-automation-rule",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -7160,13 +7281,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Store-focused email and SMS journeys",
-      "summary": "Omnisend is most relevant when marketing activity follows ecommerce events and channels, rather than isolated mailing lists. Its email and SMS combination merits consideration for retention workflows, but the store data contract and message-volume costs must be checked in a real account. Generic automation scores cannot prove performance on the buyer's commerce platform.",
-      "buyerCheck": "Test product recommendations, an abandoned-cart trigger and messaging costs.",
+      "angle": "Ecommerce automations require explicit launch and testing",
+      "summary": "Omnisend documents workflow triggers, filters and activation settings for automated marketing campaigns. These features matter when a store uses customer behavior to coordinate lifecycle emails and other channels. A visually complete workflow is not necessarily active or correctly scoped, and delayed store events can lead to mistimed messages. Evaluate segmentation, opt-in handling and order data quality before choosing an all-in-one automation platform over a simple newsletter sender.",
+      "buyerCheck": "Build a post-purchase flow, test eligibility and suppression, then confirm launch status and delivered events.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://support.omnisend.com/en/articles/3954813-set-up-automation-workflow-settings",
+      "sourceUrls": [
+        "https://support.omnisend.com/en/articles/3954813-set-up-automation-workflow-settings"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -7180,7 +7304,15 @@
     "tradeoffs": [
       "Store-focused email and SMS journeys"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://support.omnisend.com/en/articles/3954813-set-up-automation-workflow-settings",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -7387,13 +7519,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Project delivery when resourcing and process control matter",
-      "summary": "Wrike belongs on the shortlist for organizations coordinating many projects, workload and approvals. The potential value comes from visibility across teams, not from another task editor. That breadth should be weighed against training, permissions and the plan level needed for resource or reporting views.",
-      "buyerCheck": "Build a cross-functional project with approvals, resource allocation and executive reporting.",
+      "angle": "Approvals add value when reviewers have a real decision right",
+      "summary": "Wrike documents approvals used to request and track reviews of work items and attached files. This helps organizations handling creative assets, client deliverables and processes where acceptance has consequences. The trade-off is complexity: too many approval stages can delay projects, and plan entitlements govern availability. A new task manager is justified only if it makes accountable decisions clearer than existing project communication. Test rejections and re-submissions, not just the green approval state.",
+      "buyerCheck": "Run a draft through two reviewers, force a rejection and inspect audit history and deadlines.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://help.wrike.com/hc/en-us/articles/360023006313-Approvals-in-Wrike",
+      "sourceUrls": [
+        "https://help.wrike.com/hc/en-us/articles/360023006313-Approvals-in-Wrike"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -7407,7 +7542,15 @@
     "tradeoffs": [
       "Project delivery when resourcing and process control matter"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://help.wrike.com/hc/en-us/articles/360023006313-Approvals-in-Wrike",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -7774,13 +7917,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Enterprise process integration as a governance decision",
-      "summary": "Workato focuses on orchestrating applications and data across larger organizations. Its value comes from controlled, observable operations with appropriate access policy, not a low-friction automation experiment. Implementation, security reviews and total licence cost should be evaluated early.",
-      "buyerCheck": "Prototype one approved cross-system workflow with audit trails and role permissions.",
+      "angle": "Enterprise integrations succeed or fail on recipe observability",
+      "summary": "Workato defines recipes as automations consisting of triggers, actions and authenticated connections between applications. This is valuable for organizations coordinating data across multiple systems without writing every integration from scratch. The trade-off is operational ownership: connector authorization, retry policy, task volume and error handling need monitoring. Choosing a broad automation platform on connector count alone can underestimate governance and license requirements. Compare a complete failed-and-recovered transaction rather than a demo of the happy path.",
+      "buyerCheck": "Connect two systems, execute a recipe and verify failed runs, retries, permissions and audit records.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://docs.workato.com/en/workato-concepts.html",
+      "sourceUrls": [
+        "https://docs.workato.com/en/workato-concepts.html"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -7794,7 +7940,15 @@
     "tradeoffs": [
       "Enterprise process integration as a governance decision"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://docs.workato.com/en/workato-concepts.html",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -8001,13 +8155,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Commerce architecture for growing catalog complexity",
-      "summary": "BigCommerce is a potential fit for merchants needing scalable catalog and multi-channel operations. Integration and B2B-related needs can outweigh template simplicity, but plan entitlements and implementation work must be checked with the actual store. Compare total running costs and catalog control with Shopify, not just a feature list.",
-      "buyerCheck": "Model product variants, customer groups, checkout and multichannel inventory sync.",
+      "angle": "Multi-store commerce needs central catalog governance",
+      "summary": "BigCommerce documents Multi-Storefront for managing several customer-facing storefronts through one administration environment. Shared product and order management can help a retailer operate several brands or regions without duplicating the full store stack. The trade-off is governance: themes, domains, channels and regional requirements must still be configured and tested separately. Compare the operational cost of coordinating multiple storefronts against their real merchandising differences, not only the number of sites available.",
+      "buyerCheck": "Map two brands with different catalogs and domains, then test inventory consistency and order attribution.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://support.bigcommerce.com/s/article/Multi-Storefront?language=en_US",
+      "sourceUrls": [
+        "https://support.bigcommerce.com/s/article/Multi-Storefront?language=en_US"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -8021,7 +8178,15 @@
     "tradeoffs": [
       "Commerce architecture for growing catalog complexity"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://support.bigcommerce.com/s/article/Multi-Storefront?language=en_US",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -8156,13 +8321,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Rapid branded assets within a creative workflow",
-      "summary": "Adobe Express spans social graphics, short video and marketing templates. Its value is the ability to reuse assets and produce variants, not proof that every advanced creative function is available in one plan. Compare it with Canva on the team's existing asset library, editing needs and ownership of published work.",
-      "buyerCheck": "Recreate a multi-size campaign asset and verify fonts, licensing and team controls.",
+      "angle": "Brand templates help distributed teams avoid visual drift",
+      "summary": "Adobe Express documents Brand Kits for organizing approved colors, logos and typography within the creative workflow. This can save time when marketers frequently adapt social graphics, presentations and short-form promotional material. Brand consistency is not the same as campaign quality: asset permissions, licensing and approval policy remain separate responsibilities. Compare whether colleagues can reliably reuse the correct style and export formats, not only the design templates available.",
+      "buyerCheck": "Build a shared brand kit, produce three channel variants and audit font, image and permission consistency.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://www.adobe.com/express/create/brand-kit",
+      "sourceUrls": [
+        "https://www.adobe.com/express/create/brand-kit"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -8176,7 +8344,15 @@
     "tradeoffs": [
       "Rapid branded assets within a creative workflow"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.adobe.com/express/create/brand-kit",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -8311,13 +8487,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Digital-product storefront and creator operations",
-      "summary": "Podia combines course delivery, downloads, coaching and a public-facing storefront. This can simplify life for an independent seller, although community, email and payment needs often expand faster than the first product launch. Compare payout terms, content access and subscriber management against specialist alternatives.",
-      "buyerCheck": "Check tax, payment fees, course access rules and an actual customer checkout.",
+      "angle": "Course delivery should be tested as a learner experience",
+      "summary": "Podia documents creating online courses with structured lessons and downloadable material. For an independent creator, combining course delivery and selling in one environment can reduce handoffs between products. But publishing a course is only the start: learner navigation, payment steps, email sequences and customer support determine its commercial usefulness. More sophisticated education or community requirements may need additional systems. Evaluate a complete purchase-to-completion journey instead of the first course editor screen.",
+      "buyerCheck": "Publish a sample lesson, simulate student enrollment and test payment and progress access.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://help.podia.com/en/articles/11370361-creating-an-online-course",
+      "sourceUrls": [
+        "https://help.podia.com/en/articles/11370361-creating-an-online-course"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -8331,7 +8510,15 @@
     "tradeoffs": [
       "Digital-product storefront and creator operations"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://help.podia.com/en/articles/11370361-creating-an-online-course",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "https://unbounce.partnerlinks.io/o7sb3nmtp431",
@@ -8480,13 +8667,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Character conversation and creative exploration, not enterprise automation",
-      "summary": "Character.AI is oriented toward interacting with custom conversational personas. That experience differs sharply from knowledge-work assistants offering reliable business workflows or data-grounded research. Use a character platform for entertainment or exploratory dialogue, not as evidence of operational accuracy.",
-      "buyerCheck": "Evaluate content controls, character privacy and suitability for the intended audience.",
+      "angle": "Character creation is about discovery and control, not business accuracy",
+      "summary": "Character.AI's creator guide documents configuring a character's greeting, avatar, voice, tags and visibility as public, unlisted or private. This makes the service relevant to creative roleplay and character-driven experiences, but does not make it a dependable source for factual professional research. Identity, access and content moderation should be assessed alongside engaging conversations. Buyers comparing creative AI tools should test how a character behaves beyond a compelling opening interaction.",
+      "buyerCheck": "Create a private character, inspect its public visibility controls and test consistency across several dialogues.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://support.character.ai/hc/en-us/articles/50608869548699-2-Creating-a-Character-Quickstart-Guide-%CF%89",
+      "sourceUrls": [
+        "https://support.character.ai/hc/en-us/articles/50608869548699-2-Creating-a-Character-Quickstart-Guide-%CF%89"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -8500,7 +8690,15 @@
     "tradeoffs": [
       "Character conversation and creative exploration, not enterprise automation"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://support.character.ai/hc/en-us/articles/50608869548699-2-Creating-a-Character-Quickstart-Guide-%CF%89",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "slug": "google-ai-studio",
@@ -8560,13 +8758,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Prototyping Gemini behavior before API production",
-      "summary": "Google AI Studio is a browser workspace for testing model prompts and generating application starting points. It is the right sort of tool for developers comparing model behavior, not a finished customer-support platform by itself. Check actual model quotas, safety settings and the handoff from prototype keys to production credentials.",
-      "buyerCheck": "Evaluate a multimodal prompt, document rate limits and move the prototype behind a secure API service.",
+      "angle": "Prompt experimentation is not the same as a deployed AI product",
+      "summary": "Google's AI Studio quickstart documents chat prompting, model and safety settings, structured output, function calling and a Get Code path to Gemini API integration. This is valuable for developers exploring requirements before adding model calls to an application. The trade-off is ownership of production engineering: latency, security, usage limits and application evaluation remain outside a simple playground session. Compare reproducibility of generated code and safety behavior, not the number of demo prompts completed.",
+      "buyerCheck": "Prototype one structured-output prompt, export its API code and test error handling and usage budgets.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://ai.google.dev/gemini-api/docs/ai-studio-quickstart",
+      "sourceUrls": [
+        "https://ai.google.dev/gemini-api/docs/ai-studio-quickstart"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -8580,7 +8781,15 @@
     "tradeoffs": [
       "Prototyping Gemini behavior before API production"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://ai.google.dev/gemini-api/docs/ai-studio-quickstart",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "slug": "kling-ai",
@@ -8720,13 +8929,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Meeting transcripts must become usable decisions",
-      "summary": "Otter.ai captures and summarizes spoken meetings, which is valuable when notes are otherwise lost or manually rewritten. Accuracy, attendee consent and action-item extraction matter more than the existence of a transcription feature. Validate the real meeting platforms and export requirements before relying on it for records.",
-      "buyerCheck": "Record a permitted meeting with jargon, compare the transcript and extract assigned actions.",
+      "angle": "Action items need traceability to the original meeting",
+      "summary": "Otter's documentation describes identifying and managing action items associated with meeting transcripts. This can reduce the burden of rewriting notes and help attendees track assigned follow-up work. The limitation is that speech recognition and summarization may misattribute owners or omit important qualifications, especially in noisy calls. Consent to record and rules for sensitive meetings also matter. Compare reliably completed tasks and corrections, not merely the number of minutes automatically transcribed.",
+      "buyerCheck": "Record an approved meeting and verify every proposed action, assignee and transcript reference.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://help.otter.ai/hc/en-us/articles/25983095114519-Action-Items-Overview",
+      "sourceUrls": [
+        "https://help.otter.ai/hc/en-us/articles/25983095114519-Action-Items-Overview"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -8740,7 +8952,15 @@
     "tradeoffs": [
       "Meeting transcripts must become usable decisions"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://help.otter.ai/hc/en-us/articles/25983095114519-Action-Items-Overview",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
