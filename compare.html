@@ -152,7 +152,7 @@ async function boot(){
   if(qa&&tools.some(t=>t.slug===qa))a.value=qa;
   if(qb&&tools.some(t=>t.slug===qb))b.value=qb;else b.value=(tools.find(t=>t.slug!==a.value)||tools[1]).slug;
   if(a.value===b.value)b.value=(tools.find(t=>t.slug!==a.value)||tools[1]).slug;
-  function priceLabel(t){return t?.freePlanKnown===true&&t?.pricingDetails?.freePlanStatus==='verified_available'&&t?.pricingDetails?.sourceUrl&&t?.pricingDetails?.freePlanSummary?t.pricingDetails.freePlanSummary:(t?.pricing||'See vendor');}
+  function priceLabel(t){return t?.freePlanKnown===true&&t?.pricingDetails?.freePlanStatus==='verified_available'&&t?.pricingDetails?.sourceUrl&&t?.pricingDetails?.freePlanSummary?t.pricingDetails.freePlanSummary:t?.pricingDetails?.trialStatus==='verified_available'&&t?.pricingDetails?.sourceUrl&&t?.pricingDetails?.trialSummary?t.pricingDetails.trialSummary:(t?.pricing||'See vendor');}
 function freeLabel(t){return t.freePlanKnown!==true?'Unknown':t.freePlan?'Yes':'No'}
   function updateUrl(){const p=new URLSearchParams(location.search);const cleanStaticDefault=defaultA&&defaultB&&!p.get('a')&&!p.get('b')&&!legacy&&a.value===defaultA&&b.value===defaultB;if(cleanStaticDefault)return;p.delete('tool');p.set('a',a.value);p.set('b',b.value);history.replaceState(null,'',location.pathname+'?'+p.toString())}
   function render(){
