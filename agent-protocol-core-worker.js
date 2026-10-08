@@ -350,15 +350,28 @@ function requestedDimensions(args){
   for(const [key,aliases] of Object.entries(DECISION_DIMENSIONS))if(aliases.some(x=>text.includes(catalogNormalize(x))))found.push(key);
   return found.length?found:['ease','integrations'];
 }
+function verifiedIntegrationPair(tool,existing){
+  // Claims must be tied to a named integration, verification date and primary source.
+  // General integration scores and incidental mentions are not pair-level evidence.
+  const target=catalogNormalize(existing);
+  if(!target||!Array.isArray(tool?.integrations))return null;
+  return tool.integrations.find(pair=>{
+    if(!pair||typeof pair!=='object'||pair.status!=='verified')return false;
+    const name=catalogNormalize(pair.product||pair.tool||pair.name);
+    const source=String(pair.sourceUrl||pair.source_url||'');
+    const verifiedAt=String(pair.verifiedAt||pair.verified_at||'');
+    return name===target&&/^https:\/\//i.test(source)&&/^\d{4}-\d{2}-\d{2}$/.test(verifiedAt);
+  })||null;
+}
 function requirementMatch(tool,requirement){
   // A must-have is evidence of a capability, not loose overlap with marketing text.
-  // Only declared catalog category/features (or explicitly verified integration pairs)
+  // Only declared category/features or sourced, verified integration pairs
   // may satisfy one. Missing evidence must never be upgraded by fuzzy text matching.
   const needle=catalogNormalize(requirement).replace(/^(?:(?:must|need|needs|require|requires|support|supports|have|has|with)\s+)+/g,'');
   if(!needle)return {matched:false,strength:0};
   const declared=[tool?.category,...(Array.isArray(tool?.features)?tool.features:[])];
   const claims=declared.map(catalogNormalize).filter(Boolean);
-  const matched=claims.some(value=>value===needle||(' '+value+' ').includes(' '+needle+' '));
+  const matched=Boolean(verifiedIntegrationPair(tool,needle))||claims.some(value=>value===needle||(' '+value+' ').includes(' '+needle+' '));
   return {matched,strength:matched?1:0};
 }
 function budgetSignal(tool,budget){
@@ -432,7 +445,12 @@ function stackAssessment(tool,existingTools=[]){
   for(const existing of existingTools||[]){
     const n=catalogNormalize(existing);
     if(!n)continue;
-    const assistant=(ai.assistants||[]).find(x=>catalogNormalize(x)===n);
+    const pair=verifiedIntegrationPair(tool,existing);
+    if(pair){
+      pairs.push({existing_tool:existing,status:'verified',evidence:'Verified named integration with '+existing+'.',source_url:pair.sourceUrl||pair.source_url,verified_at:pair.verifiedAt||pair.verified_at});
+      continue;
+    }
+    const assistant=ai.status==='verified'?(ai.assistants||[]).find(x=>catalogNormalize(x)===n):null;
     if(assistant){pairs.push({existing_tool:existing,status:'verified',evidence:'Verified AI interoperability with '+assistant+'.'});continue}
     if((tool.features||[]).some(x=>catalogNormalize(x)==='integrations')||scoreOf(tool,'integrations')>=8){
       pairs.push({existing_tool:existing,status:'pair_unverified',evidence:'Strong general integration capability, but ToolScout does not currently store verified product-specific evidence for '+existing+'.'});
