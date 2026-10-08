@@ -28,11 +28,11 @@ test('comparisons keep vendor source URLs internal while preserving monetized CT
   assert.match(src,/href="\/go\/\${encodeURIComponent\(t\.slug\)\}/);
 });
 
-test('decision editorial cohort gives sixteen distinct profile analyses and source-anchored buyer checks',()=>{
+test('decision editorial cohort gives twenty distinct profile analyses and source-anchored buyer checks',()=>{
   const cfg=JSON.parse(read('data/organic-growth-engine.json')).editorialQuality;
   const catalog=JSON.parse(read('data/tools.json'));
   const ids=Object.keys(cfg.profileDecisionEvidence||{});
-  assert.equal(ids.length,16);
+  assert.equal(ids.length,20);
   const opens=new Set();
   for(const slug of ids){
     const evidence=cfg.profileDecisionEvidence[slug];
@@ -121,4 +121,41 @@ test('second decision editorial cohort matches catalog, static pages, independen
   assert.equal(zap.pricingDetails.verifiedAt,'2026-10-08');
   assert.ok(read('tools/zapier.html').includes('Free plan recorded:</strong> Yes'));
   assert.ok(read('tools/zapier.html').includes('100 monthly tasks'));
+});
+
+test('third decision editorial cohort distinguishes verified trials from permanent free plans',()=>{
+  const catalog=JSON.parse(read('data/tools.json')),ed=JSON.parse(read('data/organic-growth-engine.json')).editorialQuality;
+  const esc=s=>s.replaceAll('&','&amp;').replaceAll("'","&#39;");
+  for(const slug of ['activecampaign','asana','clickup','typeform']){
+    const t=catalog.find(x=>x.slug===slug);
+    assert.ok(t?.editorialReview?.summary?.length>380,'Missing reviewed conclusion '+slug);
+    assert.ok(t.strengths.length>0&&t.limitations.length>0&&t.tradeoffs.length>0);
+    assert.ok(t.editorialReview.sourceUrl.startsWith('https://'));
+    assert.equal(t.editorialReview.handsOnTested,false);
+    const html=read('tools/'+slug+'.html');
+    assert.ok(html.includes(esc(t.editorialReview.summary).slice(0,65)),'Stale static review '+slug);
+    assert.ok(html.includes(esc(t.editorialReview.buyerCheck).slice(0,60)),'Missing buying checklist '+slug);
+    assert.ok(html.includes('href="/go/'+slug+'"'));
+    assert.ok(html.includes('rel="canonical"'));
+    assert.ok(html.includes('Free plan recorded:</strong> '+(t.freePlanKnown===true?'Yes':'Unknown')));
+  }
+  const active=catalog.find(x=>x.slug==='activecampaign');
+  assert.equal(active.freePlanKnown,false,'Unverified ongoing free plans must not become verified by the existence of a trial');
+  assert.equal(active.pricingDetails.trialStatus,'verified_available');
+  assert.ok(active.pricingDetails.trialSummary.includes('14-day'));
+  assert.ok(read('tools/activecampaign.html').includes('14-day trial'));
+  for(const slug of ['asana','clickup','typeform']){
+    const t=catalog.find(x=>x.slug===slug);
+    assert.equal(t.freePlanKnown,true);
+    assert.equal(t.pricingDetails.freePlanStatus,'verified_available');
+  }
+  for(const [a,b] of [['asana','clickup'],['activecampaign','mailchimp'],['jotform','typeform']]){
+    const key=[a,b].sort().join('|'),id=a+'-vs-'+b,r=ed.comparisonOverrides[key],html=read(id+'.html');
+    assert.ok(r.analysis.length>300&&r.decision.length>120);
+    assert.ok(html.includes(esc(r.analysis).slice(0,75)));
+    assert.ok(html.includes(esc(r.decision).slice(0,65)));
+    assert.ok(html.includes('<link rel="canonical" href="https://trytoolscout.org/'+id+'">'));
+  }
+  for(const slug of ['best-project-management-tools','best-lead-capture-forms'])
+    assert.ok(read(slug+'.html').includes(esc(ed.guideOverrides[slug]).slice(0,100)));
 });
