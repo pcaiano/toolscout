@@ -299,6 +299,8 @@ function publicTool(tool){
     description:tool.description,
     pricing:tool.pricing,
     free_plan:Boolean(tool.freePlan),
+    free_plan_verified:tool.freePlanKnown===true,
+    free_plan_status:tool.freePlanKnown===true?(tool.freePlan?'verified_available':'verified_unavailable'):'unverified',
     features:Array.isArray(tool.features)?tool.features:[],
     best_for:Array.isArray(tool.bestFor)?tool.bestFor:[],
     ai_integration:aiIntegration(tool),
@@ -337,7 +339,7 @@ const DECISION_DIMENSIONS=Object.freeze({
 });
 const STOP_WORDS=new Set(['the','and','for','with','that','this','from','into','our','your','you','my','we','software','tool','tools','app','apps','need','want','best','right','which','use','using','to','of','a','an','in','on','or','is','are']);
 function clamp(n,min,max){return Math.max(min,Math.min(max,n))}
-function scoreOf(tool,key){const n=Number(tool?.scores?.[key]);return Number.isFinite(n)?clamp(n,0,10):null}
+function scoreOf(tool,key){const raw=tool?.scores?.[key];if(raw==null||raw==='')return null;const n=Number(raw);return Number.isFinite(n)?clamp(n,0,10):null}
 function textTerms(value){return catalogNormalize(value).split(' ').filter(x=>x.length>1&&!STOP_WORDS.has(x))}
 function toolHay(tool){return catalogNormalize([tool?.name,tool?.slug,tool?.category,tool?.description,...(tool?.features||[]),...(tool?.bestFor||[])].join(' '))}
 function requestedDimensions(args){
@@ -349,18 +351,20 @@ function requestedDimensions(args){
   return found.length?found:['ease','integrations'];
 }
 function requirementMatch(tool,requirement){
-  const hay=toolHay(tool),needle=catalogNormalize(requirement);
+  // A must-have is evidence of a capability, not loose overlap with marketing text.
+  // Only declared catalog category/features (or explicitly verified integration pairs)
+  // may satisfy one. Missing evidence must never be upgraded by fuzzy text matching.
+  const needle=catalogNormalize(requirement).replace(/^(?:(?:must|need|needs|require|requires|support|supports|have|has|with)\s+)+/g,'');
   if(!needle)return {matched:false,strength:0};
-  if(hay.includes(needle))return {matched:true,strength:1};
-  const terms=textTerms(needle);
-  const hits=terms.filter(t=>hay.includes(t)).length;
-  const strength=terms.length?hits/terms.length:0;
-  return {matched:strength>=0.6,strength};
+  const declared=[tool?.category,...(Array.isArray(tool?.features)?tool.features:[])];
+  const claims=declared.map(catalogNormalize).filter(Boolean);
+  const matched=claims.some(value=>value===needle||(' '+value+' ').includes(' '+needle+' '));
+  return {matched,strength:matched?1:0};
 }
 function budgetSignal(tool,budget){
   const price=scoreOf(tool,'price');
   if(!budget)return {points:0,label:'not specified'};
-  if(budget==='free')return tool?.freePlan?{points:12,label:'free plan available'}:{points:-18,label:'no verified free plan'};
+  if(budget==='free')return tool?.freePlanKnown===true?(tool.freePlan?{points:12,label:'verified catalog free plan'}:{points:-18,label:'verified no free plan'}):{points:0,label:'free-plan status not verified'};
   if(price==null)return {points:0,label:'price fit unverified'};
   if(budget==='low')return {points:(price-5)*3,label:price>=8?'strong affordability signal':price>=6?'moderate affordability signal':'weaker affordability signal'};
   if(budget==='mid')return {points:Math.abs(price-6)<=2?7:2,label:'mid-budget fit estimated from ToolScout price score'};
@@ -394,9 +398,10 @@ function constraintEvidence(tool,constraints=[]){
     if(!norm)return {constraint,status:'not_verified',evidence:'Empty constraint cannot be evaluated.'};
     const freeIntent=/\b(?:free|free plan|no cost)\b/.test(norm);
     if(freeIntent){
-      return tool?.freePlan
-        ?{constraint,status:'verified',evidence:'ToolScout catalog records a free plan.'}
-        :{constraint,status:'conflict',evidence:'ToolScout catalog does not record a free plan for this product.'};
+      if(tool?.freePlanKnown!==true)return {constraint,status:'not_verified',evidence:'Free-plan availability has not been independently verified in the current ToolScout catalog.'};
+      return tool.freePlan
+        ?{constraint,status:'verified',evidence:'ToolScout catalog has verified free-plan availability.'}
+        :{constraint,status:'conflict',evidence:'ToolScout catalog has verified that no free plan is available.'};
     }
     const stripped=norm.replace(/\b(?:must|needs?|need|requires?|require|required|support|supports|with|only|be|have|has)\b/g,' ').replace(/\s+/g,' ').trim();
     const exact=explicitTextMatch(tool,norm)||(stripped&&explicitTextMatch(tool,stripped));
@@ -497,7 +502,10 @@ function decisionCandidates(tools,args){
     const source=tools.find(t=>t.slug===x.slug);
     return source?matchesJobIntent(source,profile):false;
   });
-  return relevant.sort((a,b)=>b.fit_score-a.fit_score||String(a.name).localeCompare(String(b.name)));
+  // 'must_have' is a hard gate. A product with unverified requirements can be
+  // compared explicitly but must not appear as a qualified recommendation.
+  const qualified=(args.must_have||[]).length?relevant.filter(x=>x.requirement_evidence.every(r=>r.matched)):relevant;
+  return qualified.sort((a,b)=>b.fit_score-a.fit_score||String(a.name).localeCompare(String(b.name)));
 }
 function pairwiseTradeoffs(evaluated,dims){
   const out=[];
@@ -566,7 +574,7 @@ async function callCatalogTool(name,args,request,env){
         budget:args.budget||null,
         team:args.team||null,
         existing_tools:args.existing_tools||[],
-        methodology:'Deterministic ToolScout catalog fit. Candidates must first match the requested job/category. Scores then combine explicit priorities, budget/team signals, must-have evidence, free-form constraint evidence and known stack evidence. Every free-form constraint is returned as verified, not_verified or conflict; missing product-specific integration evidence is never upgraded from a generic text match.',
+        methodology:'Deterministic ToolScout catalog fit. Candidates must first match the requested job/category and satisfy all evidence-backed must-haves to appear in a qualified shortlist. Missing evidence is not a confirmed capability. Scores then combine explicit priorities, budget/team signals, must-have evidence, free-form constraint evidence and known stack evidence. Every free-form constraint is returned as verified, not_verified or conflict; missing product-specific integration evidence is never upgraded from a generic text match.',
         no_pay_to_rank:true
       },
       affiliate_disclosure:disclosure
