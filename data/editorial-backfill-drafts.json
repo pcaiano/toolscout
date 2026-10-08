@@ -290,6 +290,111 @@
       "Live messaging as the front door to support",
       "Crisp combines live chat, shared inbox and knowledge content for customer communication. It is relevant when website visitors need immediate guidance and operators need continuity across conversations. Test routing and response-time coverage before assuming a chatbot will resolve all incoming questions.",
       "Install on a staging site and verify offline forms, assignments and transcript handoff."
+    ],
+    "canva": [
+      "Content production for non-designers, with governance still important",
+      "Canva is useful when marketing and operations teams need repeatable visual assets without specialist design skills for every request. Templates, presentations and collaboration make that case stronger than a single image editor. Yet brand consistency, asset rights and team permissions become important as usage grows.",
+      "Test a brand template, approval workflow and export for three target channels."
+    ],
+    "adobe-express": [
+      "Rapid branded assets within a creative workflow",
+      "Adobe Express spans social graphics, short video and marketing templates. Its value is the ability to reuse assets and produce variants, not proof that every advanced creative function is available in one plan. Compare it with Canva on the team's existing asset library, editing needs and ownership of published work.",
+      "Recreate a multi-size campaign asset and verify fonts, licensing and team controls."
+    ],
+    "kling-ai": [
+      "Generative video where consistent motion is the hard problem",
+      "Kling AI targets text- and image-driven video production, with motion and audio-related functionality in the catalog. Generated results can vary substantially even with similar prompts; usage credits and rights matter alongside realism. Test the exact output duration and editing control required rather than assuming a demonstration applies to production.",
+      "Run repeated prompts and check identity stability, cost per usable clip and commercial permissions."
+    ],
+    "weryai": [
+      "Multi-model video and image creation needs quality measurement",
+      "WeryAI is presented as a platform aggregating visual generation and enhancement functions. The catalog does not independently verify which named models are accessible, in which regions, or at what cost. It warrants evaluation only after checking model availability and rights for exported output.",
+      "Compare a fixed creative brief across its supported modes and record the cost per accepted asset."
+    ],
+    "buffer": [
+      "Publishing consistency before elaborate listening tools",
+      "Buffer concentrates on scheduling, publishing and helping a small team manage regular social posts. That can outperform a broader suite if the immediate problem is missed publishing and approvals. Compare channel support, analytics history and team collaboration on the exact plan, particularly for multi-brand use.",
+      "Schedule one week's cross-channel content and confirm failures, approvals and meaningful metrics."
+    ],
+    "hootsuite": [
+      "Multi-channel social operations and team process",
+      "Hootsuite is relevant when publishing, engagement and reporting need a shared operational view. Teams should weigh the breadth of supported workflows against the setup and licensing required to keep each channel active. Do not treat a social listening label as verification of particular sources or report access.",
+      "Test inbox triage, content approval and a report for the organization's core networks."
+    ],
+    "sprout-social": [
+      "Social engagement data linked to brand and service response",
+      "Sprout Social spans social publishing, analytics and listening-oriented workflows. It belongs on a shortlist when multiple stakeholders need to act on audience conversations rather than merely schedule posts. Verify listening coverage, response routing and report entitlements before justifying the added operational complexity.",
+      "Work through a customer inquiry and a campaign report, checking seats and source coverage."
+    ],
+    "later": [
+      "Visual campaign planning for creator-led channels",
+      "Later's catalog focus is visual scheduling, media organization and link-in-bio tools. This can suit teams whose production schedule is built around image and video content, while a company needing deep support inboxes may prefer another platform. Verify the exact accounts, platforms and analytics available per tier.",
+      "Plan and publish a visual campaign and check link attribution and account limits."
+    ],
+    "socialbee": [
+      "Content categories and reuse as a publishing strategy",
+      "SocialBee emphasizes categorizing content and repeating useful posts through a schedule. The fit is strongest for a small team maintaining evergreen publishing without producing every post from scratch. Repetition must still be balanced with timeliness, channel rules and editorial judgment.",
+      "Test category-based publishing over two weeks and review duplicate-content controls."
+    ],
+    "webflow": [
+      "Visual websites with CMS and operational depth",
+      "Webflow offers design-led site building alongside hosting, CMS and search controls in the catalog. It is compelling when marketing wants more control over structured site content without maintaining a custom frontend. Plan limits, content types and publishing permissions can materially change the decision against simpler builders.",
+      "Prototype one CMS collection, responsive page and production publishing workflow."
+    ],
+    "framer": [
+      "Fast visual pages rather than a complicated web platform",
+      "Framer centers rapid visual design and live site publishing with modern layout tools. That can help teams produce campaign pages quickly, but more complex CMS, localization and integration requirements need proof in the target plan. Compare it with Webflow by shipping the same page rather than by feature list alone.",
+      "Build a responsive launch page and test performance, localization and forms."
+    ],
+    "wix": [
+      "Business website and commerce needs in one managed environment",
+      "Wix combines site design, templates and services for running a small business online. Managed convenience may reduce setup time, but portability, application dependencies and transaction requirements can become important as a business grows. Evaluate the whole customer path, not just template appearance.",
+      "Build a sample business site with lead capture, mobile checkout and export requirements."
+    ],
+    "squarespace": [
+      "Content-led websites with integrated business features",
+      "Squarespace is worth comparing when a business wants a polished site, portfolio or small store without custom hosting. Its design cohesion may be attractive, while extensibility and integrations need plan-specific review. The relevant question is whether the site can support the business's next workflow, not only its current pages.",
+      "Prototype a content collection, contact path and the intended checkout or booking flow."
+    ],
+    "wordpress-com": [
+      "Hosted publishing based on the WordPress ecosystem",
+      "WordPress.com can make sense when ongoing publishing and familiar content workflows are the center of the website. Hosting and plan restrictions differ from running WordPress on independent infrastructure; portability and plugins should not be assumed. Evaluate editorial ownership, extension access and long-term operating effort.",
+      "Check plugin availability, export portability, content SEO and the exact hosting plan."
+    ],
+    "surfer": [
+      "Content optimization as a specialist step in SEO",
+      "Surfer is primarily a writing and optimization decision, not a replacement for every SEO research tool. Its content editor and SERP-based guidance can help prioritize improvements, but suggested terms do not guarantee rankings or editorial originality. Compare it with Semrush or Ahrefs only for the part of the workflow it actually replaces.",
+      "Improve one article against a factual editorial brief and assess helpfulness, not just a content score."
+    ],
+    "moz-pro": [
+      "A broad SEO workflow built around research and tracking",
+      "Moz Pro combines keyword research, audit and backlink-oriented functions in the catalog. It should be evaluated for recurring search work and reporting fit, especially when the team needs a consistent workflow more than an isolated metric. Site limits, data freshness and regional coverage require direct vendor checking.",
+      "Evaluate one site audit, backlink question and a location-specific ranking report."
+    ],
+    "ubersuggest": [
+      "Accessible SEO research for smaller publishing operations",
+      "Ubersuggest offers keyword and competitor research alongside tracking and site checks. It can be a starting point for a budget-conscious site owner, but usefulness depends on reliable data in the relevant country and enough reporting depth. A lower apparent subscription cost should not substitute for comparing actionable outputs.",
+      "Check 20 representative queries in the target market and compare the resulting opportunity list."
+    ],
+    "mangools": [
+      "Focused SEO utilities for keyword and SERP tasks",
+      "Mangools is oriented toward keyword discovery, SERP inspection and routine rank tracking. Its suite can be appealing when the buyer wants approachable tools for several discrete research steps rather than a large agency platform. Verify update frequency, geographic data and tracked-keyword quotas.",
+      "Research a competitor topic, track a set of terms and test data export."
+    ],
+    "screaming-frog": [
+      "Technical crawling before strategic keyword research",
+      "Screaming Frog SEO Spider is primarily a site crawler for investigating URLs, metadata, errors and indexing patterns. It is the wrong choice for someone mainly buying content ideation or CRM automation. Deployment environment, crawl limits and analyst skill determine whether it can be used effectively.",
+      "Crawl a staging site and confirm JavaScript handling, export and issue prioritization."
+    ],
+    "perplexity": [
+      "Search-grounded answers requiring source scrutiny",
+      "Perplexity is designed to collect information from the web and produce cited answers. The citations can accelerate research, but they do not guarantee that a source supports every synthesized claim. It fits exploratory research more naturally than an automated system of record or a production transaction agent.",
+      "Audit five factual answers against their linked originals and check recency and coverage."
+    ],
+    "notebooklm": [
+      "Answers constrained to a chosen document collection",
+      "NotebookLM is suited to research where uploaded sources define the evidence base. That is a different use case from open-web discovery, and the quality of the answer depends on what material the user supplies. Compare source coverage, quotation traceability and sharing permissions for the team's actual corpus.",
+      "Upload a controlled research packet and verify each answer against the underlying documents."
     ]
   }
 }
