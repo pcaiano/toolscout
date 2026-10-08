@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "toolscout",
-  "version": "1.0.0",
-  "description": "Use ToolScout, the Independent Software Discovery & Decision Engine at trytoolscout.org, to search, compare and evaluate software.",
+  "version": "2.0.0",
+  "description": "ToolScout helps users decide which software is right for them by turning jobs, constraints, trade-offs, existing stack and recent product changes into evidence-aware software decisions.",
   "author": {
     "name": "ToolScout",
     "email": "pedro@trytoolscout.org",
@@ -17,20 +17,29 @@
     "recommendations",
     "AI",
     "MCP",
-    "decision engine"
+    "decision engine",
+    "shortlist",
+    "trade-offs",
+    "alternatives",
+    "software buying",
+    "stack fit"
   ],
   "extensions": {
     "com.openai": {
       "interface": {
         "displayName": "ToolScout: Software Decision Engine",
-        "shortDescription": "Independent software discovery and decision support",
-        "longDescription": "ToolScout is the independent software discovery and decision engine at trytoolscout.org. Search its public software catalog, compare products, retrieve software profiles, get fit-based recommendations and check verified AI interoperability such as MCP, public API and supported AI assistants. ToolScout is read-only: it does not purchase software, create vendor accounts or modify user data. ToolScout may earn compensation from some outbound links, but affiliate participation does not determine ranking, search order or comparison results.",
+        "shortDescription": "Decide which software is right for your use case",
+        "longDescription": "ToolScout is the Independent Software Discovery & Decision Engine at trytoolscout.org. It is built for software buying decisions rather than generic catalog search: shortlist software for a job and constraints, compare products for a particular use case, find alternatives because of a specific weakness, explain trade-offs and what a cheaper choice may give up, assess fit with an existing stack, and surface recent buyer-relevant product changes. ToolScout is read-only and explicitly surfaces missing or unverified evidence instead of inventing compatibility. ToolScout may earn compensation from some outbound links, but affiliate participation does not determine ranking, shortlist order, comparison conclusions or factual output.",
         "developerName": "ToolScout",
         "category": "Productivity",
         "capabilities": [
-          "Software recommendations",
-          "Software catalog search",
-          "Software comparison",
+          "Contextual software decisions",
+          "Evidence-aware shortlists",
+          "Use-case comparisons and trade-offs",
+          "Alternatives by reason",
+          "Existing stack fit",
+          "Recent buyer-relevant software changes",
+          "Software catalog lookup",
           "AI interoperability"
         ],
         "websiteURL": "https://trytoolscout.org",
@@ -38,9 +47,12 @@
         "privacyPolicyURL": "https://trytoolscout.org/privacy",
         "termsOfServiceURL": "https://trytoolscout.org/terms",
         "defaultPrompt": [
-          "Find a CRM for a small sales team with a low budget.",
-          "Compare HubSpot and Pipedrive for a growing sales team.",
-          "Which tools in ToolScout have verified MCP support?"
+          "Recommend software for this job and these constraints: CRM for a five-person consultancy using Gmail, low budget, strong automation.",
+          "Compare HubSpot and Pipedrive for my particular use case and show the trade-offs.",
+          "Find alternatives to HubSpot because I dislike the price and complexity.",
+          "What do I lose if I choose the cheaper option?",
+          "Which of these tools best fits the software I already use?",
+          "What changed recently that should affect my shortlist?"
         ],
         "brandColor": "#111214",
         "brandColorDark": "#C3F309",
@@ -51,34 +63,40 @@
         "test_cases": {
           "positive": [
             {
-              "description": "Recommend software from a job and constraints",
-              "prompt": "Find a CRM for a small sales team with a low budget.",
-              "tools_triggered": "recommend_tools",
-              "expected_behavior": "Return a short ranked set of ToolScout CRM recommendations with fit reasons, profile links, ToolScout outbound links and an affiliate disclosure. Affiliate participation must not affect ranking."
+              "description": "Build a contextual shortlist",
+              "prompt": "I run a five-person consultancy. We use Gmail, need CRM automation, want an easy setup and have a low budget. What should I shortlist?",
+              "tools_triggered": "decide_software",
+              "expected_behavior": "Return a short evidence-aware shortlist using the stated job, constraints, budget, priorities and existing stack. Explain reasons, trade-offs and uncertainty. Do not rank by affiliate payout."
             },
             {
-              "description": "Search the catalog by capability",
-              "prompt": "Find SEO tools in ToolScout with verified AI interoperability.",
+              "description": "Compare products for the user's actual use case",
+              "prompt": "Compare HubSpot and Pipedrive for a five-person consultancy that uses Gmail and values automation and ease. What do I lose if I pick the cheaper option?",
+              "tools_triggered": "compare_for_use_case",
+              "expected_behavior": "Return use-case-specific fit, explicit trade-offs, a close-call or best-fit verdict when justified, and an affordability analysis that distinguishes ToolScout's price signal from a live vendor quote."
+            },
+            {
+              "description": "Find alternatives because of a specific weakness",
+              "prompt": "Find alternatives to HubSpot because I dislike the price and complexity. I still need CRM automation.",
+              "tools_triggered": "find_alternatives",
+              "expected_behavior": "Return same-category alternatives that improve the dimensions implied by the complaint, while also showing what each alternative may sacrifice versus HubSpot."
+            },
+            {
+              "description": "Check fit with an existing stack without inventing integrations",
+              "prompt": "Which fits my stack better, HubSpot or Pipedrive? I already use ChatGPT, Gmail and Notion.",
+              "tools_triggered": "check_stack_fit",
+              "expected_behavior": "Separate verified pair or AI interoperability evidence from general integration capability and unknown pair-specific compatibility. Never invent an integration."
+            },
+            {
+              "description": "Show recent changes that could affect the decision",
+              "prompt": "What changed recently in HubSpot and Notion that could affect whether I shortlist them?",
+              "tools_triggered": "recent_changes",
+              "expected_behavior": "Return only ToolScout editorial updates associated with the requested products, include date and canonical ToolScout news URL, and state that absence of an update does not prove no vendor changes occurred."
+            },
+            {
+              "description": "Secondary catalog lookup",
+              "prompt": "Look up SEO tools in ToolScout with verified AI interoperability.",
               "tools_triggered": "search_tools",
-              "expected_behavior": "Return relevant ToolScout catalog results that satisfy the requested AI interoperability filter without inventing personalised match percentages."
-            },
-            {
-              "description": "Retrieve one software profile",
-              "prompt": "Show me ToolScout's information about HubSpot.",
-              "tools_triggered": "get_tool",
-              "expected_behavior": "Return HubSpot catalog facts, AI interoperability status, ToolScout profile URL and ToolScout outbound URL without exposing raw affiliate programme fields or commission values."
-            },
-            {
-              "description": "Compare two catalog tools",
-              "prompt": "Compare HubSpot and Pipedrive.",
-              "tools_triggered": "compare_tools",
-              "expected_behavior": "Return factual side-by-side catalog information for HubSpot and Pipedrive and clearly state that affiliate participation does not influence comparison order or facts."
-            },
-            {
-              "description": "Check AI interoperability",
-              "prompt": "What AI interoperability does Zapier have according to ToolScout?",
-              "tools_triggered": "get_ai_compatibility",
-              "expected_behavior": "Return ToolScout's current verified or explicitly unverified AI interoperability fields for Zapier, including MCP status, public API status and listed assistants when available."
+              "expected_behavior": "Use catalog lookup only because the user asked for discovery/filtering rather than a buying decision. Do not invent personalised match percentages."
             }
           ],
           "negative": [
@@ -101,7 +119,7 @@
       },
       "publication": {
         "countries": [],
-        "release_notes": "Initial public ToolScout: Software Decision Engine package with read-only software recommendations, catalog search, software profiles, side-by-side comparisons and verified AI interoperability lookup."
+        "release_notes": "ToolScout 2.0 turns the plugin into a software decision engine: contextual shortlists, use-case comparisons, reason-based alternatives, trade-off and cheaper-option analysis, stack-fit evidence, and recent buyer-relevant product changes. Catalog search remains as a secondary lookup capability."
       }
     }
   }
