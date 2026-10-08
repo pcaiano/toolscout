@@ -3648,14 +3648,17 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Content optimization as a specialist step in SEO",
-      "summary": "Surfer is primarily a writing and optimization decision, not a replacement for every SEO research tool. Its content editor and SERP-based guidance can help prioritize improvements, but suggested terms do not guarantee rankings or editorial originality. Compare it with Semrush or Ahrefs only for the part of the workflow it actually replaces.",
-      "buyerCheck": "Improve one article against a factual editorial brief and assess helpfulness, not just a content score.",
+      "angle": "Content scores are guidance rather than guarantees of ranking",
+      "summary": "Surfer's Content Editor documentation describes term suggestions, article structure guidance and optimization scores based on competing search results. The utility is a consistent research and review workflow for search-focused editorial teams. Its limits matter: blindly inserting suggested terms can damage clarity, and high optimization scores do not establish evidence quality or guarantee higher rankings. Compare the amount of original insight, readability and real search performance after publication, not the editor's score alone.",
+      "buyerCheck": "Review one existing article against search intent and source quality before accepting optimization terms.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
-      "handsOnTested": false
+      "sourceUrl": "https://docs.surferseo.com/en/articles/5700347-content-editor-overview",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false,
+      "sourceUrls": [
+        "https://docs.surferseo.com/en/articles/5700347-content-editor-overview"
+      ]
     },
     "strengths": [
       "Catalog describes content optimization",
@@ -3668,7 +3671,15 @@
     "tradeoffs": [
       "Content optimization as a specialist step in SEO"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://docs.surferseo.com/en/articles/5700347-content-editor-overview",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -3722,14 +3733,17 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Analyze product behavior, not just page visits",
-      "summary": "Mixpanel centers funnel conversion, retention and user journey analysis. Its usefulness depends on consistent event definitions and identity stitching rather than a more attractive dashboard. Compare it with PostHog when experimentation and session replay need to live in the same operating environment.",
-      "buyerCheck": "Instrument signup and activation with clear anonymous-to-known identity transitions.",
+      "angle": "Product retention needs cohorts defined around meaningful events",
+      "summary": "Mixpanel's official training covers creating cohorts from behavior or profile attributes and reusing them in Funnels, Flows and Retention analysis. That is valuable when a product team needs to distinguish users who activate from those who return and become loyal. The challenge is event governance: a cohort created from inconsistent identity or event names can produce persuasive but invalid results. Compare Mixpanel through decisions the team can make from reliable product signals, not dashboard sophistication alone.",
+      "buyerCheck": "Define activation and return events, build two cohorts and confirm counts against instrumentation.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
-      "handsOnTested": false
+      "sourceUrl": "https://university.mixpanel.com/student/activity/3411675-cohorts-understanding-and-analyzing-user-groups",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false,
+      "sourceUrls": [
+        "https://university.mixpanel.com/student/activity/3411675-cohorts-understanding-and-analyzing-user-groups"
+      ]
     },
     "strengths": [
       "Catalog describes product analytics",
@@ -3742,7 +3756,15 @@
     "tradeoffs": [
       "Analyze product behavior, not just page visits"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://university.mixpanel.com/student/activity/3411675-cohorts-understanding-and-analyzing-user-groups",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -4810,14 +4832,17 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Qualitative behavior to explain a conversion drop",
-      "summary": "Hotjar's catalog focus is heatmaps, recordings and visitor feedback. That can uncover usability friction that aggregate analytics cannot explain, but small or biased recording samples can mislead. Review privacy redaction and the exact capture allowance before treating observed sessions as representative.",
-      "buyerCheck": "Investigate one high-exit page with consented recordings and validate findings with a survey.",
+      "angle": "Behavioral recordings are governed by data retention and privacy",
+      "summary": "Hotjar's own support documentation explains how retention and deletion differ for recordings, heatmaps and feedback data. This matters because visually helpful recordings can reveal friction that aggregate traffic reports miss, yet the sample may be incomplete and privacy handling is not optional. Product and plan differences can affect what is captured and how long it remains available. Compare the quality of actionable user-experience findings with consent, masking and storage obligations before adding tracking.",
+      "buyerCheck": "Inspect a consented recording sample, data masking rules and the current deletion policy.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
-      "handsOnTested": false
+      "sourceUrl": "https://help.hotjar.com/hc/pt-br/articles/115011640427-Por-quanto-tempo-o-Hotjar-mant%C3%A9m-meus-dados",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false,
+      "sourceUrls": [
+        "https://help.hotjar.com/hc/pt-br/articles/115011640427-Por-quanto-tempo-o-Hotjar-mant%C3%A9m-meus-dados"
+      ]
     },
     "strengths": [
       "Catalog describes heatmaps",
@@ -4830,7 +4855,15 @@
     "tradeoffs": [
       "Qualitative behavior to explain a conversion drop"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://help.hotjar.com/hc/pt-br/articles/115011640427-Por-quanto-tempo-o-Hotjar-mant%C3%A9m-meus-dados",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -5556,14 +5589,17 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Operational error evidence before another dashboard",
-      "summary": "Sentry focuses on tracing real application errors, performance and affected user sessions. It is valuable when a team must connect incidents to specific releases and code paths. Noise from poor grouping or incomplete instrumentation can undermine that value, while event volume determines pricing exposure.",
-      "buyerCheck": "Inject a staging exception, follow its trace and measure whether an actionable alert reaches an owner.",
+      "angle": "Error visibility must connect real regressions to releases",
+      "summary": "Sentry documents issue details that include stack traces, breadcrumbs, tags, affected users and release context. That helps engineering teams move from an exception count to a potentially reproducible user failure. However, noisy grouping and poor instrumentation can overwhelm the team or hide the most important regressions. The buying decision depends on whether alerts lead to verified fixes and whether issue volume, sampling and retention fit the deployment budget.",
+      "buyerCheck": "Introduce a test error after deployment, inspect the stack trace and confirm release attribution.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
-      "handsOnTested": false
+      "sourceUrl": "https://docs.sentry.io/product/issues/issue-details/",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false,
+      "sourceUrls": [
+        "https://docs.sentry.io/product/issues/issue-details/"
+      ]
     },
     "strengths": [
       "Catalog describes error tracking",
@@ -5576,7 +5612,15 @@
     "tradeoffs": [
       "Operational error evidence before another dashboard"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://docs.sentry.io/product/issues/issue-details/",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -6155,14 +6199,17 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Technical crawling before strategic keyword research",
-      "summary": "Screaming Frog SEO Spider is primarily a site crawler for investigating URLs, metadata, errors and indexing patterns. It is the wrong choice for someone mainly buying content ideation or CRM automation. Deployment environment, crawl limits and analyst skill determine whether it can be used effectively.",
-      "buyerCheck": "Crawl a staging site and confirm JavaScript handling, export and issue prioritization.",
+      "angle": "Site crawling is most valuable when scope and limits are explicit",
+      "summary": "Screaming Frog's SEO Spider documentation states that the free version is limited to 500 crawled URLs and explains how depth, URL path and total crawl restrictions can shape an audit. That makes it a practical technical SEO investigation tool, but an incomplete sample can conceal site-wide problems. Paid access is useful when a team needs broader coverage and saved crawl comparisons, not merely because a site contains many pages. Interpret crawl findings alongside canonical, indexing and real traffic evidence.",
+      "buyerCheck": "Crawl the same representative site section with defined limits and reconcile missing or duplicate URLs.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
-      "handsOnTested": false
+      "sourceUrl": "https://www.screamingfrog.co.uk/seo-spider/user-guide/configuration/",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false,
+      "sourceUrls": [
+        "https://www.screamingfrog.co.uk/seo-spider/user-guide/configuration/"
+      ]
     },
     "strengths": [
       "Catalog describes site crawling",
@@ -6175,7 +6222,15 @@
     "tradeoffs": [
       "Technical crawling before strategic keyword research"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.screamingfrog.co.uk/seo-spider/user-guide/configuration/",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -6806,14 +6861,17 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Inside-sales conversations in the same workspace as deals",
-      "summary": "Close centers sales activity around calls, email, SMS and a deal pipeline. This is useful if the sales team's daily bottleneck is outreach and follow-up, rather than marketing campaign breadth. Check telephony availability, message costs, CRM sync and local compliance before trusting a catalog integration score.",
-      "buyerCheck": "Run a full day of sample calling, email and logging in the proposed geography.",
+      "angle": "Automated sales sequences belong to accountable deal workflows",
+      "summary": "Close documents automated Workflows for email, SMS, call tasks, lead updates and opportunity actions. These are available on its Growth and Scale plans, so a basic CRM subscription should not be assumed to include sophisticated automation. The attraction is having communication and opportunity updates in one sales process rather than spreading ownership among tools. The trade-off is deliverability, sequence quality and operational control: badly configured triggers can contact leads at the wrong stage. Measure qualified meetings and human follow-up workload.",
+      "buyerCheck": "Create a permission-compliant sequence that stops on a defined response and updates the opportunity.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
-      "handsOnTested": false
+      "sourceUrl": "https://help.close.com/feature-guide/workflows",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false,
+      "sourceUrls": [
+        "https://help.close.com/feature-guide/workflows"
+      ]
     },
     "strengths": [
       "Catalog describes CRM",
@@ -6826,7 +6884,15 @@
     "tradeoffs": [
       "Inside-sales conversations in the same workspace as deals"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://help.close.com/feature-guide/workflows",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -7210,14 +7276,17 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Email campaigns extending into funnels and webinars",
-      "summary": "GetResponse spans newsletters, automation, landing pages and webinar-oriented marketing. A team running scheduled launches may benefit from that breadth, while one requiring only broadcast email risks buying unnecessary complexity. Compare event registration, follow-up timing and contact-based charges rather than counting adjacent features.",
-      "buyerCheck": "Recreate a webinar registration, reminder and post-event nurture journey.",
+      "angle": "Email lifecycle complexity should determine the required tier",
+      "summary": "GetResponse's help centre documents marketing automation workflows, messages and conditions connected to mailing and marketing activity. That makes it relevant when campaigns need different responses for signup and customer events, not just a scheduled newsletter. A sophisticated workflow can also create unnecessary cost and incorrect sends when contact consent or event definitions are weak. Compare the permitted triggers, automation entitlements and deliverability on the selected plan before replacing separate email and landing-page services.",
+      "buyerCheck": "Run a consented signup through a welcome workflow and test a nonmatching branch and unsubscribe.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
-      "handsOnTested": false
+      "sourceUrl": "https://www.getresponse.com/help/automation",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false,
+      "sourceUrls": [
+        "https://www.getresponse.com/help/automation"
+      ]
     },
     "strengths": [
       "Catalog describes email marketing",
@@ -7230,7 +7299,15 @@
     "tradeoffs": [
       "Email campaigns extending into funnels and webinars"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.getresponse.com/help/automation",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -7447,14 +7524,17 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Project communication without elaborate administrative machinery",
-      "summary": "Basecamp's combination of project messages, to-dos and schedules can reduce scattered conversations for a small team. The simplicity is intentional, but teams requiring deep dependencies, resourcing or portfolio analytics may need a different tool. Examine the complete project life cycle rather than just its to-do list.",
-      "buyerCheck": "Pilot a client project including files, comments, deadlines and external participants.",
+      "angle": "Project simplicity depends on the tools the team actually uses",
+      "summary": "Basecamp documents projects assembled from optional tools such as messages, to-do lists and schedules. Teams can turn off unnecessary modules and reuse common setups through templates. That is useful for smaller groups seeking clear coordination without maintaining a heavily configured project management system. The trade-off is breadth: complex dependency mapping, resource forecasting or granular portfolio reporting may require separate systems. Compare time spent coordinating real assignments rather than the number of features in a demo.",
+      "buyerCheck": "Set up a client project template with messages, due dates and guests, and track one full handoff.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
-      "handsOnTested": false
+      "sourceUrl": "https://3.basecamp-help.com/article/25-projects",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false,
+      "sourceUrls": [
+        "https://3.basecamp-help.com/article/25-projects"
+      ]
     },
     "strengths": [
       "Catalog describes projects",
@@ -7467,7 +7547,15 @@
     "tradeoffs": [
       "Project communication without elaborate administrative machinery"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://3.basecamp-help.com/article/25-projects",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -8083,14 +8171,17 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Form intake connected to operational records",
-      "summary": "Fillout focuses on form capture with conditional logic and links to database-style workflows. It deserves attention when answers update structured records or drive follow-up work, not just when a form looks polished. Validate record permissions, conditional steps and per-plan submissions, particularly if a live database is the system of record.",
-      "buyerCheck": "Submit records through a test workflow and check updates, errors and access permissions.",
+      "angle": "Conditional data collection needs tested downstream actions",
+      "summary": "Fillout documents form pages supporting multiple fields, signatures and varied page types, alongside logic that can hide questions or change a respondent's path. The value increases when structured answers need to feed CRM or operational systems rather than a disconnected spreadsheet. But logic and integration conditions can introduce edge cases, duplicate submissions or incomplete records. A simple newsletter signup may not need this flexibility. Choose it after checking accessibility, submission limits and what actually reaches the destination tool.",
+      "buyerCheck": "Build two conditional paths, submit edge-case responses and reconcile the resulting CRM records.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
-      "handsOnTested": false
+      "sourceUrl": "https://www.fillout.com/docs/help/form-page",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false,
+      "sourceUrls": [
+        "https://www.fillout.com/docs/help/form-page"
+      ]
     },
     "strengths": [
       "Catalog describes forms",
@@ -8103,7 +8194,15 @@
     "tradeoffs": [
       "Form intake connected to operational records"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.fillout.com/docs/help/form-page",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
