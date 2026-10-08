@@ -305,6 +305,7 @@ function publicTool(tool){
     best_for:Array.isArray(tool.bestFor)?tool.bestFor:[],
     ai_integration:aiIntegration(tool),
     last_verified:tool.lastVerified||null,
+    category_review_required:tool.categoryReviewRequired===true,
     editorial_review:tool?.editorialReview&&typeof tool.editorialReview==='object'?{
       angle:tool.editorialReview.angle||null,
       conclusion:tool.editorialReview.summary||null,
@@ -315,6 +316,8 @@ function publicTool(tool){
       reviewed_at:tool.editorialReview.reviewedAt||null,
       evidence_source:tool.editorialReview.sourceUrl||null,
       evidence_method:tool.editorialReview.method||null,
+      verification_status:tool.editorialReview.verificationStatus||'editorial_vendor_documentation',
+      evidence_caveat:tool.editorialReview.verificationStatus==='catalog_only'?'Editorial assessment derived from unverified catalog attributes. Confirm capabilities, plans and integrations with the vendor before relying on them.':null,
       hands_on_tested:tool.editorialReview.handsOnTested===true
     }:null,
     profile_url:`https://trytoolscout.org/tools/${encodeURIComponent(tool.slug)}`,
@@ -530,7 +533,7 @@ function decisionCandidates(tools,args){
   const profile=jobIntentProfile(tools,args.job||args.use_case||'');
   const relevant=evaluated.filter(x=>{
     const source=tools.find(t=>t.slug===x.slug);
-    return source?matchesJobIntent(source,profile):false;
+    return source&&!source.categoryReviewRequired?matchesJobIntent(source,profile):false;
   });
   // 'must_have' is a hard gate. A product with unverified requirements can be
   // compared explicitly but must not appear as a qualified recommendation.
