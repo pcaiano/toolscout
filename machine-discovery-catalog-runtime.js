@@ -30,6 +30,12 @@ async function manifest(env){
     plugin_display_name:TOOLSCOUT_PLUGIN_NAME,
     canonical_identity:`ToolScout | ${TOOLSCOUT_DESCRIPTOR} | trytoolscout.org`,
     canonical_url:'https://trytoolscout.org',
+    decision_engine:{
+      primary_capabilities:['decide_software','compare_for_use_case','find_alternatives','check_stack_fit','recent_changes'],
+      secondary_lookup_capabilities:['recommend_tools','search_tools','get_tool','compare_tools','get_ai_compatibility'],
+      positioning:'Softonic helps you find software. ToolScout helps you decide which software is right for you.',
+      no_pay_to_rank:true
+    },
     machine_discovery:{
       llms_txt:'https://trytoolscout.org/llms.txt',
       agent_guidance:'https://trytoolscout.org/agents.md',
