@@ -8,6 +8,7 @@ const root=process.cwd();
 const ed=JSON.parse(fs.readFileSync(path.join(root,'data/organic-growth-engine.json'),'utf8')).editorialQuality;
 const intents=JSON.parse(fs.readFileSync(path.join(root,'data/intents.json'),'utf8'));
 const pairs=JSON.parse(fs.readFileSync(path.join(root,'data/comparisons.json'),'utf8'));
+const holds=new Set((JSON.parse(fs.readFileSync(path.join(root,'reports/seo-publication-holds.json'),'utf8')).items||[]).map(x=>x.intent));
 const esc=v=>String(v??'').replace(/[\u2014\u2013]/g,'-').replace(/\s+/g,' ').trim()
   .replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
 const g=/(<h2>ToolScout analysis<\/h2><p>)[\s\S]*?(<\/p><\/section>)/;
@@ -31,6 +32,10 @@ function materialize(slug,type,analysis,decision){
 }
 for(const intent of intents){
   const analysis=ed.guideOverrides[intent.slug];if(!analysis||analysis.length<220)throw Error('Missing guide editorial '+intent.slug);
+  if(holds.has(intent.slug)){
+    if(fs.existsSync(path.join(root,intent.slug+'.html')))throw Error('Held guide must not be publicly indexed: '+intent.slug);
+    continue;
+  }
   materialize(intent.slug,'guide',analysis,null);
 }
 for(const [a,b] of pairs){
