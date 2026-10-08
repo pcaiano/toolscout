@@ -162,7 +162,7 @@ function render(tool){
   const related=relatedTools(tool);
   const verificationDate=tool.sourceCheckedOn||tool.lastVerified||null;
   const freeAnswer=tool.freePlanKnown!==true
-    ? `ToolScout has not yet verified whether ${tool.name} currently offers a free plan. Check the vendor for current offers.`
+    ? tool?.pricingDetails?.trialStatus==='verified_available'&&tool?.pricingDetails?.sourceUrl&&tool?.pricingDetails?.trialSummary?`ToolScout has not verified a permanent free plan. Vendor documentation records: ${tool.pricingDetails.trialSummary}`:`ToolScout has not yet verified whether ${tool.name} currently offers a free plan. Check the vendor for current offers.`
     : tool.freePlan
       ? tool?.pricingDetails?.freePlanStatus==='verified_available'&&tool?.pricingDetails?.sourceUrl?'Vendor documentation confirms a free entry plan with defined usage limits. Check current eligibility and allowances.':'The current ToolScout catalog records a free plan. Check the vendor for current limits and eligibility.'
       : 'The current ToolScout catalog does not record a free plan. Check the vendor for current offers.';
