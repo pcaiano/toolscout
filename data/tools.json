@@ -189,7 +189,19 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
-    ]
+    ],
+    "freePlanKnown": true,
+    "pricingDetails": {
+      "freePlanStatus": "verified_available",
+      "freePlanSummary": "Vendor-documented free publication and welcome email; multi-step automations require a paid plan.",
+      "limits": [
+        "Automations require a paid plan",
+        "Lite includes up to 10 live automations",
+        "Pro includes unlimited live automations"
+      ],
+      "sourceUrl": "https://www.beehiiv.com/support/article/38813477234071-welcome-email-vs-welcome-automation-which-should-you-use",
+      "verifiedAt": "2026-10-08"
+    }
   },
   {
     "slug": "hubspot",
