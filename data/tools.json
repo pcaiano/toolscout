@@ -9324,13 +9324,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Cross-channel agents require message delivery and handoff proof",
-      "summary": "Chatzy AI claims automation across messaging, voice and web channels. That is a real integration and compliance problem, not simply a chatbot feature. The submitted category tags provide insufficient independent evidence of channel permissions, agent reliability or cost.",
-      "buyerCheck": "Request a live channel demonstration with logging, user consent and human escalation.",
+      "angle": "Lead automation across channels depends on paid integrations",
+      "summary": "Chatzy AI offers a web and social inbox on its Free plan, but its published comparison separates that from connecting your own WhatsApp number, which requires a paid tier. The Free offering includes a limited allowance of AI replies and journey runs. This matters because a company testing website enquiries may start without an invoice while a WhatsApp-first sales team must budget subscriptions plus usage. Validate human takeover and campaign permissions before automating customer conversations.",
+      "buyerCheck": "Test a website enquiry and a WhatsApp handoff, then estimate subscription, reply and calling charges.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://chatzy.ai/pricing",
+      "sourceUrls": [
+        "https://chatzy.ai/pricing"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -9344,7 +9347,15 @@
     "tradeoffs": [
       "Cross-channel agents require message delivery and handoff proof"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://chatzy.ai/pricing",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -9415,13 +9426,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Customer-service automation requires independent accuracy proof",
-      "summary": "CoSupport AI's submitted positioning concerns handling support interactions in multiple languages. That makes resolution quality, escalation and knowledge grounding the real decision criteria, not the advertised accuracy percentage. Its broad assistant category and catalog feature tags need specialist verification before high-confidence ranking.",
-      "buyerCheck": "Request a documented demo with real support tickets, escalation paths and language coverage.",
+      "angle": "Support ROI is determined by resolutions, not generated answers",
+      "summary": "CoSupport AI publishes three distinct ways to pay: by resolved support ticket, by AI response or by a flat monthly service. Its stated 30-day pilot allows a customer to observe ticket performance before the paid phase, and the vendor separately describes a resolution guarantee. That makes it particularly relevant to high-volume helpdesks with reliable ticket histories. The trade-off is measurement: a low reply price does not mean a low cost per accurate resolution, and tickets handed to humans need explicit accounting.",
+      "buyerCheck": "Reconcile a sample of resolved, reopened and escalated tickets and model costs under each billing method.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://cosupport.ai/pricing",
+      "sourceUrls": [
+        "https://cosupport.ai/pricing"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -9435,7 +9449,15 @@
     "tradeoffs": [
       "Customer-service automation requires independent accuracy proof"
     ],
-    "evidence": [],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://cosupport.ai/pricing",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ],
     "categoryReviewRequired": true
   },
   {
@@ -9592,13 +9614,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Face replacement workflows require explicit media consent",
-      "summary": "Deep Swap AI is described as an image face-swap tool, not developer infrastructure. That category mismatch should be corrected before it can answer a developer-tools query. Buyers also need to review subject authorization, media retention and the usage-credit model before uploading images.",
-      "buyerCheck": "Check permitted source material, the preview/export terms and the product's true category.",
+      "angle": "One-time credits and watermarks shape the face-editing choice",
+      "summary": "DeepSwapAI's current pricing document distinguishes one-time credit packs from recurring subscriptions and shows that each photo replacement uses six credits. Video charges instead depend on rounded-up seconds, so a short preview is not a reliable proxy for the cost of a longer clip. Trial exports carry a visible watermark until a completed purchase, and the vendor asks users to confirm rights to source identities. Compare cost per acceptable, consented output before buying a larger credit pack.",
+      "buyerCheck": "Price five photos and a brief video, inspect watermark conditions and confirm subject consent.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://deepswapai.com/pricing",
+      "sourceUrls": [
+        "https://deepswapai.com/pricing"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -9612,7 +9637,15 @@
     "tradeoffs": [
       "Face replacement workflows require explicit media consent"
     ],
-    "evidence": [],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://deepswapai.com/pricing",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ],
     "categoryReviewRequired": true
   },
   {
@@ -9679,13 +9712,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Media-editing feature claims do not establish developer fit",
-      "summary": "Face Swap AI focuses on replacing faces across photos and video, according to its catalog entry. Presenting it as a software-development platform is misleading without evidence of a real developer offering. Consent, output restrictions and processing retention should drive evaluation.",
-      "buyerCheck": "Verify the media editing workflow, API claims and subject permissions before categorizing.",
+      "angle": "Moving-face replacement has different costs from photos",
+      "summary": "FaceSwapAI's official video workflow bills by server-measured input duration at three credits per second with a nine-credit minimum. Video generation requires sign-in and is not covered by the one-time watermarked photo trial. That distinction matters when a creator assumes that a free test translates into free usable video. Credits, permitted likeness rights and the reported 24-hour file deletion need review before upload. Do not select it as a developer tool merely because its catalog has broad API tags.",
+      "buyerCheck": "Calculate the exact cost of a short video, inspect source permission rules and test one difficult moving shot.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://faceswapai.com/video-swap",
+      "sourceUrls": [
+        "https://faceswapai.com/video-swap"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -9699,7 +9735,15 @@
     "tradeoffs": [
       "Media-editing feature claims do not establish developer fit"
     ],
-    "evidence": [],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://faceswapai.com/video-swap",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ],
     "categoryReviewRequired": true
   },
   {
@@ -9873,13 +9917,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Controlled lip-sync production rather than a generic API",
-      "summary": "Lip Sync AI is recorded as generating talking videos from footage and audio. The practical decision is about authorized materials, lip accuracy and usable export quality. Its current developer categorization and several feature labels are not yet verified and should not influence broad recommendations.",
-      "buyerCheck": "Use consenting footage and compare timing, watermarks and any available integration documentation.",
+      "angle": "Basic and High Fidelity video dubbing are priced differently",
+      "summary": "Lip Sync AI's pricing differentiates a verified-account Basic trial of 30 credits from High Fidelity processing, which cannot use promotional credits. The free grant expires after seven days and restricts each trial job to fifteen seconds. Published plans also state that they do not include team seats or API access, a crucial mismatch with generic developer-software expectations. A creator should evaluate a short, consenting speaker clip before purchasing production credits, including its required moderation step.",
+      "buyerCheck": "Compare a simple authorized clip in Basic mode with paid High Fidelity and check the actual credit estimate.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://lipsyncai.tools/pricing",
+      "sourceUrls": [
+        "https://lipsyncai.tools/pricing"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -9893,7 +9940,15 @@
     "tradeoffs": [
       "Controlled lip-sync production rather than a generic API"
     ],
-    "evidence": [],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://lipsyncai.tools/pricing",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ],
     "categoryReviewRequired": true
   },
   {
@@ -9965,13 +10020,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Multiple model access in one subscription",
-      "summary": "Lorka AI positions itself as a way to use several AI systems from a single interface. Consolidation can be convenient, but it can also obscure model versions, rate limits and how data is retained. Treat the model lineup and subscription entitlements as unverified until checked at the vendor.",
-      "buyerCheck": "Compare available model versions, privacy terms and usage quotas against direct subscriptions.",
+      "angle": "Aggregating AI subscriptions changes access and quota trade-offs",
+      "summary": "Lorka's manufacturer site presents a monthly subscription offering access to several third-party AI chatbot families in one workspace. The main practical advantage is reducing account switching for varied writing, research and analysis tasks. Yet named model families on a marketing page do not guarantee an identical model version, quota, file policy or tool entitlement to a direct subscription. The vendor's comparison of stand-alone prices should not be treated as independently measured savings. Test the particular models and workload before replacing existing plans.",
+      "buyerCheck": "Use three regular tasks on the required models and compare limits, source access and privacy with direct subscriptions.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://www.lorka.ai/es",
+      "sourceUrls": [
+        "https://www.lorka.ai/es"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -9985,7 +10043,15 @@
     "tradeoffs": [
       "Multiple model access in one subscription"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.lorka.ai/es",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -10506,13 +10572,16 @@
       "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
     },
     "editorialReview": {
-      "angle": "Photo-to-video creation for marketing assets",
-      "summary": "Talkpix AI appears to focus on talking images, advertisements and short creative clips. That is closer to content creation than a developer environment, despite some catalog API tags. Buyers should compare controllability, commercial rights and cost per acceptable output rather than assumed code integrations.",
-      "buyerCheck": "Create a consented product clip and verify output resolution, rights and the correct category.",
+      "angle": "Talking-photo pricing is paid before any rendering",
+      "summary": "TalkPix's pricing explains one-time credit packs alongside an optional membership, with an introductory paid talking-photo offer. A 720p talking photo consumes one credit per rendered second, while 1080p costs more; credits from one-time packs do not expire according to the vendor. There is no fully free video-generation tier, so a buyer comparing it with trial-based tools should price an acceptable export rather than a headline starting amount. Permission for depicted people and realistic motion remain independent checks.",
+      "buyerCheck": "Create a consented ten-second portrait video and compare billed seconds, quality and export rights.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://www.talkpix.ai/pricing",
+      "sourceUrls": [
+        "https://www.talkpix.ai/pricing"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -10526,7 +10595,15 @@
     "tradeoffs": [
       "Photo-to-video creation for marketing assets"
     ],
-    "evidence": [],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.talkpix.ai/pricing",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ],
     "categoryReviewRequired": true
   },
   {
@@ -10598,13 +10675,16 @@
       "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
     },
     "editorialReview": {
-      "angle": "Teacher lesson planning, not a generic forms product",
-      "summary": "Teachquill's recorded purpose is creating lesson plans, quizzes and educational materials. That is substantially different from the forms category currently assigned to it; this classification needs review before the product can be considered a qualified answer to a generic business-form query. Assessment should focus on educational accuracy, teacher workload and export formats.",
-      "buyerCheck": "Verify product category and test one lesson plan, worksheet and classroom export.",
+      "angle": "Teacher planning tools require curriculum-level human review",
+      "summary": "TeachQuill's planning documentation describes lessons and unit plans built from grade level, subject, duration and a chosen curriculum standard. It also describes editing and exporting drafts to teaching documents. This is specialist education software rather than a general forms platform. The operational trade-off is accuracy: standards alignment and appropriate accommodations cannot be accepted solely on a generated draft. Evaluate usefulness on an actual lesson with a teacher reviewing objectives, assessment and differentiation.",
+      "buyerCheck": "Generate a lesson and an aligned worksheet, then have a teacher audit the standard, pacing and export.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://teachquill.com/plan",
+      "sourceUrls": [
+        "https://teachquill.com/plan"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -10618,7 +10698,15 @@
     "tradeoffs": [
       "Teacher lesson planning, not a generic forms product"
     ],
-    "evidence": [],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://teachquill.com/plan",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ],
     "categoryReviewRequired": true
   },
   {
@@ -10687,13 +10775,16 @@
       "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
     },
     "editorialReview": {
-      "angle": "Fast writing prompts rather than a verified research system",
-      "summary": "Typli AI focuses on producing and refining written text. That can help an individual writer overcome a blank page, but the catalog does not verify underlying research, source attribution or advanced multimodal features. Buyers should decide whether draft speed or editorial correctness is the primary requirement.",
-      "buyerCheck": "Check originality, editing control, export and the provenance of factual statements.",
+      "angle": "Writing bundles and AI models share a token budget",
+      "summary": "Typli's published plans use a monthly token allowance across its chat, writing and image capabilities. The service is broader than a single article generator, but larger models and image generation draw different amounts from the same balance. This is a different cost structure from subscribing to one writing editor with a fixed word quota. A buyer should compare model access and real output cost, not rely on its headline count of writing templates or available models to predict value.",
+      "buyerCheck": "Run one long document, five short edits and a visual task, then estimate monthly token use.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://typli.ai/pricing",
+      "sourceUrls": [
+        "https://typli.ai/pricing"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -10707,7 +10798,15 @@
     "tradeoffs": [
       "Fast writing prompts rather than a verified research system"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://typli.ai/pricing",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
