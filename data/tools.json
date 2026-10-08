@@ -457,13 +457,17 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Creative throughput does not equal ad performance",
-      "summary": "AdCreative.ai is relevant when a paid media team needs more advertising asset variations for testing. Generating alternatives quickly is useful, but a creative score is not proof of incremental conversions. Judge the product by the quality of assets accepted by the ad platforms and by how cleanly real results feed back into the next iteration.",
-      "buyerCheck": "Run a controlled creative test against an existing campaign and measure conversion outcomes.",
+      "angle": "Predictive ad scores are not measured campaign uplift",
+      "summary": "AdCreative.ai documents a Creative Scoring workflow that compares submitted image assets and presents separate predicted Performance and Awareness scores. It can help a paid media team prioritize which visuals to test when many variants are available. Those scores are forecasts rather than observed conversions, so the decision should rely on experiments in the advertising account and actual customer outcomes. Confirm how credits, generated assets and brand controls fit the team's production volume before paying for higher creative throughput.",
+      "buyerCheck": "Score a controlled set of assets, launch matched ad tests and compare predicted rankings with observed conversions.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://help.adcreative.ai/en/articles/8885776-what-is-creative-scoring-ai-and-how-to-use-it",
+      "sourceUrls": [
+        "https://help.adcreative.ai/en/articles/8885776-what-is-creative-scoring-ai-and-how-to-use-it",
+        "https://help.adcreative.ai/en/articles/5713632-how-does-the-ai-score-your-creatives"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -477,7 +481,22 @@
     "tradeoffs": [
       "Creative throughput does not equal ad performance"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://help.adcreative.ai/en/articles/8885776-what-is-creative-scoring-ai-and-how-to-use-it",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://help.adcreative.ai/en/articles/5713632-how-does-the-ai-score-your-creatives",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "slug": "pipedrive",
@@ -9025,13 +9044,17 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Generative video where consistent motion is the hard problem",
-      "summary": "Kling AI targets text- and image-driven video production, with motion and audio-related functionality in the catalog. Generated results can vary substantially even with similar prompts; usage credits and rights matter alongside realism. Test the exact output duration and editing control required rather than assuming a demonstration applies to production.",
-      "buyerCheck": "Run repeated prompts and check identity stability, cost per usable clip and commercial permissions.",
+      "angle": "Shot continuity and native audio are the difficult parts of AI video",
+      "summary": "Kling AI's official VIDEO 3.0 guide documents text-to-video, image-driven generation, native audio and custom multi-shot workflows with durations up to fifteen seconds per generation. That makes it worth considering for storyboards and campaign footage requiring more than a single static-looking shot. The trade-off is iteration: manufacturer examples do not prove that characters, speech and camera framing will remain consistent on every prompt. Compare successful usable seconds, editing effort and credits against a real creative brief.",
+      "buyerCheck": "Generate a two-character, multi-shot fifteen-second sample and evaluate sound, continuity and rerun cost.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://kling.ai/quickstart/klingai-video-3-model-user-guide",
+      "sourceUrls": [
+        "https://kling.ai/quickstart/klingai-video-3-model-user-guide",
+        "https://kling.ai/quickstart/klingai-video-3-omni-model-user-guide"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -9045,7 +9068,22 @@
     "tradeoffs": [
       "Generative video where consistent motion is the hard problem"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://kling.ai/quickstart/klingai-video-3-model-user-guide",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://kling.ai/quickstart/klingai-video-3-omni-model-user-guide",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "slug": "otter-ai",
@@ -9730,13 +9768,17 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Image and video enhancement should be measured on real assets",
-      "summary": "GoEnhance AI is positioned as a visual generation and enhancement environment. Its appeal is combining transformations that might otherwise need separate services, yet listed model access and actual editing quality remain unverified. Buyers should use their own content, not vendor promotional examples, in evaluation.",
-      "buyerCheck": "Try a short authorized clip, inspect visual artifacts and calculate the accepted output cost.",
+      "angle": "Restyling existing footage is different from generating a scene",
+      "summary": "GoEnhance AI documents text-to-video, image-to-video and video-to-video transformations alongside its image tools. For a producer with existing footage, video-to-video restyling can be more relevant than creating synthetic scenes from scratch. The manufacturer's guide discusses multiple animation styles, but its speed and consistency claims should be treated as vendor claims until tested independently. Choose based on subject stability, exported resolution and the full cost of retries on representative footage.",
+      "buyerCheck": "Convert the same ten-second clip into three styles and inspect motion preservation, visual drift and total credits.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://www.goenhance.ai/ai-video-generator",
+      "sourceUrls": [
+        "https://www.goenhance.ai/ai-video-generator",
+        "https://www.goenhance.ai/blog/The-Complete-Guide-to-GoEnhance-AI-Video-to-Animation"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -9750,7 +9792,22 @@
     "tradeoffs": [
       "Image and video enhancement should be measured on real assets"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.goenhance.ai/ai-video-generator",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.goenhance.ai/blog/The-Complete-Guide-to-GoEnhance-AI-Video-to-Animation",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -10804,13 +10861,17 @@
       "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
     },
     "editorialReview": {
-      "angle": "Recording and editing workflow versus synthetic-video generation",
-      "summary": "Vmaker AI is presented as a platform for capturing, editing and repurposing video. This can be more suitable for teams recording real demonstrations than services built around fully synthetic footage. Several catalog feature tags are unverified, so test transcription, recording quality and workflow fit directly.",
-      "buyerCheck": "Record a screen tutorial, trim it, add captions and test team publishing rights.",
+      "angle": "Repurposing recordings calls for captions and manual corrections",
+      "summary": "Vmaker AI documents a workflow that edits uploaded or screen-recorded video with automatic captions, B-roll, music and timeline controls. Its pricing page separates the free plan's subtitle allowance from larger paid editing and export limits. This is useful for educators and marketers turning longer spoken footage into clips, but auto-selected highlights and captions still require human correction before publication. Compare usable output and export entitlements rather than counting every AI editing feature as a substitute for review.",
+      "buyerCheck": "Turn a ten-minute demo into two short clips, fix transcription errors and price the required exports.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://www.vmaker.com/ai-video-editor",
+      "sourceUrls": [
+        "https://www.vmaker.com/ai-video-editor",
+        "https://www.vmaker.com/pricing"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -10824,7 +10885,22 @@
     "tradeoffs": [
       "Recording and editing workflow versus synthetic-video generation"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.vmaker.com/ai-video-editor",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.vmaker.com/pricing",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -10980,13 +11056,17 @@
       "rankingNote": "Catalog inclusion does not imply recommendation. Tool-specific editorial evidence is required before ranking eligibility."
     },
     "editorialReview": {
-      "angle": "File and media recovery, not general software development",
-      "summary": "Wondershare Repairit is positioned for repairing corrupted photos, video and documents. Recovery rate, local versus cloud handling and supported file formats matter far more than the broad developer feature labels currently in the catalog. These taxonomy errors need review before applying category-based ranks.",
-      "buyerCheck": "Test recovery on harmless duplicate corrupted files and document privacy and export constraints.",
+      "angle": "Severely damaged video may need a matching sample file",
+      "summary": "Wondershare Repairit documents Quick Repair and an Advanced Repair mode that uses an intact sample video recorded by the same device and in the same format. The manufacturer also distinguishes free preview from paid saving of fully repaired desktop videos. This makes it a targeted recovery option, not a general video editor or developer tool. A repaired preview does not guarantee a playable or lossless export, and severely damaged files may remain unrecoverable. Compare recovery success on copies of the exact affected file types before buying.",
+      "buyerCheck": "Try Quick and Advanced Repair on backup copies, verify exported playback and inspect the paid licence terms.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://repairit.wondershare.com/video-repair.html",
+      "sourceUrls": [
+        "https://repairit.wondershare.com/video-repair.html",
+        "https://repairit.wondershare.com/buy/video-repair.html"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -11000,7 +11080,22 @@
     "tradeoffs": [
       "File and media recovery, not general software development"
     ],
-    "evidence": [],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://repairit.wondershare.com/video-repair.html",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://repairit.wondershare.com/buy/video-repair.html",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ],
     "categoryReviewRequired": true
   }
 ]

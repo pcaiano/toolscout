@@ -54,8 +54,8 @@ test('decision editorial catalog has 127 individual assessments with transparent
   assert.equal(opens.size,ids.length,'Repeated lead architecture detected in decision-grade profiles');
   const provisional=catalog.filter(x=>x.editorialReview?.verificationStatus==='catalog_only');
   const sourced=catalog.filter(x=>x.editorialReview&&!provisional.includes(x));
-  assert.equal(provisional.length,24);
-  assert.equal(sourced.length,103);
+  assert.equal(provisional.length,19);
+  assert.equal(sourced.length,108);
   for(const tool of provisional){
     const html=read('tools/'+tool.slug+'.html');
     assert.match(html,/Catalog-based; vendor claims and plan limits not independently verified/i);
@@ -67,7 +67,7 @@ test('decision editorial catalog has 127 individual assessments with transparent
   const disputed=catalog.filter(x=>x.categoryReviewRequired);
   assert.equal(disputed.length,10);
   for(const tool of disputed){
-    assert.match(read('tools/'+tool.slug+'.html'),/Category under review/);
+    assert.match(read('tools/'+tool.slug+'.html'),/Category under review|category review pending/i);
     assert.ok(['developer','forms','ai-assistant'].includes(tool.category));
   }
 });

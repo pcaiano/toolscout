@@ -2,15 +2,12 @@
   "baselineDate": "2026-10-08",
   "purpose": "Finite inherited documentation debt; new catalog tools require vendor source evidence before entry. Keep pending internal and retire slugs as sourcing completes.",
   "pendingSlugs": [
-    "adcreative-ai",
     "anijam-ai",
     "chatzy-ai",
     "cosupport-ai",
     "davinci-ai",
     "deep-swap-ai",
     "face-swap-ai",
-    "goenhance-ai",
-    "kling-ai",
     "lip-sync-ai",
     "lorka-ai",
     "moz-pro",
@@ -23,8 +20,6 @@
     "teachquill",
     "typli-ai",
     "vidflux-ai",
-    "vmaker-ai",
-    "weryai",
-    "wondershare-repairit"
+    "weryai"
   ]
 }

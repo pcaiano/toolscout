@@ -377,7 +377,7 @@
       "systeme-io": "Systeme.io is worth shortlisting when a creator needs funnels, email sequences and course delivery in one service rather than separate landing-page, email and learning tools. Its published Free plan includes 2,000 contacts, three sales funnels and one workflow, making it a practical prototype tier rather than an unlimited operating plan. The trade-off is flexibility: check when your number of automations, funnels and contacts pushes you into a paid plan, and compare that total with separate specialist tools.",
       "beehiiv": "beehiiv is designed around publishing a newsletter and growing its subscriber audience. The important buying distinction is between a simple publication and a multi-step subscriber lifecycle: beehiiv documents that automations are paid-plan functionality. Lite allows up to ten live automations, while Pro offers unlimited live automations and additional click-trigger options. A publisher sending a weekly issue may not need this depth; one monetizing segmented subscriber journeys should price the required plan before migrating a list.",
       "jotform": "Jotform is an operational form-builder option when a submission needs to start an approval, payment or data-collection workflow rather than simply send a contact notification. Its Starter tier has material limits: the vendor describes a five-form allowance and 100 monthly submissions, alongside account-wide storage and upload limits. These limits are more decision-relevant than a long list of form features. Before purchasing, model monthly submissions, file sizes and any approval or payment steps under the exact plan.",
-      "adcreative-ai": "AdCreative.ai is relevant when a paid media team needs more advertising asset variations for testing. Generating alternatives quickly is useful, but a creative score is not proof of incremental conversions. Judge the product by the quality of assets accepted by the ad platforms and by how cleanly real results feed back into the next iteration.",
+      "adcreative-ai": "AdCreative.ai documents a Creative Scoring workflow that compares submitted image assets and presents separate predicted Performance and Awareness scores. It can help a paid media team prioritize which visuals to test when many variants are available. Those scores are forecasts rather than observed conversions, so the decision should rely on experiments in the advertising account and actual customer outcomes. Confirm how credits, generated assets and brand controls fit the team's production volume before paying for higher creative throughput.",
       "jasper": "Jasper documents a reusable knowledge base for product facts, audiences and brand context. This can reduce repeated briefing when several marketers produce campaign assets for one business. The limitation is governance: incorrect or stale knowledge can be repeatedly reproduced as confident promotional statements. Team review and approval are still necessary, and a generic assistant may be enough for infrequent content work. Compare review time and factual consistency across a real campaign.",
       "zoho-crm": "Zoho CRM merits consideration for a small sales team that needs leads, contacts and deals in a structured CRM, particularly if it already uses other Zoho applications. The manufacturer's edition guide documents a Free tier for up to three users, with basic lead, contact and deal tracking and limited workflow actions. That is a useful starting point, not evidence that advanced automation or every Zoho integration is included. Compare the configuration effort and reporting requirements with simpler CRMs before paying for a wider suite.",
       "monday-crm": "monday.com's CRM support documents pipeline boards that organize prospects and opportunities across sales stages. This is attractive when salespeople need to see current ownership and coordinate tasks with other departments. Yet custom board flexibility can lead to inconsistent stages and unreliable forecasts unless definitions are established centrally. The buying decision is therefore about repeatable process governance and reporting, not the appeal of colorful columns or drag-and-drop movement.",
@@ -458,7 +458,7 @@
       "unbounce": "Unbounce documents Smart Traffic as adaptive routing between two or more published landing-page variants following a learning phase. It suits teams with measurable paid traffic and genuinely different offers to test. This is not the same design as a fixed-split A/B experiment; insufficient traffic and frequent variant edits make results hard to assess. Before paying for optimization, ensure conversion events and campaign attribution are reliable and that the experiment has enough visits to be useful.",
       "character-ai": "Character.AI's creator guide documents configuring a character's greeting, avatar, voice, tags and visibility as public, unlisted or private. This makes the service relevant to creative roleplay and character-driven experiences, but does not make it a dependable source for factual professional research. Identity, access and content moderation should be assessed alongside engaging conversations. Buyers comparing creative AI tools should test how a character behaves beyond a compelling opening interaction.",
       "google-ai-studio": "Google's AI Studio quickstart documents chat prompting, model and safety settings, structured output, function calling and a Get Code path to Gemini API integration. This is valuable for developers exploring requirements before adding model calls to an application. The trade-off is ownership of production engineering: latency, security, usage limits and application evaluation remain outside a simple playground session. Compare reproducibility of generated code and safety behavior, not the number of demo prompts completed.",
-      "kling-ai": "Kling AI targets text- and image-driven video production, with motion and audio-related functionality in the catalog. Generated results can vary substantially even with similar prompts; usage credits and rights matter alongside realism. Test the exact output duration and editing control required rather than assuming a demonstration applies to production.",
+      "kling-ai": "Kling AI's official VIDEO 3.0 guide documents text-to-video, image-driven generation, native audio and custom multi-shot workflows with durations up to fifteen seconds per generation. That makes it worth considering for storyboards and campaign footage requiring more than a single static-looking shot. The trade-off is iteration: manufacturer examples do not prove that characters, speech and camera framing will remain consistent on every prompt. Compare successful usable seconds, editing effort and credits against a real creative brief.",
       "otter-ai": "Otter's documentation describes identifying and managing action items associated with meeting transcripts. This can reduce the burden of rewriting notes and help attendees track assigned follow-up work. The limitation is that speech recognition and summarization may misattribute owners or omit important qualifications, especially in noisy calls. Consent to record and rules for sensitive meetings also matter. Compare reliably completed tasks and corrections, not merely the number of minutes automatically transcribed.",
       "anijam-ai": "Anijam AI is presented as a conversation-led system for generating films and social video. The broad list of styles is not independently validated, so treat it as an early creative tool rather than a guaranteed production pipeline. Reliability, permissions and export credits need checking.",
       "chatzy-ai": "Chatzy AI claims automation across messaging, voice and web channels. That is a real integration and compliance problem, not simply a chatbot feature. The submitted category tags provide insufficient independent evidence of channel permissions, agent reliability or cost.",
@@ -466,7 +466,7 @@
       "davinci-ai": "DaVinci AI advertises access to several named image and video generators in a single interface. That packaging may help creative exploration, but the catalog does not verify current model versions or usage conditions. Compare output rights, credit cost and controls against direct access to the underlying services.",
       "deep-swap-ai": "Deep Swap AI is described as an image face-swap tool, not developer infrastructure. That category mismatch should be corrected before it can answer a developer-tools query. Buyers also need to review subject authorization, media retention and the usage-credit model before uploading images.",
       "face-swap-ai": "Face Swap AI focuses on replacing faces across photos and video, according to its catalog entry. Presenting it as a software-development platform is misleading without evidence of a real developer offering. Consent, output restrictions and processing retention should drive evaluation.",
-      "goenhance-ai": "GoEnhance AI is positioned as a visual generation and enhancement environment. Its appeal is combining transformations that might otherwise need separate services, yet listed model access and actual editing quality remain unverified. Buyers should use their own content, not vendor promotional examples, in evaluation.",
+      "goenhance-ai": "GoEnhance AI documents text-to-video, image-to-video and video-to-video transformations alongside its image tools. For a producer with existing footage, video-to-video restyling can be more relevant than creating synthetic scenes from scratch. The manufacturer's guide discusses multiple animation styles, but its speed and consistency claims should be treated as vendor claims until tested independently. Choose based on subject stability, exported resolution and the full cost of retries on representative footage.",
       "lip-sync-ai": "Lip Sync AI is recorded as generating talking videos from footage and audio. The practical decision is about authorized materials, lip accuracy and usable export quality. Its current developer categorization and several feature labels are not yet verified and should not influence broad recommendations.",
       "lorka-ai": "Lorka AI positions itself as a way to use several AI systems from a single interface. Consolidation can be convenient, but it can also obscure model versions, rate limits and how data is retained. Treat the model lineup and subscription entitlements as unverified until checked at the vendor.",
       "paioclaw": "Paioclaw describes an assistant handling calendar and delegated tasks. This is a higher-risk use case than text generation because incorrect actions can affect other people. The current catalog description is too thin to establish reliability, supported accounts or how confirmations work.",
@@ -478,9 +478,9 @@
       "teachquill": "Teachquill's recorded purpose is creating lesson plans, quizzes and educational materials. That is substantially different from the forms category currently assigned to it; this classification needs review before the product can be considered a qualified answer to a generic business-form query. Assessment should focus on educational accuracy, teacher workload and export formats.",
       "typli-ai": "Typli AI focuses on producing and refining written text. That can help an individual writer overcome a blank page, but the catalog does not verify underlying research, source attribution or advanced multimodal features. Buyers should decide whether draft speed or editorial correctness is the primary requirement.",
       "vidflux-ai": "Vidflux AI markets rapid text-to-video generation using several models. Speed claims should be treated as promotional until measured on a representative brief, including retries and unusable outputs. Its listing contains insufficient sourced pricing and production evidence to establish a high-confidence recommendation.",
-      "vmaker-ai": "Vmaker AI is presented as a platform for capturing, editing and repurposing video. This can be more suitable for teams recording real demonstrations than services built around fully synthetic footage. Several catalog feature tags are unverified, so test transcription, recording quality and workflow fit directly.",
+      "vmaker-ai": "Vmaker AI documents a workflow that edits uploaded or screen-recorded video with automatic captions, B-roll, music and timeline controls. Its pricing page separates the free plan's subtitle allowance from larger paid editing and export limits. This is useful for educators and marketers turning longer spoken footage into clips, but auto-selected highlights and captions still require human correction before publication. Compare usable output and export entitlements rather than counting every AI editing feature as a substitute for review.",
       "weryai": "WeryAI is presented as a platform aggregating visual generation and enhancement functions. The catalog does not independently verify which named models are accessible, in which regions, or at what cost. It warrants evaluation only after checking model availability and rights for exported output.",
-      "wondershare-repairit": "Wondershare Repairit is positioned for repairing corrupted photos, video and documents. Recovery rate, local versus cloud handling and supported file formats matter far more than the broad developer feature labels currently in the catalog. These taxonomy errors need review before applying category-based ranks."
+      "wondershare-repairit": "Wondershare Repairit documents Quick Repair and an Advanced Repair mode that uses an intact sample video recorded by the same device and in the same format. The manufacturer also distinguishes free preview from paid saving of fully repaired desktop videos. This makes it a targeted recovery option, not a general video editor or developer tool. A repaired preview does not guarantee a playable or lossless export, and severely damaged files may remain unrecoverable. Compare recovery success on copies of the exact affected file types before buying."
     },
     "guideOverrides": {
       "best-seo-tools-for-agencies": "An agency's SEO stack should be evaluated by the work it repeats across accounts: research, site auditing, tracked keywords, reporting and client handoff. Semrush is a broad operating-suite candidate; Ahrefs is especially relevant to backlink-led competitor investigation; Surfer is a narrower content optimization option. ToolScout's recorded scores are editorial signals, not live product tests or proof of current entitlements. Before adopting a winner, price the actual keyword, crawl and account allowances, and run one representative client campaign through the shortlisted workflow.",
@@ -735,11 +735,11 @@
         "handsOnTested": false
       },
       "adcreative-ai": {
-        "angle": "Creative throughput does not equal ad performance",
-        "buyerCheck": "Run a controlled creative test against an existing campaign and measure conversion outcomes.",
-        "sourceUrl": null,
+        "angle": "Predictive ad scores are not measured campaign uplift",
+        "buyerCheck": "Score a controlled set of assets, launch matched ad tests and compare predicted rankings with observed conversions.",
+        "sourceUrl": "https://help.adcreative.ai/en/articles/8885776-what-is-creative-scoring-ai-and-how-to-use-it",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "jasper": {
@@ -1383,11 +1383,11 @@
         "handsOnTested": false
       },
       "kling-ai": {
-        "angle": "Generative video where consistent motion is the hard problem",
-        "buyerCheck": "Run repeated prompts and check identity stability, cost per usable clip and commercial permissions.",
-        "sourceUrl": null,
+        "angle": "Shot continuity and native audio are the difficult parts of AI video",
+        "buyerCheck": "Generate a two-character, multi-shot fifteen-second sample and evaluate sound, continuity and rerun cost.",
+        "sourceUrl": "https://kling.ai/quickstart/klingai-video-3-model-user-guide",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "otter-ai": {
@@ -1447,11 +1447,11 @@
         "handsOnTested": false
       },
       "goenhance-ai": {
-        "angle": "Image and video enhancement should be measured on real assets",
-        "buyerCheck": "Try a short authorized clip, inspect visual artifacts and calculate the accepted output cost.",
-        "sourceUrl": null,
+        "angle": "Restyling existing footage is different from generating a scene",
+        "buyerCheck": "Convert the same ten-second clip into three styles and inspect motion preservation, visual drift and total credits.",
+        "sourceUrl": "https://www.goenhance.ai/ai-video-generator",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "lip-sync-ai": {
@@ -1543,11 +1543,11 @@
         "handsOnTested": false
       },
       "vmaker-ai": {
-        "angle": "Recording and editing workflow versus synthetic-video generation",
-        "buyerCheck": "Record a screen tutorial, trim it, add captions and test team publishing rights.",
-        "sourceUrl": null,
+        "angle": "Repurposing recordings calls for captions and manual corrections",
+        "buyerCheck": "Turn a ten-minute demo into two short clips, fix transcription errors and price the required exports.",
+        "sourceUrl": "https://www.vmaker.com/ai-video-editor",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "weryai": {
@@ -1559,11 +1559,11 @@
         "handsOnTested": false
       },
       "wondershare-repairit": {
-        "angle": "File and media recovery, not general software development",
-        "buyerCheck": "Test recovery on harmless duplicate corrupted files and document privacy and export constraints.",
-        "sourceUrl": null,
+        "angle": "Severely damaged video may need a matching sample file",
+        "buyerCheck": "Try Quick and Advanced Repair on backup copies, verify exported playback and inspect the paid licence terms.",
+        "sourceUrl": "https://repairit.wondershare.com/video-repair.html",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
     }
