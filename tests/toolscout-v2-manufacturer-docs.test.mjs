@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {vendorEvidenceIssues} from '../scripts/check-vendor-evidence.mjs';
+import {trustedManufacturerEvidence} from '../catalog-autonomy-worker.js';
 import {transformPublicRedesignResponse} from '../public-redesign-runtime.js';
 
 const read=p=>JSON.parse(fs.readFileSync(new URL('../'+p,import.meta.url),'utf8'));
@@ -64,4 +65,16 @@ test('new catalog admission routes reject vendor-page-only evidence',()=>{
  assert.match(promotion,/manufacturer_editorial_documentation_required/);
  assert.match(runtime,/datedDocument/);
  assert.match(promotion,/documentSource/);
+});
+
+test('scheduled trusted catalog admissions require dated manufacturer proof',()=>{
+ const catalog=read('data/tools.json');
+ const hubspot=catalog.find(t=>t.slug==='hubspot');
+ assert.equal(trustedManufacturerEvidence(hubspot),true);
+ assert.equal(trustedManufacturerEvidence({...hubspot,editorialReview:null}),false);
+ assert.equal(trustedManufacturerEvidence({...hubspot,evidence:[]}),false);
+ assert.equal(trustedManufacturerEvidence({...hubspot,editorialReview:{...hubspot.editorialReview,sourceUrl:'https://unrelated.co.uk/docs'}}),false);
+ const forged={...hubspot,sourceUrl:'https://seller.co.uk/',editorialReview:{...hubspot.editorialReview,sourceUrl:'https://unrelated.co.uk/pricing'},evidence:[{claimScope:'toolscout_editorial_review',sourceUrl:'https://unrelated.co.uk/pricing',verifiedAt:'2026-10-08'}]};
+ assert.equal(trustedManufacturerEvidence(forged),false);
+ assert.match(fs.readFileSync(new URL('../catalog-autonomy-worker.js',import.meta.url),'utf8'),/if\(!trustedManufacturerEvidence\(raw\)\)/);
 });
