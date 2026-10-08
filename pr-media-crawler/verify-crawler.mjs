@@ -16,6 +16,10 @@ const html = '<p>Jane Doe - Editor <a href="mailto:jane@example.org">Jane Doe</a
 const contacts = ctx.extract(html,"https://publisher.org/contact","publisher.org");
 assert.deepEqual(Array.from(contacts,c=>c.email).sort(),["jane@example.org","john@example.org","pedro@publisher.org"]);
 assert.equal(ctx.extract('<p>News h.jones@publisher.org</p>',"https://publisher.org/","publisher.org")[0].name,"");
+const masked = ctx.extract('<p>Editor Alba Mota publishes alba [at] publisher [dot] org</p>',"https://publisher.org/contact","publisher.org");
+assert.equal(masked[0].email,"alba@publisher.org");
+assert.equal(masked[0].name,"");
+assert.equal(ctx.extract('<p>Editor name [at] publisher [dot] invalid</p>',"https://publisher.org/contact","publisher.org").length,0);
 const fixture = `import {parentPort,workerData} from "node:worker_threads";
 if(workerData.domain==="fast"){ parentPort.postMessage({domain:"fast",status:"complete",contacts:[],people:[],pages_fetched:1}); }
 else if(workerData.domain==="zero"){ parentPort.postMessage({domain:"zero",status:"complete",contacts:[],people:[],pages_fetched:0}); }
