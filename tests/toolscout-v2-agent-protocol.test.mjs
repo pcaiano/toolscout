@@ -377,7 +377,7 @@ test('full catalog MCP distinguishes editorial coverage from verified evidence a
   const catalog=JSON.parse(fs.readFileSync(new URL('../data/tools.json',import.meta.url),'utf8'));
   const env={ASSETS:{fetch:async request=>new URL(request.url).pathname==='/data/tools.json'?Response.json(catalog):new Response('',{status:404})}};
   async function getTool(slug){
-    const body={jsonrpc:'2.0',id:801,method:'tools/call',params:{name:'get_tool',arguments:{tool:slug}}};
+    const body={jsonrpc:'2.0',id:801,method:'tools/call',params:{name:'get_tool',arguments:{tool:slug},_meta:{'io.modelcontextprotocol/protocolVersion':'2026-07-28','io.modelcontextprotocol/clientInfo':{name:'editorial-catalog-audit',version:'1.0'}}}};
     const r=await handleAgentProtocolRoute(new Request('https://trytoolscout.org/mcp',{method:'POST',headers:{'Content-Type':'application/json','MCP-Protocol-Version':'2026-07-28','Mcp-Method':'tools/call','Mcp-Name':'get_tool'},body:JSON.stringify(body)}),env,{waitUntil(){}});
     assert.equal(r.status,200);
     const payload=await r.json();
