@@ -173,7 +173,7 @@ function iconSources(t){
   const curated=assets?.[t.slug]?.url||'';
   return{src:curated||first||google,first:curated?first:'',google,stage:curated?0:1};
 }
-function freeLabel(t){return t.freePlanKnown===false?'Unknown':t.freePlan?'Yes':'No';}
+function freeLabel(t){return t.freePlanKnown!==true?'Unknown':t.freePlan?'Yes':'No';}
 function headHtml(t){
   const icon=iconSources(t);
   const img=icon.src?`<img src="${esc(icon.src)}" data-first="${esc(icon.first)}" data-google="${esc(icon.google)}" data-stage="${icon.stage}" alt="${esc(t.name)} logo" width="25" height="25" loading="lazy" referrerpolicy="no-referrer" onerror="nextIcon(this)">`:'';
