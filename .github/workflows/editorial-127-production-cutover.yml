@@ -1,0 +1,65 @@
+# Single-use production publication after PR #468 passed all CI gates.
+# This workflow changes only the Cloudflare Worker/assets and does not run D1 migrations.
+name: ToolScout Editorial 127 Production Cutover
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/editorial-127-production-cutover.yml'
+permissions:
+  contents: read
+concurrency:
+  group: toolscout-worker-production-recovery
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout merged production code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate 127 editorial profiles and category protections
+        run: |
+          set -euo pipefail
+          node --check agent-protocol-core-worker.js
+          node --check scripts/generate-tool-pages.mjs
+          node --check scripts/generate-seo-pages.mjs
+          node --test tests/toolscout-v2-editorial-evidence-generators.test.mjs tests/toolscout-v2-agent-protocol.test.mjs tests/toolscout-v2-canonical-contract.test.mjs
+          python3 -m unittest discover -s tests -p 'test_decision_quality.py'
+          python3 scripts/audit_decision_quality.py --json > /tmp/decision-127-audit.json
+          python3 -c "import json; x=json.load(open('/tmp/decision-127-audit.json')); assert x['catalog_count']==127; assert x['metrics']['catalog_only_editorial_reviews']==107; assert x['metrics']['sourced_editorial_reviews']==20; print('Validated: 127 reviews, 107 provisional, 20 sourced')"
+      - name: Wrangler dry-run compilation
+        run: npx wrangler deploy --config wrangler.toml --dry-run --outdir /tmp/editorial-127-build
+      - name: Publish to canonical Cloudflare Worker without database migrations
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo 'Missing production Cloudflare token'; exit 1; }
+          npx wrangler deploy --config wrangler.toml --latest
+      - name: Verify live editorial evidence tiers and preserved canonical URLs
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3 4 5; do
+            curl -fsSL --retry 2 "https://trytoolscout.org/tools/systeme-io?editorial_cutover=468" -o /tmp/systeme.html || true
+            curl -fsSL --retry 2 "https://trytoolscout.org/best-crm-for-small-business?editorial_cutover=468" -o /tmp/crm.html || true
+            curl -fsSL --retry 2 "https://trytoolscout.org/tools/teachquill?editorial_cutover=468" -o /tmp/teachquill.html || true
+            if grep -Fq 'Systeme.io combines the funnel' /tmp/systeme.html 2>/dev/null &&
+               grep -Fq 'catalog-based editorial assessment only' /tmp/systeme.html 2>/dev/null &&
+               grep -Fq 'A small-business CRM purchase begins' /tmp/crm.html 2>/dev/null &&
+               grep -Fq 'Category under review' /tmp/teachquill.html 2>/dev/null &&
+               grep -Fq 'href="/go/systeme-io"' /tmp/systeme.html 2>/dev/null &&
+               grep -Fq 'rel="canonical"' /tmp/systeme.html 2>/dev/null; then
+              echo 'PASS: ToolScout 127 editorial release verified on the public domain'
+              exit 0
+            fi
+            sleep 10
+          done
+          echo 'Production verification could not establish all release assertions' >&2
+          exit 1
