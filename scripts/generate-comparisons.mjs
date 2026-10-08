@@ -173,6 +173,7 @@ function iconSources(t){
   const curated=assets?.[t.slug]?.url||'';
   return{src:curated||first||google,first:curated?first:'',google,stage:curated?0:1};
 }
+function priceLabel(t){return t?.freePlanKnown===true&&t?.pricingDetails?.freePlanStatus==='verified_available'&&t?.pricingDetails?.sourceUrl&&t?.pricingDetails?.freePlanSummary?t.pricingDetails.freePlanSummary:(t?.pricing||'See vendor');}
 function freeLabel(t){return t.freePlanKnown!==true?'Unknown':t.freePlan?'Yes':'No';}
 function headHtml(t){
   const icon=iconSources(t);
@@ -181,7 +182,7 @@ function headHtml(t){
 }
 function ctaHtml(t){return `<div class="actions"><a class="btn secondary" href="./tools/${encodeURIComponent(t.slug)}">Profile</a><a class="btn" href="/go/${encodeURIComponent(t.slug)}?source=compare" target="_blank" rel="nofollow sponsored noopener">Visit ${esc(t.name)}</a></div>`;}
 function initialTable(a,b){
-  const rows=[['Category',a.category,b.category],['Pricing',a.pricing||'See vendor',b.pricing||'See vendor'],['Free plan',freeLabel(a),freeLabel(b)],['AI interoperability',aiTier(a),aiTier(b)],['AI assistants',aiAssistants(a),aiAssistants(b)],['Agent connectivity',aiMcp(a),aiMcp(b)],['Features',(a.features||[]).join(', '),(b.features||[]).join(', ')],['Best for',(a.bestFor||[]).join(', '),(b.bestFor||[]).join(', ')],['Last verified',a.lastVerified||'Not recorded',b.lastVerified||'Not recorded']];
+  const rows=[['Category',a.category,b.category],['Pricing',priceLabel(a),priceLabel(b)],['Free plan',freeLabel(a),freeLabel(b)],['AI interoperability',aiTier(a),aiTier(b)],['AI assistants',aiAssistants(a),aiAssistants(b)],['Agent connectivity',aiMcp(a),aiMcp(b)],['Features',(a.features||[]).join(', '),(b.features||[]).join(', ')],['Best for',(a.bestFor||[]).join(', '),(b.bestFor||[]).join(', ')],['Last verified',a.lastVerified||'Not recorded',b.lastVerified||'Not recorded']];
   return `<div class="row"><div class="cell label">Compare</div><div class="cell">${headHtml(a)}${ctaHtml(a)}</div><div class="cell">${headHtml(b)}${ctaHtml(b)}</div></div>`+rows.map(r=>`<div class="row"><div class="cell label">${esc(r[0])}</div><div class="cell value">${esc(r[1])}</div><div class="cell value">${esc(r[2])}</div></div>`).join('');
 }
 function render(a,b){
