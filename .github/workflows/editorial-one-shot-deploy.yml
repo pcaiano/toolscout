@@ -1,0 +1,53 @@
+# One-time controlled publication of the already reviewed editorial decision cohort.
+# Triggered only by the addition of this file on main. Remove after verification.
+name: ToolScout Editorial Cutover
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/editorial-one-shot-deploy.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: toolscout-worker-production-recovery
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify current editorial, MCP and canonical contract
+        run: |
+          node --check agent-protocol-core-worker.js
+          node --check scripts/generate-tool-pages.mjs
+          node --check scripts/generate-comparisons.mjs
+          node --test tests/toolscout-v2-editorial-evidence-generators.test.mjs tests/toolscout-v2-agent-protocol.test.mjs tests/toolscout-v2-canonical-contract.test.mjs
+      - name: Validate preservation invariants
+        env:
+          TOOLSCOUT_V2_BASE_REF: a4bfbd36f0f6d049e3bf13dd6272f48276ada07e
+        run: node scripts/validate-v2-preservation.mjs
+      - name: Wrangler dry-run
+        run: npx wrangler deploy --config wrangler.toml --dry-run --outdir /tmp/toolscout-editorial-dry-run
+      - name: Publish to canonical ToolScout Cloudflare Worker without database migrations
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "Missing Cloudflare deployment token"; exit 1; }
+          npx wrangler deploy --config wrangler.toml --latest
+      - name: Verify new editorial content at production URLs
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --retry 5 --retry-delay 3 'https://trytoolscout.org/tools/hubspot?editorial_cutover=20261008' | grep -Fq 'HubSpot earns consideration'
+          curl --fail --silent --show-error --retry 5 --retry-delay 3 'https://trytoolscout.org/hubspot-vs-pipedrive?editorial_cutover=20261008' | grep -Fq 'HubSpot and Pipedrive solve adjacent'
+          curl --fail --silent --show-error --retry 5 --retry-delay 3 'https://trytoolscout.org/tools/zapier?editorial_cutover=20261008' | grep -Fq 'Before you choose'
+          echo 'Production ToolScout editorial cutover verified'
