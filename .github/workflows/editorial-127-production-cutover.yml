@@ -8,6 +8,7 @@ on:
       - '.github/workflows/editorial-127-production-cutover.yml'
 permissions:
   contents: read
+  issues: write
 concurrency:
   group: toolscout-worker-production-recovery
   cancel-in-progress: false
@@ -63,3 +64,15 @@ jobs:
           done
           echo 'Production verification could not establish all release assertions' >&2
           exit 1
+      - name: Record independently verified production release
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr comment 468 --repo "${{ github.repository }}" --body "EDITORIAL-127-DEPLOY-VERIFIED: Production Worker published from commit ${{ github.sha }}. Live canonical profile, category caveat and CRM guide verified. No D1 migration executed."
+      - name: Record deployment or validation failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr comment 468 --repo "${{ github.repository }}" --body "EDITORIAL-127-DEPLOY-FAILED: Release workflow for commit ${{ github.sha }} failed or could not verify production. Inspect the GitHub Actions logs; publication is NOT confirmed."
