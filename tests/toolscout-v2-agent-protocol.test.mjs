@@ -384,12 +384,11 @@ test('full catalog MCP distinguishes editorial coverage from verified evidence a
     assert.equal(payload.result.isError,false);
     return payload.result.structuredContent.tool;
   }
-  const provisional=await getTool('resume-ai');
-  assert.equal(provisional.editorial_review.verification_status,'catalog_only');
-  assert.equal(provisional.editorial_review.evidence_source,null);
-  assert.match(provisional.editorial_review.evidence_caveat,/unverified catalog attributes/i);
-  assert.equal(provisional.category_review_required,true);
-  assert.equal(provisional.editorial_review.hands_on_tested,false);
+  const sourcedWithTaxonomyIssue=await getTool('resume-ai');
+  assert.equal(sourcedWithTaxonomyIssue.editorial_review.verification_status,'vendor_documented');
+  assert.match(sourcedWithTaxonomyIssue.editorial_review.evidence_source,/^https:\/\//);
+  assert.equal(sourcedWithTaxonomyIssue.category_review_required,true,'Source verification must not override independent category review');
+  assert.equal(sourcedWithTaxonomyIssue.editorial_review.hands_on_tested,false);
   const sourced=await getTool('hubspot');
   assert.notEqual(sourced.editorial_review.verification_status,'catalog_only');
   assert.match(sourced.editorial_review.evidence_source,/^https:\/\//);
