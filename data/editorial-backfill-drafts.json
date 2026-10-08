@@ -1,0 +1,180 @@
+{
+  "status": "catalog_assessment_unverified",
+  "entries": {
+    "systeme-io": [
+      "Selling a digital product without stitching five platforms together",
+      "Systeme.io combines the funnel, email and course jobs into a single proposed operating stack. It is worth comparing when setup overhead matters more than selecting the strongest specialist in each category. Confirm how the paid tiers handle contacts, funnels and course access: the catalog alone cannot establish the lowest viable long-term package.",
+      "Model one purchase journey from landing page to email follow-up and paid course access."
+    ],
+    "beehiiv": [
+      "A newsletter business rather than a general marketing database",
+      "beehiiv puts publishing, audience growth and newsletter monetization in the center of the product decision. That is a different job from CRM-driven segmentation or ecommerce lifecycle automation. Check ownership of subscriber data, referral features and the monetization conditions before moving an established list.",
+      "Test subscriber import, signup attribution and the recurring publication workflow."
+    ],
+    "adcreative-ai": [
+      "Creative throughput does not equal ad performance",
+      "AdCreative.ai is relevant when a paid media team needs more advertising asset variations for testing. Generating alternatives quickly is useful, but a creative score is not proof of incremental conversions. Judge the product by the quality of assets accepted by the ad platforms and by how cleanly real results feed back into the next iteration.",
+      "Run a controlled creative test against an existing campaign and measure conversion outcomes."
+    ],
+    "kit": [
+      "Creator subscriber relationships ahead of enterprise automation",
+      "Kit emphasizes newsletter sequences, subscriber tags and creator commerce. For a writer or course creator that can be a more natural workflow than a complex B2B marketing stack, but the economics depend on subscriber count and the automation actually required. Validate migration of tags, consent status and paid product paths before changing platforms.",
+      "Import a small consented segment and reproduce one complete subscriber-to-sale sequence."
+    ],
+    "klaviyo": [
+      "Lifecycle marketing tied to ecommerce behavior",
+      "Klaviyo is oriented around customer profiles, segmentation and campaigns triggered by shopping activity. That focus matters when cart and purchase data drive decisions more than a generic newsletter editor. Integration depth, usable events and messaging charges will determine value; catalog feature labels are not enough to prove a specific store connection.",
+      "Map purchase, browse and abandoned-cart events and calculate the combined email/SMS cost."
+    ],
+    "mailerlite": [
+      "Lean newsletter operations with landing-page flexibility",
+      "MailerLite is a credible comparison for teams that mainly publish newsletters, collect subscriptions and run simple email sequences. Its landing-page and website options may reduce tool count, but this should not obscure plan limits and automation requirements. Evaluate whether the editing experience and subscriber segmentation fit the actual publication calendar.",
+      "Check the applicable subscriber and send limits, signup forms and sequence branching."
+    ],
+    "getresponse": [
+      "Email campaigns extending into funnels and webinars",
+      "GetResponse spans newsletters, automation, landing pages and webinar-oriented marketing. A team running scheduled launches may benefit from that breadth, while one requiring only broadcast email risks buying unnecessary complexity. Compare event registration, follow-up timing and contact-based charges rather than counting adjacent features.",
+      "Recreate a webinar registration, reminder and post-event nurture journey."
+    ],
+    "omnisend": [
+      "Store-focused email and SMS journeys",
+      "Omnisend is most relevant when marketing activity follows ecommerce events and channels, rather than isolated mailing lists. Its email and SMS combination merits consideration for retention workflows, but the store data contract and message-volume costs must be checked in a real account. Generic automation scores cannot prove performance on the buyer's commerce platform.",
+      "Test product recommendations, an abandoned-cart trigger and messaging costs."
+    ],
+    "constant-contact": [
+      "Small-business campaigns with events in the workflow",
+      "Constant Contact brings campaigns, forms and event-oriented activity together for organizations that communicate with customers regularly. Event management can be a meaningful differentiator from a pure email sender, but only if registrations and follow-ups are essential. Verify contact segmentation, automation depth and pricing by audience size before consolidating tools.",
+      "Set up one event invitation, registration and follow-up campaign with the required audience segments."
+    ],
+    "podia": [
+      "Digital-product storefront and creator operations",
+      "Podia combines course delivery, downloads, coaching and a public-facing storefront. This can simplify life for an independent seller, although community, email and payment needs often expand faster than the first product launch. Compare payout terms, content access and subscriber management against specialist alternatives.",
+      "Check tax, payment fees, course access rules and an actual customer checkout."
+    ],
+    "unbounce": [
+      "Conversion-focused landing pages rather than a complete website",
+      "Unbounce is worth evaluating when paid campaigns need landing pages, lead capture and testing separated from the main site release cycle. Its advantage only matters if marketers can measure valid conversion improvements and maintain tracking. A temporary free trial does not establish a permanently free operating option; verify traffic and conversion entitlements first.",
+      "Run an A/B page test with consistent attribution, mobile performance and CRM delivery."
+    ],
+    "jotform": [
+      "Operational forms that move work forward",
+      "Jotform extends basic form collection toward approvals, payments and structured workflow steps. It fits businesses where a submission initiates a process rather than simply delivers a contact email. Check what an actual plan permits in submissions, storage, signatures and integrations before treating every listed module as included.",
+      "Prototype a form with payment or approval, file uploads and an exception path."
+    ],
+    "paperform": [
+      "Forms that can also handle bookings and purchases",
+      "Paperform is attractive when the form itself is the client-facing transaction, combining questions with payments or bookings. That flexibility is less important for a simple newsletter signup, where a lighter form builder may suffice. Payment gateways, conditional paths and allowable submissions need direct plan verification.",
+      "Test a real booking/payment form and audit confirmations, refunds and data exports."
+    ],
+    "fillout": [
+      "Form intake connected to operational records",
+      "Fillout focuses on form capture with conditional logic and links to database-style workflows. It deserves attention when answers update structured records or drive follow-up work, not just when a form looks polished. Validate record permissions, conditional steps and per-plan submissions, particularly if a live database is the system of record.",
+      "Submit records through a test workflow and check updates, errors and access permissions."
+    ],
+    "teachquill": [
+      "Teacher lesson planning, not a generic forms product",
+      "Teachquill's recorded purpose is creating lesson plans, quizzes and educational materials. That is substantially different from the forms category currently assigned to it; this classification needs review before the product can be considered a qualified answer to a generic business-form query. Assessment should focus on educational accuracy, teacher workload and export formats.",
+      "Verify product category and test one lesson plan, worksheet and classroom export."
+    ],
+    "jasper": [
+      "Brand-consistent marketing production under review",
+      "Jasper is positioned for teams that need recurring marketing copy and brand-voice controls across many assets. The question is whether review, governance and campaign reuse justify a dedicated writing environment over a general AI assistant. Output quality and factual accuracy still require editorial supervision.",
+      "Test one campaign brief across multiple channels and measure editing time and brand consistency."
+    ],
+    "grammarly": [
+      "Writing improvement at the point of work",
+      "Grammarly addresses clarity, grammar and tone across the applications people already write in. That is a narrower and often easier-to-evaluate job than running an entire AI content production system. Review privacy settings, application coverage and whether suggestions preserve domain-specific terminology.",
+      "Compare suggested edits on a legal, sales and internal note before enabling broad access."
+    ],
+    "copy-ai": [
+      "Sales and marketing workflows, not just another copy generator",
+      "Copy.ai's catalog scope includes go-to-market content and repeatable marketing or sales processes. That makes process consistency more important than the number of writing prompts. Teams should confirm which workflow integrations and governance functions are actually available on their tier before replacing existing tools.",
+      "Pilot one approved outbound sequence, including personalization, human review and CRM handoff."
+    ],
+    "zoho-crm": [
+      "Sales CRM depth within a broader business stack",
+      "Zoho CRM covers leads, pipelines, analytics and automation for teams that want to structure sales operations. Its wider ecosystem may be attractive to organizations already using related Zoho products, but that connection must be verified for each specific app. Compare setup and reporting needs with lighter CRMs before assuming extra configuration is worth it.",
+      "Map lead assignment, stages, duplicate control and required integrations."
+    ],
+    "monday-crm": [
+      "Customizable sales workflows anchored in a shared workspace",
+      "monday CRM is a candidate when salespeople and other teams need to collaborate around leads and work items. Its flexibility can help nonstandard sales processes, while also creating a risk of inconsistent board design. Test pipeline reporting and operational governance before treating visual configurability as a replacement for core CRM controls.",
+      "Recreate pipeline stages, team permissions, automations and forecasting reports."
+    ],
+    "salesforce": [
+      "Enterprise CRM control with implementation costs to justify",
+      "Salesforce is a serious candidate when sales and service operations need extensive data models, controls and cross-team reporting. Its ecosystem is broad, but complexity in licensing, administration and rollout can overwhelm a small business. The decision turns on governance, data ownership and total implementation effort rather than sheer capability breadth.",
+      "Budget licences, integrations, configuration and admin ownership for the complete workflow."
+    ],
+    "close": [
+      "Inside-sales conversations in the same workspace as deals",
+      "Close centers sales activity around calls, email, SMS and a deal pipeline. This is useful if the sales team's daily bottleneck is outreach and follow-up, rather than marketing campaign breadth. Check telephony availability, message costs, CRM sync and local compliance before trusting a catalog integration score.",
+      "Run a full day of sample calling, email and logging in the proposed geography."
+    ],
+    "copper": [
+      "CRM for teams living inside Google Workspace",
+      "Copper is positioned for relationship management close to Gmail and Google tools. That workflow can be advantageous where adoption depends on reducing context switches, but the depth of the exact Workspace connection needs direct confirmation. Do not mistake an integration label for proof of bidirectional data sync.",
+      "Check Gmail, Calendar and contact permissions, sync direction and duplicate handling."
+    ],
+    "freshsales": [
+      "Sales pipeline and communication in one CRM",
+      "Freshsales combines lead and deal workflows with communication features. It is relevant when a small or growing team wants more structure than a contact spreadsheet without immediately adopting an enterprise platform. Verify which phone, email and automation capabilities are included in the intended region and plan.",
+      "Test lead capture, routing, follow-up and the manager's reporting view."
+    ],
+    "attio": [
+      "Custom relationship data rather than a fixed pipeline template",
+      "Attio stands out in the catalog through a configurable CRM data model and custom relationships. That matters for investors, partners or other nonstandard pipelines, but flexibility comes with decisions about fields, objects and governance. Evaluate whether the team can maintain the resulting structure without turning every change into a development project.",
+      "Create a nonstandard relationship object, sharing rules and one automation end to end."
+    ],
+    "claude": [
+      "Document-heavy AI work and controlled tool access",
+      "Claude is an option for analysis, drafting and development tasks where working with lengthy context and revisions is central. Model choice should follow actual output evaluation, data-handling rules and available integrations, not a broad claim that one assistant is universally superior. Confirm plan limits and the client tools your team needs.",
+      "Evaluate three representative documents, one coding task and the organization's retention policy."
+    ],
+    "chatgpt": [
+      "General-purpose assistance across varied tasks",
+      "ChatGPT can support research, writing, analysis and coding in a single assistant interface. That breadth is useful when tasks change throughout the day, but reliability varies by task, available tools and plan. Compare factual checking, work-product quality and connected-data permissions with more specialized systems.",
+      "Test one research question, one document task and one workflow using only permitted data."
+    ],
+    "gemini": [
+      "AI assistance for multimodal and Google-centric workflows",
+      "Gemini belongs on the shortlist when users already work with Google services or need to reason across text and images. Workspace integration and exact model entitlements vary, and the catalog should not be used as evidence for a connector without an independently verified record. Test privacy boundaries and actual collaboration flows.",
+      "Compare document, spreadsheet and image tasks with the user's existing Google toolset."
+    ],
+    "character-ai": [
+      "Character conversation and creative exploration, not enterprise automation",
+      "Character.AI is oriented toward interacting with custom conversational personas. That experience differs sharply from knowledge-work assistants offering reliable business workflows or data-grounded research. Use a character platform for entertainment or exploratory dialogue, not as evidence of operational accuracy.",
+      "Evaluate content controls, character privacy and suitability for the intended audience."
+    ],
+    "cosupport-ai": [
+      "Customer-service automation requires independent accuracy proof",
+      "CoSupport AI's submitted positioning concerns handling support interactions in multiple languages. That makes resolution quality, escalation and knowledge grounding the real decision criteria, not the advertised accuracy percentage. Its broad assistant category and catalog feature tags need specialist verification before high-confidence ranking.",
+      "Request a documented demo with real support tickets, escalation paths and language coverage."
+    ],
+    "lorka-ai": [
+      "Multiple model access in one subscription",
+      "Lorka AI positions itself as a way to use several AI systems from a single interface. Consolidation can be convenient, but it can also obscure model versions, rate limits and how data is retained. Treat the model lineup and subscription entitlements as unverified until checked at the vendor.",
+      "Compare available model versions, privacy terms and usage quotas against direct subscriptions."
+    ],
+    "paioclaw": [
+      "Personal agent promises need execution and permission controls",
+      "Paioclaw describes an assistant handling calendar and delegated tasks. This is a higher-risk use case than text generation because incorrect actions can affect other people. The current catalog description is too thin to establish reliability, supported accounts or how confirmations work.",
+      "Require a demonstrated calendar task with permission scoping, logs and human approval."
+    ],
+    "pine-ai": [
+      "AI life administration where consent and accountability matter",
+      "Pine AI is positioned for making calls and negotiating everyday administrative matters. The value would come from verifiable outcomes and time saved, but it also raises consent, authorization and audit questions. Treat supported jurisdictions and success claims as unverified until demonstrated.",
+      "Check call recording consent, authorization methods, cancellation flow and verifiable task completion."
+    ],
+    "questie-ai": [
+      "Gaming companion rather than a business AI assistant",
+      "Questie AI's recorded niche is interactive game conversation and voice response. This should not be conflated with general-purpose analysis or business decision support merely because both use conversational AI. Its category and marketing claims need product-level confirmation before it is eligible for generic work-assistant recommendations.",
+      "Test supported games, latency, permissions and age-appropriate content settings."
+    ],
+    "typli-ai": [
+      "Fast writing prompts rather than a verified research system",
+      "Typli AI focuses on producing and refining written text. That can help an individual writer overcome a blank page, but the catalog does not verify underlying research, source attribution or advanced multimodal features. Buyers should decide whether draft speed or editorial correctness is the primary requirement.",
+      "Check originality, editing control, export and the provenance of factual statements."
+    ]
+  }
+}
