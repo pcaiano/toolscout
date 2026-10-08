@@ -94,11 +94,15 @@ for(const pathname of PATHS){
   const parity=comparePublicParity(baseline.html,candidateHtml,{strictSearchMetadata:true});
   const baselineFp=publicPageFingerprint(baseline.html);
   const candidateFp=publicPageFingerprint(candidateHtml);
-  if(parity.errors.length)failed=true;
+  // Exactly one intentional presentation change: drop redundant software H1 suffix.
+  // Everything else, including canonicals, metadata, links and structure, must still match.
+  const approvedH1Change=/^\/tools\/[a-z0-9-]+$/.test(pathname)&&baselineFp.h1===candidateFp.h1+' profile';
+  const errors=parity.errors.filter(error=>!(error==='h1_changed'&&approvedH1Change));
+  if(errors.length)failed=true;
   report.push({
     pathname,
-    ok:parity.ok,
-    errors:parity.errors,
+    ok:errors.length===0,
+    errors,
     live:{
       status:baseline.response.status,
       canonical:baselineFp.canonical,

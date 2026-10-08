@@ -53,6 +53,11 @@ function stripLegacyNavigation(html,surface){
   return out;
 }
 
+function normalizeToolProfileHeading(html,surface){
+  if(surface!=='tool-profile')return String(html||'');
+  return String(html||'').replace(/(<h1\b[^>]*>)([^<>]*?)\s+profile(\s*<\/h1>)/i,(_,open,name,close)=>open+name+close);
+}
+
 function normalizeToolProfileBackLink(html,surface){
   if(surface!=='tool-profile')return String(html||'');
   const back='<a class="ts2-back-tools" href="/tools" aria-label="Back to tools"><span aria-hidden="true">←</span><span>Back to tools</span></a>';
@@ -390,6 +395,7 @@ export async function transformPublicRedesignResponse(request,response){
   const surface=publicSurface(url.pathname);
   html=stripLegacyNavigation(html,surface);
   html=normalizeToolProfileBackLink(html,surface);
+  html=normalizeToolProfileHeading(html,surface);
   if(isCommercialDecisionPath(url.pathname))html=stripCommercialVendorSourceLinks(html);
   if(!html.includes('data-toolscout-public-redesign="2"'))html=html.replace('</head>',styleTag()+'</head>');
   if(!html.includes('toolscout-v2-native.css'))html=html.replace('</head>','<link rel="stylesheet" href="/toolscout-v2-native.css?v=20261006-2" data-toolscout-native-v2="1"></head>');

@@ -64,3 +64,17 @@ Only after these gates should catalog coverage expand from 127 towards 250, 500 
 - **Recommendation:** mandatory-requirement violations (target zero), irrelevant category leakage (target zero), confidence calibration, sample-based decision quality.
 - **Editorial:** source freshness, text uniqueness, usefulness of trade-offs, accuracy of prices and plans.
 - **Distribution:** qualified MCP calls, agent referrals, verified strict-human sessions and actual monetized outbound/conversion, kept separate.
+
+## Mandatory manufacturer documentation (8 October 2026)
+
+Every new software record must have dated, product-specific first-party manufacturer evidence before catalog admission, rather than publishing a catalog-only editorial assessment. Existing vendor-documented analyses must never regress to unsourced facts. A marketing homepage or affiliate URL alone cannot substantiate plan limitations, integrations, prices or specific capabilities. Do not claim hands-on testing without performing it.
+
+The original editorial cohort had 20 documented products and 107 catalog-only assessments. Five more manufacturers have now been reviewed (Systeme.io, beehiiv, Jotform, Zoho CRM and PostHog). The remaining 102 constitute an **internal, finite research queue**, recorded in `data/vendor-evidence-backlog.json`. This is not a target quality tier for readers or agents. Remove each slug as its dated primary documentation is established; never add new unsourced records to this queue.
+
+`node scripts/check-vendor-evidence.mjs` runs in ToolScout 2.0 CI and rejects new entries without structured source evidence or an existing sourced record that falls out of compliance. Structure checks do not by themselves prove a particular sentence is supported by its citation. Each factual assertion still needs direct documentary review, including limitations and plan boundaries. Keep truthful uncertainty for legacy unsourced data until verified.
+
+Each tool profile's visible H1 is exactly the product name (for example, "HubSpot"). The independent software profile eyebrow already provides context, so the generator and live runtime must not append "profile" to the H1. Preserve SEO canonicals, structured metadata and `/go/` commercial routes.
+
+## Source privacy and public commercial navigation
+
+The manufacturer documents and their URLs are kept in ToolScout's internal editorial evidence store and are checked by the editorial quality process. **Do not render manufacturer documentation links, direct source links, external official-source CTAs or source lists on public software profiles.** Public profiles show ToolScout's independent conclusion, meaningful strengths and limitations, dated editorial methodology if useful, and only the approved monetized product visit route `/go/{slug}` for vendor visits. Retain documentary provenance internally for audit and re-verification; it is not a visitor-facing reading list. The product-profile link regression test enforces this separation.
