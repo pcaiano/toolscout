@@ -16,6 +16,8 @@
 - Feed: https://trytoolscout.org/feed.xml
 
 ## Machine and agent discovery
+- MCP decision engine: https://trytoolscout.org/mcp
+- A2A agent card: https://trytoolscout.org/.well-known/agent-card.json
 - Agent guidance: https://trytoolscout.org/agents.md
 - Distribution manifest: https://trytoolscout.org/.well-known/toolscout-distribution.json
 - Distribution JSON feed: https://trytoolscout.org/api/distribution/feed.json
@@ -42,6 +44,14 @@ Machine readers should use the canonical URLs and visible page content as the so
 - Alternatives to a named software product
 - Software for small businesses, consultants, agencies, creators, sales teams and marketing teams
 - Software constrained by price, free plan, automation, integrations, workflow or team size
+
+## Preferred decision operations
+- `decide_software`: shortlist software for a concrete job plus constraints.
+- `compare_for_use_case`: compare named products for the user's actual workflow and surface trade-offs.
+- `find_alternatives`: replace a product because of a specific weakness while preserving must-haves.
+- `check_stack_fit`: assess candidates against an existing software stack without inventing pair-specific integrations.
+- `recent_changes`: surface recent ToolScout editorial updates that can change a buying decision.
+- `search_tools` is a secondary catalog lookup operation, not the preferred operation for software choice.
 
 ## Recommendation principles
 - Start with the user's job rather than generic popularity.
