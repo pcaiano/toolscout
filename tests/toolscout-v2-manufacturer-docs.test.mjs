@@ -37,3 +37,26 @@ test('existing live profile pages remove only redundant H1 profile suffix',async
  assert.match(result,/Independent CRM profile/);
  assert.match(result,/href="\/go\/hubspot"/);
 });
+
+test('public product profiles do not link directly to manufacturer documentation',()=>{
+ const catalog=read('data/tools.json');
+ for(const tool of catalog){
+   const html=fs.readFileSync(new URL('../tools/'+tool.slug+'.html',import.meta.url),'utf8');
+   const anchors=[...html.matchAll(/<a\\b[^>]*href=["']([^"']+)["']/gi)].map(match=>match[1]);
+   assert.ok(anchors.some(href=>href==='/go/'+tool.slug),'Monetized product CTA missing: '+tool.slug);
+   for(const href of anchors){
+     assert.ok(!/^https?:\\/\\//i.test(href),'External direct link exposed in public profile: '+tool.slug+' '+href);
+   }
+ }
+ const generator=fs.readFileSync(new URL('../scripts/generate-tool-pages.mjs',import.meta.url),'utf8');
+ assert.ok(!generator.includes('href="${esc(tool.sourceUrl)}"'));
+});
+
+test('new catalog admission routes reject vendor-page-only evidence',()=>{
+ const runtime=fs.readFileSync(new URL('../catalog-gap-runtime-worker.js',import.meta.url),'utf8');
+ const promotion=fs.readFileSync(new URL('../scripts/promote-verified-gap-profiles-to-catalog.mjs',import.meta.url),'utf8');
+ assert.match(runtime,/manufacturer_editorial_documentation_required/);
+ assert.match(promotion,/manufacturer_editorial_documentation_required/);
+ assert.match(runtime,/datedDocument/);
+ assert.match(promotion,/documentSource/);
+});
