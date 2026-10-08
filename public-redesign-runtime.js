@@ -70,6 +70,8 @@ function normalizeToolProfileBackLink(html,surface){
 
 function stripCommercialVendorSourceLinks(html){
   let out=String(html||'');
+  // Primary-source URLs are internal editorial evidence, never public profile links.
+  out=out.replace(/<p\b[^>]*class=["'][^"']*\bsmall\b[^"']*["'][^>]*>\s*<strong>\s*AI integration evidence:\s*<\/strong>[\s\S]*?<\/p>/gi,'');
   out=out.replace(/(<section\b[^>]*data-toolscout-editorial-evidence=["']1["'][^>]*>)([\s\S]*?)(<\/section>)/gi,(match,open,body,close)=>open+body.replace(/<a\b[^>]*href=["']https?:\/\/[^"']+["'][^>]*>([\s\S]*?)<\/a>/gi,'$1')+close);
   out=out.replace(/<p\b[^>]*class=["'][^"']*source-note[^"']*["'][^>]*>[\s\S]*?<\/p>/gi,'');
   out=out.replace(/\s*(?:·\s*)?<a\b[^>]*href=["']https?:\/\/[^"']+["'][^>]*>\s*Official(?:\s+product)?\s+source\s*<\/a>/gi,'');
