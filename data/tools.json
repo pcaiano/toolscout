@@ -694,9 +694,9 @@
       "summary": "Jasper documents a reusable knowledge base for product facts, audiences and brand context. This can reduce repeated briefing when several marketers produce campaign assets for one business. The limitation is governance: incorrect or stale knowledge can be repeatedly reproduced as confident promotional statements. Team review and approval are still necessary, and a generic assistant may be enough for infrequent content work. Compare review time and factual consistency across a real campaign.",
       "buyerCheck": "Create five campaign assets from an approved product brief and check every claim.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": "https://help.jasper.ai/hc/en-us/articles/18618707176347-Knowledge-Base",
+      "sourceUrl": "https://www.jasper.ai/knowledge-base",
       "sourceUrls": [
-        "https://help.jasper.ai/hc/en-us/articles/18618707176347-Knowledge-Base"
+        "https://www.jasper.ai/knowledge-base"
       ],
       "method": "first_party_documentation_plus_editorial_judgment",
       "verificationStatus": "vendor_documented",
@@ -716,7 +716,7 @@
     "evidence": [
       {
         "claimScope": "toolscout_editorial_review",
-        "sourceUrl": "https://help.jasper.ai/hc/en-us/articles/18618707176347-Knowledge-Base",
+        "sourceUrl": "https://www.jasper.ai/knowledge-base",
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
@@ -6534,9 +6534,9 @@
       "summary": "Crisp documents assigning support conversations to specific operators and applying automatic routing rules. This matters when a shared inbox starts to suffer from duplicate replies, missing owners or uneven workload. Routing functions and operator teams have plan-specific limits; configuration errors can leave an urgent request in the wrong queue. Evaluate workload distribution with actual enquiries rather than the appearance of the website widget.",
       "buyerCheck": "Route billing and technical tickets among available and unavailable operators.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": "https://help.crisp.chat/en/article/how-to-route-and-assign-conversations-to-operators-in-crisp-qjl2d2/",
+      "sourceUrl": "https://help.crisp.chat/en/article/how-to-route-and-assign-conversations-to-operators-bv8z4c/",
       "sourceUrls": [
-        "https://help.crisp.chat/en/article/how-to-route-and-assign-conversations-to-operators-in-crisp-qjl2d2/"
+        "https://help.crisp.chat/en/article/how-to-route-and-assign-conversations-to-operators-bv8z4c/"
       ],
       "method": "first_party_documentation_plus_editorial_judgment",
       "verificationStatus": "vendor_documented",
@@ -6556,7 +6556,7 @@
     "evidence": [
       {
         "claimScope": "toolscout_editorial_review",
-        "sourceUrl": "https://help.crisp.chat/en/article/how-to-route-and-assign-conversations-to-operators-in-crisp-qjl2d2/",
+        "sourceUrl": "https://help.crisp.chat/en/article/how-to-route-and-assign-conversations-to-operators-bv8z4c/",
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
