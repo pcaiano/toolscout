@@ -12,45 +12,64 @@
       "displayName": "ToolScout: Software Decision Engine",
       "type": "application/mcp-server-card+json",
       "url": "https://trytoolscout.org/mcp",
-      "description": "ToolScout is the independent software discovery and decision engine at trytoolscout.org. Deterministic recommendations use job, persona, budget, team and priority, and affiliate relationships do not influence ranking.",
+      "description": "ToolScout is the Independent Software Discovery & Decision Engine at trytoolscout.org. This read-only MCP helps users decide which software is right for a real job and constraints: evidence-aware shortlists, contextual comparisons, reason-based alternatives, trade-offs, existing-stack fit and recent buyer-relevant changes. Affiliate relationships do not influence decision output.",
       "tags": [
         "software",
         "recommendations",
         "decision-support",
-        "mcp"
+        "mcp",
+        "shortlist",
+        "trade-offs",
+        "alternatives",
+        "stack-fit",
+        "buyer-decision"
       ],
       "capabilities": [
-        "recommend_tools"
+        "decide_software",
+        "compare_for_use_case",
+        "find_alternatives",
+        "check_stack_fit",
+        "recent_changes",
+        "recommend_tools",
+        "search_tools",
+        "get_tool",
+        "compare_tools",
+        "get_ai_compatibility"
       ],
       "representativeQueries": [
-        "what software should I use for my small sales team",
-        "recommend a CRM under 25 dollars per month",
-        "best SEO tools for an agency",
-        "workflow automation software for a small business"
+        "What software should I shortlist for this job and these constraints?",
+        "Compare HubSpot and Pipedrive for my particular use case",
+        "Find alternatives to HubSpot because I dislike the price and complexity",
+        "What do I lose if I choose the cheaper option?",
+        "Which candidate fits the software I already use?",
+        "What changed recently that should affect my shortlist?"
       ],
-      "version": "1.0.0"
+      "version": "2.0.0"
     },
     {
       "identifier": "urn:air:trytoolscout.org:a2a:software-recommendation-agent",
       "displayName": "ToolScout: Software Decision Engine Agent",
       "type": "application/a2a-agent-card+json",
       "url": "https://trytoolscout.org/.well-known/agent-card.json",
-      "description": "ToolScout is the independent software discovery and decision engine at trytoolscout.org. This read-only agent ranks software against a described job and optional budget, team and priority constraints.",
+      "description": "ToolScout is the independent software discovery and decision engine at trytoolscout.org. This read-only A2A agent turns a software job and constraints into a decision-oriented shortlist and is positioned for software choice rather than generic catalog search.",
       "tags": [
         "software",
         "recommendations",
         "agent",
-        "a2a"
+        "a2a",
+        "shortlist",
+        "buyer-fit"
       ],
       "capabilities": [
+        "decide_software",
         "recommend_software"
       ],
       "representativeQueries": [
-        "find software for customer support",
-        "which AI assistant should my team use",
-        "recommend marketing software for a small company"
+        "Help me decide which CRM fits my team and budget",
+        "What software should I shortlist for this workflow?",
+        "Recommend software for my job and constraints"
       ],
-      "version": "1.0.0"
+      "version": "2.0.0"
     },
     {
       "identifier": "urn:air:trytoolscout.org:openapi:recommendation-api",
