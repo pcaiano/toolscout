@@ -133,6 +133,19 @@ if (policy.autoPromoteVerifiedCompetitiveGapProfiles !== false) {
       continue;
     }
 
+    // A reachable official homepage is not proof of a decision-grade review.
+    // Admission requires a product-specific, dated manufacturer document.
+    const review=profile?.editorialReview;
+    const reviewSource=review?.sourceUrl;
+    const evidence=Array.isArray(profile?.evidence)?profile.evidence:[];
+    const documentSource=evidence.some(x=>x?.claimScope==='toolscout_editorial_review'&&x?.sourceUrl===reviewSource&&/^\d{4}-\d{2}-\d{2}$/.test(x?.verifiedAt||''));
+    const manufacturerDomain=u=>{try{return new URL(u).hostname.replace(/^www\./,'').split('.').slice(-2).join('.')}catch{return null}};
+    const firstParty=Boolean(reviewSource&&manufacturerDomain(reviewSource)===manufacturerDomain(source.finalUrl||profile.sourceUrl));
+    if(!review?.summary||!firstParty||!documentSource||review?.verificationStatus==='catalog_only'||review?.handsOnTested===true){
+      held.push({slug,reason:'manufacturer_editorial_documentation_required',retry:'source_review'});
+      continue;
+    }
+
     const bestFor = Array.isArray(profile.bestFor) && profile.bestFor.length >= 2
       ? profile.bestFor.slice(0,6)
       : (BEST_FOR[category] || ['software buyers evaluating this category', 'teams comparing relevant software options']);
@@ -155,6 +168,8 @@ if (policy.autoPromoteVerifiedCompetitiveGapProfiles !== false) {
       lastVerified:today,
       scores:neutralScores(profile),
       aiIntegration:profile?.aiIntegration && typeof profile.aiIntegration==='object' ? profile.aiIntegration : {...UNKNOWN_AI_INTEGRATION},
+      editorialReview:review,
+      evidence,
       catalogTier:'coverage',
       rankingEligible:policy.rankingEligibleOnAdmission === true,
       comparisonEligible:policy.comparisonEligibleOnAdmission === true,
