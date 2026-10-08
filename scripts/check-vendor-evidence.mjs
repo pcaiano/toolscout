@@ -11,7 +11,7 @@ export function vendorEvidenceIssues(tools, pendingSlugs) {
   const allow=new Set(pendingSlugs);
   const slugs=new Set();
   const names=new Set();
-  const manufacturerDocDomains={trello:['atlassian.com'],chatgpt:['openai.com'],claude:['anthropic.com'],gemini:['google.com'],gitlab:['gitlab.com'],freshdesk:['freshdesk.com'],'google-ai-studio':['google.dev'],loom:['atlassian.com']};
+  const manufacturerDocDomains={trello:['atlassian.com'],chatgpt:['openai.com'],claude:['anthropic.com'],gemini:['google.com'],gitlab:['gitlab.com'],freshdesk:['freshdesk.com'],'google-ai-studio':['google.dev'],loom:['atlassian.com'],notebooklm:['google.com']};
   const hostname=url=>{try{return new URL(url).hostname.toLowerCase().replace(/^www[.]/,'')}catch{return null}};
   const ownedSource=(home,doc,slug)=>{
     const h=hostname(home),d=hostname(doc);

@@ -3648,13 +3648,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Content optimization as a specialist step in SEO",
-      "summary": "Surfer is primarily a writing and optimization decision, not a replacement for every SEO research tool. Its content editor and SERP-based guidance can help prioritize improvements, but suggested terms do not guarantee rankings or editorial originality. Compare it with Semrush or Ahrefs only for the part of the workflow it actually replaces.",
-      "buyerCheck": "Improve one article against a factual editorial brief and assess helpfulness, not just a content score.",
+      "angle": "Content optimization scores are guidance, not ranking guarantees",
+      "summary": "Surfer's official Content Editor documentation describes Content Score as a combination of SEO and AI-search signals, including topical coverage and upfront answer alignment. These scores can make editorial briefs and revision priorities more repeatable. But optimizing to a score is not evidence of organic performance, and excessive term repetition can reduce readability. Teams should compare the content's factual distinctiveness, search intent and observed clicks rather than treating a high score as an outcome in itself.",
+      "buyerCheck": "Improve one factual article using the editor, reject awkward suggestions and compare indexed performance after publication.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://docs.surferseo.com/en/articles/5700365-content-score-in-the-editor-explained",
+      "sourceUrls": [
+        "https://docs.surferseo.com/en/articles/5700365-content-score-in-the-editor-explained"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -3668,7 +3671,15 @@
     "tradeoffs": [
       "Content optimization as a specialist step in SEO"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://docs.surferseo.com/en/articles/5700365-content-score-in-the-editor-explained",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -4573,13 +4584,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Social engagement data linked to brand and service response",
-      "summary": "Sprout Social spans social publishing, analytics and listening-oriented workflows. It belongs on a shortlist when multiple stakeholders need to act on audience conversations rather than merely schedule posts. Verify listening coverage, response routing and report entitlements before justifying the added operational complexity.",
-      "buyerCheck": "Work through a customer inquiry and a campaign report, checking seats and source coverage.",
+      "angle": "Approval governance matters more than a fuller social calendar",
+      "summary": "Sprout Social documents multi-stage publishing approvals with role-based reviewers, author notifications and deadlines. The manufacturer places approval workflows on its Professional and Advanced plans, making this a substantial purchasing distinction from a basic scheduler. It suits agencies and larger teams where sign-off prevents costly errors; a solo creator may not need the overhead. Scheduling alone does not guarantee publication if approval expires, so compare end-to-end process reliability and permissions.",
+      "buyerCheck": "Submit a campaign post to two approvers, simulate a missed deadline and verify the resulting publishing state.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://support.sproutsocial.com/hc/en-us/articles/205974715-Message-Approval-Workflows",
+      "sourceUrls": [
+        "https://support.sproutsocial.com/hc/en-us/articles/205974715-Message-Approval-Workflows"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -4593,7 +4607,15 @@
     "tradeoffs": [
       "Social engagement data linked to brand and service response"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://support.sproutsocial.com/hc/en-us/articles/205974715-Message-Approval-Workflows",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -4810,13 +4832,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Qualitative behavior to explain a conversion drop",
-      "summary": "Hotjar's catalog focus is heatmaps, recordings and visitor feedback. That can uncover usability friction that aggregate analytics cannot explain, but small or biased recording samples can mislead. Review privacy redaction and the exact capture allowance before treating observed sessions as representative.",
-      "buyerCheck": "Investigate one high-exit page with consented recordings and validate findings with a survey.",
+      "angle": "Qualitative recordings need representative samples and privacy controls",
+      "summary": "Hotjar documents session-recording filters for rage clicks, traffic channels, user geography and experimental variants. That can explain a conversion problem which aggregate analytics only detects. The limitation is interpretation: a memorable recording may not represent the broader audience, and session capture requires careful treatment of consent and sensitive fields. Compare its qualitative insights with measured conversion data instead of replacing statistical evidence with individual clips. Validate sampling and retention requirements on the intended plan.",
+      "buyerCheck": "Filter recordings for one friction event, cross-check its frequency in analytics and inspect privacy settings.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://help.hotjar.com/hc/en-us/articles/115011819928-Recording-Filters",
+      "sourceUrls": [
+        "https://help.hotjar.com/hc/en-us/articles/115011819928-Recording-Filters"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -4830,7 +4855,15 @@
     "tradeoffs": [
       "Qualitative behavior to explain a conversion drop"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://help.hotjar.com/hc/en-us/articles/115011819928-Recording-Filters",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -5556,13 +5589,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Operational error evidence before another dashboard",
-      "summary": "Sentry focuses on tracing real application errors, performance and affected user sessions. It is valuable when a team must connect incidents to specific releases and code paths. Noise from poor grouping or incomplete instrumentation can undermine that value, while event volume determines pricing exposure.",
-      "buyerCheck": "Inject a staging exception, follow its trace and measure whether an actionable alert reaches an owner.",
+      "angle": "Error monitoring must distinguish impact from noise",
+      "summary": "Sentry documents an issue-detail view that brings together occurrence counts, affected users, stack traces and release information. This helps engineering teams prioritize regressions based on who is affected rather than treating every exception equally. The trade-off is instrumentation discipline: noisy grouping, incomplete source maps or inaccurate release tagging can turn alerts into another distraction. Its value should be measured through faster triage and safer production changes, not raw numbers of captured events.",
+      "buyerCheck": "Instrument one real application error, inspect affected users and release context, then test assignment and resolution.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://docs.sentry.io/product/issues/issue-details/",
+      "sourceUrls": [
+        "https://docs.sentry.io/product/issues/issue-details/"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -5576,7 +5612,15 @@
     "tradeoffs": [
       "Operational error evidence before another dashboard"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://docs.sentry.io/product/issues/issue-details/",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -5798,13 +5842,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Answers constrained to a chosen document collection",
-      "summary": "NotebookLM is suited to research where uploaded sources define the evidence base. That is a different use case from open-web discovery, and the quality of the answer depends on what material the user supplies. Compare source coverage, quotation traceability and sharing permissions for the team's actual corpus.",
-      "buyerCheck": "Upload a controlled research packet and verify each answer against the underlying documents.",
+      "angle": "Answers grounded in selected documents still require checking",
+      "summary": "Google's NotebookLM help explains source-based chats that use the text, quotes and images of uploaded material in answer citations. This makes NotebookLM attractive when research must stay close to a defined corpus rather than unrestricted web browsing. But citation visibility is not proof that synthesis or numerical interpretation is accurate; missing documents can also bias the result. The buying decision should consider source limits, permissions and the ability to trace every important claim back to the original.",
+      "buyerCheck": "Load five approved documents, ask cross-source questions and check the cited passages and missing evidence.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://support.google.com/notebooklm/answer/16179559?hl=en",
+      "sourceUrls": [
+        "https://support.google.com/notebooklm/answer/16179559?hl=en"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -5818,7 +5865,15 @@
     "tradeoffs": [
       "Answers constrained to a chosen document collection"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://support.google.com/notebooklm/answer/16179559?hl=en",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -6155,13 +6210,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Technical crawling before strategic keyword research",
-      "summary": "Screaming Frog SEO Spider is primarily a site crawler for investigating URLs, metadata, errors and indexing patterns. It is the wrong choice for someone mainly buying content ideation or CRM automation. Deployment environment, crawl limits and analyst skill determine whether it can be used effectively.",
-      "buyerCheck": "Crawl a staging site and confirm JavaScript handling, export and issue prioritization.",
+      "angle": "Technical crawling needs boundaries and interpretation",
+      "summary": "Screaming Frog's official SEO Spider guide distinguishes the free version's 500-URL crawl limit from licensed crawling at greater scale, with settings for crawl depth, URL patterns and rendering. This is especially useful for diagnosing structural SEO issues across templates. Yet collecting more URLs is not the same as identifying a business-critical fix: robots directives, canonicals and JavaScript rendering require experienced interpretation. A small publisher may learn enough from the free edition; agencies running large audits should account for licensing and hardware.",
+      "buyerCheck": "Run a crawl of key site templates, sample non-indexable URLs and verify crawl limits before licensing.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://www.screamingfrog.co.uk/seo-spider/user-guide/configuration/",
+      "sourceUrls": [
+        "https://www.screamingfrog.co.uk/seo-spider/user-guide/configuration/"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -6175,7 +6233,15 @@
     "tradeoffs": [
       "Technical crawling before strategic keyword research"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.screamingfrog.co.uk/seo-spider/user-guide/configuration/",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -6806,13 +6872,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Inside-sales conversations in the same workspace as deals",
-      "summary": "Close centers sales activity around calls, email, SMS and a deal pipeline. This is useful if the sales team's daily bottleneck is outreach and follow-up, rather than marketing campaign breadth. Check telephony availability, message costs, CRM sync and local compliance before trusting a catalog integration score.",
-      "buyerCheck": "Run a full day of sample calling, email and logging in the proposed geography.",
+      "angle": "Saved lead views can make a CRM proactive",
+      "summary": "Close documents Smart Views as saved lead filters that dynamically surface records requiring follow-up. This suits sales teams whose main bottleneck is deciding which prospect to contact today rather than maintaining elaborate cross-department customer processes. The trade-off is data quality: incomplete activity history or poorly defined filters can direct representatives toward irrelevant calls. Compare communication capabilities and automation rights by paid tier, and test whether the view accurately reflects overdue work.",
+      "buyerCheck": "Create a saved view for uncontacted qualified leads and verify it updates after real calling and email activity.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://help.close.com/feature-guide/lead-filtering-and-smart-views/creating-smart-views",
+      "sourceUrls": [
+        "https://help.close.com/feature-guide/lead-filtering-and-smart-views/creating-smart-views"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -6826,7 +6895,15 @@
     "tradeoffs": [
       "Inside-sales conversations in the same workspace as deals"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://help.close.com/feature-guide/lead-filtering-and-smart-views/creating-smart-views",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -7210,13 +7287,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Email campaigns extending into funnels and webinars",
-      "summary": "GetResponse spans newsletters, automation, landing pages and webinar-oriented marketing. A team running scheduled launches may benefit from that breadth, while one requiring only broadcast email risks buying unnecessary complexity. Compare event registration, follow-up timing and contact-based charges rather than counting adjacent features.",
-      "buyerCheck": "Recreate a webinar registration, reminder and post-event nurture journey.",
+      "angle": "Automation logic should reflect actual customer behaviour",
+      "summary": "GetResponse documents automation workflows made from conditions, actions and filters, including link clicks and other subscriber events. That breadth can support product launches and customer nurture alongside newsletters. But more paths mean more room for silent mistakes in contact segmentation or consent, while automation entitlements may vary by subscription. A business sending occasional campaigns may be better served by a simpler email platform. Compare the complete subscriber journey, not the list of possible triggers.",
+      "buyerCheck": "Create a two-condition workflow with a click and a purchase path, then test contacts, suppression and consent.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://www.getresponse.com/help/what-are-actions-conditions-and-filters.html",
+      "sourceUrls": [
+        "https://www.getresponse.com/help/what-are-actions-conditions-and-filters.html"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -7230,7 +7310,15 @@
     "tradeoffs": [
       "Email campaigns extending into funnels and webinars"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.getresponse.com/help/what-are-actions-conditions-and-filters.html",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -8083,13 +8171,16 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Form intake connected to operational records",
-      "summary": "Fillout focuses on form capture with conditional logic and links to database-style workflows. It deserves attention when answers update structured records or drive follow-up work, not just when a form looks polished. Validate record permissions, conditional steps and per-plan submissions, particularly if a live database is the system of record.",
-      "buyerCheck": "Submit records through a test workflow and check updates, errors and access permissions.",
+      "angle": "Form branching should support the downstream decision",
+      "summary": "Fillout documents page logic that routes respondents to different questions or endings according to earlier answers. This is useful when a form must qualify leads, support applications or guide users to the right service, rather than collect identical fields for everybody. Conditional paths also increase testing complexity: inconsistent branches can omit essential details or produce misleading success messages. Evaluate connected data destinations and the exact limits of each plan before replacing a simple form.",
+      "buyerCheck": "Prototype three qualification branches, including rejection and missing answers, and inspect stored records.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
+      "sourceUrl": "https://www.fillout.com/help/getting-started",
+      "sourceUrls": [
+        "https://www.fillout.com/help/getting-started"
+      ],
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
       "handsOnTested": false
     },
     "strengths": [
@@ -8103,7 +8194,15 @@
     "tradeoffs": [
       "Form intake connected to operational records"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.fillout.com/help/getting-started",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
