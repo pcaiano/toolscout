@@ -378,49 +378,49 @@
       "beehiiv": "beehiiv is designed around publishing a newsletter and growing its subscriber audience. The important buying distinction is between a simple publication and a multi-step subscriber lifecycle: beehiiv documents that automations are paid-plan functionality. Lite allows up to ten live automations, while Pro offers unlimited live automations and additional click-trigger options. A publisher sending a weekly issue may not need this depth; one monetizing segmented subscriber journeys should price the required plan before migrating a list.",
       "jotform": "Jotform is an operational form-builder option when a submission needs to start an approval, payment or data-collection workflow rather than simply send a contact notification. Its Starter tier has material limits: the vendor describes a five-form allowance and 100 monthly submissions, alongside account-wide storage and upload limits. These limits are more decision-relevant than a long list of form features. Before purchasing, model monthly submissions, file sizes and any approval or payment steps under the exact plan.",
       "adcreative-ai": "AdCreative.ai is relevant when a paid media team needs more advertising asset variations for testing. Generating alternatives quickly is useful, but a creative score is not proof of incremental conversions. Judge the product by the quality of assets accepted by the ad platforms and by how cleanly real results feed back into the next iteration.",
-      "jasper": "Jasper is positioned for teams that need recurring marketing copy and brand-voice controls across many assets. The question is whether review, governance and campaign reuse justify a dedicated writing environment over a general AI assistant. Output quality and factual accuracy still require editorial supervision.",
+      "jasper": "Jasper documents a reusable knowledge base for product facts, audiences and brand context. This can reduce repeated briefing when several marketers produce campaign assets for one business. The limitation is governance: incorrect or stale knowledge can be repeatedly reproduced as confident promotional statements. Team review and approval are still necessary, and a generic assistant may be enough for infrequent content work. Compare review time and factual consistency across a real campaign.",
       "zoho-crm": "Zoho CRM merits consideration for a small sales team that needs leads, contacts and deals in a structured CRM, particularly if it already uses other Zoho applications. The manufacturer's edition guide documents a Free tier for up to three users, with basic lead, contact and deal tracking and limited workflow actions. That is a useful starting point, not evidence that advanced automation or every Zoho integration is included. Compare the configuration effort and reporting requirements with simpler CRMs before paying for a wider suite.",
       "monday-crm": "monday CRM is a candidate when salespeople and other teams need to collaborate around leads and work items. Its flexibility can help nonstandard sales processes, while also creating a risk of inconsistent board design. Test pipeline reporting and operational governance before treating visual configurability as a replacement for core CRM controls.",
-      "claude": "Claude is an option for analysis, drafting and development tasks where working with lengthy context and revisions is central. Model choice should follow actual output evaluation, data-handling rules and available integrations, not a broad claim that one assistant is universally superior. Confirm plan limits and the client tools your team needs.",
+      "claude": "Anthropic documents project instructions, uploaded knowledge and workspace collaboration for Claude. A project is useful when successive research or drafting tasks need the same reference corpus. It still requires document freshness, accurate citations and permission checks, especially when several people can access the files. Compare the quality of repeatable work against actual subscription and data-handling limits rather than an isolated model benchmark.",
       "calendly": "Calendly's Routing Forms can qualify visitors and send them to specific event types, external URLs or custom messages. That makes the software useful beyond one-person booking links, especially for inbound teams. The practical limits involve routing ownership, team plan permissions and calendar availability. Advanced host allocation should not be assumed to exist in a basic scheduling account. Compare a real lead journey and conflict handling before adding it to a sales process.",
       "posthog": "PostHog is a compelling choice when a product team wants behavioral analytics close to session replay, feature flags and experiments. Its vendor pricing is usage-based rather than a conventional seat-based analytics subscription: product analytics includes one million events each month at no charge, while other products have their own allowances. That helps small teams start, but event volume, retention, privacy obligations and the number of enabled products can change the bill. Estimate the events your real instrumentation will generate before choosing it over a simpler web analytics product.",
       "apollo": "Apollo documents both granular prospect filters and outbound sales sequences. The fit is strongest when a team can move from a precise ideal-customer segment to an accountable outreach workflow. More records do not necessarily mean better leads: contact accuracy, lawful outreach, deliverability and CRM duplication determine commercial value. Evaluate the total cost per qualified conversation rather than database size or the mere availability of AI-written emails.",
       "lemlist": "lemlist is positioned for coordinated prospecting via email and additional channels. That can help a small outbound team keep follow-ups structured, but deliverability and compliance still depend on list quality and sender reputation. Check each channel's supported permissions and actual sending limits.",
-      "intercom": "Intercom brings inbox, help content and automated assistance into the same service workflow. AI resolution should be evaluated against real support cases, policy boundaries and escalation quality rather than an advertised percentage. Its commercial model must also be tested on forecast volume.",
-      "zendesk": "Zendesk covers ticketing and multiple customer channels alongside knowledge and analytics. That scope is attractive to larger support operations, but configuration, licensing and integrations may be excessive for a small inbox team. Prioritize service-level reporting and channel continuity over maximum feature count.",
+      "intercom": "Intercom documents Fin AI Agent escalation guidance, data-driven rules and workflow-based handoffs. The important distinction is between answering common questions and safely handling frustrated or exceptional customers. An AI agent can increase throughput while harming service if human access is poorly configured. Plan coverage, resolution definitions and connected knowledge also affect the result. Evaluate support quality through historic real cases rather than a headline automation rate.",
+      "zendesk": "Zendesk documents ticket triggers activated by creation or updates, and separate time-based automations. That distinction supports immediate routing as well as follow-ups when a case becomes overdue. Improper conditions or interactions among rules can create duplicate notifications and inconsistent states. Larger support teams may justify these controls, while a small inbox may prefer simpler processes. Test the full escalation and closure policy before rollout.",
       "instantly": "Instantly's catalog pitch combines cold-email sending tools with leads and deliverability functions. More sending accounts do not compensate for poor segmentation or unverified contacts. Focus on verified human replies and sender reputation rather than email volume as the performance indicator.",
-      "kit": "Kit emphasizes newsletter sequences, subscriber tags and creator commerce. For a writer or course creator that can be a more natural workflow than a complex B2B marketing stack, but the economics depend on subscriber count and the automation actually required. Validate migration of tags, consent status and paid product paths before changing platforms.",
-      "klaviyo": "Klaviyo is oriented around customer profiles, segmentation and campaigns triggered by shopping activity. That focus matters when cart and purchase data drive decisions more than a generic newsletter editor. Integration depth, usable events and messaging charges will determine value; catalog feature labels are not enough to prove a specific store connection.",
+      "kit": "Kit documents tagging subscribers through visual automations and rules when they submit a form or meet another trigger. This is useful when creators want to segment buyers and readers without operating a large marketing platform. But automation plans and entry limits vary, and a mistaken tag can start irrelevant or unwanted email sequences. Test the full signup-to-message journey and suppression logic rather than judging the visual canvas alone.",
+      "klaviyo": "Klaviyo documents flows triggered by metrics such as checkout started or order placed, with event synchronization tied to ecommerce integrations. This is strong for retailers whose marketing depends on actual buying behavior. It also makes the data pipeline a failure point: late, missing or duplicated events can lead to poor targeting, and changing a flow trigger often requires cloning it. Compare incremental retained revenue with segmentation upkeep and message costs.",
       "canva": "Canva documents Brand Kits that hold approved logos, colours and fonts for teams, with related templates and role controls. That makes it particularly valuable when many employees produce recurring marketing materials without relying on a designer for every asset. The constraint is editorial governance: visual consistency does not prove image rights, factual accuracy or approval compliance. Subscription tier and user role affect management capabilities. Evaluate shared template reuse and approvals, not simply the speed of producing one attractive graphic.",
-      "grammarly": "Grammarly addresses clarity, grammar and tone across the applications people already write in. That is a narrower and often easier-to-evaluate job than running an entire AI content production system. Review privacy settings, application coverage and whether suggestions preserve domain-specific terminology.",
-      "buffer": "Buffer concentrates on scheduling, publishing and helping a small team manage regular social posts. That can outperform a broader suite if the immediate problem is missed publishing and approvals. Compare channel support, analytics history and team collaboration on the exact plan, particularly for multi-brand use.",
+      "grammarly": "Grammarly documents paid tone rewrite suggestions separately from tone detection, with supported application differences. It can help teams polish frequent customer correspondence without moving every document into a new editor. Yet automatic sentence rewrites can alter technical meaning, formal nuance or brand voice, requiring a final human check. Compare the acceptance rate of edits and privacy policies before treating it as an organization-wide writing solution.",
+      "buffer": "Buffer documents recurring queue slots and individual time zones for connected social channels. Scheduled posts fill the next available slot, which can simplify a steady publishing rhythm for small teams. The same mechanism can misalign time-critical campaigns when people assume every queued post has a fixed date. Roles and queue allowances also merit checking. Compare reliable cadence, channel coverage and approvals rather than just a calendar view.",
       "webflow": "Webflow documents locale-specific page slugs, SEO metadata and dynamic collection content. It can therefore suit a design-led business maintaining structured marketing pages for several markets. But visual creation does not eliminate the workload of modelling content, translating variants or governing publication rights. Localization features may be plan-dependent and should be tested with the actual content model. Compare long-term CMS maintenance and multilingual SEO needs rather than evaluating only the visual editor.",
       "surfer": "Surfer is primarily a writing and optimization decision, not a replacement for every SEO research tool. Its content editor and SERP-based guidance can help prioritize improvements, but suggested terms do not guarantee rankings or editorial originality. Compare it with Semrush or Ahrefs only for the part of the workflow it actually replaces.",
       "mixpanel": "Mixpanel centers funnel conversion, retention and user journey analysis. Its usefulness depends on consistent event definitions and identity stitching rather than a more attractive dashboard. Compare it with PostHog when experimentation and session replay need to live in the same operating environment.",
-      "freshdesk": "Freshdesk provides a ticket-centric path for businesses moving beyond shared email. Knowledge articles and automation can reduce repeated requests, provided their plan actually includes the required functions. Evaluate ease of setup alongside agent permissions, channel coverage and reporting.",
-      "framer": "Framer centers rapid visual design and live site publishing with modern layout tools. That can help teams produce campaign pages quickly, but more complex CMS, localization and integration requirements need proof in the target plan. Compare it with Webflow by shipping the same page rather than by feature list alone.",
+      "freshdesk": "Freshdesk documents automation rules that classify and route newly created support tickets. This helps support teams distribute repetitive requests without manually opening every message. The trade-off is correct classification: a loosely defined subject condition can wrongly prioritize or assign a sensitive issue. Product versions, permissions and plan rights also warrant checking. Test a representative ticket mix and urgent fallback, not simply whether a rule can be created.",
+      "framer": "Framer documents adding locales, choosing region fallbacks and providing manual or AI translation. This can accelerate multilingual campaign sites when the same design must reach several markets. The constraint is upkeep: each additional locale can demand translated calls to action, quality checks and accurate metadata, not just a language toggle. Evaluate the publishing workflow and the team's localization capacity before buying on visual polish.",
       "perplexity": "Perplexity's documentation describes Spaces as collaborative topic hubs with research threads and optional uploaded file search. That is useful for organizing recurring investigations rather than collecting unrelated answers. However, source citations still require checking against originals, and file-search eligibility and collaboration vary by subscription. A research assistant should not be confused with a verified system of record or transaction platform. Test the tool using factual questions with known reference answers and the privacy controls required by the team.",
       "slack": "Slack's documentation covers canvases and lists with separate view, comment and edit permissions. Combined with workflow capabilities, this makes it useful for coordinating requests and keeping teams informed. The trade-off is knowledge governance: busy channels alone do not make decisions easy to retrieve, and external collaborators should not receive broader access than intended. Some automation features require paid plans. Compare collaboration speed with retention, search quality and permissions in the real workplace.",
       "cursor": "Cursor documents repository-scoped project rules that guide its AI assistant and separate account privacy settings. Those are relevant to development teams who need generated changes to follow existing project conventions. The risk is mistaking fast code generation for a safely reviewed modification. Regression tests, diff inspection and secure secret handling remain necessary, and teams must understand what data can be processed. Compare completed, reviewed changes against the existing editor rather than lines generated.",
       "shopify": "Shopify's documentation covers capture of payments, order edits, fulfilment, refunds and returns from its store administration. That breadth supports merchants who need a single order operating workflow rather than only a storefront builder. The full cost may depend on payment providers, shipping, sales channels and additional applications. Compare the real path from checkout to delivery and exception resolution; an attractive theme and headline subscription tell only part of the story.",
       "loom": "Loom focuses on recorded explanations that colleagues can watch without booking another call. Its utility depends on viewers finding the right clip, receiving updates and responding when something changes. A searchable transcript and sensible retention policy can matter more than recording effects.",
-      "miro": "Miro supports visual thinking, diagrams and collaborative planning, especially when people need to explore ideas together. A whiteboard should not automatically become the system of record for project delivery. Compare facilitation tools, exports and handoff to the actual task platform.",
+      "miro": "Miro documents different board privacy capabilities between Free and paid plans. In Free teams, boards can be visible to teammates without individual invitations, while private boards need eligible plans. This matters for strategy sessions and client work where drafts may be confidential. A useful whiteboard is not necessarily an appropriate permanent records store. Compare participant rights and data retention before inviting external organizations.",
       "hootsuite": "Hootsuite is relevant when publishing, engagement and reporting need a shared operational view. Teams should weigh the breadth of supported workflows against the setup and licensing required to keep each channel active. Do not treat a social listening label as verification of particular sources or report access.",
       "sprout-social": "Sprout Social spans social publishing, analytics and listening-oriented workflows. It belongs on a shortlist when multiple stakeholders need to act on audience conversations rather than merely schedule posts. Verify listening coverage, response routing and report entitlements before justifying the added operational complexity.",
       "later": "Later's catalog focus is visual scheduling, media organization and link-in-bio tools. This can suit teams whose production schedule is built around image and video content, while a company needing deep support inboxes may prefer another platform. Verify the exact accounts, platforms and analytics available per tier.",
       "socialbee": "SocialBee emphasizes categorizing content and repeating useful posts through a schedule. The fit is strongest for a small team maintaining evergreen publishing without producing every post from scratch. Repetition must still be balanced with timeliness, channel rules and editorial judgment.",
       "hotjar": "Hotjar's catalog focus is heatmaps, recordings and visitor feedback. That can uncover usability friction that aggregate analytics cannot explain, but small or biased recording samples can mislead. Review privacy redaction and the exact capture allowance before treating observed sessions as representative.",
-      "amplitude": "Amplitude is relevant to product organizations asking why users return, churn or progress between activation stages. Strong analytics require a reliable event model, and a platform cannot compensate for inconsistent tagging. Assess warehouse integration, attribution and experimentation entitlements against the team's actual cadence.",
-      "plausible": "Plausible Analytics is oriented toward privacy-conscious website measurement with relatively simple dashboards. It is worth considering when marketing needs traffic and conversion trends rather than granular product behavior. Compliance still depends on the implementation, and complex funnels may exceed the intended scope.",
+      "amplitude": "Amplitude documents different retention measures, including users returning on a specific date or on or after that date. Those two definitions can produce very different product health narratives from the same event data. The platform is useful when a product team can define stable cohorts and meaningful return events. Otherwise, chart sophistication hides poor instrumentation. Compare decisions reached from cohorts, not the number of charts available.",
+      "plausible": "Plausible documents pageview goals, custom events and funnels for measuring signups or purchases. This provides an approachable view of marketing performance for teams that do not need highly granular product analytics. But instrumentation is still required: a dashboard only counts configured goals, and added custom events may affect billable traffic. Check attribution and goal completeness against server records before declaring campaign success.",
       "matomo": "Matomo offers a privacy-oriented analytics path that can include self-hosting. Hosting control may help organizations with stricter data policies, but it also transfers maintenance and security responsibilities. Evaluate what is included in cloud versus self-hosted editions before declaring one less expensive.",
       "github": "GitHub's documentation describes protected branches with pull-request reviews and required status checks. That turns shared code hosting into a foundation for accountable collaboration and safer releases. Yet those safeguards do not configure themselves: branch restrictions, reviewer policy, access and deployment checks require deliberate setup. Available controls can depend on repository visibility and plan. Judge the product by whether it helps a real team catch an unsafe change before deployment, not just by repository storage.",
-      "gitlab": "GitLab combines source control with pipelines, planning and security-oriented functions in the current catalog. An integrated workflow can reduce handoffs, but migration and runner governance may become significant commitments. Verify which scanning and administration controls belong to the selected deployment and licence.",
+      "gitlab": "GitLab documents CI pipelines using .gitlab-ci.yml, jobs and sequential stages executed by runners. The benefit is linking source review to testing and deployment with fewer manual handoffs. But pipeline breadth also means responsibility for build minutes, runners, permissions and reliable secrets. A passing job is meaningful only if the tests protect the work that reaches production. Compare real workflow reliability before consolidating tooling.",
       "replit": "Replit is oriented toward building, running and sharing software without setting up every environment locally. That can accelerate prototyping and learning, while production ownership still depends on resource controls and a reliable release process. Evaluate secrets, hosting limits and exportability before treating it as a long-term platform.",
-      "vercel": "Vercel centers previews, deployment and web-application delivery, especially for teams with active frontend development. The buying decision hinges on performance, functions, build frequency and how the organization monitors production, rather than hosting a static page once. Check framework assumptions, data transfer and region requirements.",
-      "netlify": "Netlify combines continuous deployment with managed functions and web forms in the catalog. This can simplify a content or app team's release cycle, but the value depends on the exact build, hosting and runtime usage. Compare it with Vercel using the same repository and workload, not only feature checkboxes.",
+      "vercel": "Vercel documents testing preview deployments and promoting a verified deployment to production. That makes it relevant to frontend teams shipping often with a review and release gate. But hosting convenience does not remove the need to control environment configuration, costs and production errors. Measure safe releases and rollback behavior rather than simply build speed or framework familiarity.",
+      "netlify": "Netlify documents Deploy Previews that build isolated site versions from pull and merge requests. This can let design, content and engineering teams inspect changes without immediately publishing them. But access protection, build usage and environment variables still require deliberate management, especially for sensitive previews. The purchase case rests on deployment reliability and review workflow, not how quickly a Git repository connects.",
       "sentry": "Sentry focuses on tracing real application errors, performance and affected user sessions. It is valuable when a team must connect incidents to specific releases and code paths. Noise from poor grouping or incomplete instrumentation can undermine that value, while event volume determines pricing exposure.",
-      "chatgpt": "ChatGPT can support research, writing, analysis and coding in a single assistant interface. That breadth is useful when tasks change throughout the day, but reliability varies by task, available tools and plan. Compare factual checking, work-product quality and connected-data permissions with more specialized systems.",
-      "gemini": "Gemini belongs on the shortlist when users already work with Google services or need to reason across text and images. Workspace integration and exact model entitlements vary, and the catalog should not be used as evidence for a connector without an independently verified record. Test privacy boundaries and actual collaboration flows.",
+      "chatgpt": "OpenAI documents Projects that group conversations, reference files and instructions for related tasks. This is valuable for ongoing research or writing where repeating context wastes time. However, access and file limits vary by plan and the presence of reference files does not prove that every generated statement is correct. Evaluate source-grounding and approved connector permissions, not just the fluency of a single answer.",
+      "gemini": "Google documents custom Gems with saved instructions and attached reference files, including files from Drive. This can suit organizations already storing approved material in Google Workspace. The trade-off is dependence on connected account settings, permissions and upkeep of the Gem's knowledge. A reusable assistant should be judged by consistent factual outputs across tasks, not simply ease of initial configuration.",
       "notebooklm": "NotebookLM is suited to research where uploaded sources define the evidence base. That is a different use case from open-web discovery, and the quality of the answer depends on what material the user supplies. Compare source coverage, quotation traceability and sharing permissions for the team's actual corpus.",
       "copy-ai": "Copy.ai's catalog scope includes go-to-market content and repeatable marketing or sales processes. That makes process consistency more important than the number of writing prompts. Teams should confirm which workflow integrations and governance functions are actually available on their tier before replacing existing tools.",
       "moz-pro": "Moz Pro combines keyword research, audit and backlink-oriented functions in the catalog. It should be evaluated for recurring search work and reporting fit, especially when the team needs a consistent workflow more than an isolated metric. Site limits, data freshness and regional coverage require direct vendor checking.",
@@ -428,32 +428,32 @@
       "mangools": "Mangools is oriented toward keyword discovery, SERP inspection and routine rank tracking. Its suite can be appealing when the buyer wants approachable tools for several discrete research steps rather than a large agency platform. Verify update frequency, geographic data and tracked-keyword quotas.",
       "screaming-frog": "Screaming Frog SEO Spider is primarily a site crawler for investigating URLs, metadata, errors and indexing patterns. It is the wrong choice for someone mainly buying content ideation or CRM automation. Deployment environment, crawl limits and analyst skill determine whether it can be used effectively.",
       "wix": "Wix combines site design, templates and services for running a small business online. Managed convenience may reduce setup time, but portability, application dependencies and transaction requirements can become important as a business grows. Evaluate the whole customer path, not just template appearance.",
-      "squarespace": "Squarespace is worth comparing when a business wants a polished site, portfolio or small store without custom hosting. Its design cohesion may be attractive, while extensibility and integrations need plan-specific review. The relevant question is whether the site can support the business's next workflow, not only its current pages.",
+      "squarespace": "Squarespace documents page sections in its 7.1 editor, allowing site owners to rearrange and style sections without maintaining custom frontend code. This can suit portfolios and small businesses seeking a consistent web presence. Limitations emerge when requirements extend to complex integrations, migrations or bespoke applications. Visual ease should therefore be weighed against long-term content portability and operating cost, rather than treating a template as a full custom platform.",
       "wordpress-com": "WordPress.com combines hosted publishing with reduced infrastructure administration, making it practical for a content-first website. The manufacturer's help centre distinguishes built-in capabilities from installed plugins, which require an eligible paid plan. That is a meaningful difference from independently hosted WordPress software. A publication may welcome the convenience; a complex membership or commerce site must evaluate plugins, backups and export portability. Select the plan only after mapping the exact extensions and editorial processes needed.",
-      "help-scout": "Help Scout is oriented toward shared inbox work and customer-facing help content. It can suit teams that prioritize personal replies and straightforward collaboration over extensive contact-center operations. Confirm workflows, seat-based pricing and messaging limits before migrating historical conversations.",
-      "gorgias": "Gorgias is positioned for stores whose support questions frequently concern purchases, shipments and returns. Connecting support with order data can reduce context switching, but each ecommerce integration and automation entitlement requires verification. Measure service quality rather than just ticket closure counts.",
-      "crisp": "Crisp combines live chat, shared inbox and knowledge content for customer communication. It is relevant when website visitors need immediate guidance and operators need continuity across conversations. Test routing and response-time coverage before assuming a chatbot will resolve all incoming questions.",
+      "help-scout": "Help Scout documents automatic workflows based on conditions and actions, including sorting, tagging and customer messages. These simplify a shared inbox while maintaining a service-focused interface. However, automatic workflows can send the wrong response or close a message when their rules are too broad, and some permissions and capacity are plan dependent. Compare the quality of resolved enquiries and ease of escalation against a heavier helpdesk system.",
+      "gorgias": "Gorgias documents distinct triggers for ticket creation, new messages and ticket updates, with an explicit order of execution. That matters for ecommerce helpdesks because one rule can change fields that a later rule evaluates. Automating refund or shipping enquiries without exception checks may cause misrouting or premature closure. Evaluate a representative rule stack and the actual store-data integration before trusting operational savings.",
+      "crisp": "Crisp documents assigning support conversations to specific operators and applying automatic routing rules. This matters when a shared inbox starts to suffer from duplicate replies, missing owners or uneven workload. Routing functions and operator teams have plan-specific limits; configuration errors can leave an urgent request in the wrong queue. Evaluate workload distribution with actual enquiries rather than the appearance of the website widget.",
       "salesforce": "Salesforce's documentation defines opportunities as deals progressing through stages and shows how that structure underpins pipeline management. This is useful for larger teams that need reporting and shared process discipline. The trade-off is the configuration and administration required to make stages, fields and access rules reliable. Smaller teams may adopt a simpler CRM more quickly and at lower total cost. Compare forecast credibility and full implementation resources rather than the raw breadth of an enterprise feature list.",
       "close": "Close centers sales activity around calls, email, SMS and a deal pipeline. This is useful if the sales team's daily bottleneck is outreach and follow-up, rather than marketing campaign breadth. Check telephony availability, message costs, CRM sync and local compliance before trusting a catalog integration score.",
       "copper": "Copper is positioned for relationship management close to Gmail and Google tools. That workflow can be advantageous where adoption depends on reducing context switches, but the depth of the exact Workspace connection needs direct confirmation. Do not mistake an integration label for proof of bidirectional data sync.",
-      "freshsales": "Freshsales combines lead and deal workflows with communication features. It is relevant when a small or growing team wants more structure than a contact spreadsheet without immediately adopting an enterprise platform. Verify which phone, email and automation capabilities are included in the intended region and plan.",
-      "attio": "Attio stands out in the catalog through a configurable CRM data model and custom relationships. That matters for investors, partners or other nonstandard pipelines, but flexibility comes with decisions about fields, objects and governance. Evaluate whether the team can maintain the resulting structure without turning every change into a development project.",
-      "mailerlite": "MailerLite is a credible comparison for teams that mainly publish newsletters, collect subscriptions and run simple email sequences. Its landing-page and website options may reduce tool count, but this should not obscure plan limits and automation requirements. Evaluate whether the editing experience and subscriber segmentation fit the actual publication calendar.",
+      "freshsales": "Freshsales documents rules that update contact stages after changes to deal records. That can reduce manual cleanup when a sales team has clear lifecycle definitions. The downside is that incorrect deal stages and duplicate contacts propagate through automatic updates, distorting forecasting and communications. Verify which actions are included in the intended plan and who maintains the rules. Judge adoption and reporting accuracy, not only pipeline feature count.",
+      "attio": "Attio documents object-wide and list-specific attributes, with system and custom fields for records. This flexibility suits nonstandard relationship workflows that do not fit a basic sales pipeline. It also introduces data-design risk: duplicate fields, inconsistent owners and over-customization can make CRM reporting unreliable. Some relationship functionality requires paid plans. Evaluate the underlying record model before relying on attractive visual lists.",
+      "mailerlite": "MailerLite documents triggers including form completion, group entry, link clicks and custom field changes. A basic newsletter may require little beyond welcome email, whereas multibranch lifecycle marketing needs carefully designed conditions. Some multi-trigger flexibility depends on paid plans. Poor subscription hygiene or wrong triggers can inflate sending without improving outcomes. Compare deliverability and the exact conditions that enroll a subscriber.",
       "getresponse": "GetResponse spans newsletters, automation, landing pages and webinar-oriented marketing. A team running scheduled launches may benefit from that breadth, while one requiring only broadcast email risks buying unnecessary complexity. Compare event registration, follow-up timing and contact-based charges rather than counting adjacent features.",
       "omnisend": "Omnisend is most relevant when marketing activity follows ecommerce events and channels, rather than isolated mailing lists. Its email and SMS combination merits consideration for retention workflows, but the store data contract and message-volume costs must be checked in a real account. Generic automation scores cannot prove performance on the buyer's commerce platform.",
-      "constant-contact": "Constant Contact brings campaigns, forms and event-oriented activity together for organizations that communicate with customers regularly. Event management can be a meaningful differentiator from a pure email sender, but only if registrations and follow-ups are essential. Verify contact segmentation, automation depth and pricing by audience size before consolidating tools.",
+      "constant-contact": "Constant Contact documents an Automation Path Builder triggered by subscriber actions, calendar dates and commerce activity. Its help centre distinguishes current automation paths from earlier legacy email series, a meaningful issue for migrating users. Newsletter-only teams may not need complicated journeys; event-led marketers should verify entitlements, consent controls and audience segments first. Price the workflow the team actually uses rather than all available features.",
       "basecamp": "Basecamp's combination of project messages, to-dos and schedules can reduce scattered conversations for a small team. The simplicity is intentional, but teams requiring deep dependencies, resourcing or portfolio analytics may need a different tool. Examine the complete project life cycle rather than just its to-do list.",
       "wrike": "Wrike belongs on the shortlist for organizations coordinating many projects, workload and approvals. The potential value comes from visibility across teams, not from another task editor. That breadth should be weighed against training, permissions and the plan level needed for resource or reporting views.",
-      "jira": "Jira is designed around tracked issues and configurable agile workflows. This can be useful for software teams that need triage, sprint visibility and handoffs, but poorly governed configurations can add administrative overhead. Compare it with Linear or a simpler task manager using the same issue set.",
+      "jira": "Atlassian documents Jira workflows built from statuses and directed transitions. That is valuable when teams need formal handoffs from intake to implementation, review and completion. A poorly designed workflow can create unnecessary approvals or prevent legitimate rework, so more configurable does not always mean more productive. Compare reporting quality and administrative load against the team's actual release and exception process.",
       "pabbly-connect": "Pabbly Connect is listed for webhook-driven workflows and app connections. It can be a candidate for simpler operational integrations, but the catalog does not verify exact connector behavior, error handling or pricing allowances. Test the workload against Zapier, Make and n8n rather than assuming equivalent capabilities.",
       "integrately": "Integrately emphasizes prebuilt automations and approachable app connections. That is useful for teams that need a known workflow running quickly, but templates can become restrictive when data validation and exception handling grow complicated. Verify the particular app pair and task allowance before ranking on ease alone.",
       "workato": "Workato focuses on orchestrating applications and data across larger organizations. Its value comes from controlled, observable operations with appropriate access policy, not a low-friction automation experiment. Implementation, security reviews and total licence cost should be evaluated early.",
-      "paperform": "Paperform is attractive when the form itself is the client-facing transaction, combining questions with payments or bookings. That flexibility is less important for a simple newsletter signup, where a lighter form builder may suffice. Payment gateways, conditional paths and allowable submissions need direct plan verification.",
+      "paperform": "Paperform documents logic that can show questions, change workflow actions and apply conditional pricing to payment forms. It is a sensible candidate when customer inputs drive a booking or purchase, not just newsletter signup. Greater flexibility creates configuration risk, especially when amounts and fulfillment depend on hidden questions or custom conditions. Test edge cases and integration delivery before paying for a complex form stack.",
       "fillout": "Fillout focuses on form capture with conditional logic and links to database-style workflows. It deserves attention when answers update structured records or drive follow-up work, not just when a form looks polished. Validate record permissions, conditional steps and per-plan submissions, particularly if a live database is the system of record.",
       "bigcommerce": "BigCommerce is a potential fit for merchants needing scalable catalog and multi-channel operations. Integration and B2B-related needs can outweigh template simplicity, but plan entitlements and implementation work must be checked with the actual store. Compare total running costs and catalog control with Shopify, not just a feature list.",
-      "woocommerce": "WooCommerce makes particular sense for a business already relying on WordPress content and extensibility. Its open-source core gives room for customization but does not eliminate hosting, payment, extension or maintenance costs. A store owner should compare operational responsibility with managed commerce platforms.",
+      "woocommerce": "WooCommerce documents order states for payments, fulfilment, cancellation and refunds. That control is attractive to WordPress sites requiring custom storefronts and extensible transactions. The trade-off is operational ownership of plugins, hosting, security and gateway reliability, which a managed hosted store may simplify. Select it when configurability has genuine business value and the team can support the stack over time.",
       "adobe-express": "Adobe Express spans social graphics, short video and marketing templates. Its value is the ability to reuse assets and produce variants, not proof that every advanced creative function is available in one plan. Compare it with Canva on the team's existing asset library, editing needs and ownership of published work.",
-      "descript": "Descript combines recording, transcription and audio/video editing in a document-like workflow. It can save producers time when editing spoken content and generating clips, but transcription errors and export quality still matter. Test it against the actual language, accents and publication formats.",
+      "descript": "Descript documents editing audio and video by editing a linked text transcript, where deleted or moved words alter the media. This can save time for interviews, tutorials and podcasts dominated by dialogue. But transcription errors, speaker changes and the resulting visual cuts need manual review. A text-based editor is not automatically a replacement for advanced color or timeline work. Compare completed, approved footage rather than raw edit speed.",
       "podia": "Podia combines course delivery, downloads, coaching and a public-facing storefront. This can simplify life for an independent seller, although community, email and payment needs often expand faster than the first product launch. Compare payout terms, content access and subscriber management against specialist alternatives.",
       "unbounce": "Unbounce documents Smart Traffic as adaptive routing between two or more published landing-page variants following a learning phase. It suits teams with measurable paid traffic and genuinely different offers to test. This is not the same design as a fixed-split A/B experiment; insufficient traffic and frequent variant edits make results hard to assess. Before paying for optimization, ensure conversion events and campaign attribution are reliable and that the experiment has enough visits to be useful.",
       "character-ai": "Character.AI is oriented toward interacting with custom conversational personas. That experience differs sharply from knowledge-work assistants offering reliable business workflows or data-grounded research. Use a character platform for entertainment or exploratory dialogue, not as evidence of operational accuracy.",
@@ -743,11 +743,11 @@
         "handsOnTested": false
       },
       "jasper": {
-        "angle": "Brand-consistent marketing production under review",
-        "buyerCheck": "Test one campaign brief across multiple channels and measure editing time and brand consistency.",
-        "sourceUrl": null,
+        "angle": "Marketing consistency depends on trusted brand facts",
+        "buyerCheck": "Create five campaign assets from an approved product brief and check every claim.",
+        "sourceUrl": "https://help.jasper.ai/hc/en-us/articles/18618707176347-Knowledge-Base",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "zoho-crm": {
@@ -767,11 +767,11 @@
         "handsOnTested": false
       },
       "claude": {
-        "angle": "Document-heavy AI work and controlled tool access",
-        "buyerCheck": "Evaluate three representative documents, one coding task and the organization's retention policy.",
-        "sourceUrl": null,
+        "angle": "Document-oriented work needs controlled project knowledge",
+        "buyerCheck": "Ask five document-grounded questions and inspect cited passages, access and sharing rights.",
+        "sourceUrl": "https://support.anthropic.com/en/articles/9517075-what-are-projects",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "calendly": {
@@ -807,19 +807,19 @@
         "handsOnTested": false
       },
       "intercom": {
-        "angle": "Support platform decisions increasingly include AI escalation",
-        "buyerCheck": "Replay representative tickets and measure verified resolutions, failed handoffs and cost per handled conversation.",
-        "sourceUrl": null,
+        "angle": "Human escalation is a core measure of AI support quality",
+        "buyerCheck": "Test twenty historical requests, including refunds and frustrated users, and audit handoff paths.",
+        "sourceUrl": "https://www.intercom.com/help/en/articles/12396892-manage-fin-ai-agent-s-escalation-guidance-and-rules",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "zendesk": {
-        "angle": "Broad service processes with governance to match",
-        "buyerCheck": "Test routing across email, chat and voice with permissions and service-level targets.",
-        "sourceUrl": null,
+        "angle": "Ticket events and timed rules solve separate service problems",
+        "buyerCheck": "Run a priority trigger and delayed follow-up rule on the same ticket and inspect timing.",
+        "sourceUrl": "https://support.zendesk.com/hc/en-us/articles/4408822236058-About-Zendesk-triggers-and-how-they-work",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "instantly": {
@@ -831,19 +831,19 @@
         "handsOnTested": false
       },
       "kit": {
-        "angle": "Creator subscriber relationships ahead of enterprise automation",
-        "buyerCheck": "Import a small consented segment and reproduce one complete subscriber-to-sale sequence.",
-        "sourceUrl": null,
+        "angle": "Automated tagging can simplify creator subscriber journeys",
+        "buyerCheck": "Create a signup tag and welcome sequence, then test duplicate and opted-out contacts.",
+        "sourceUrl": "https://help.kit.com/en/articles/4306079-how-to-automatically-tag-subscribers",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "klaviyo": {
-        "angle": "Lifecycle marketing tied to ecommerce behavior",
-        "buyerCheck": "Map purchase, browse and abandoned-cart events and calculate the combined email/SMS cost.",
-        "sourceUrl": null,
+        "angle": "Store event quality controls lifecycle email reliability",
+        "buyerCheck": "Run an abandonment and post-purchase flow against real synchronized store events.",
+        "sourceUrl": "https://help.klaviyo.com/hc/en-us/articles/360003057151",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "canva": {
@@ -855,19 +855,19 @@
         "handsOnTested": false
       },
       "grammarly": {
-        "angle": "Writing improvement at the point of work",
-        "buyerCheck": "Compare suggested edits on a legal, sales and internal note before enabling broad access.",
-        "sourceUrl": null,
+        "angle": "Tone rewriting has narrower rights than tone detection",
+        "buyerCheck": "Review twenty real sentences for corrected meaning, tone and client compatibility.",
+        "sourceUrl": "https://support.grammarly.com/hc/en-us/articles/10674801783309-How-do-Grammarly-s-tone-suggestions-work",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "buffer": {
-        "angle": "Publishing consistency before elaborate listening tools",
-        "buyerCheck": "Schedule one week's cross-channel content and confirm failures, approvals and meaningful metrics.",
-        "sourceUrl": null,
+        "angle": "Queued publishing needs channel-specific scheduling rules",
+        "buyerCheck": "Schedule posts in two time zones, change a queue slot and confirm publication times.",
+        "sourceUrl": "https://support.buffer.com/en-us/articles/setting-up-your-timezones-and-posting-schedules-P4iSag90Fl",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "webflow": {
@@ -895,19 +895,19 @@
         "handsOnTested": false
       },
       "freshdesk": {
-        "angle": "Helpdesk structure for growing service teams",
-        "buyerCheck": "Route a recurring issue, escalate a complex case and check the customer conversation history.",
-        "sourceUrl": null,
+        "angle": "Incoming ticket rules need exception checks",
+        "buyerCheck": "Route ten varied tickets and verify ownership, urgency and escalation.",
+        "sourceUrl": "https://support.freshdesk.com/support/solutions/articles/207276",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "framer": {
-        "angle": "Fast visual pages rather than a complicated web platform",
-        "buyerCheck": "Build a responsive launch page and test performance, localization and forms.",
-        "sourceUrl": null,
+        "angle": "Localization multiplies content governance requirements",
+        "buyerCheck": "Translate a live landing page into a second locale and test content updates and links.",
+        "sourceUrl": "https://www.framer.com/help/articles/adding-a-new-locale/",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "perplexity": {
@@ -951,11 +951,11 @@
         "handsOnTested": false
       },
       "miro": {
-        "angle": "Workshop facilitation rather than task execution",
-        "buyerCheck": "Run a planning workshop, capture decisions and transfer actions into the team's work manager.",
-        "sourceUrl": null,
+        "angle": "Private collaboration has a concrete subscription cost",
+        "buyerCheck": "Run a confidential workshop with a guest and verify every board-sharing level.",
+        "sourceUrl": "https://help.miro.com/hc/en-us/articles/360011114519-Public-boards-vs-private-boards",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "hootsuite": {
@@ -999,19 +999,19 @@
         "handsOnTested": false
       },
       "amplitude": {
-        "angle": "Behavioral cohorts and experiments for growth teams",
-        "buyerCheck": "Reproduce a retention cohort, user journey and experiment readout from known event definitions.",
-        "sourceUrl": null,
+        "angle": "Retention choices change the apparent user journey",
+        "buyerCheck": "Instrument a product activation event and reconcile two retention calculation methods.",
+        "sourceUrl": "https://www.amplitude.com/docs/analytics/charts/retention-analysis/retention-analysis-calculation",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "plausible": {
-        "angle": "Lightweight site metrics and a smaller tracking footprint",
-        "buyerCheck": "Implement a goal and referral report while checking consent and campaign attribution.",
-        "sourceUrl": null,
+        "angle": "Web conversions are defined goals, not just pageviews",
+        "buyerCheck": "Track one signup, one external click and a two-step funnel and reconcile events.",
+        "sourceUrl": "https://plausible.io/docs/goal-conversions",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "matomo": {
@@ -1031,11 +1031,11 @@
         "handsOnTested": false
       },
       "gitlab": {
-        "angle": "Integrated DevSecOps versus a modular developer stack",
-        "buyerCheck": "Replicate a repository pipeline with a security gate, merge approval and deployment audit.",
-        "sourceUrl": null,
+        "angle": "Integrated pipelines demand runner and release discipline",
+        "buyerCheck": "Run a merge-request pipeline with a failed test, protected secret and staged release.",
+        "sourceUrl": "https://docs.gitlab.com/ci/pipelines/",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "replit": {
@@ -1047,19 +1047,19 @@
         "handsOnTested": false
       },
       "vercel": {
-        "angle": "Frontend release velocity and managed deployment operations",
-        "buyerCheck": "Publish a preview, measure edge/serverless usage and test rollback and alerts.",
-        "sourceUrl": null,
+        "angle": "Preview validation should precede production promotion",
+        "buyerCheck": "Validate a preview using checks and logs, then promote a tested version with rollback plan.",
+        "sourceUrl": "https://vercel.com/docs/deployments/promote-preview-to-production",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "netlify": {
-        "angle": "Developer workflow and deployment for web properties",
-        "buyerCheck": "Deploy a representative site with a form, build previews and production rollback.",
-        "sourceUrl": null,
+        "angle": "Pull request previews support safer publishing",
+        "buyerCheck": "Create a pull request preview and inspect data protection, approvals and build behavior.",
+        "sourceUrl": "https://docs.netlify.com/deploy/deploy-types/deploy-previews/",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "sentry": {
@@ -1071,19 +1071,19 @@
         "handsOnTested": false
       },
       "chatgpt": {
-        "angle": "General-purpose assistance across varied tasks",
-        "buyerCheck": "Test one research question, one document task and one workflow using only permitted data.",
-        "sourceUrl": null,
+        "angle": "Projects support repeatable work with shared context",
+        "buyerCheck": "Complete three related tasks from permitted project files and verify references and access.",
+        "sourceUrl": "https://help.openai.com/pt-pt/articles/10169521-projects-in-chatgpt",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "gemini": {
-        "angle": "AI assistance for multimodal and Google-centric workflows",
-        "buyerCheck": "Compare document, spreadsheet and image tasks with the user's existing Google toolset.",
-        "sourceUrl": null,
+        "angle": "Reusable instructions can reduce repetitive prompting",
+        "buyerCheck": "Build a Gem using permitted Drive documents and verify five answers and sharing settings.",
+        "sourceUrl": "https://support.google.com/gemini/answer/15235603?hl=en",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "notebooklm": {
@@ -1143,11 +1143,11 @@
         "handsOnTested": false
       },
       "squarespace": {
-        "angle": "Content-led websites with integrated business features",
-        "buyerCheck": "Prototype a content collection, contact path and the intended checkout or booking flow.",
-        "sourceUrl": null,
+        "angle": "Managed design editing trades flexibility for speed",
+        "buyerCheck": "Build a services page, revise sections and confirm required integrations and export options.",
+        "sourceUrl": "https://support.squarespace.com/hc/en-us/articles/360027987711-Page-sections",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "wordpress-com": {
@@ -1159,27 +1159,27 @@
         "handsOnTested": false
       },
       "help-scout": {
-        "angle": "Human-centered support without an oversized ticket stack",
-        "buyerCheck": "Move a small shared inbox and test assignments, saved replies and help center search.",
-        "sourceUrl": null,
+        "angle": "Support workflows should preserve accountable human replies",
+        "buyerCheck": "Test ten common enquiries and ensure automation never hides urgent or exceptional cases.",
+        "sourceUrl": "https://docs.helpscout.com/article/1399-automatic-workflows",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "gorgias": {
-        "angle": "Ecommerce support linked to order context",
-        "buyerCheck": "Recreate an order-status and return case and verify permitted store actions.",
-        "sourceUrl": null,
+        "angle": "Support rule ordering determines automation reliability",
+        "buyerCheck": "Replay three overlapping support scenarios and inspect each rule and agent outcome.",
+        "sourceUrl": "https://docs.gorgias.com/en-US/rules-faq-82011",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "crisp": {
-        "angle": "Live messaging as the front door to support",
-        "buyerCheck": "Install on a staging site and verify offline forms, assignments and transcript handoff.",
-        "sourceUrl": null,
+        "angle": "Inbox routing should make conversation ownership explicit",
+        "buyerCheck": "Route billing and technical tickets among available and unavailable operators.",
+        "sourceUrl": "https://help.crisp.chat/en/article/how-to-route-and-assign-conversations-to-operators-in-crisp-qjl2d2/",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "salesforce": {
@@ -1207,27 +1207,27 @@
         "handsOnTested": false
       },
       "freshsales": {
-        "angle": "Sales pipeline and communication in one CRM",
-        "buyerCheck": "Test lead capture, routing, follow-up and the manager's reporting view.",
-        "sourceUrl": null,
+        "angle": "Sales automations should follow defined customer stages",
+        "buyerCheck": "Create a deal-stage update workflow and test open, won and duplicated deals.",
+        "sourceUrl": "https://crmsupport.freshworks.com/support/solutions/articles/50000002142-common-use-cases-for-workflows",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "attio": {
-        "angle": "Custom relationship data rather than a fixed pipeline template",
-        "buyerCheck": "Create a nonstandard relationship object, sharing rules and one automation end to end.",
-        "sourceUrl": null,
+        "angle": "Custom CRM attributes enable unusual business relationships",
+        "buyerCheck": "Model two custom relationships and test shared fields, list rules and reporting consistency.",
+        "sourceUrl": "https://attio.com/help/reference/managing-your-data/attributes/create-manage-attributes",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "mailerlite": {
-        "angle": "Lean newsletter operations with landing-page flexibility",
-        "buyerCheck": "Check the applicable subscriber and send limits, signup forms and sequence branching.",
-        "sourceUrl": null,
+        "angle": "Subscriber triggers define automation usefulness",
+        "buyerCheck": "Test form signup, link click and unsubscribe against a defined workflow.",
+        "sourceUrl": "https://www.mailerlite.com/help/how-to-set-up-automation-triggers",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "getresponse": {
@@ -1247,11 +1247,11 @@
         "handsOnTested": false
       },
       "constant-contact": {
-        "angle": "Small-business campaigns with events in the workflow",
-        "buyerCheck": "Set up one event invitation, registration and follow-up campaign with the required audience segments.",
-        "sourceUrl": null,
+        "angle": "Lifecycle journeys require modern automation triggers",
+        "buyerCheck": "Build a list-join and purchase follow-up path while testing subscription consent.",
+        "sourceUrl": "https://knowledgebase.constantcontact.com/email-digital-marketing/tutorials/KnowledgeBase/49709-Understanding-triggers-in-the-Automation-Path-Builder?lang=en_US",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "basecamp": {
@@ -1271,11 +1271,11 @@
         "handsOnTested": false
       },
       "jira": {
-        "angle": "Engineering issues linked to delivery workflows",
-        "buyerCheck": "Import a backlog, run a sprint, test permissions and inspect the reporting developers actually use.",
-        "sourceUrl": null,
+        "angle": "Statuses and transitions must match real delivery steps",
+        "buyerCheck": "Configure an issue from triage through review and back again, then inspect auditability.",
+        "sourceUrl": "https://support.atlassian.com/jira-software-cloud/docs/workflows-and-statuses-for-boards-in-business-projects/",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "pabbly-connect": {
@@ -1303,11 +1303,11 @@
         "handsOnTested": false
       },
       "paperform": {
-        "angle": "Forms that can also handle bookings and purchases",
-        "buyerCheck": "Test a real booking/payment form and audit confirmations, refunds and data exports.",
-        "sourceUrl": null,
+        "angle": "Conditional forms need transaction-level accuracy",
+        "buyerCheck": "Build a conditional quote or payment form and confirm final charges and handoffs.",
+        "sourceUrl": "https://paperform.co/help/articles/logic-guide/",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "fillout": {
@@ -1327,11 +1327,11 @@
         "handsOnTested": false
       },
       "woocommerce": {
-        "angle": "WordPress commerce flexibility with maintenance obligations",
-        "buyerCheck": "Build a sample store and calculate hosting, plugin updates, security and checkout costs.",
-        "sourceUrl": null,
+        "angle": "Commerce ownership requires reliable order-state handling",
+        "buyerCheck": "Simulate failed payment, refund and extension update, then inspect backups and recovery.",
+        "sourceUrl": "https://woocommerce.com/document/managing-orders/order-statuses/",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "adobe-express": {
@@ -1343,11 +1343,11 @@
         "handsOnTested": false
       },
       "descript": {
-        "angle": "Transcript-first media editing with quality caveats",
-        "buyerCheck": "Edit an interview recording, check the corrected transcript and assess final audio/video output.",
-        "sourceUrl": null,
+        "angle": "Transcript-linked editing helps spoken-content production",
+        "buyerCheck": "Edit a sample interview and inspect transcript accuracy, video continuity and export.",
+        "sourceUrl": "https://help.descript.com/hc/en-us/articles/10164808475149-Inline-notes",
         "checkedOn": "2026-10-08",
-        "evidenceType": "catalog_assessment_unverified",
+        "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
       "podia": {
