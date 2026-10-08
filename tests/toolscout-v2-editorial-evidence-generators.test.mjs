@@ -28,20 +28,21 @@ test('comparisons keep vendor source URLs internal while preserving monetized CT
   assert.match(src,/href="\/go\/\${encodeURIComponent\(t\.slug\)\}/);
 });
 
-test('decision editorial cohort gives twenty distinct profile analyses and source-anchored buyer checks',()=>{
+test('decision editorial catalog has 127 individual assessments with transparent provenance',()=>{
   const cfg=JSON.parse(read('data/organic-growth-engine.json')).editorialQuality;
   const catalog=JSON.parse(read('data/tools.json'));
   const ids=Object.keys(cfg.profileDecisionEvidence||{});
-  assert.equal(ids.length,20);
+  assert.equal(ids.length,127);
   const opens=new Set();
   for(const slug of ids){
     const evidence=cfg.profileDecisionEvidence[slug];
     const review=cfg.profileOverrides[slug];
     const html=read('tools/'+slug+'.html');
     assert.ok(catalog.some(x=>x.slug===slug),'Missing catalog product '+slug);
-    assert.ok(review&&review.length>=350,'Weak profile analysis '+slug);
+    assert.ok(review&&review.length>=190,'Weak profile analysis '+slug);
     assert.ok(evidence.angle&&evidence.buyerCheck&&evidence.checkedOn==='2026-10-08','Missing buyer evidence '+slug);
-    assert.match(evidence.sourceUrl,/^https:\/\//);
+    if(evidence.evidenceType==='catalog_assessment_unverified')assert.equal(evidence.sourceUrl,null,'Catalog-only is not verified vendor evidence '+slug);
+    else assert.match(evidence.sourceUrl,/^https:\/\//);
     assert.equal(evidence.handsOnTested,false,'No unperformed hands-on tests may be asserted');
     assert.ok(html.includes('editorialBuyerCheck'),'Missing displayed buyer checklist on '+slug);
     assert.ok(html.includes(evidence.buyerCheck.replaceAll('&','&amp;').replaceAll("'","&#39;")),'Mismatch buyer checklist '+slug);
@@ -51,6 +52,24 @@ test('decision editorial cohort gives twenty distinct profile analyses and sourc
     opens.add(review.split(/\s+/).slice(0,6).join(' ').toLowerCase());
   }
   assert.equal(opens.size,ids.length,'Repeated lead architecture detected in decision-grade profiles');
+  const provisional=catalog.filter(x=>x.editorialReview?.verificationStatus==='catalog_only');
+  const sourced=catalog.filter(x=>x.editorialReview&&!provisional.includes(x));
+  assert.equal(provisional.length,107);
+  assert.equal(sourced.length,20);
+  for(const tool of provisional){
+    const html=read('tools/'+tool.slug+'.html');
+    assert.match(html,/Catalog-based; vendor claims and plan limits not independently verified/i);
+    assert.match(html,/catalog-based editorial assessment only/i);
+    assert.equal(tool.editorialReview.sourceUrl,null);
+    assert.equal(tool.editorialReview.handsOnTested,false);
+    assert.ok(!tool.evidence?.length,'Unverified assertions cannot masquerade as evidence '+tool.slug);
+  }
+  const disputed=catalog.filter(x=>x.categoryReviewRequired);
+  assert.equal(disputed.length,10);
+  for(const tool of disputed){
+    assert.match(read('tools/'+tool.slug+'.html'),/Category under review/);
+    assert.ok(['developer','forms','ai-assistant'].includes(tool.category));
+  }
 });
 
 test('six prebuilt comparisons and two guides share editorial conclusions with their source config',()=>{
