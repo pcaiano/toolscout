@@ -372,3 +372,45 @@ test('decision engine shortlist carries a documented editorial basis for reviewe
   assert.ok(hubspot.editorial_review?.limitations?.length);
   assert.equal(out.structuredContent.decision_basis.no_pay_to_rank,true);
 });
+
+test('full catalog MCP distinguishes editorial coverage from verified evidence and taxonomy review',async()=>{
+  const catalog=JSON.parse(fs.readFileSync(new URL('../data/tools.json',import.meta.url),'utf8'));
+  const env={ASSETS:{fetch:async request=>new URL(request.url).pathname==='/data/tools.json'?Response.json(catalog):new Response('',{status:404})}};
+  async function getTool(slug){
+    const body={jsonrpc:'2.0',id:801,method:'tools/call',params:{name:'get_tool',arguments:{tool:slug}}};
+    const r=await handleAgentProtocolRoute(new Request('https://trytoolscout.org/mcp',{method:'POST',headers:{'Content-Type':'application/json','MCP-Protocol-Version':'2026-07-28','Mcp-Method':'tools/call','Mcp-Name':'get_tool'},body:JSON.stringify(body)}),env,{waitUntil(){}});
+    assert.equal(r.status,200);
+    const payload=await r.json();
+    assert.equal(payload.result.isError,false);
+    return payload.result.structuredContent.tool;
+  }
+  const provisional=await getTool('resume-ai');
+  assert.equal(provisional.editorial_review.verification_status,'catalog_only');
+  assert.equal(provisional.editorial_review.evidence_source,null);
+  assert.match(provisional.editorial_review.evidence_caveat,/unverified catalog attributes/i);
+  assert.equal(provisional.category_review_required,true);
+  assert.equal(provisional.editorial_review.hands_on_tested,false);
+  const sourced=await getTool('hubspot');
+  assert.notEqual(sourced.editorial_review.verification_status,'catalog_only');
+  assert.match(sourced.editorial_review.evidence_source,/^https:\/\//);
+  assert.equal(sourced.category_review_required,false);
+});
+
+test('full catalog qualification excludes disputed categories and caps confidence of catalog-only advice',async()=>{
+  const catalog=JSON.parse(fs.readFileSync(new URL('../data/tools.json',import.meta.url),'utf8'));
+  const forms=await benchmarkDecision(catalog,{job:'forms',limit:5,priorities:['ease']});
+  assert.equal(forms.isError,false);
+  assert.ok(forms.structuredContent.shortlist.length>0);
+  assert.ok(forms.structuredContent.shortlist.every(x=>x.slug!=='teachquill'));
+  const development=await benchmarkDecision(catalog,{job:'developer',limit:5,priorities:['ease']});
+  assert.equal(development.isError,false);
+  assert.ok(development.structuredContent.shortlist.every(x=>!catalog.find(t=>t.slug===x.slug)?.categoryReviewRequired));
+  const marketing=await benchmarkDecision(catalog,{job:'marketing',limit:5,priorities:['ease'],budget:'free'});
+  assert.equal(marketing.isError,false);
+  for(const item of marketing.structuredContent.shortlist){
+    if(item.editorial_review?.verification_status!=='catalog_only')continue;
+    assert.equal(item.evidence_confidence,'limited');
+    if(catalog.find(t=>t.slug===item.slug)?.freePlanKnown!==true)
+      assert.ok(!item.advantages.includes('verified catalog free plan'));
+  }
+});
