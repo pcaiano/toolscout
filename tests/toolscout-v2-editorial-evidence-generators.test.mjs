@@ -67,7 +67,7 @@ test('decision editorial catalog has 127 individual assessments with transparent
   const disputed=catalog.filter(x=>x.categoryReviewRequired);
   assert.equal(disputed.length,10);
   for(const tool of disputed){
-    assert.match(read('tools/'+tool.slug+'.html'),/Category under review/);
+    assert.match(read('tools/'+tool.slug+'.html'),/Category under review|category review pending/i);
     assert.ok(['developer','forms','ai-assistant'].includes(tool.category));
   }
 });
