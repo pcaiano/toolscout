@@ -1,0 +1,60 @@
+name: ToolScout editorial source wave6 production cutover
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/editorial-wave6-one-shot-20261008.yml'
+permissions:
+  contents: read
+concurrency:
+  group: toolscout-editorial-wave6-20261008
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify manufacturer evidence contract
+        run: |
+          node scripts/check-vendor-evidence.mjs
+          node --test tests/toolscout-v2-manufacturer-docs.test.mjs tests/toolscout-v2-editorial-evidence-generators.test.mjs
+      - name: Wrangler production build dry run
+        run: npx wrangler deploy --config wrangler.toml --dry-run --outdir /tmp/toolscout-editorial-wave6
+      - name: Publish without changing D1
+        run: npx wrangler deploy --config wrangler.toml --latest
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      - name: Verify live product analysis and outbound policies
+        run: |
+          set -euo pipefail
+          for slug in basecamp mangools mixpanel pabbly-connect; do
+            curl --retry 4 --retry-delay 2 --fail --silent --show-error -L "https://trytoolscout.org/tools/${slug}?toolscout_editorial_wave6_20261008=1" -o "/tmp/toolscout-wave6-${slug}.html"
+          done
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const catalog=JSON.parse(fs.readFileSync('data/tools.json','utf8'));
+          const social=new Set(['www.linkedin.com','x.com','bsky.app','dev.to','www.pinterest.com','www.threads.com']);
+          for(const slug of ['basecamp','mangools','mixpanel','pabbly-connect']){
+            const tool=catalog.find(t=>t.slug===slug);
+            const html=fs.readFileSync('/tmp/toolscout-wave6-'+slug+'.html','utf8');
+            if(!html.includes('<h1>'+tool.name+'</h1>'))throw Error('H1 mismatch '+slug);
+            const lead=tool.editorialReview.summary.slice(0,35);
+            if(!html.includes(lead)&&!html.includes(lead.replaceAll("'",'&#39;')))throw Error('Stale editorial profile '+slug);
+            if(!html.includes('href="/go/'+slug+'"'))throw Error('Monetized CTA absent '+slug);
+            if(html.includes('Catalog-based; vendor claims and plan limits not independently verified'))throw Error('Provisional editorial still present '+slug);
+            const links=html.split('<a ').slice(1).map(s=>s.match(/href=["']([^"']+)["']/i)?.[1]).filter(Boolean);
+            const forbidden=links.filter(h=>{
+              if(!h.startsWith('https://')&&!h.startsWith('http://'))return false;
+              try{return !social.has(new URL(h).hostname)}catch{return true}
+            });
+            if(forbidden.length)throw Error('Public external vendor links '+slug+' '+forbidden.join(','));
+            console.log('PASS',slug,'brand title, analysis, no vendor docs links, /go commercial route');
+          }
+          console.log('EDITORIAL WAVE6 PRODUCTION VERIFIED, 100 DOCUMENTED');
+          NODE
