@@ -62,6 +62,28 @@ class DecisionQualityAuditTests(unittest.TestCase):
         result = self.inspect_rows([fixture(lastVerified=None)])
         self.assertEqual(result["metrics"]["invalid_verification_date"], 1)
 
+    def test_unknown_free_plan_does_not_count_as_verified(self):
+        result = self.inspect_rows([fixture(freePlan=True, freePlanKnown=False)])
+        self.assertEqual(result["metrics"]["free_plan_status_unverified"], 1)
+
+    def test_sourced_integration_pair_has_positive_evidence(self):
+        result = self.inspect_rows([fixture(integrations=[{
+            "product": "Gmail",
+            "status": "verified",
+            "sourceUrl": "https://example.org/docs/gmail",
+            "verifiedAt": "2026-10-08",
+        }])])
+        self.assertEqual(result["metrics"]["verified_integration_pairs"], 1)
+        self.assertEqual(result["metrics"].get("invalid_integration_evidence", 0), 0)
+
+    def test_unsourced_verified_integration_pair_is_flagged(self):
+        result = self.inspect_rows([fixture(integrations=[{
+            "product": "Gmail",
+            "status": "verified",
+            "verifiedAt": "2026-10-08",
+        }])])
+        self.assertEqual(result["metrics"]["invalid_integration_evidence"], 1)
+
     def test_non_object_row_is_invalid(self):
         result = self.inspect_rows([fixture(), None])
         self.assertTrue(result["invalid_structure"])
