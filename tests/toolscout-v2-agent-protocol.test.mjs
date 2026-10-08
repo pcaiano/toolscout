@@ -145,6 +145,26 @@ test('MCP recent_changes reads only ToolScout editorial evidence associated with
 });
 
 
+test('A2A SendMessage now returns a decision shortlist rather than the legacy recommendation payload',async()=>{
+  const catalog=JSON.parse(fs.readFileSync(new URL('../data/tools.json',import.meta.url),'utf8'));
+  const env={
+    ASSETS:{fetch:async request=>new URL(request.url).pathname==='/data/tools.json'?Response.json(catalog):new Response('',{status:404})},
+    DB:{prepare(){return {bind(){return this},async run(){return {success:true}}}}}
+  };
+  const body={jsonrpc:'2.0',id:30,method:'SendMessage',params:{message:{role:'ROLE_USER',parts:[{text:'CRM for a small consultancy with automation and integrations'}]}}};
+  const response=await handleAgentProtocolRoute(
+    new Request('https://trytoolscout.org/a2a',{method:'POST',headers:{'Content-Type':'application/json','A2A-Version':'1.0'},body:JSON.stringify(body)}),
+    env,{waitUntil(){}}
+  );
+  assert.equal(response.status,200);
+  const payload=await response.json();
+  const data=payload.result.message.parts.find(x=>x.mediaType==='application/json')?.data;
+  assert.ok(Array.isArray(data.shortlist));
+  assert.ok(data.shortlist.length>=2);
+  assert.equal(data.decision_basis.no_pay_to_rank,true);
+});
+
+
 test('MCP review contract remains read-only and does not write protocol telemetry',()=>{
   const runtime=fs.readFileSync(new URL('../agent-protocol-core-worker.js',import.meta.url),'utf8');
   const start=runtime.indexOf('async function handleMcp');
