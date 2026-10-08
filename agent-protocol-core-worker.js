@@ -323,8 +323,8 @@ function catalogSearchScore(tool,args){
   return score;
 }
 const DECISION_DIMENSIONS=Object.freeze({
-  price:['price','pricing','cost','budget','cheap','cheaper','affordable','free'],
-  ease:['ease','easy','simple','simplicity','usability','beginner','setup','learning curve'],
+  price:['price','pricing','cost','budget','cheap','cheaper','affordable','free','expensive','too expensive'],
+  ease:['ease','easy','simple','simplicity','usability','beginner','setup','learning curve','complex','complexity','complicated'],
   automation:['automation','automate','workflow','workflows','automatic'],
   integrations:['integration','integrations','integrate','stack','connect','connector'],
   sales:['sales','crm','pipeline','lead','leads','prospecting'],
@@ -530,13 +530,13 @@ async function callCatalogTool(name,args,request,env){
     const evalArgs={job:args.use_case,use_case:args.use_case,must_have:args.must_have||[],budget:args.budget,team:args.team,priorities:args.priorities||[],existing_tools:args.existing_tools||[]};
     const evaluated=found.map(t=>decisionEvaluation(t,evalArgs)).sort((a,b)=>b.fit_score-a.fit_score);
     const dims=requestedDimensions(evalArgs),gap=evaluated[0].fit_score-evaluated[1].fit_score;
-    const priceRank=[...evaluated].filter(x=>(x.requested_dimensions.find(d=>d.dimension==='price')||{}).score!=null)
-      .sort((a,b)=>((b.requested_dimensions.find(d=>d.dimension==='price')||{}).score||0)-((a.requested_dimensions.find(d=>d.dimension==='price')||{}).score||0));
+    const priceRank=[...evaluated].filter(x=>scoreOf(found.find(t=>t.slug===x.slug),'price')!=null)
+      .sort((a,b)=>(scoreOf(found.find(t=>t.slug===b.slug),'price')||0)-(scoreOf(found.find(t=>t.slug===a.slug),'price')||0));
     const affordable=priceRank[0]||null;
     const leader=evaluated[0];
     const losses=affordable?dims.filter(d=>d!=='price').map(d=>{
-      const av=(affordable.requested_dimensions.find(x=>x.dimension===d)||{}).score;
-      const lv=(leader.requested_dimensions.find(x=>x.dimension===d)||{}).score;
+      const at=found.find(t=>t.slug===affordable.slug),lt=found.find(t=>t.slug===leader.slug);
+      const av=scoreOf(at,d),lv=scoreOf(lt,d);
       return av!=null&&lv!=null&&lv-av>=2?{dimension:d,affordability_leader:av,best_fit_leader:lv,gap:lv-av}:null;
     }).filter(Boolean):[];
     return {data:{
@@ -651,14 +651,15 @@ function a2aArgs(message){
   const dataParts=message.parts.filter(p=>p&&p.data&&typeof p.data==='object'&&!Array.isArray(p.data)).map(p=>p.data);
   const data=Object.assign({},...dataParts);
   const args={...data};
-  if(!args.q&&texts.length)args.q=texts.join('\n');
-  if(!args.q)return {error:'message must include text or application/json data with q'};
-  const invalid=validRecommendArguments(args);if(invalid)return {error:invalid};
+  if(!args.job&&args.q)args.job=args.q;
+  if(!args.job&&texts.length)args.job=texts.join('\n');
+  if(!args.job)return {error:'message must include text or application/json data with job'};
+  const invalid=validToolArguments('decide_software',args);if(invalid)return {error:invalid};
   return {args};
 }
 function recommendationText(data){
-  const names=(data?.recommendations||[]).map((r,i)=>`${i+1}. ${r.name} (${r.match}% match)`).join('\n');
-  return `ToolScout recommendations for: ${data.query}\n${names}\n\nAffiliate relationships do not influence ranking.`;
+  const names=(data?.shortlist||[]).map((r,i)=>`${i+1}. ${r.name} (${r.fit_score}/95 fit, ${r.evidence_confidence} evidence confidence)`).join('\n');
+  return `ToolScout shortlist for: ${data.job}\n${names}\n\nToolScout surfaces trade-offs and missing evidence rather than forcing a universal winner. Affiliate relationships do not influence shortlist order.`;
 }
 async function handleA2A(request,env,ctx){
   if(request.method==='OPTIONS')return new Response(null,{status:204,headers:A2A_HEADERS});
@@ -670,11 +671,11 @@ async function handleA2A(request,env,ctx){
   if(body.method!=='SendMessage'){ctx.waitUntil(logProtocol(env,'a2a',body.method,{success:false}));return a2aError(body.id,-32601,'Method not found','METHOD_NOT_FOUND',400)}
   const extracted=a2aArgs(body?.params?.message);
   if(extracted.error){ctx.waitUntil(logProtocol(env,'a2a','SendMessage',{success:false}));return a2aError(body.id,-32602,'Invalid parameters','INVALID_PARAMS',400)}
-  const out=await callRecommend(extracted.args,request,env,ctx);
-  if(out.error){ctx.waitUntil(logProtocol(env,'a2a','SendMessage',{success:false}));return a2aError(body.id,-32603,'Internal error','RECOMMENDATION_UNAVAILABLE',500)}
+  const out=await callCatalogTool('decide_software',extracted.args,request,env);
+  if(out.error){ctx.waitUntil(logProtocol(env,'a2a','SendMessage',{success:false}));return a2aError(body.id,-32603,'Internal error','DECISION_UNAVAILABLE',500)}
   const incoming=body.params.message,contextId=incoming.contextId||crypto.randomUUID();
   const message={messageId:crypto.randomUUID(),contextId,role:'ROLE_AGENT',parts:[{text:recommendationText(out.data),mediaType:'text/plain'},{data:out.data,mediaType:'application/json'}]};
-  ctx.waitUntil(logProtocol(env,'a2a','SendMessage',{resultCount:Number(out.data?.count||0)}));
+  ctx.waitUntil(logProtocol(env,'a2a','SendMessage',{resultCount:Number(out.data?.shortlist?.length||0)}));
   return Response.json({jsonrpc:'2.0',id:body.id,result:{message}},{headers:A2A_HEADERS});
 }
 
