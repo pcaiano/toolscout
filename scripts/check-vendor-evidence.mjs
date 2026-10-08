@@ -11,7 +11,7 @@ export function vendorEvidenceIssues(tools, pendingSlugs) {
   const slugs=new Set();
   const names=new Set();
   const manufacturerDocDomains={trello:['atlassian.com']};
-  const rootDomain=url=>{try{return new URL(url).hostname.toLowerCase().replace(/^www\\./,'').split('.').slice(-2).join('.')}catch{return null}};
+  const rootDomain=url=>{try{return new URL(url).hostname.toLowerCase().replace(/^www\./,'').split('.').slice(-2).join('.')}catch{return null}};
   if(allow.size!==pendingSlugs.length)issues.push('Duplicate pending slug in baseline');
   if(!Array.isArray(tools))return ['Catalog is not an array'];
   for(const tool of tools){
