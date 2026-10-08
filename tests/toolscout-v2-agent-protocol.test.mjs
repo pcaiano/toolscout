@@ -271,3 +271,29 @@ test('decision benchmark: unverified free-plan flags are never considered verifi
   assert.equal(bySlug['free-known'].constraint_evidence[0].status,'verified');
   assert.equal(bySlug['free-known'].free_plan_status,'verified_available');
 });
+
+test('decision benchmark: only sourced verified Gmail pairs meet Gmail must-haves',async()=>{
+  const catalog=[
+    {slug:'crm-verified',name:'CRM Verified',category:'crm',description:'CRM',features:['crm'],bestFor:['teams'],integrations:[{product:'Gmail',status:'verified',sourceUrl:'https://docs.example.com/gmail',verifiedAt:'2026-10-08'}],scores:{integrations:7,ease:8}},
+    {slug:'crm-unsourced',name:'CRM Unsourced',category:'crm',description:'CRM',features:['crm','integrations'],bestFor:['teams'],integrations:[{product:'Gmail',status:'verified',verifiedAt:'2026-10-08'}],scores:{integrations:10,ease:10}}
+  ];
+  const out=await benchmarkDecision(catalog,{must_have:['Gmail'],existing_tools:['Gmail'],priorities:['integrations']});
+  assert.equal(out.isError,false);
+  assert.deepEqual(out.structuredContent.shortlist.map(x=>x.slug),['crm-verified']);
+  const pair=out.structuredContent.shortlist[0].stack_fit.pairs[0];
+  assert.equal(pair.status,'verified');
+  assert.equal(pair.source_url,'https://docs.example.com/gmail');
+  assert.equal(pair.verified_at,'2026-10-08');
+});
+
+test('decision benchmark: unverified AI assistant lists do not prove integration',async()=>{
+  const catalog=[
+    {slug:'crm-assistant-unknown',name:'CRM Assistant Unknown',category:'crm',description:'CRM',features:['crm','integrations'],bestFor:['teams'],aiIntegration:{status:'unverified',assistants:['ChatGPT']},scores:{integrations:9,ease:8}},
+    {slug:'crm-assistant-verified',name:'CRM Assistant Verified',category:'crm',description:'CRM',features:['crm','integrations'],bestFor:['teams'],aiIntegration:{status:'verified',assistants:['ChatGPT']},scores:{integrations:9,ease:8}}
+  ];
+  const out=await benchmarkDecision(catalog,{existing_tools:['ChatGPT'],priorities:['integrations']});
+  assert.equal(out.isError,false);
+  const bySlug=Object.fromEntries(out.structuredContent.shortlist.map(x=>[x.slug,x]));
+  assert.equal(bySlug['crm-assistant-unknown'].stack_fit.pairs[0].status,'pair_unverified');
+  assert.equal(bySlug['crm-assistant-verified'].stack_fit.pairs[0].status,'verified');
+});
