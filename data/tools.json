@@ -1900,14 +1900,17 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Scheduling reduces friction only if routing matches the business",
-      "summary": "Calendly addresses meeting booking, availability and reminders, with team-routing potential where inbound leads must reach the right person. Calendar links alone are simple; multi-person assignment and follow-up logic need more scrutiny. Validate conflict handling, team permissions and paid routing entitlements.",
-      "buyerCheck": "Test a meeting across time zones with two calendars, rescheduling and lead qualification.",
+      "angle": "Inbound lead routing is distinct from simple scheduling",
+      "summary": "Calendly's Routing Forms can qualify visitors and send them to specific event types, external URLs or custom messages. That makes the software useful beyond one-person booking links, especially for inbound teams. The practical limits involve routing ownership, team plan permissions and calendar availability. Advanced host allocation should not be assumed to exist in a basic scheduling account. Compare a real lead journey and conflict handling before adding it to a sales process.",
+      "buyerCheck": "Test an unqualified lead and two qualified booking paths, including rescheduling.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
-      "handsOnTested": false
+      "sourceUrl": "https://help.calendly.com/hc/en-us/articles/4418606043927-Getting-started-with-Routing-Forms",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false,
+      "sourceUrls": [
+        "https://help.calendly.com/hc/en-us/articles/4418606043927-Getting-started-with-Routing-Forms"
+      ]
     },
     "strengths": [
       "Catalog describes scheduling",
@@ -1920,7 +1923,15 @@
     "tradeoffs": [
       "Scheduling reduces friction only if routing matches the business"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://help.calendly.com/hc/en-us/articles/4418606043927-Getting-started-with-Routing-Forms",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -2540,14 +2551,17 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Prospecting data is only valuable when it converts responsibly",
-      "summary": "Apollo combines B2B contact discovery, enrichment and outbound sequences. The decision should rest on relevant verified contacts and the resulting pipeline, not total records advertised. List freshness, jurisdictional outreach rules, CRM syncing and deliverability require direct validation.",
-      "buyerCheck": "Sample 50 ideal accounts, verify contact accuracy and track legitimate replies through the CRM.",
+      "angle": "Prospect precision beats contact volume",
+      "summary": "Apollo documents both granular prospect filters and outbound sales sequences. The fit is strongest when a team can move from a precise ideal-customer segment to an accountable outreach workflow. More records do not necessarily mean better leads: contact accuracy, lawful outreach, deliverability and CRM duplication determine commercial value. Evaluate the total cost per qualified conversation rather than database size or the mere availability of AI-written emails.",
+      "buyerCheck": "Sample 50 target accounts and track legitimate sequence replies through the CRM.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
-      "handsOnTested": false
+      "sourceUrl": "https://knowledge.apollo.io/hc/en-us/articles/4412665755661-Use-Search-Filters-to-Find-Prospects",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false,
+      "sourceUrls": [
+        "https://knowledge.apollo.io/hc/en-us/articles/4412665755661-Use-Search-Filters-to-Find-Prospects"
+      ]
     },
     "strengths": [
       "Catalog describes B2B lead database",
@@ -2560,7 +2574,15 @@
     "tradeoffs": [
       "Prospecting data is only valuable when it converts responsibly"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://knowledge.apollo.io/hc/en-us/articles/4412665755661-Use-Search-Filters-to-Find-Prospects",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -3081,14 +3103,17 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Content production for non-designers, with governance still important",
-      "summary": "Canva is useful when marketing and operations teams need repeatable visual assets without specialist design skills for every request. Templates, presentations and collaboration make that case stronger than a single image editor. Yet brand consistency, asset rights and team permissions become important as usage grows.",
-      "buyerCheck": "Test a brand template, approval workflow and export for three target channels.",
+      "angle": "Brand governance distinguishes Canva from a simple graphics editor",
+      "summary": "Canva documents Brand Kits that hold approved logos, colours and fonts for teams, with related templates and role controls. That makes it particularly valuable when many employees produce recurring marketing materials without relying on a designer for every asset. The constraint is editorial governance: visual consistency does not prove image rights, factual accuracy or approval compliance. Subscription tier and user role affect management capabilities. Evaluate shared template reuse and approvals, not simply the speed of producing one attractive graphic.",
+      "buyerCheck": "Set up a brand kit and test template sharing, restrictions and exports.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
-      "handsOnTested": false
+      "sourceUrl": "https://www.canva.com/help/brand-kit/",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false,
+      "sourceUrls": [
+        "https://www.canva.com/help/brand-kit/"
+      ]
     },
     "strengths": [
       "Catalog describes graphic design",
@@ -3101,7 +3126,15 @@
     "tradeoffs": [
       "Content production for non-designers, with governance still important"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.canva.com/help/brand-kit/",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -3409,14 +3442,17 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Visual websites with CMS and operational depth",
-      "summary": "Webflow offers design-led site building alongside hosting, CMS and search controls in the catalog. It is compelling when marketing wants more control over structured site content without maintaining a custom frontend. Plan limits, content types and publishing permissions can materially change the decision against simpler builders.",
-      "buyerCheck": "Prototype one CMS collection, responsive page and production publishing workflow.",
+      "angle": "Structured multilingual sites need durable governance",
+      "summary": "Webflow documents locale-specific page slugs, SEO metadata and dynamic collection content. It can therefore suit a design-led business maintaining structured marketing pages for several markets. But visual creation does not eliminate the workload of modelling content, translating variants or governing publication rights. Localization features may be plan-dependent and should be tested with the actual content model. Compare long-term CMS maintenance and multilingual SEO needs rather than evaluating only the visual editor.",
+      "buyerCheck": "Build one CMS collection and localized page, checking SEO metadata and publishing.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
-      "handsOnTested": false
+      "sourceUrl": "https://help.webflow.com/hc/en-us/articles/33961235760531-Localize-page-settings",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false,
+      "sourceUrls": [
+        "https://help.webflow.com/hc/en-us/articles/33961235760531-Localize-page-settings"
+      ]
     },
     "strengths": [
       "Catalog describes visual web design",
@@ -3429,7 +3465,15 @@
     "tradeoffs": [
       "Visual websites with CMS and operational depth"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://help.webflow.com/hc/en-us/articles/33961235760531-Localize-page-settings",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -3784,14 +3828,17 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Search-grounded answers requiring source scrutiny",
-      "summary": "Perplexity is designed to collect information from the web and produce cited answers. The citations can accelerate research, but they do not guarantee that a source supports every synthesized claim. It fits exploratory research more naturally than an automated system of record or a production transaction agent.",
-      "buyerCheck": "Audit five factual answers against their linked originals and check recency and coverage.",
+      "angle": "Cited research needs verification and collaboration controls",
+      "summary": "Perplexity's documentation describes Spaces as collaborative topic hubs with research threads and optional uploaded file search. That is useful for organizing recurring investigations rather than collecting unrelated answers. However, source citations still require checking against originals, and file-search eligibility and collaboration vary by subscription. A research assistant should not be confused with a verified system of record or transaction platform. Test the tool using factual questions with known reference answers and the privacy controls required by the team.",
+      "buyerCheck": "Audit five answers against sources and test collaborators' file visibility.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
-      "handsOnTested": false
+      "sourceUrl": "https://hub-prod.perplexity.ai/hub/faq/what-are-spaces",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false,
+      "sourceUrls": [
+        "https://hub-prod.perplexity.ai/hub/faq/what-are-spaces"
+      ]
     },
     "strengths": [
       "Catalog describes AI search",
@@ -3804,7 +3851,15 @@
     "tradeoffs": [
       "Search-grounded answers requiring source scrutiny"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://hub-prod.perplexity.ai/hub/faq/what-are-spaces",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -3862,14 +3917,17 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Conversation is not the same as durable knowledge",
-      "summary": "Slack brings channel-based messaging and collaboration into one work environment. It is a strong candidate for fast team coordination but may require a deliberate document or knowledge system to prevent decisions disappearing into chat. Verify message retention, external sharing and AI feature entitlements before moving sensitive work.",
-      "buyerCheck": "Run a real project with channels, an external guest and an archival search requirement.",
+      "angle": "Fast communication needs deliberate access controls",
+      "summary": "Slack's documentation covers canvases and lists with separate view, comment and edit permissions. Combined with workflow capabilities, this makes it useful for coordinating requests and keeping teams informed. The trade-off is knowledge governance: busy channels alone do not make decisions easy to retrieve, and external collaborators should not receive broader access than intended. Some automation features require paid plans. Compare collaboration speed with retention, search quality and permissions in the real workplace.",
+      "buyerCheck": "Run a project with an external guest and retrieve a decision after closure.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
-      "handsOnTested": false
+      "sourceUrl": "https://slack.com/help/articles/15678967614611-Manage-access-permissions-for-canvases-and-lists",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false,
+      "sourceUrls": [
+        "https://slack.com/help/articles/15678967614611-Manage-access-permissions-for-canvases-and-lists"
+      ]
     },
     "strengths": [
       "Catalog describes channels",
@@ -3882,7 +3940,15 @@
     "tradeoffs": [
       "Conversation is not the same as durable knowledge"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://slack.com/help/articles/15678967614611-Manage-access-permissions-for-canvases-and-lists",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -3937,14 +4003,17 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "An AI coding editor should be judged on safe changes, not completions",
-      "summary": "Cursor brings codebase-aware editing and agentic development into the editor. Productivity gains depend on whether changes preserve tests, project conventions and secrets, not the speed of producing code. Before rolling it out broadly, compare review controls, data policy and model entitlements with the existing IDE.",
-      "buyerCheck": "Ask it to modify a tested module, inspect the diff and run the full regression suite.",
+      "angle": "Safe code changes are the relevant output",
+      "summary": "Cursor documents repository-scoped project rules that guide its AI assistant and separate account privacy settings. Those are relevant to development teams who need generated changes to follow existing project conventions. The risk is mistaking fast code generation for a safely reviewed modification. Regression tests, diff inspection and secure secret handling remain necessary, and teams must understand what data can be processed. Compare completed, reviewed changes against the existing editor rather than lines generated.",
+      "buyerCheck": "Define project rules and privacy settings, then review a tested refactor.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
-      "handsOnTested": false
+      "sourceUrl": "https://docs.cursor.com/context/rules-for-ai",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false,
+      "sourceUrls": [
+        "https://docs.cursor.com/context/rules-for-ai"
+      ]
     },
     "strengths": [
       "Catalog describes AI code editor",
@@ -3957,7 +4026,15 @@
     "tradeoffs": [
       "An AI coding editor should be judged on safe changes, not completions"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://docs.cursor.com/context/rules-for-ai",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -4013,14 +4090,17 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Commerce operations and checkout before visual design",
-      "summary": "Shopify covers storefronts, payments, orders and a broad app ecosystem. It is useful when a merchant wants one operating center for selling, but payment fees, app dependencies and regional requirements materially change cost. Evaluate the complete order journey rather than only the storefront theme.",
-      "buyerCheck": "Simulate an order from product page to taxes, payment, fulfilment and returns.",
+      "angle": "Order operations drive commerce platform value",
+      "summary": "Shopify's documentation covers capture of payments, order edits, fulfilment, refunds and returns from its store administration. That breadth supports merchants who need a single order operating workflow rather than only a storefront builder. The full cost may depend on payment providers, shipping, sales channels and additional applications. Compare the real path from checkout to delivery and exception resolution; an attractive theme and headline subscription tell only part of the story.",
+      "buyerCheck": "Process a trial order, refund and fulfilment handoff, then total related costs.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
-      "handsOnTested": false
+      "sourceUrl": "https://help.shopify.com/en/manual/fulfillment/managing-orders",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false,
+      "sourceUrls": [
+        "https://help.shopify.com/en/manual/fulfillment/managing-orders"
+      ]
     },
     "strengths": [
       "Catalog describes online store",
@@ -4033,7 +4113,15 @@
     "tradeoffs": [
       "Commerce operations and checkout before visual design"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://help.shopify.com/en/manual/fulfillment/managing-orders",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -4821,14 +4909,17 @@
       ]
     },
     "editorialReview": {
-      "angle": "Code collaboration and automation with a clear source of truth",
-      "summary": "GitHub centers repositories, reviews, issues and automated delivery around shared code. Its value grows when branch policies and approvals make changes traceable, whereas ungoverned automation can create deployment risk. Decide which collaboration and security features are required before choosing subscription tiers.",
-      "buyerCheck": "Test a protected branch, code review, secret handling and a staged release workflow.",
+      "angle": "Code review controls matter more than repository storage",
+      "summary": "GitHub's documentation describes protected branches with pull-request reviews and required status checks. That turns shared code hosting into a foundation for accountable collaboration and safer releases. Yet those safeguards do not configure themselves: branch restrictions, reviewer policy, access and deployment checks require deliberate setup. Available controls can depend on repository visibility and plan. Judge the product by whether it helps a real team catch an unsafe change before deployment, not just by repository storage.",
+      "buyerCheck": "Try a protected branch, required reviewer and intentionally failing status check.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
-      "handsOnTested": false
+      "sourceUrl": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false,
+      "sourceUrls": [
+        "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches"
+      ]
     },
     "strengths": [
       "Catalog describes git hosting",
@@ -4841,7 +4932,15 @@
     "tradeoffs": [
       "Code collaboration and automation with a clear source of truth"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -5975,14 +6074,17 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Hosted publishing based on the WordPress ecosystem",
-      "summary": "WordPress.com can make sense when ongoing publishing and familiar content workflows are the center of the website. Hosting and plan restrictions differ from running WordPress on independent infrastructure; portability and plugins should not be assumed. Evaluate editorial ownership, extension access and long-term operating effort.",
-      "buyerCheck": "Check plugin availability, export portability, content SEO and the exact hosting plan.",
+      "angle": "Managed publishing trades flexibility for simpler operations",
+      "summary": "WordPress.com combines hosted publishing with reduced infrastructure administration, making it practical for a content-first website. The manufacturer's help centre distinguishes built-in capabilities from installed plugins, which require an eligible paid plan. That is a meaningful difference from independently hosted WordPress software. A publication may welcome the convenience; a complex membership or commerce site must evaluate plugins, backups and export portability. Select the plan only after mapping the exact extensions and editorial processes needed.",
+      "buyerCheck": "List required plugins, domain and export options and check each against the plan.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
-      "handsOnTested": false
+      "sourceUrl": "https://wordpress.com/support/plugins/install-a-plugin/",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false,
+      "sourceUrls": [
+        "https://wordpress.com/support/plugins/install-a-plugin/"
+      ]
     },
     "strengths": [
       "Catalog describes website publishing",
@@ -5995,7 +6097,15 @@
     "tradeoffs": [
       "Hosted publishing based on the WordPress ecosystem"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://wordpress.com/support/plugins/install-a-plugin/",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -6261,14 +6371,17 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Enterprise CRM control with implementation costs to justify",
-      "summary": "Salesforce is a serious candidate when sales and service operations need extensive data models, controls and cross-team reporting. Its ecosystem is broad, but complexity in licensing, administration and rollout can overwhelm a small business. The decision turns on governance, data ownership and total implementation effort rather than sheer capability breadth.",
-      "buyerCheck": "Budget licences, integrations, configuration and admin ownership for the complete workflow.",
+      "angle": "CRM depth must justify operational complexity",
+      "summary": "Salesforce's documentation defines opportunities as deals progressing through stages and shows how that structure underpins pipeline management. This is useful for larger teams that need reporting and shared process discipline. The trade-off is the configuration and administration required to make stages, fields and access rules reliable. Smaller teams may adopt a simpler CRM more quickly and at lower total cost. Compare forecast credibility and full implementation resources rather than the raw breadth of an enterprise feature list.",
+      "buyerCheck": "Model five opportunity stages and estimate licensing and administration.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
-      "handsOnTested": false
+      "sourceUrl": "https://help.salesforce.com/s/articleView?id=sf.essentials_opportunities.htm&language=en_US&type=5",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false,
+      "sourceUrls": [
+        "https://help.salesforce.com/s/articleView?id=sf.essentials_opportunities.htm&language=en_US&type=5"
+      ]
     },
     "strengths": [
       "Catalog describes CRM",
@@ -6281,7 +6394,15 @@
     "tradeoffs": [
       "Enterprise CRM control with implementation costs to justify"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://help.salesforce.com/s/articleView?id=sf.essentials_opportunities.htm&language=en_US&type=5",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -7938,14 +8059,17 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Conversion-focused landing pages rather than a complete website",
-      "summary": "Unbounce is worth evaluating when paid campaigns need landing pages, lead capture and testing separated from the main site release cycle. Its advantage only matters if marketers can measure valid conversion improvements and maintain tracking. A temporary free trial does not establish a permanently free operating option; verify traffic and conversion entitlements first.",
-      "buyerCheck": "Run an A/B page test with consistent attribution, mobile performance and CRM delivery.",
+      "angle": "Adaptive optimization needs sound measurement",
+      "summary": "Unbounce documents Smart Traffic as adaptive routing between two or more published landing-page variants following a learning phase. It suits teams with measurable paid traffic and genuinely different offers to test. This is not the same design as a fixed-split A/B experiment; insufficient traffic and frequent variant edits make results hard to assess. Before paying for optimization, ensure conversion events and campaign attribution are reliable and that the experiment has enough visits to be useful.",
+      "buyerCheck": "Publish two variants, set a conversion goal and monitor the learning stage.",
       "reviewedAt": "2026-10-08",
-      "sourceUrl": null,
-      "method": "catalog_based_unverified",
-      "verificationStatus": "catalog_only",
-      "handsOnTested": false
+      "sourceUrl": "https://documentation.unbounce.com/hc/en-us/articles/360036412231-Enabling-Smart-Traffic-on-Your-Landing-Pages",
+      "method": "first_party_documentation_plus_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false,
+      "sourceUrls": [
+        "https://documentation.unbounce.com/hc/en-us/articles/360036412231-Enabling-Smart-Traffic-on-Your-Landing-Pages"
+      ]
     },
     "strengths": [
       "Catalog describes landing pages",
@@ -7958,7 +8082,15 @@
     "tradeoffs": [
       "Conversion-focused landing pages rather than a complete website"
     ],
-    "evidence": []
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://documentation.unbounce.com/hc/en-us/articles/360036412231-Enabling-Smart-Traffic-on-Your-Landing-Pages",
+        "verifiedAt": "2026-10-08",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      }
+    ]
   },
   {
     "slug": "character-ai",
