@@ -84,6 +84,24 @@ class DecisionQualityAuditTests(unittest.TestCase):
         }])])
         self.assertEqual(result["metrics"]["invalid_integration_evidence"], 1)
 
+    def test_provisional_and_sourced_editorial_counts_are_separated(self):
+        provisional = fixture(editorialReview={
+            "summary": "A useful, unverified catalog assessment",
+            "verificationStatus": "catalog_only",
+            "sourceUrl": None,
+            "handsOnTested": False,
+        }, categoryReviewRequired=True)
+        sourced = fixture(slug="sourced", editorialReview={
+            "summary": "A review supported by vendor documentation",
+            "sourceUrl": "https://docs.example.com/product",
+            "handsOnTested": False,
+        })
+        result = self.inspect_rows([provisional, sourced, fixture(slug="missing")])
+        self.assertEqual(result["metrics"]["catalog_only_editorial_reviews"], 1)
+        self.assertEqual(result["metrics"]["sourced_editorial_reviews"], 1)
+        self.assertEqual(result["metrics"]["missing_editorial_reviews"], 1)
+        self.assertEqual(result["metrics"]["category_review_required"], 1)
+
     def test_non_object_row_is_invalid(self):
         result = self.inspect_rows([fixture(), None])
         self.assertTrue(result["invalid_structure"])
