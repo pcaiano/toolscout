@@ -49,3 +49,12 @@ test('Search Engine shows an explained editorial fit indicator, not a fabricated
   assert.match(app,/Scores are editorial fit indicators, not probabilities/);
   assert.ok(app.includes('if(!signal.recognized)'));
 });
+
+test('Runtime rankings do not infer free plans, penalize unknown scores or publish direct manufacturer links',()=>{
+ const runtime=fs.readFileSync(new URL('../catalog-runtime-ranking.js',import.meta.url),'utf8');
+ assert.match(runtime,/tool\?\.freePlanKnown===true/);
+ assert.match(runtime,/unknown isn't a zero rating/);
+ assert.doesNotMatch(runtime,/>Official source<\/a>/);
+ assert.match(runtime,/Manufacturer documentation checked internally/);
+ assert.match(runtime,/\/go\/\$\{encodeURIComponent\(t.slug\)\}/);
+});
