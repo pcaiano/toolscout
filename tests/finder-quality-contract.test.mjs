@@ -28,7 +28,11 @@ test('broad category searches avoid fake personalized percentages',()=>{
   assert.match(app,/This is a broad category search/);
   assert.match(app,/Category fit/);
   assert.match(app,/Refine for personalized ranking/);
-  assert.match(app,/const raw=42\+/);
+  assert.match(app,/function scoreTool\(/);
+  assert.doesNotMatch(app,/const raw=42\+/);
+  assert.match(app,/if\(goal&&!sameCategory&&!nameMatch\)return -1/);
+  assert.match(app,/t\.freePlanKnown!==true/);
+  assert.match(app,/t\.editorialReview\?\.summary/);
 });
 
 test('Finder motion exposes three visible decision stages',()=>{
@@ -37,4 +41,11 @@ test('Finder motion exposes three visible decision stages',()=>{
   assert.match(app,/Building your shortlist/);
   assert.match(home,/\.search-stages/);
   assert.match(home,/\.search-stage\.active/);
+});
+
+test('Search Engine shows an explained editorial fit indicator, not a fabricated probability',()=>{
+  assert.match(app,/Fit score<\\/span><strong>\\$\\{t.score\\}\\/100/);
+  assert.doesNotMatch(app,/Match<\\/span><strong>\\$\\{t.score\\}%/);
+  assert.match(app,/Scores are editorial fit indicators, not probabilities/);
+  assert.match(app,/if\\(!signal.recognized\\)/);
 });
