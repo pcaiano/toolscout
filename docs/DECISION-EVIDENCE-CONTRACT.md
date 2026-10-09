@@ -184,6 +184,10 @@ Grow the existing catalog rather than create a second catalog or add a parallel 
 
 To unlock specialist sectors not represented in the existing allowed category registry, expand the current catalog taxonomy only with a fully verified candidate cohort and tests. Avoid speculative indexable buying guides from thin coverage.
 
+## Mandatory verified decision claim on every new admission (9 October 2026)
+
+The Catalog Autonomy trusted admission and the market-gap growth admission now both reject proposed new profiles without **at least one first-party manufacturer-supported decision claim** carrying a concrete type/value, `status: verified`, a real verification date, and a non-homepage manufacturer URL owned by the vendor. This supplements, rather than replaces, two distinct dated first-party evidence pages, structured original review, verified pricing/free status, logo, strengths, limitations and trade-offs. Synthetic product summaries and research-only seeds remain unpublished. Existing catalog records are not silently downgraded; the extra check applies to new admission eligibility.
+
 ## Canonical D1 catalog backfill (9 October 2026)
 
 Catalog Autonomy owns a single product-data catalog: existing D1 `catalog_runtime_candidates` stores documented automatic admissions and progressively mirrors all 127 original static catalog profiles. The existing Growth Brain now runs `baseline_catalog_migration` hourly, up to 40 missing original slugs per invocation. The migration preserves each entire profile including dated, internal first-party manufacturer evidence and claims; `INSERT OR IGNORE` ensures it cannot overwrite existing D1 edits or independently admitted tools. The static JSON snapshot remains a read-only outage fallback and source for the import. The public merged catalog selects a D1 row when present without changing original tool order. Neither import nor storage origin implies fresh verification of source pricing or entitlements.
