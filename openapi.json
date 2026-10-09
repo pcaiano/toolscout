@@ -309,6 +309,37 @@
                               },
                               "evidence_scope": {
                                 "type": "string"
+                              },
+                              "category_examples": {
+                                "type": "array",
+                                "description": "Manufacturer-documented general-category product profile examples, never a sector-certified shortlist or ranking.",
+                                "items": {
+                                  "type": "object",
+                                  "required": [
+                                    "name",
+                                    "slug",
+                                    "profile_url",
+                                    "status"
+                                  ],
+                                  "properties": {
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "slug": {
+                                      "type": "string"
+                                    },
+                                    "profile_url": {
+                                      "type": "string",
+                                      "format": "uri"
+                                    },
+                                    "status": {
+                                      "type": "string",
+                                      "enum": [
+                                        "category_example_not_industry_qualified"
+                                      ]
+                                    }
+                                  }
+                                }
                               }
                             }
                           }
