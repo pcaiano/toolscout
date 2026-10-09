@@ -170,7 +170,7 @@ async function readRuntimeEdgeSnapshot(){
   }catch{return null}
 }
 async function runtimeSnapshot(env,{force=false}={}){
-  if(!force&&Date.now()-runtimeCache.at<RUNTIME_CACHE_MS)return runtimeCache;
+  if(!force&&!runtimeCache.degraded&&Date.now()-runtimeCache.at<RUNTIME_CACHE_MS)return runtimeCache;
   try{
     const [states,candidates]=await Promise.all([
       env.DB.prepare(`SELECT * FROM catalog_runtime_state`).all(),
