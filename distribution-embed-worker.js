@@ -1,4 +1,5 @@
 import {businessWorkflowGuidance,verifiedPmsCandidates} from './business-workflow-intent.js';
+import {publicMergedTools} from './catalog-autonomy-worker.js';
 import base from './distribution-command-worker.js';
 import { prioritizedDistributionFeed } from './distribution-feed-priority.js';
 import {recentDistributionAssets,handleMachineDiscoveryCatalogRoute} from './machine-discovery-catalog-runtime.js';
@@ -166,7 +167,7 @@ async function recommend(request,env){
   };
   const limit=Math.max(1,Math.min(5,Number.parseInt(u.searchParams.get('limit')||'3',10)||3));
   try{
-    const [tools,intents]=await Promise.all([assetJson(request,env,'/data/tools.json'),assetJson(request,env,'/data/intents.json')]);
+    const [tools,intents]=await Promise.all([publicMergedTools(env),assetJson(request,env,'/data/intents.json')]);
     // Interpret the whole-business question BEFORE category hints inferred from
     // sector names such as marketing agency, software company or architecture firm.
     // Only a user-supplied goal is a hard category instruction at this stage.
