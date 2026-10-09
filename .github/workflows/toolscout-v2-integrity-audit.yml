@@ -24,6 +24,9 @@ on:
       - 'scripts/validate-v2-preservation.mjs'
       - 'scripts/evaluate-v2-integrity-audit.mjs'
       - 'scripts/persist-v2-integrity-report.mjs'
+      - 'agent-protocol-core-worker.js'
+      - 'data/tools.json'
+      - 'scripts/probe-live-mcp-decision.mjs'
       - 'tests/toolscout-v2-*.test.mjs'
 
 permissions:
@@ -203,3 +206,7 @@ jobs:
         run: |
           echo "Integrity Audit failed. The failure has been persisted to the Growth Brain incident queue."
           exit 1
+
+      - name: Verify real production MCP buyer decisions after Cloudflare deployment
+        if: always()
+        run: node scripts/probe-live-mcp-decision.mjs
