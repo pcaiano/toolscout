@@ -282,7 +282,7 @@ test('decision benchmark: only sourced verified Gmail pairs meet Gmail must-have
   assert.deepEqual(out.structuredContent.shortlist.map(x=>x.slug),['crm-verified']);
   const pair=out.structuredContent.shortlist[0].stack_fit.pairs[0];
   assert.equal(pair.status,'verified');
-  assert.equal(pair.source_url,'https://docs.example.com/gmail');
+  assert.equal('source_url' in pair,false,'Manufacturer source URL must remain internal');
   assert.equal(pair.verified_at,'2026-10-08');
 });
 
@@ -336,7 +336,7 @@ test('decision evidence cohort: documented integrations qualify without generic 
     assert.equal(candidate.requirement_evidence[0].matched,true);
     const pair=candidate.stack_fit.pairs[0];
     assert.equal(pair.status,'verified');
-    assert.match(pair.source_url,/^https:\/\//);
+    assert.equal('source_url' in pair,false);
     assert.match(pair.verified_at,/^\d{4}-\d{2}-\d{2}$/);
   }
   const make=catalog.find(x=>x.slug==='make');
@@ -356,7 +356,7 @@ test('decision engine MCP returns the same sourced editorial conclusion as the c
   assert.deepEqual(content.editorial_review.limitations,source.limitations);
   assert.deepEqual(content.editorial_review.tradeoffs,source.tradeoffs);
   assert.equal(content.editorial_review.hands_on_tested,false);
-  assert.match(content.editorial_review.evidence_source,/^https:\/\//);
+  assert.equal(content.editorial_review.evidence_basis,'manufacturer_documentation_verified_internally');
   assert.match(content.profile_url,/^https:\/\/trytoolscout\.org\/tools\/zapier$/);
   assert.match(content.tool_url,/^https:\/\/trytoolscout\.org\/go\/zapier/);
   assert.equal('commission' in content,false);
@@ -386,12 +386,12 @@ test('full catalog MCP distinguishes editorial coverage from verified evidence a
   }
   const sourcedWithTaxonomyIssue=await getTool('resume-ai');
   assert.equal(sourcedWithTaxonomyIssue.editorial_review.verification_status,'vendor_documented');
-  assert.match(sourcedWithTaxonomyIssue.editorial_review.evidence_source,/^https:\/\//);
+  assert.equal(sourcedWithTaxonomyIssue.editorial_review.evidence_basis,'manufacturer_documentation_verified_internally');
   assert.equal(sourcedWithTaxonomyIssue.category_review_required,true,'Source verification must not override independent category review');
   assert.equal(sourcedWithTaxonomyIssue.editorial_review.hands_on_tested,false);
   const sourced=await getTool('hubspot');
   assert.notEqual(sourced.editorial_review.verification_status,'catalog_only');
-  assert.match(sourced.editorial_review.evidence_source,/^https:\/\//);
+  assert.equal(sourced.editorial_review.evidence_basis,'manufacturer_documentation_verified_internally');
   assert.equal(sourced.category_review_required,false);
 });
 
