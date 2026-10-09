@@ -77,7 +77,7 @@ export default {
         const location=primary.headers.get('Location');
         try{
           const dest=new URL(location,request.url);
-          if(dest.hostname!==url.hostname||(!/^\\/(?:tools(?:\\/|$)|go(?:\\/|$))/.test(dest.pathname)))return primary;
+          if(dest.hostname!==url.hostname||(!/^\/(?:tools(?:\/|$)|go(?:\/|$))/.test(dest.pathname)))return primary;
         }catch{}
       } else if(primary&&primary.status!==200&&primary.status!==404)return primary;
       if(slug){
