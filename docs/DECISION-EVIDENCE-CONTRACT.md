@@ -100,4 +100,13 @@ Trello publishes Standard USD 6 monthly per user or USD 5/month equivalent if bi
 `usageTier` on a verified quote establishes the usage allowance for that **same paid plan** (Make Core/Pro/Teams at 10,000 credits/month). It must not be confused with the Free plan's 1,000 monthly credits. All manufacturer documentation URLs are kept internal.
 
 CI includes `tests/toolscout-v2-plan-coherence.test.mjs`, with 16 documented buying cases, billing commitments, multiple mandatory requirements, and proof that cheap tiers cannot inherit Premium capabilities.
+## Verified collaborative software pricing and licensed-seat subtotals (9 October 2026)
+
+The independently verified second cohort adds ClickUp Unlimited and Business, Airtable Team and self-serve Business, and Asana Starter and Advanced. Each plan carries documented USD prices for monthly and annual commitments. Total internal quote coverage is now 26 price records across six software products. Source URLs are internal manufacturer documentation; they are never exposed in public MCP buyer results.
+
+**Buyer-facing distinction:** Quotes with `unit: seat` are prices for one paid seat. For an explicit number of **billed seats** (the optional `seat_count` integer, 1–100, or `for N billed seats`), ToolScout can calculate a labelled **before-tax subscription subtotal** only if the buyer explicitly asks for that subtotal. The API returns `seat_count`, `seat_monthly_subtotal`, `seat_invoice_subtotal`, and `price_scope: seat_subscription_subtotal_before_tax`. This multiplication does **not** verify VAT, addons, proration, other workspaces, discounts, billing minimums, or a final invoice. Ambiguous all-in team totals, tax-inclusive requirements, market-specific prices and conflicting seat counts fail closed. Quotes for channels or fixed-price subscriptions are never multiplied by a seat count.
+
+Airtable's self-serve Business has a documented private-domain email eligibility condition and distinct contributor billing permissions. Recorded seat prices are list-price references, not evidence a team with Gmail signups is eligible for Business. The publication does not claim regional EUR checkout evidence.
+
+`tests/toolscout-v2-seat-subtotals.test.mjs` covers 26 documented buyer scenarios including plan-specific feature inheritance, Airtable per-base record limits, annual invoices, billed-seat subtotals, country unknowns and protected all-in totals.
 No new GitHub Actions deployment route: Cloudflare Workers Builds continues to publish merged `main` commits automatically; GitHub Actions recovery remains manual-only.
