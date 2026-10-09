@@ -606,6 +606,7 @@ function hardBuyerConstraint(value){
 }
 function decisionBlockers(evaluated,args={}){
   const reasons=[];
+  if(evaluated.plan_coherence?.status==='not_verified')reasons.push('No manufacturer-documented single plan proves all mandatory buying requirements simultaneously.');
   if(evaluated.category_review_required)reasons.push('ToolScout category classification is pending review.');
   for(const req of evaluated.requirement_evidence||[])
     if(!req.matched)reasons.push('Mandatory capability lacks claim-level manufacturer evidence: '+req.requirement);
@@ -697,6 +698,25 @@ function buyerValidationPlan(tool,args,constraints,stack){
   if(!checks.length)checks.push('Run the specific workflow with representative data and verify the limits before purchase.');
   return [...new Set(checks)].slice(0,6);
 }
+function coherentBuyerPlan(must,constraints){
+  const required=[
+    ...(must||[]).map(x=>({kind:'feature',verified:x.matched===true,plans:x.eligible_plans||[]})),
+    ...(constraints||[]).filter(x=>hardBuyerConstraint(x.constraint)).map(x=>({kind:Array.isArray(x.price_options)?'price':'constraint',verified:x.status==='verified',plans:x.eligible_plans||[]}))
+  ];
+  if(required.length<2)return {status:'not_required',selected_plan:null};
+  if(required.some(x=>!x.verified))return {status:'incomplete',selected_plan:null};
+  const priced=required.some(x=>x.kind==='price');
+  const explicit=required.filter(x=>x.plans.length);
+  if(!priced&&explicit.length<2)return {status:'not_required',selected_plan:null};
+  if(priced&&explicit.length!==required.length)return {status:'not_verified',selected_plan:null,evidence:'Some required features or capacities have no verified entitlement on the priced tier.'};
+  const shared=explicit.reduce((acc,x)=>acc.filter(p=>x.plans.some(t=>catalogNormalize(t)===catalogNormalize(p))),explicit[0]?.plans||[]);
+  if(!shared.length)return {status:'not_verified',selected_plan:null,evidence:'No single manufacturer-documented plan satisfies all mandatory price, capacity and capability requirements.'};
+  const quotes=(constraints||[]).flatMap(x=>Array.isArray(x.price_options)?x.price_options:[])
+    .filter(x=>shared.some(p=>catalogNormalize(x.plan)===catalogNormalize(p)))
+    .sort((a,b)=>a.monthly_equivalent-b.monthly_equivalent);
+  const selected=quotes[0]?.plan||shared[0];
+  return {status:'verified',selected_plan:selected,evidence:'One manufacturer-documented plan satisfies the combined verified buying requirements.'};
+}
 function decisionEvaluation(tool,args){
   const job=String(args.job||args.use_case||args.q||'').trim(),hay=toolHay(tool),terms=textTerms(job);
   let relevance=0;
@@ -714,7 +734,13 @@ function decisionEvaluation(tool,args){
   const budget=budgetSignal(tool,args.budget),team=teamSignal(tool,args.team);
   const must=(args.must_have||[]).map(x=>({requirement:x,...requirementMatch(tool,x,{budget:args.budget})}));
   const avoids=(args.avoid||[]).map(x=>({requirement:x,...requirementMatch(tool,x,{exclude:true})}));
-  const constraints=constraintEvidence(tool,args.constraints||[],args.budget,args.country||null);
+  const initialConstraints=constraintEvidence(tool,args.constraints||[],args.budget,args.country||null);
+  const planCoherence=coherentBuyerPlan(must,initialConstraints);
+  const constraints=initialConstraints.map(x=>{
+    if(planCoherence.status!=='verified'||!x.price_options?.length)return x;
+    const price=x.price_options.find(p=>catalogNormalize(p.plan)===catalogNormalize(planCoherence.selected_plan));
+    return price?{...x,...price}:x;
+  });
   const mustMatched=must.filter(x=>x.matched).length;
   const avoidHits=avoids.filter(x=>x.matched).length;
   const constraintVerified=constraints.filter(x=>x.status==='verified').length;
@@ -752,6 +778,7 @@ function decisionEvaluation(tool,args){
     avoid_evidence:avoids,
     constraint_evidence:constraints,
     constraint_summary:{verified:constraintVerified,not_verified:constraintUnverified,conflicts:constraintConflicts},
+    plan_coherence:planCoherence,
     stack_fit:stack
   };
 }
