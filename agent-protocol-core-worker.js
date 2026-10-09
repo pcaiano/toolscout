@@ -637,7 +637,7 @@ function decisionBlockers(evaluated,args={}){
   if(args.budget==='free'&&!(evaluated.free_plan_verified&&evaluated.free_plan))
     reasons.push('A documented free plan is required but not confirmed.');
   if(args.require_stack_fit===true)for(const pair of evaluated.stack_fit?.pairs||[])
-    if(pair.status!=='verified')reasons.push('Mandatory stack integration with '+pair.existing_tool+' is not verified on the requested plan.');
+    if(pair.status!=='verified'||pair.proof_scope==='ai_interoperability_only')reasons.push('Mandatory stack integration with '+pair.existing_tool+' is not verified on the requested plan.');
   for(const c of evaluated.constraint_evidence||[])
     if(hardBuyerConstraint(c.constraint)&&c.status!=='verified')
       reasons.push('Mandatory constraint cannot be confirmed: '+c.constraint+' ('+c.status+').');
@@ -700,7 +700,7 @@ function stackAssessment(tool,existingTools=[],{budget=null}={}){
       continue;
     }
     const assistant=ai.status==='verified'?(ai.assistants||[]).find(x=>catalogNormalize(x)===n):null;
-    if(assistant){pairs.push({existing_tool:existing,status:'pair_unverified',evidence:'AI interoperability with '+assistant+' is reported, but ToolScout lacks a plan-specific named integration entitlement for a mandatory stack requirement.'});continue}
+    if(assistant){pairs.push({existing_tool:existing,status:budget==='free'?'pair_unverified':'verified',proof_scope:'ai_interoperability_only',evidence:'Verified AI interoperability with '+assistant+', but no plan-specific named integration entitlement is recorded.'});continue}
     if((tool.features||[]).some(x=>catalogNormalize(x)==='integrations')||scoreOf(tool,'integrations')>=8){
       pairs.push({existing_tool:existing,status:'pair_unverified',evidence:'Strong general integration capability, but ToolScout does not currently store verified product-specific evidence for '+existing+'.'});
       continue;
@@ -767,7 +767,7 @@ function decisionEvaluation(tool,args){
   const avoids=(args.avoid||[]).map(x=>({requirement:x,...requirementMatch(tool,x,{exclude:true})}));
   const initialConstraints=constraintEvidence(tool,args.constraints||[],args.budget,args.country||null,args.seat_count||null);
   const stack=stackAssessment(tool,args.existing_tools||[],{budget:args.budget});
-  const required= args.require_stack_fit===true?[...must,...stack.pairs.map(pair=>({matched:pair.status==='verified',eligible_plans:pair.eligible_plans||[]}))]:must;
+  const required= args.require_stack_fit===true?[...must,...stack.pairs.map(pair=>({matched:pair.status==='verified'&&pair.proof_scope!=='ai_interoperability_only',eligible_plans:pair.eligible_plans||[]}))]:must;
   const planCoherence=coherentBuyerPlan(required,initialConstraints);
   const constraints=initialConstraints.map(x=>{
     if(planCoherence.status!=='verified'||!x.price_options?.length)return x;
