@@ -127,7 +127,13 @@
       const guidance=data.guidance||{};
       const workflows=Array.isArray(guidance.workflows)?guidance.workflows.slice(0,mode==='mini'?2:4):[];
       results.innerHTML='<div class="result workflow"><div class="name">'+esc(guidance.title||'Choose the software task')+'</div><div class="description">'+esc(guidance.explanation||'')+'</div></div>'
-        +workflows.map((w,index)=>'<article class="result workflow"><div class="category">'+esc(w.category||'Software')+'</div><div class="name">'+esc(w.title)+'</div><div class="description">'+esc(w.scope)+'</div><button class="workflow-action" type="button" data-index="'+index+'">Explore this workflow</button></article>').join('');
+        +workflows.map((w,index)=>{
+          const examples=(w.category_examples||[]).slice(0,2).map(t=>'<a class="profile" data-action="profile" data-slug="'+esc(t.slug)+'" href="'+esc(trackedUrl('/tools/'+encodeURIComponent(t.slug),t.slug))+'" rel="noopener" target="_blank">'+esc(t.name)+'</a>').join(' · ');
+          return '<article class="result workflow"><div class="category">'+esc(w.category||'Software')+'</div><div class="name">'+esc(w.title)+'</div><div class="description">'+esc(w.scope)+'</div>'
+            +(examples?'<div class="description">Catalog examples (sector fit not verified): '+examples+'</div>':'')
+            +'<button class="workflow-action" type="button" data-index="'+index+'">Explore this workflow</button></article>';
+        }).join('');
+      results.querySelectorAll('a[data-action="profile"]').forEach(link=>link.addEventListener('click',()=>event('profile_click',{result_slug:clean(link.dataset.slug,80)})));
       results.querySelectorAll('.workflow-action').forEach(control=>control.addEventListener('click',()=>{
         const workflow=workflows[Number(control.dataset.index)];
         if(!workflow)return;

@@ -34,6 +34,10 @@ async function manifest(env){
       primary_capabilities:['decide_software','compare_for_use_case','find_alternatives','check_stack_fit','recent_changes'],
       secondary_lookup_capabilities:['recommend_tools','search_tools','get_tool','compare_tools','get_ai_compatibility'],
       positioning:'Softonic helps you find software. ToolScout helps you decide which software is right for you.',
+      business_intent_decomposition:true,
+      supported_business_questions:['software to run a restaurant','software for an architecture practice','software for a marketing agency','software for a business in any sector'],
+      whole_business_response:'workflow_guidance with industry-specific jobs, documented category examples and first-party Finder URLs; not a fabricated overall winner',
+      workflow_decision_endpoint:'https://trytoolscout.org/mcp',
       no_pay_to_rank:true
     },
     machine_discovery:{

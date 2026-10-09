@@ -159,3 +159,27 @@ The current catalog retains 127 products. Eight first-party documented named int
 These source URLs exist only in private catalog evidence. Buyer-facing MCP results expose named status, date and caveat but not raw manufacturer documentation URLs. When mandatory stack fit is requested, only first-party verified named integrations can qualify. A plan-specific Free request still fails closed without that plan's entitlement. 
 
 All additions are guarded by tests/toolscout-v2-documented-integration-coverage.test.mjs in the existing ToolScout 2.0 CI, alongside preservation and browser checks.
+
+## Universal business discovery, AI referrals and catalog scale (9 October 2026)
+
+Airbnb was a regression example, not a strategic priority. ToolScout's mission is to support buying questions about **any business and any industry**, while using the same evidence-aware core decision engine and truthful catalog boundaries.
+
+### Request interpretation
+
+- Broad question such as 'best software to run my restaurant', 'software for an architecture company', 'software for a marketing agency' or an unknown small business: return `workflow_guidance`, with an identified industry, four sector-relevant buying jobs, distinct specialist-system gaps, category coverage counts and first-party Finder URLs. Do not award one cross-category 'winner'.
+- The same `businessWorkflowGuidance` module is used by the website API and MCP/A2A. The whole-business classification happens **before** a sector term like 'marketing agency' accidentally becomes the tool-category goal 'marketing'. Narrow CRM, SEO or other named workflows bypass decomposition and use normal category/constraint gates.
+- If specialist vertical products are admitted with sufficient first-party evidence, replace gap statements with qualified recommendations for that vertical rather than freezing no-coverage assumptions.
+- Documented `category_examples` give at most two non-winning ToolScout **profile** links per workflow, ordered by dated internal claim depth, not by commercial participation. They are examples of general functional categories and are never endorsements for sector-specific requirements.
+- A first-party `finder_url` is a useful AI or publisher referral entrypoint; actual link clicks and qualified human sessions must be measured, not inferred from the existence of API responses, MCP calls, citations or raw site traffic. AI products do not automatically invoke this engine without an enabled client connection, and ToolScout cannot guarantee their distribution.
+
+### Practical catalog expansion toward 500, 1,000 and beyond
+
+Grow the existing catalog rather than create a second catalog or add a parallel content engine. Measure **manufacturer-evidenced breadth plus strict-human acquisition and decision completions**, not just the number of tool names.
+
+1. Use first-party internal query demand, observed AI-to-Finder handoffs, GSC topics, and competitor/category gaps to prioritize underserved buyer jobs across the industry ontology. A missing specialized operation is a research signal, not a license to recommend a generic tool.
+2. Feed candidates into the current Catalog Autonomy/trusted-candidate workflow. Every new product must satisfy the existing `scripts/check-vendor-evidence.mjs` new-slug rules: two distinct dated first-party documents, decision-quality original analysis, explicit strengths, trade-offs and limitations, pricing/Free status (unknown if not proven), relevant audience and a real logo. Vendor facts and plan tiers must be individually substantiated; no synthetic listing inflation.
+3. Apply the same profile, comparison, discovery ranking and schema rules to each admission. Preserve canonical URLs, existing backlinks and affiliate neutrality. Where an outbound route is required, resolve the actual valid monetizable `/go/` contract rather than inventing affiliate links or exposing manufacturer-source URLs on public profiles.
+4. Ship reviewable evidence-backed groups through the existing CI and Cloudflare build. Prefer balanced coverage of multiple industries and workflows over large generic AI-catalog waves. The current catalog remains 127 as of this change; target numbers are goals, not achieved results.
+5. Monitor unique documented vendors, category/workflow coverage, verified claims and integrations, AI-referral-qualified human sessions, Finder workflow completions, ToolScout profile opens, and actual monetized outbound and commission evidence. Never collapse these populations into vanity traffic.
+
+To unlock specialist sectors not represented in the existing allowed category registry, expand the current catalog taxonomy only with a fully verified candidate cohort and tests. Avoid speculative indexable buying guides from thin coverage.

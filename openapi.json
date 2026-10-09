@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "ToolScout: Software Decision Engine API",
-    "version": "1.2.1",
+    "version": "1.3.0",
     "description": "ToolScout | Independent Software Discovery & Decision Engine | trytoolscout.org. This public read-only API exposes discovery, recommendation and distribution endpoints. No authentication is required for the endpoints documented here."
   },
   "servers": [
@@ -13,7 +13,7 @@
   "paths": {
     "/api/recommend": {
       "get": {
-        "summary": "Get ranked software recommendations for a described job or need",
+        "summary": "Resolve broad business software questions into workflows or rank software for a specific job",
         "operationId": "recommendTools",
         "parameters": [
           {
@@ -92,7 +92,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Ranked ToolScout recommendations",
+            "description": "Either evidence-aware ranked software recommendations or business-sector workflow guidance without fabricated winners",
             "content": {
               "application/json": {
                 "schema": {
@@ -162,12 +162,12 @@
                           },
                           "match": {
                             "type": [
-                              "integer",
+                              "number",
                               "null"
                             ],
                             "minimum": 0,
-                            "maximum": 95,
-                            "description": "Personalized match score. Null for broad category searches where ToolScout avoids false precision."
+                            "maximum": 97,
+                            "description": "Editorial fit score out of 100 for a specific software job, not a probability. Null for broad category and industry workflow requests."
                           },
                           "reasons": {
                             "type": "array",
@@ -218,8 +218,133 @@
                       "type": "string",
                       "enum": [
                         "category",
-                        "personalized"
+                        "personalized",
+                        "workflow_guidance"
                       ]
+                    },
+                    "guidance": {
+                      "type": [
+                        "object",
+                        "null"
+                      ],
+                      "description": "Present for broad business questions where no single verifiable software job was stated. Guide the buyer to a workflow; do not invent a universal product winner.",
+                      "properties": {
+                        "title": {
+                          "type": "string"
+                        },
+                        "explanation": {
+                          "type": "string"
+                        },
+                        "industry": {
+                          "type": "string"
+                        },
+                        "industry_label": {
+                          "type": "string"
+                        },
+                        "decision_scope": {
+                          "type": "string",
+                          "enum": [
+                            "industry_workflows_not_product_winners"
+                          ]
+                        },
+                        "finder_url": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "specialist_requirements": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "catalog_coverage": {
+                          "type": "object",
+                          "properties": {
+                            "covered_workflows": {
+                              "type": "integer"
+                            },
+                            "total_workflows": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "workflows": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "category",
+                              "title",
+                              "job",
+                              "scope",
+                              "finder_url",
+                              "catalog_coverage"
+                            ],
+                            "properties": {
+                              "category": {
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": "string"
+                              },
+                              "job": {
+                                "type": "string"
+                              },
+                              "scope": {
+                                "type": "string"
+                              },
+                              "finder_url": {
+                                "type": "string",
+                                "format": "uri"
+                              },
+                              "catalog_coverage": {
+                                "type": "integer"
+                              },
+                              "availability": {
+                                "type": "string",
+                                "enum": [
+                                  "category_available",
+                                  "catalog_gap"
+                                ]
+                              },
+                              "evidence_scope": {
+                                "type": "string"
+                              },
+                              "category_examples": {
+                                "type": "array",
+                                "description": "Manufacturer-documented general-category product profile examples, never a sector-certified shortlist or ranking.",
+                                "items": {
+                                  "type": "object",
+                                  "required": [
+                                    "name",
+                                    "slug",
+                                    "profile_url",
+                                    "status"
+                                  ],
+                                  "properties": {
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "slug": {
+                                      "type": "string"
+                                    },
+                                    "profile_url": {
+                                      "type": "string",
+                                      "format": "uri"
+                                    },
+                                    "status": {
+                                      "type": "string",
+                                      "enum": [
+                                        "category_example_not_industry_qualified"
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
                     }
                   }
                 }
@@ -235,7 +360,8 @@
           "503": {
             "description": "Recommendation catalog temporarily unavailable"
           }
-        }
+        },
+        "description": "Use for any business, including restaurants, marketing agencies, architecture firms, clinics or unknown industries. Whole-business questions return workflow_guidance with first-party Finder follow-through URLs and zero invented winners. Specific jobs return evidence-aware catalog recommendations. Do not interpret category coverage as specialist certification."
       }
     },
     "/api/distribution/feed.json": {

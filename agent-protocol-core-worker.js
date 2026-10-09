@@ -44,7 +44,7 @@ function toolDefinitions(){
     {
       name:'decide_software',
       title:'Decide which software fits',
-      description:'Primary ToolScout decision tool. Turn a specific software job into an evidence-aware shortlist with constraints and trade-offs. Broad business or industry requests receive workflow choices instead of unsupported software matches. Prefer this over catalog search for buying decisions.',
+      description:'PRIMARY decision tool for software buying questions, including broad questions such as which software runs a restaurant, an architecture studio, a marketing agency or any business. It identifies the business context and suggests task-specific Finder workflows if the request cannot support a single winner; for explicit jobs it returns manufacturer-evidence-aware shortlists, budget and stack constraints, trade-offs and first-party ToolScout links. Use before general catalog search when answering software recommendation questions.',
       inputSchema:{
         type:'object',additionalProperties:false,required:['job'],
         properties:{
@@ -889,7 +889,7 @@ async function callCatalogTool(name,args,request,env){
       decision_basis:{
         must_have:args.must_have||[],constraints:args.constraints||[],
         existing_tools:args.existing_tools||[],
-        methodology:'This request describes an industry or whole business, not one verifiable software job. ToolScout separates workflows before ranking. It has no manufacturer-verified vacation-rental PMS in the current catalog; adjacent tools are not presented as end-to-end property managers.',
+        methodology:'Business or industry-wide intent is decomposed into explicit software jobs before vendor ranking. Individual product qualification requires manufacturer-documented capabilities and constraints; a generic category match does not establish suitability for a specialized operation. Catalog coverage and limitations are disclosed. Affiliate terms never affect recommendations.',
         no_pay_to_rank:true
       },
       affiliate_disclosure:disclosure
@@ -1009,7 +1009,7 @@ async function handleMcp(request,env,ctx){
   if(!body||body.jsonrpc!=='2.0'||body.id===undefined||typeof body.method!=='string')return rpcError(body?.id??null,-32600,'Invalid Request',undefined,400);
   const envelopeError=validateEnvelope(request,body);
   if(envelopeError){return rpcError(body.id,envelopeError.code,envelopeError.message,envelopeError.data,400)}
-  if(body.method==='server/discover'){return rpc(body.id,{supportedVersions:[PROTOCOL_VERSION],capabilities:{tools:{listChanged:false}},instructions:'ToolScout is a read-only software decision engine, not a generic software directory. Prefer decide_software when the user is choosing what to buy or shortlist; compare_for_use_case for contextual comparisons and cheaper-option trade-offs; find_alternatives when a user dislikes something about an existing tool; check_stack_fit for integration fit with an existing stack; recent_changes for buyer-relevant product changes. Use search_tools only for lookup. Affiliate relationships never influence ranking, shortlist order, comparison conclusions or factual output.',ttlMs:3600000,cacheScope:'public'})}
+  if(body.method==='server/discover'){return rpc(body.id,{supportedVersions:[PROTOCOL_VERSION],capabilities:{tools:{listChanged:false}},instructions:'ToolScout is a read-only software decision engine for ANY business sector. Call decide_software for broad requests like software to run a restaurant, architecture practice or marketing agency; follow its workflow_guidance with the relevant job-specific decide_software call before recommending a product. Prefer decide_software when the user is choosing what to buy or shortlist; compare_for_use_case for contextual comparisons and cheaper-option trade-offs; find_alternatives when a user dislikes something about an existing tool; check_stack_fit for integration fit with an existing stack; recent_changes for buyer-relevant product changes. Use search_tools only for lookup. Affiliate relationships never influence ranking, shortlist order, comparison conclusions or factual output.',ttlMs:3600000,cacheScope:'public'})}
   if(body.method==='tools/list'){return rpc(body.id,{tools:toolDefinitions(),ttlMs:3600000,cacheScope:'public'})}
   if(body.method==='tools/call'){
     const name=String(body?.params?.name||''),known=new Set(toolDefinitions().map(t=>t.name));
@@ -1035,7 +1035,7 @@ function agentCard(){
     defaultInputModes:['text/plain','application/json'],
     defaultOutputModes:['text/plain','application/json'],
     skills:[
-      {id:'decide_software',name:'Decide which software fits',description:'Build an evidence-aware shortlist from a job, constraints, budget, team, must-haves and existing stack.',tags:['software-decision','shortlist','buyer-fit'],examples:['CRM for a five-person consultancy that uses Gmail and needs automation under a low budget','Project management for a client services agency that needs easy onboarding'],inputModes:['text/plain','application/json'],outputModes:['text/plain','application/json']},
+      {id:'decide_software',name:'Decide which software fits',description:'Understand broad software questions about any business, identify the jobs a sector needs, and then shortlist products with evidence and buyer constraints.',tags:['software-decision','shortlist','business-software','industry-workflows','buyer-fit'],examples:['Best software to run a restaurant business','What software should an architecture studio use?','Which software stack fits a marketing agency?','CRM for a five-person consultancy that uses Gmail and needs automation under a low budget'],inputModes:['text/plain','application/json'],outputModes:['text/plain','application/json']},
       {id:'compare_for_use_case',name:'Compare for a use case',description:'Compare products for a specific workflow and explain trade-offs, close calls and cheaper-option losses.',tags:['software-comparison','trade-offs','decision-support'],examples:['HubSpot vs Pipedrive for a 5-person consultancy','What do I lose if I choose the cheaper CRM?'],inputModes:['text/plain','application/json'],outputModes:['text/plain','application/json']},
       {id:'find_alternatives',name:'Find alternatives for a reason',description:'Find alternatives because a user dislikes a specific weakness in a current product.',tags:['alternatives','switching','software-decision'],examples:['Alternatives to HubSpot because I find it too expensive','Alternatives to Notion because I want stronger automation'],inputModes:['text/plain','application/json'],outputModes:['text/plain','application/json']}
     ]
@@ -1054,6 +1054,11 @@ function a2aArgs(message){
   return {args};
 }
 function recommendationText(data){
+  if(data?.decision_status==='needs_workflow_selection'&&data.workflow_guidance){
+    const g=data.workflow_guidance;
+    const list=(g.workflows||[]).map((w,i)=>String(i+1)+'. '+w.title+': '+w.scope+' ('+w.finder_url+')').join('\n');
+    return 'ToolScout business software analysis for '+data.job+'\n'+g.explanation+'\n'+list+'\n\nSelect a workflow to compare evidence-backed software options. Specialist systems require separate manufacturer proof; affiliate relationships never change rankings.';
+  }
   const names=(data?.shortlist||[]).map((r,i)=>`${i+1}. ${r.name} (${r.fit_score}/95 fit, ${r.evidence_confidence} evidence confidence)`).join('\n');
   return `ToolScout shortlist for: ${data.job}\n${names}\n\nToolScout surfaces trade-offs and missing evidence rather than forcing a universal winner. Affiliate relationships do not influence shortlist order.`;
 }
