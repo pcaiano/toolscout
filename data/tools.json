@@ -109,6 +109,26 @@
         "status": "verified",
         "verifiedAt": "2026-10-08",
         "sourceUrl": "https://systeme.io/pricing"
+      },
+      {
+        "type": "plan_limit",
+        "value": "free funnels",
+        "unit": "funnels",
+        "quantity": 3,
+        "plan": "Free",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://systeme.io/pricing"
+      },
+      {
+        "type": "plan_limit",
+        "value": "free workflows",
+        "unit": "workflows",
+        "quantity": 1,
+        "plan": "Free",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://systeme.io/pricing"
       }
     ]
   },
@@ -218,6 +238,16 @@
       {
         "type": "capability",
         "value": "automation",
+        "plan": "Lite",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.beehiiv.com/support/article/38813477234071-welcome-email-vs-welcome-automation-which-should-you-use"
+      },
+      {
+        "type": "plan_limit",
+        "value": "lite live automations",
+        "unit": "automations",
+        "quantity": 10,
         "plan": "Lite",
         "status": "verified",
         "verifiedAt": "2026-10-08",
@@ -445,7 +475,36 @@
       ],
       "sourceUrl": "https://www.jotform.com/help/408-understanding-your-account-usage-and-limits/",
       "verifiedAt": "2026-10-08"
-    }
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "forms",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.jotform.com/help/408-understanding-your-account-usage-and-limits/"
+      },
+      {
+        "type": "plan_limit",
+        "value": "starter monthly submissions",
+        "unit": "submissions",
+        "quantity": 100,
+        "plan": "Starter",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.jotform.com/help/408-understanding-your-account-usage-and-limits/"
+      },
+      {
+        "type": "plan_limit",
+        "value": "starter active forms",
+        "unit": "forms",
+        "quantity": 5,
+        "plan": "Starter",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.jotform.com/help/408-understanding-your-account-usage-and-limits/"
+      }
+    ]
   },
   {
     "slug": "adcreative-ai",
@@ -534,6 +593,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "creative scoring",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.adcreative.ai/en/articles/8885776-what-is-creative-scoring-ai-and-how-to-use-it"
+      }
     ]
   },
   {
@@ -615,7 +683,16 @@
       "sourceUrls": [
         "https://www.pipedrive.com/en/features/pipeline-management"
       ]
-    }
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "sales pipeline management",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.pipedrive.com/en/features/pipeline-management"
+      }
+    ]
   },
   {
     "slug": "semrush",
@@ -706,7 +783,16 @@
       "sourceUrls": [
         "https://www.semrush.com/kb/32-position-tracking"
       ]
-    }
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "position tracking",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.semrush.com/kb/32-position-tracking"
+      }
+    ]
   },
   {
     "slug": "jasper",
@@ -785,6 +871,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "knowledge base",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.jasper.ai/knowledge-base"
       }
     ]
   },
@@ -879,7 +974,36 @@
       "sourceUrls": [
         "https://help.brevo.com/hc/en-us/articles/208580669-FAQs-What-are-the-limits-of-the-Free-plan"
       ]
-    }
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "email sends",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.brevo.com/hc/en-us/articles/208580669-FAQs-What-are-the-limits-of-the-Free-plan"
+      },
+      {
+        "type": "plan_limit",
+        "value": "free daily email sends",
+        "unit": "emails",
+        "quantity": 300,
+        "plan": "Free",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.brevo.com/hc/en-us/articles/208580669-FAQs-What-are-the-limits-of-the-Free-plan"
+      },
+      {
+        "type": "plan_limit",
+        "value": "free stored contacts",
+        "unit": "contacts",
+        "quantity": 100000,
+        "plan": "Free",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.brevo.com/hc/en-us/articles/208580669-FAQs-What-are-the-limits-of-the-Free-plan"
+      }
+    ]
   },
   {
     "slug": "activecampaign",
@@ -967,7 +1091,16 @@
       "trialSummary": "14-day trial, up to 100 email sends and one user; trial features mirror Professional plan.",
       "sourceUrl": "https://help.activecampaign.com/hc/en-us/articles/218789987-Free-trial-capabilities",
       "verifiedAt": "2026-10-08"
-    }
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "14-day trial",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.activecampaign.com/hc/en-us/articles/218789987-Free-trial-capabilities"
+      }
+    ]
   },
   {
     "slug": "mailchimp",
@@ -1060,7 +1193,36 @@
       "sourceUrls": [
         "https://mailchimp.com/help/about-mailchimp-pricing-plans/"
       ]
-    }
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "email campaigns",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://mailchimp.com/help/about-mailchimp-pricing-plans/"
+      },
+      {
+        "type": "plan_limit",
+        "value": "free monthly email sends",
+        "unit": "emails",
+        "quantity": 500,
+        "plan": "Free",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://mailchimp.com/help/about-mailchimp-pricing-plans/"
+      },
+      {
+        "type": "plan_limit",
+        "value": "free contacts",
+        "unit": "contacts",
+        "quantity": 250,
+        "plan": "Free",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://mailchimp.com/help/about-mailchimp-pricing-plans/"
+      }
+    ]
   },
   {
     "slug": "zapier",
@@ -1179,6 +1341,16 @@
         "status": "verified",
         "verifiedAt": "2026-10-08",
         "sourceUrl": "https://help.zapier.com/hc/en-us/articles/32337438839565-What-s-included-in-Zapier-s-Free-plan"
+      },
+      {
+        "type": "plan_limit",
+        "value": "free one user",
+        "unit": "users",
+        "quantity": 1,
+        "plan": "Free",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.zapier.com/hc/en-us/articles/32337438839565-What-s-included-in-Zapier-s-Free-plan"
       }
     ]
   },
@@ -1286,7 +1458,26 @@
       "sourceUrls": [
         "https://www.make.com/en/product"
       ]
-    }
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "visual workflow builder",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.make.com/en/product"
+      },
+      {
+        "type": "plan_limit",
+        "value": "free monthly credits",
+        "unit": "credits",
+        "quantity": 1000,
+        "plan": "Free",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.make.com/en/pricing"
+      }
+    ]
   },
   {
     "slug": "zoho-crm",
@@ -1386,7 +1577,26 @@
       ],
       "sourceUrl": "https://help.zoho.com/portal/en/kb/crm/getting-started/articles/choose-your-path-edition-and-role-guide",
       "verifiedAt": "2026-10-08"
-    }
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "lead management",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.zoho.com/portal/en/kb/crm/getting-started/articles/choose-your-path-edition-and-role-guide"
+      },
+      {
+        "type": "plan_limit",
+        "value": "free CRM users",
+        "unit": "users",
+        "quantity": 3,
+        "plan": "Free",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.zoho.com/portal/en/kb/crm/getting-started/articles/choose-your-path-edition-and-role-guide"
+      }
+    ]
   },
   {
     "slug": "monday-crm",
@@ -1466,6 +1676,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "pipeline boards",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://support.monday.com/hc/en-us/articles/360013348719-Sales-pipeline-management-with-monday-CRM"
       }
     ]
   },
@@ -1557,7 +1776,16 @@
       ],
       "sourceUrl": "https://help.typeform.com/hc/en-us/articles/360032972852-Free-plan",
       "verifiedAt": "2026-10-08"
-    }
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "forms",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.typeform.com/hc/en-us/articles/360032972852-Free-plan"
+      }
+    ]
   },
   {
     "slug": "tally",
@@ -1647,7 +1875,16 @@
       "sourceUrls": [
         "https://tally.so/help/faq"
       ]
-    }
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "forms",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://tally.so/help/faq"
+      }
+    ]
   },
   {
     "slug": "ahrefs",
@@ -1737,7 +1974,16 @@
       "sourceUrls": [
         "https://help.ahrefs.com/en/articles/9419051-about-ahrefs-starter-plan"
       ]
-    }
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "starter plan",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.ahrefs.com/en/articles/9419051-about-ahrefs-starter-plan"
+      }
+    ]
   },
   {
     "slug": "se-ranking",
@@ -1816,7 +2062,16 @@
       "sourceUrls": [
         "https://seranking.com/website-audit.html"
       ]
-    }
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "website audit",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://seranking.com/website-audit.html"
+      }
+    ]
   },
   {
     "slug": "clickup",
@@ -1909,7 +2164,16 @@
       ],
       "sourceUrl": "https://help.clickup.com/hc/en-us/articles/6309390855319-Create-and-edit-Spaces",
       "verifiedAt": "2026-10-08"
-    }
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "spaces",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.clickup.com/hc/en-us/articles/6309390855319-Create-and-edit-Spaces"
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -1994,6 +2258,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "projects",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://support.anthropic.com/en/articles/9517075-what-are-projects"
       }
     ]
   },
@@ -2080,6 +2353,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "routing forms",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.calendly.com/hc/en-us/articles/4418606043927-Getting-started-with-Routing-Forms"
       }
     ]
   },
@@ -2186,7 +2468,26 @@
       ],
       "sourceUrl": "https://posthog.com/pricing",
       "verifiedAt": "2026-10-08"
-    }
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "product analytics events",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://posthog.com/pricing"
+      },
+      {
+        "type": "plan_limit",
+        "value": "free monthly analytics events",
+        "unit": "events",
+        "quantity": 1000000,
+        "plan": "Free",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://posthog.com/pricing"
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -2284,7 +2585,17 @@
       "sourceUrls": [
         "https://www.notion.com/help/database-automations"
       ]
-    }
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "database automations",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.notion.com/help/database-automations",
+        "plan": "Paid"
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -2383,7 +2694,16 @@
       ],
       "sourceUrl": "https://help.asana.com/s/article/asana-personal-plan-details",
       "verifiedAt": "2026-10-08"
-    }
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "project tasks",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.asana.com/s/article/asana-personal-plan-details"
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -2481,7 +2801,26 @@
       "sourceUrls": [
         "https://support.atlassian.com/trello/docs/workspace-user-limit/"
       ]
-    }
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "workspaces",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://support.atlassian.com/trello/docs/workspace-user-limit/"
+      },
+      {
+        "type": "plan_limit",
+        "value": "free workspace collaborators",
+        "unit": "collaborators",
+        "quantity": 10,
+        "plan": "Free",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://support.atlassian.com/trello/docs/workspace-user-limit/"
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -2578,7 +2917,26 @@
       "sourceUrls": [
         "https://support.airtable.com/articles/3199652922-managing-airtable-automations"
       ]
-    }
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "automations",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://support.airtable.com/articles/3199652922-managing-airtable-automations"
+      },
+      {
+        "type": "plan_limit",
+        "value": "free base records",
+        "unit": "records",
+        "quantity": 1000,
+        "plan": "Free",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://support.airtable.com/articles/2277136852-airtable-plans-overview"
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -2666,7 +3024,16 @@
       "sourceUrls": [
         "https://docs.n8n.io/hosting/"
       ]
-    }
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "self-hosting",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://docs.n8n.io/hosting/"
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -2751,6 +3118,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "prospect filters",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://knowledge.apollo.io/hc/en-us/articles/4412665755661-Use-Search-Filters-to-Find-Prospects"
       }
     ]
   },
@@ -2839,6 +3215,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "deliverability checklist",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.lemlist.com/en/articles/4452683-use-the-email-deliverability-checklist"
       }
     ]
   },
@@ -2929,6 +3314,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "AI escalation rules",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.intercom.com/help/en/articles/12396892-manage-fin-ai-agent-s-escalation-guidance-and-rules"
+      }
     ]
   },
   {
@@ -3017,6 +3411,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "ticket triggers",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://support.zendesk.com/hc/en-us/articles/4408822236058-About-Zendesk-triggers-and-how-they-work"
+      }
     ]
   },
   {
@@ -3103,6 +3506,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "mailbox warmup readiness",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.instantly.ai/en/articles/13938078-when-your-email-account-is-ready-for-campaigns"
       }
     ]
   },
@@ -3192,6 +3604,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "subscriber tagging",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.kit.com/en/articles/4306079-how-to-automatically-tag-subscribers"
+      }
     ]
   },
   {
@@ -3279,6 +3700,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "event-triggered flows",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.klaviyo.com/hc/en-us/articles/360003057151"
       }
     ]
   },
@@ -3369,6 +3799,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "brand kits",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.canva.com/help/brand-kit/"
       }
     ]
   },
@@ -3475,7 +3914,16 @@
       "sourceUrls": [
         "https://help.figma.com/hc/en-us/articles/13838684089751-Starter-plan-overview"
       ]
-    }
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "design collaboration",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.figma.com/hc/en-us/articles/13838684089751-Starter-plan-overview"
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -3560,6 +4008,16 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "tone rewrite suggestions",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://support.grammarly.com/hc/en-us/articles/10674801783309-How-do-Grammarly-s-tone-suggestions-work",
+        "plan": "Paid"
       }
     ]
   },
@@ -3744,6 +4202,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "localized page metadata",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.webflow.com/hc/en-us/articles/33961235760531-Localize-page-settings"
+      }
     ]
   },
   {
@@ -3828,6 +4295,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "content score",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://docs.surferseo.com/en/articles/5700365-content-score-in-the-editor-explained"
       }
     ]
   },
@@ -3914,6 +4390,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "funnel analysis",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://mixpanel.com/blog/introduction-to-analytics-funnel-analysis/"
+      }
     ]
   },
   {
@@ -3999,6 +4484,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "ticket automation",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://support.freshdesk.com/support/solutions/articles/207276"
       }
     ]
   },
@@ -4087,6 +4581,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "website localization",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.framer.com/help/articles/adding-a-new-locale/"
       }
     ]
   },
@@ -4182,6 +4685,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "projects",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.perplexity.ai/hub/products/projects"
+      }
     ]
   },
   {
@@ -4270,6 +4782,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "canvas permissions",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://slack.com/help/articles/15678967614611-Manage-access-permissions-for-canvases-and-lists"
       }
     ]
   },
@@ -4365,6 +4886,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "project rules",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://cursor.com/docs/rules"
+      }
     ]
   },
   {
@@ -4451,6 +4981,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "order management",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.shopify.com/en/manual/fulfillment/managing-orders"
       }
     ]
   },
@@ -4540,6 +5079,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "recording sharing permissions",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://support.atlassian.com/loom/docs/share-your-recording"
+      }
     ]
   },
   {
@@ -4628,6 +5176,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "board privacy settings",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.miro.com/hc/en-us/articles/360011114519-Public-boards-vs-private-boards"
+      }
     ]
   },
   {
@@ -4709,6 +5266,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "recommended posting times",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.hootsuite.com/s/article/recommended-times"
       }
     ]
   },
@@ -4792,6 +5358,16 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "message approval workflows",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://support.sproutsocial.com/hc/en-us/articles/205974715-Message-Approval-Workflows",
+        "plan": "Professional"
+      }
     ]
   },
   {
@@ -4873,6 +5449,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "link in bio post links",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.later.com/hc/en-us/articles/4409220791447-Add-and-Edit-Post-Links-in-Link-in-Bio"
       }
     ]
   },
@@ -4957,6 +5542,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "content categories",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.socialbee.com/hc/en-us/articles/29979201786903-Content-Categories-All-You-Need-to-Know"
+      }
     ]
   },
   {
@@ -5039,6 +5633,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "session recording filters",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.hotjar.com/hc/en-us/articles/115011819928-Recording-Filters"
       }
     ]
   },
@@ -5123,6 +5726,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "retention analysis",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.amplitude.com/docs/analytics/charts/retention-analysis/retention-analysis-calculation"
+      }
     ]
   },
   {
@@ -5205,6 +5817,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "conversion goals",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://plausible.io/docs/goal-conversions"
       }
     ]
   },
@@ -5289,6 +5910,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "conversion goals",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://matomo.org/faq/reports/create-a-goal-in-matomo/"
       }
     ]
   },
@@ -5381,6 +6011,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "protected branches",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches"
+      }
     ]
   },
   {
@@ -5463,6 +6102,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "CI pipelines",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://docs.gitlab.com/ci/pipelines/"
       }
     ]
   },
@@ -5548,6 +6196,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "autoscale deployments",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://docs.replit.com/pt/references/publishing/autoscale-deployments"
+      }
     ]
   },
   {
@@ -5630,6 +6287,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "preview deployments",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://vercel.com/docs/deployments/promote-preview-to-production"
       }
     ]
   },
@@ -5714,6 +6380,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "deploy previews",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://docs.netlify.com/deploy/deploy-types/deploy-previews/"
+      }
     ]
   },
   {
@@ -5796,6 +6471,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "error issue details",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://docs.sentry.io/product/issues/issue-details/"
       }
     ]
   },
@@ -5883,6 +6567,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "projects",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.openai.com/pt-pt/articles/10169521-projects-in-chatgpt"
+      }
     ]
   },
   {
@@ -5967,6 +6660,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "gems",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://support.google.com/gemini/answer/15235603?hl=en"
+      }
     ]
   },
   {
@@ -6050,6 +6752,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "source-grounded chats",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://support.google.com/notebooklm/answer/16179559?hl=en"
+      }
     ]
   },
   {
@@ -6132,6 +6843,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "workflow builder",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.copy.ai/platform/building-workflows"
       }
     ]
   },
@@ -6226,6 +6946,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "rank tracking",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://dc8hdnsmzapvm.cloudfront.net/help/moz-pro/rankings/overview"
+      }
     ]
   },
   {
@@ -6308,6 +7037,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "keyword ideas",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://neilpatel.com/blog/keyword-ideas-data-ubersuggest-answer-the-public/"
+      }
     ]
   },
   {
@@ -6389,6 +7127,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "keyword research",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://mangools.com/blog/kwfinder-guide/"
       }
     ]
   },
@@ -6473,6 +7220,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "site crawling",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.screamingfrog.co.uk/seo-spider/user-guide/configuration/"
+      }
     ]
   },
   {
@@ -6555,6 +7311,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "contributor permissions",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://support.wix.com/en/article/about-contributor-roles-permissions"
       }
     ]
   },
@@ -6639,6 +7404,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "page sections",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://support.squarespace.com/hc/en-us/articles/360027987711-Page-sections"
+      }
     ]
   },
   {
@@ -6722,6 +7496,16 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "plugin installation",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://wordpress.com/support/plugins/install-a-plugin/",
+        "plan": "Paid"
+      }
     ]
   },
   {
@@ -6804,6 +7588,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "automatic workflows",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://docs.helpscout.com/article/1399-automatic-workflows"
+      }
     ]
   },
   {
@@ -6885,6 +7678,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "ticket rules",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://docs.gorgias.com/en-US/rules-faq-82011"
       }
     ]
   },
@@ -6969,6 +7771,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "automatic conversation routing",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.crisp.chat/en/article/how-to-route-and-assign-conversations-to-operators-bv8z4c/"
+      }
     ]
   },
   {
@@ -7051,6 +7862,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "sales opportunities",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.salesforce.com/s/articleView?id=sf.essentials_opportunities.htm&language=en_US&type=5"
       }
     ]
   },
@@ -7135,6 +7955,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "smart views",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.close.com/feature-guide/lead-filtering-and-smart-views/creating-smart-views"
+      }
     ]
   },
   {
@@ -7217,6 +8046,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "workflow rules",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://support.copper.com/en/articles/15926316-create-a-workflow-automation-rule"
       }
     ]
   },
@@ -7301,6 +8139,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "workflow automation",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://crmsupport.freshworks.com/support/solutions/articles/50000002142-common-use-cases-for-workflows"
+      }
     ]
   },
   {
@@ -7383,6 +8230,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "custom attributes",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://attio.com/help/reference/managing-your-data/attributes/create-manage-attributes"
       }
     ]
   },
@@ -7467,6 +8323,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "automation triggers",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.mailerlite.com/help/how-to-set-up-automation-triggers"
+      }
     ]
   },
   {
@@ -7550,6 +8415,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "workflow filters",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.getresponse.com/help/what-are-actions-conditions-and-filters.html"
+      }
     ]
   },
   {
@@ -7631,6 +8505,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "automation workflow triggers",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://support.omnisend.com/en/articles/3954813-set-up-automation-workflow-settings"
       }
     ]
   },
@@ -7715,6 +8598,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "automation path builder",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://knowledgebase.constantcontact.com/email-digital-marketing/tutorials/KnowledgeBase/49709-Understanding-triggers-in-the-Automation-Path-Builder?lang=en_US"
+      }
     ]
   },
   {
@@ -7798,6 +8690,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "projects",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://5.basecamp-help.com/article/1176-creating-and-setting-up-a-project"
+      }
     ]
   },
   {
@@ -7880,6 +8781,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "approvals",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.wrike.com/hc/en-us/articles/360023006313-Approvals-in-Wrike"
       }
     ]
   },
@@ -7974,7 +8884,16 @@
       "sourceUrls": [
         "https://linear.app/docs/teams"
       ]
-    }
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "teams",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://linear.app/docs/teams"
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -8056,6 +8975,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "workflow transitions",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://support.atlassian.com/jira-software-cloud/docs/workflows-and-statuses-for-boards-in-business-projects/"
       }
     ]
   },
@@ -8140,6 +9068,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "webhook triggers",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://docs.pabbly.com/pabbly/doc/how-to-integrate-your-application-with-pabbly-connect-integration-guide.21"
+      }
     ]
   },
   {
@@ -8221,6 +9158,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "ready-made automations",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://integrately.com/docs"
       }
     ]
   },
@@ -8305,6 +9251,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "recipes",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://docs.workato.com/en/workato-concepts.html"
+      }
     ]
   },
   {
@@ -8387,6 +9342,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "conditional form logic",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://paperform.co/help/articles/logic-guide/"
       }
     ]
   },
@@ -8471,6 +9435,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "page logic",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.fillout.com/help/getting-started"
+      }
     ]
   },
   {
@@ -8553,6 +9526,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "multi-storefront",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://support.bigcommerce.com/s/article/Multi-Storefront?language=en_US"
       }
     ]
   },
@@ -8637,6 +9619,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "order statuses",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://woocommerce.com/document/managing-orders/order-statuses/"
+      }
     ]
   },
   {
@@ -8719,6 +9710,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "brand kits",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.adobe.com/express/create/brand-kit"
       }
     ]
   },
@@ -8804,6 +9804,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "transcript-based editing",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.descript.com/hc/en-us/articles/10164808475149-Inline-notes"
+      }
     ]
   },
   {
@@ -8885,6 +9894,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "online courses",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.podia.com/en/articles/11370361-creating-an-online-course"
       }
     ]
   },
@@ -8974,6 +9992,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "smart traffic",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://documentation.unbounce.com/hc/en-us/articles/360036412231-Enabling-Smart-Traffic-on-Your-Landing-Pages"
       }
     ]
   },
@@ -9066,6 +10093,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "character creation",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://support.character.ai/hc/en-us/articles/50608869548699-2-Creating-a-Character-Quickstart-Guide-%CF%89"
+      }
     ]
   },
   {
@@ -9156,6 +10192,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "function calling",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://ai.google.dev/gemini-api/docs/ai-studio-quickstart"
       }
     ]
   },
@@ -9256,6 +10301,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "text-to-video",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://kling.ai/quickstart/klingai-video-3-model-user-guide"
+      }
     ]
   },
   {
@@ -9346,6 +10400,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "meeting action items",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.otter.ai/hc/en-us/articles/25983095114519-Action-Items-Overview"
       }
     ]
   },
@@ -9443,6 +10506,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "720p exports",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.anijam.ai/pricing/"
+      }
     ]
   },
   {
@@ -9538,6 +10610,16 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "WhatsApp number connection",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://chatzy.ai/pricing",
+        "plan": "Paid"
       }
     ]
   },
@@ -9642,7 +10724,16 @@
         "handsOnTested": false
       }
     ],
-    "categoryReviewRequired": true
+    "categoryReviewRequired": true,
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "support ticket resolution billing",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://cosupport.ai/pricing"
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -9744,6 +10835,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "monthly creation credits",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.davinci.ai/en/articles/232781-how-does-the-subscription-work-in-davinci"
+      }
     ]
   },
   {
@@ -9841,7 +10941,16 @@
         "handsOnTested": false
       }
     ],
-    "categoryReviewRequired": true
+    "categoryReviewRequired": true,
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "credit packs",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://deepswapai.com/pricing"
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -9939,7 +11048,16 @@
         "handsOnTested": false
       }
     ],
-    "categoryReviewRequired": true
+    "categoryReviewRequired": true,
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "video face swap",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://faceswapai.com/video-swap"
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -10046,6 +11164,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "video-to-video",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.goenhance.ai/ai-video-generator"
+      }
     ]
   },
   {
@@ -10144,7 +11271,17 @@
         "handsOnTested": false
       }
     ],
-    "categoryReviewRequired": true
+    "categoryReviewRequired": true,
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "high fidelity processing",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://lipsyncai.tools/pricing",
+        "plan": "Paid"
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -10245,6 +11382,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "multi-model chat",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.lorka.ai/es"
       }
     ]
   },
@@ -10347,7 +11493,16 @@
         "handsOnTested": false
       }
     ],
-    "categoryReviewRequired": true
+    "categoryReviewRequired": true,
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "hosted OpenClaw",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://paioclaw.ai/pricing/"
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -10444,6 +11599,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "bill negotiation",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.19pine.ai/pricing"
       }
     ]
   },
@@ -10545,6 +11709,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "pay as you go credits",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.pixmax.ai/pricing.html"
       }
     ]
   },
@@ -10649,7 +11822,16 @@
         "handsOnTested": false
       }
     ],
-    "categoryReviewRequired": true
+    "categoryReviewRequired": true,
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "gaming screen context",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.questie.ai/features"
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -10754,7 +11936,16 @@
         "handsOnTested": false
       }
     ],
-    "categoryReviewRequired": true
+    "categoryReviewRequired": true,
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "resume audits",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://resume-ai.com/"
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -10856,7 +12047,16 @@
         "handsOnTested": false
       }
     ],
-    "categoryReviewRequired": true
+    "categoryReviewRequired": true,
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "talking photos",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.talkpix.ai/pricing"
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -10959,7 +12159,16 @@
         "handsOnTested": false
       }
     ],
-    "categoryReviewRequired": true
+    "categoryReviewRequired": true,
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "curriculum lesson plans",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://teachquill.com/plan"
+      }
+    ]
   },
   {
     "affiliateUrl": "",
@@ -11058,6 +12267,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "monthly tokens",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://typli.ai/pricing"
+      }
     ]
   },
   {
@@ -11154,6 +12372,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "text-to-video",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://vidflux.ai/pricing"
       }
     ]
   },
@@ -11262,6 +12489,15 @@
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "automatic captions",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.vmaker.com/ai-video-editor"
+      }
     ]
   },
   {
@@ -11357,6 +12593,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "concurrent video generation",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.weryai.com/pricing"
       }
     ]
   },
@@ -11469,6 +12714,15 @@
         "handsOnTested": false
       }
     ],
-    "categoryReviewRequired": true
+    "categoryReviewRequired": true,
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "advanced video repair",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://repairit.wondershare.com/video-repair.html"
+      }
+    ]
   }
 ]

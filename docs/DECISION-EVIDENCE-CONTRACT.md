@@ -20,8 +20,7 @@ Optional `decisionClaims` entries in a catalog record use:
   "value": "social scheduling",
   "status": "verified",
   "sourceUrl": "https://support.vendor.example/documentation",
-  "verifiedAt": "2026-10-08",
-  "plan": "Free"
+  "verifiedAt": "2026-10-08"
 }
 ```
 
@@ -30,7 +29,7 @@ Optional `decisionClaims` entries in a catalog record use:
 - `status`: only `verified` can qualify
 - `sourceUrl`: first-party manufacturer evidence, private to the catalog; a vendor subdomain or an existing internally accepted editorial source URL
 - `verifiedAt`: ISO calendar date, not future dated or more than 180 days old
-- `plan`: tier entitlement when applicable. A paid-tier capability cannot qualify under `budget: "free"`
+- `plan`: exact documented tier entitlement. Under `budget: "free"`, an individual capability or named integration only qualifies if its availability on the Free tier is positively documented. Missing tier data means `not_verified`; a documented paid-only tier means `conflict`.
 - For `plan_limit`: `unit` such as `tasks` or `users`, plus numeric `quantity` and `plan`
 - For `price_eur_month`: `amount`, `plan`, `billingCycle: "monthly"`. No currency conversion, promotional pricing or annual equivalent is inferred.
 
@@ -51,10 +50,16 @@ The buyer can still compare unqualified alternatives; they must be labelled unqu
 
 `python3 scripts/audit_decision_quality.py --json` reports the number of products with decision-grade claims, documented products lacking claim-level evidence, source/date problems and price/integration evidence gaps.
 
-`tests/toolscout-v2-decision-benchmark.test.mjs` executes **50 controlled buyer scenarios** across 10 capabilities and five evidence/plan statuses, plus price, capacity and real-catalog checks. The existing decision qualification suite also runs in mandatory CI. 
+`tests/toolscout-v2-decision-benchmark.test.mjs` executes **50 controlled buyer scenarios** across 10 capabilities and five evidence/plan statuses, plus price, capacity and real-catalog checks. `tests/toolscout-v2-decision-evidence-coverage.test.mjs` enforces 127-tool claim coverage, manufacturer provenance and free-tier/plan-capacity honesty. Both run in the existing mandatory CI alongside the decision qualification suite. 
 
-## Current evidence boundary
+## Current evidence boundary (9 October 2026)
 
-This phase seeds claim-level evidence for Buffer, HubSpot, Zapier, Systeme.io and beehiiv from first-party documentary material already reviewed in the catalog. The other catalog records **remain fully documented at editorial profile level** but lack structured, individual decision claims until they are verified and curated. Do not report 100% decision-claim coverage.
+All 127 catalog entries now contain at least one **individually selected, dated manufacturer-supported decision claim**, rather than only a general documented editorial review. The expansion adds 137 entries from reviewed manufacturer evidence, including 15 numerical plan-entitlement records. Each selected capability was curated against the tool-specific manufacturer review; no generic feature-list import or speculative plan pricing is accepted.
+
+**Coverage is per product, not per feature or purchase scenario.** One verified feature does not qualify every other claim about the same product. Unknown integrations, exact monthly EUR prices, usage entitlements, product exclusions and features on a Free plan must still fail closed until that specific requirement has documented proof. The audits measure both tools with at least one claim and the total number of claims, never representing 127/127 as full feature coverage.
+
+For new catalog admissions, claim-level evidence should be sourced with the same rigor as the editorial manufacturer review; adding a product profile alone does not prove all buying constraints.
+
+Manufacturer documentation stays private, and existing public profile canonicals, schema and monetizable `/go/` links are unchanged.
 
 No new GitHub Actions deployment route: Cloudflare Workers Builds continues to publish merged `main` commits automatically; GitHub Actions recovery remains manual-only.

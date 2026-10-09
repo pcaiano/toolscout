@@ -29,6 +29,7 @@ def inspect(path=DATA):
     slugs = collections.Counter(t.get("slug") for t in tools if isinstance(t, dict) and t.get("slug"))
     issues = []
     categories = collections.Counter()
+    sourced_claims_by_category = collections.Counter()
     counters = collections.Counter()
     missing_field_counts = collections.Counter()
     rows = []
@@ -118,6 +119,22 @@ def inspect(path=DATA):
                 issues.append(f"{slug}: claim missing valid first-party source, date, or assertion")
             else:
                 counters["verified_decision_claims"] += 1
+                sourced_claims_by_category[str(tool.get("category", "unknown"))] += 1
+                if claim.get("type") == "plan_limit":
+                    number = claim.get("quantity")
+                    pricing = tool.get("pricingDetails") or {}
+                    if (not isinstance(number, (int, float)) or isinstance(number, bool) or number <= 0
+                            or not claim.get("unit") or not claim.get("plan")
+                            or not pricing.get("sourceUrl") or not pricing.get("limits")):
+                        counters["invalid_decision_claims"] += 1
+                        issues.append(f"{slug}: plan limit lacks numerical entitlement or first-party pricing record")
+                    else:
+                        counters["verified_plan_limit_claims"] += 1
+                elif claim.get("type") == "price_eur_month":
+                    if (not isinstance(claim.get("amount"), (int, float)) or claim.get("amount") < 0
+                            or not claim.get("plan") or claim.get("billingCycle") != "monthly"):
+                        counters["invalid_decision_claims"] += 1
+                        issues.append(f"{slug}: EUR monthly price lacks comparable monthly plan")
         if not tool.get("affiliateUrl"):
             counters["no_explicit_affiliate_url"] += 1
         if not tool.get("sourceUrl"):
@@ -145,6 +162,7 @@ def inspect(path=DATA):
     return {
         "catalog_count": len(tools),
         "categories": dict(sorted(categories.items())),
+        "sourced_claims_by_category": dict(sorted(sourced_claims_by_category.items())),
         "metrics": dict(sorted(counters.items())),
         "missing_field_counts": dict(sorted(missing_field_counts.items())),
         "invalid_structure": bool(duplicates) or any(not isinstance(t, dict) for t in tools) or bool(counters["invalid_decision_claims"]),
