@@ -134,3 +134,15 @@ The existing `decide_software`, `compare_for_use_case` and `find_alternatives` t
 For a Free-only budget, a confirmed product pair is **not** enough: the exact Free-plan entitlement must also be manufacturer-documented. For priced decisions, a required integration without a verified plan entitlement cannot be combined with an unrelated cheap quote; the candidate fails the shared-plan coherence gate. AI interoperability with an assistant is a useful signal, but it does not substitute for vendor-backed, plan-specific pair evidence.
 
 The `check_stack_fit` tool accepts optional `budget` to expose Free-tier unknowns. Empty qualified shortlists and comparisons with no qualified winner are factual uncertainty, **not** claims that no real integration exists. These safeguards never modify editorial scoring for affiliate status, public URLs, page design or vendor documentation link policies. Regression cases run in the existing CI at `tests/toolscout-v2-stack-fit-qualification.test.mjs`.
+
+## Shared industry intent and Finder scoring (9 October 2026)
+
+The first-party /api/recommend endpoint is the single ranking owner for the homepage Finder and Publisher Kit Full/Mini widgets. The homepage must not maintain a parallel browser-side scorer. AI-facing decide_software and Finder share a pure business-workflow intent interpreter: broad industry questions return workflow choices before individual software is ranked.
+
+- Broad short-term-rental/Airbnb requests do not prove that ToolScout currently has an end-to-end property management system in its 127-tool catalog. The response says the catalog lacks a manufacturer-verified vacation-rental PMS and offers specific adjacent jobs, not a fake channel manager.
+- Generic running-a-business questions receive workflow choices rather than arbitrary cross-category top-three results. Narrow CRM, SEO, automation or other software jobs proceed directly to category-gated catalog matches. Noise continues to fail closed.
+- Personalized recommendations report an editorial fit score out of 100, not a success probability. It uses job/category relevance, actual editorial score dimensions and review evidence. A category-only query displays qualitative fit rather than fake personalized percentages. True ties should remain ties: do not fabricate unique scores.
+- Free-only matching requires a documented Free plan. Cheap/affordable is low-budget, not proof of free. Affiliate payout cannot influence ranking. Mandatory plan-specific claims and integrations continue through decide_software strict claim gates.
+- Existing public URLs, manufacturer documentation privacy, /go/ commercial redirects, tracking, publication and route ownership remain unchanged.
+
+Regression tests: tests/toolscout-v2-finder-embed-product.test.mjs and tests/toolscout-v2-agent-protocol.test.mjs in existing CI.
