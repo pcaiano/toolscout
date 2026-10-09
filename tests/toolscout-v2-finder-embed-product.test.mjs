@@ -157,7 +157,7 @@ test('Airbnb business discovery decomposes jobs instead of fabricating property 
 });
 
 test('general business questions get actionable workflow decomposition',async()=>{
-  for(const q of ['software for managing a small business','best software to run a restaurant business']){
+  for(const q of ['software for managing a small business','best software to run a restaurant business','best platform for managing a restaurant business']){
     const response=await handleDistributionEmbedRoute(new Request('https://trytoolscout.org/api/recommend?q='+encodeURIComponent(q)),assetEnv());
     assert.equal(response.status,200,q);
     const data=await response.json();
