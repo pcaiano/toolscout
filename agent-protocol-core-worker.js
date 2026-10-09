@@ -492,7 +492,7 @@ function constraintEvidence(tool,constraints=[],budget=null){
         :{constraint,status:'conflict',evidence:'The manufacturer documentation records no available free plan.'};
     }
     const stripped=norm.replace(/\b(?:must|needs?|need|requires?|require|required|support|supports|with|only|be|have|has)\b/g,' ').replace(/\s+/g,' ').trim();
-    const integrationName=stripped.replace(/^(?:integrate|integrates|integration|connect|connects|sync|syncs)\s+(?:with|to)\s+/,'');
+    const integrationName=norm.replace(/^(?:must|needs?|need|requires?|require|required|support|supports|with|only)\s+/,'').replace(/^(?:integrate|integrates|integration|connect|connects|sync|syncs)\s+(?:(?:with|to)\s+)?/,'');
     const pair=verifiedIntegrationPair(tool,integrationName);
     if(pair){
       if(budget==='free'&&catalogNormalize(pair.plan||'')!=='free')
