@@ -1,4 +1,5 @@
 import {businessWorkflowGuidance,verifiedPmsCandidates} from './business-workflow-intent.js';
+import {publicMergedTools} from './catalog-autonomy-worker.js';
 import base from './content-engine-intelligence-worker.js';
 
 const PROTOCOL_VERSION='2026-07-28';
@@ -280,11 +281,11 @@ async function callRecommend(args,request,env,ctx){
 }
 function catalogNormalize(v){return String(v||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim()}
 async function loadCatalog(request,env){
-  const url=new URL('/data/tools.json',request.url);
-  const response=await env.ASSETS.fetch(new Request(url.toString(),{method:'GET',headers:{Accept:'application/json'}}));
-  if(!response.ok)throw new Error('catalog_unavailable');
-  const tools=await response.json();
-  if(!Array.isArray(tools))throw new Error('catalog_invalid');
+  // Reuse the public canonical catalog: static documents plus manufacturer-
+  // qualified runtime admissions, with confirmed-broken slugs suppressed.
+  // Reading ASSETS directly silently hid future admitted tools from MCP/A2A.
+  const tools=await publicMergedTools(env);
+  if(!Array.isArray(tools)||!tools.length)throw new Error('catalog_unavailable');
   return tools;
 }
 function findCatalogTool(tools,value){
@@ -823,7 +824,7 @@ function decisionCandidates(tools,args){
   const profile=jobIntentProfile(tools,args.job||args.use_case||'');
   const relevant=evaluated.filter(x=>{
     const source=tools.find(t=>t.slug===x.slug);
-    return source&&!source.categoryReviewRequired&&(source.category!=='vacation-rental'||verifiedPmsCandidates([source]).length>0)?matchesJobIntent(source,profile):false;
+    return source&&source.rankingEligible!==false&&!source.categoryReviewRequired&&(source.category!=='vacation-rental'||verifiedPmsCandidates([source]).length>0)?matchesJobIntent(source,profile):false;
   });
   // 'must_have' is a hard gate. A product with unverified requirements can be
   // compared explicitly but must not appear as a qualified recommendation.
