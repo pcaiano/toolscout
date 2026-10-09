@@ -266,9 +266,14 @@ export async function publicCatalogInventory(env){
     return {slug,name:tool?.name||slug,category:tool?.category||null,origin:staticSet.has(slug)?'static':'runtime',affiliate_status:status,affiliate_active:AFFILIATE_MONETIZED_STATES.has(status)};
   });
   const active=rows.filter(x=>x.affiliate_active).length;
+  const snapshot=await runtimeSnapshot(env);
+  const seeded=[...staticSet].filter(slug=>snapshot.baselineMirrors?.has(slug)).length;
   return {
     ok:true,
     version:'canonical-catalog-v1',
+    storage:{primary:'cloudflare_d1',fallback:'read_only_static_snapshot',seeded_baseline:seeded,baseline_total:staticSet.size,
+      baseline_remaining:Math.max(0,staticSet.size-seeded),migration_phase:seeded===staticSet.size&&staticSet.size?'seeded_pending_public_renderer_validation':'seeding',
+      degraded:Boolean(snapshot.degraded),source:snapshot.source||'d1',legacy_html_preserved:true},
     total:rows.length,
     static_unique:rows.filter(x=>x.origin==='static').length,
     runtime_unique:rows.filter(x=>x.origin==='runtime').length,
