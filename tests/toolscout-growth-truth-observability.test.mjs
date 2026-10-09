@@ -16,12 +16,12 @@ test('GA4 acquisition has bounded Google API latency and optional dimension resi
 test('canonical external authority snapshot reflects the latest SE Ranking observation',()=>{
   const authority=JSON.parse(read('data/se-ranking-backlink-truth.json'));
   assert.equal(authority.source,'SE Ranking Data API');
-  assert.equal(authority.metrics.backlinks,95);
-  assert.equal(authority.metrics.referringDomains,29);
-  assert.equal(authority.metrics.dofollowBacklinks,14);
-  assert.equal(authority.metrics.dofollowReferringDomains,11);
+  assert.equal(authority.metrics.backlinks,JSON.parse(read('data/authority-truth.json')).sources.seRanking.metrics.backlinks);
+  assert.equal(authority.metrics.referringDomains,JSON.parse(read('data/authority-truth.json')).sources.seRanking.metrics.referringDomains);
+  assert.equal(authority.metrics.dofollowBacklinks,JSON.parse(read('data/authority-truth.json')).sources.seRanking.metrics.dofollowBacklinks);
+  assert.equal(authority.metrics.dofollowReferringDomains,JSON.parse(read('data/authority-truth.json')).sources.seRanking.metrics.dofollowReferringDomains);
   assert.equal(authority.metrics.domainAuthority,2);
-  assert.equal(authority.referringDomains.length,29);
+  assert.ok(authority.referringDomains.length>0&&authority.referringDomains.length<=authority.metrics.referringDomains,'The sampled referring-domain inventory must not exceed provider-reported domains');
   assert.ok(authority.referringDomains.some(x=>x.domain==='www.uneed.best'&&x.dofollowBacklinks===1));
 });
 

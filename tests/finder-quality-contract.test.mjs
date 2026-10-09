@@ -28,7 +28,11 @@ test('broad category searches avoid fake personalized percentages',()=>{
   assert.match(app,/This is a broad category search/);
   assert.match(app,/Category fit/);
   assert.match(app,/Refine for personalized ranking/);
-  assert.match(app,/const raw=42\+/);
+  assert.match(app,/function scoreTool\(/);
+  assert.doesNotMatch(app,/const raw=42\+/);
+  assert.match(app,/if\(goal&&!sameCategory&&!nameMatch\)return -1/);
+  assert.match(app,/t\.freePlanKnown!==true/);
+  assert.match(app,/t\.editorialReview\?\.summary/);
 });
 
 test('Finder motion exposes three visible decision stages',()=>{
@@ -37,4 +41,20 @@ test('Finder motion exposes three visible decision stages',()=>{
   assert.match(app,/Building your shortlist/);
   assert.match(home,/\.search-stages/);
   assert.match(home,/\.search-stage\.active/);
+});
+
+test('Search Engine shows an explained editorial fit indicator, not a fabricated probability',()=>{
+  assert.ok(app.includes('Fit score</span><strong>${t.score}/100'));
+  assert.ok(!app.includes('Match</span><strong>${t.score}%'));
+  assert.match(app,/Scores are editorial fit indicators, not probabilities/);
+  assert.ok(app.includes('if(!signal.recognized)'));
+});
+
+test('Runtime rankings do not infer free plans, penalize unknown scores or publish direct manufacturer links',()=>{
+ const runtime=fs.readFileSync(new URL('../catalog-runtime-ranking.js',import.meta.url),'utf8');
+ assert.match(runtime,/tool\?\.freePlanKnown===true/);
+ assert.match(runtime,/unknown isn't a zero rating/);
+ assert.doesNotMatch(runtime,/>Official source<\/a>/);
+ assert.match(runtime,/Manufacturer documentation checked internally/);
+ assert.match(runtime,/\/go\/\$\{encodeURIComponent\(t.slug\)\}/);
 });

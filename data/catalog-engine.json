@@ -104,7 +104,11 @@
     "rejectGenericSyntheticEditorialProfiles": true,
     "maximumFactualReviewAgeDays": 45,
     "aiInteroperabilityProfileRequiredOnAdmission": true,
-    "aiInteroperabilityCanBeUnknown": true
+    "aiInteroperabilityCanBeUnknown": true,
+    "requireDecisionGradeManufacturerDocumentation": true,
+    "minimumIndependentDocumentPages": 2,
+    "requireExplicitStrengthsLimitationsTradeoffs": true,
+    "rejectEditorialScoreWithoutProvenance": true
   },
   "coverageAdmission": {
     "autoPromoteVerifiedCompetitiveGapProfiles": true,
@@ -118,7 +122,7 @@
     "comparisonEligibleOnAdmission": true,
     "requirePricingForCatalogEntry": false,
     "requireToolSpecificScoresForCatalogEntry": false,
-    "upgradeToEditorialRequiresSeparateEvidence": false,
+    "upgradeToEditorialRequiresSeparateEvidence": true,
     "requireVisualAssetForCatalogEntry": true
   },
   "qualityControl": {

@@ -43,14 +43,14 @@ test('runtime ranking is creation-only and carries primary evidence',async()=>{
   const response=await renderRuntimeRanking(envWithStaticGuide(false),'/best-seo-tools-for-agencies',tools);
   assert.ok(response instanceof Response);
   const html=await response.text();
-  assert.match(html,/Official source/);
+  assert.match(html,/Manufacturer documentation checked internally/);
   assert.match(html,/Source checked 2026-09-29/);
-  assert.match(html,/https:\/\/alpha\.example\.com/);
+  assert.doesNotMatch(html,/https:\/\/alpha\.example\.com/);
 });
 
-test('runtime-admitted tool profile generator exposes official evidence',()=>{
+test('runtime-admitted tool profile generator retains manufacturer sources internally',()=>{
   const src=fs.readFileSync(new URL('../catalog-autonomy-worker.js',import.meta.url),'utf8');
   assert.match(src,/Editorial evidence:/);
-  assert.match(src,/Official product source/);
+  assert.doesNotMatch(src,/Official product source/);
   assert.match(src,/tool\.sourceUrl/);
 });

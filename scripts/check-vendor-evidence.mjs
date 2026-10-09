@@ -6,9 +6,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 
-export function vendorEvidenceIssues(tools, pendingSlugs) {
+export function vendorEvidenceIssues(tools, pendingSlugs, newSlugs=[]) {
   const issues=[];
   const allow=new Set(pendingSlugs);
+  const additions=new Set(newSlugs);
   const slugs=new Set();
   const names=new Set();
   const manufacturerDocDomains={basecamp:['basecamp-help.com'],trello:['atlassian.com'],chatgpt:['openai.com'],claude:['anthropic.com'],gemini:['google.com'],gitlab:['gitlab.com'],freshdesk:['freshdesk.com'],'moz-pro':['dc8hdnsmzapvm.cloudfront.net'],'google-ai-studio':['google.dev'],loom:['atlassian.com'],notebooklm:['google.com']};
@@ -46,6 +47,22 @@ export function vendorEvidenceIssues(tools, pendingSlugs) {
       continue;
     }
     if(!documented)issues.push('Manufacturer documentation required before catalog inclusion: '+slug);
+    if(additions.has(slug)&&documented){
+      const docs=[...new Set(Array.isArray(r.sourceUrls)?r.sourceUrls:[])].filter(u=>{
+        try{const x=new URL(u);return x.protocol==='https:'&&x.pathname!=='/'&&ownedSource(tool.sourceUrl,u,slug)}catch{return false}
+      });
+      const datedDocs=docs.filter(u=>evidence.some(x=>x.sourceUrl===u&&/^\d{4}-\d{2}-\d{2}$/.test(x.verifiedAt)));
+      if(typeof r.summary!=='string'||r.summary.trim().length<260||typeof r.angle!=='string'||r.angle.trim().length<20||typeof r.buyerCheck!=='string'||r.buyerCheck.trim().length<60)
+        issues.push('Decision-grade analysis, distinctive angle and actionable buyer check required: '+slug);
+      if(docs.length<2||datedDocs.length<2)
+        issues.push('Two distinct dated manufacturer documentation pages required for new products: '+slug);
+      if((tool.strengths||[]).length<2||(tool.limitations||[]).length<2||(tool.tradeoffs||[]).length<1)
+        issues.push('Explicit strengths, limitations and tradeoffs required: '+slug);
+      if(!tool.pricingDetails||!String(tool.pricingDetails.freePlanStatus||'').trim())
+        issues.push('Explicit pricing/free-plan status, including unknown where unverified, required: '+slug);
+      if(!Array.isArray(tool.features)||tool.features.length<3||!Array.isArray(tool.bestFor)||tool.bestFor.length<2)
+        issues.push('Specific features and buyer audience required: '+slug);
+    }
   }
   for(const slug of allow)if(!slugs.has(slug))issues.push('Pending baseline references a removed product: '+slug);
   return issues;
@@ -56,7 +73,16 @@ if(runningAsScript){
   const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
   const tools=JSON.parse(fs.readFileSync(path.join(root,'data/tools.json'),'utf8'));
   const baseline=JSON.parse(fs.readFileSync(path.join(root,'data/vendor-evidence-backlog.json'),'utf8'));
-  const issues=vendorEvidenceIssues(tools,baseline.pendingSlugs);
+  const baseRef=process.env.TOOLSCOUT_VENDOR_EVIDENCE_BASE_REF||'origin/main';
+  let newSlugs=[];
+  try{
+    const oldCatalog=JSON.parse(execFileSync('git',['show',baseRef+':data/tools.json'],{cwd:root,encoding:'utf8'}));
+    const previous=new Set(oldCatalog.map(t=>t.slug));
+    newSlugs=tools.map(t=>t.slug).filter(slug=>!previous.has(slug));
+  }catch(error){
+    if(process.env.TOOLSCOUT_VENDOR_EVIDENCE_REQUIRE_BASE==='1'){console.error('Cannot compare new catalog admissions with base: '+String(error.message).slice(0,240));process.exitCode=1}
+  }
+  const issues=vendorEvidenceIssues(tools,baseline.pendingSlugs,newSlugs);
   // On pull requests the backlog must only shrink. A proposed change cannot
   // whitelist new unsupported tools by modifying the baseline alongside them.
   try {

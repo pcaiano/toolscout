@@ -78,3 +78,19 @@ Each tool profile's visible H1 is exactly the product name (for example, "HubSpo
 ## Source privacy and public commercial navigation
 
 The manufacturer documents and their URLs are kept in ToolScout's internal editorial evidence store and are checked by the editorial quality process. **Do not render manufacturer documentation links, direct source links, external official-source CTAs or source lists on public software profiles.** Public profiles show ToolScout's independent conclusion, meaningful strengths and limitations, dated editorial methodology if useful, and only the approved monetized product visit route `/go/{slug}` for vendor visits. Retain documentary provenance internally for audit and re-verification; it is not a visitor-facing reading list. The product-profile link regression test enforces this separation.
+
+## Decision ranking and admission rules (9 October 2026)
+
+The previous 127-tool manufacturer-documentation backlog is now empty. This means all existing catalog entries have at least a recorded internal manufacturer reference, **not** that every numerical score, integration pair, pricing limit or textual assertion has undergone hands-on testing or claim-level corroboration.
+
+The existing Finder and MCP/A2A decision interface must:
+- Match the actual task and software family before sorting by subjective dimensions. A strong sales or automation score must never override an explicitly requested SEO, CRM or developer category.
+- Refuse a free-only shortlist unless the product has a recorded, independently verified free plan. An unknown is not a yes.
+- Explain the specific editorial fit, buying checks, verification confidence and trade-offs. Fit scores are internal decision indicators, not probabilities of purchasing success, accuracy or software quality.
+- Apply a hard filter for requested must-haves and never infer integrations from a general score or incidental use of a product name.
+- Keep manufacturer evidence URLs private, including in machine-readable recommendation payloads; commercial product visits remain on ToolScout /go/ links. Verified provenance and the reviewed-at date can be described without exposing the actual manufacturer reading list.
+- Remain affiliate-neutral. Revenue relationships must never influence eligibility or ranking.
+
+**For every future static or runtime catalog addition** (not grandfathered historical entries), the quality gate requires two distinct non-homepage HTTPS manufacturer documents with dated matching evidence records; an original review of sufficient depth with a specific editorial angle and buyer check; two strengths, two limitations and at least one trade-off; explicit free-plan/pricing status, including unknown if unverified; and a specific capability and audience fit. Unverified candidates remain in the research queue rather than being auto-published or entered into rankings.
+
+The gate checks provenance structure; checking that each precise claim is in fact supported by its documentary source remains a separate editorial verification duty. Do not inflate completeness or claim verified integrations, prices or hands-on results from these structural validations.

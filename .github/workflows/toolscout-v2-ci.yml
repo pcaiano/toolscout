@@ -71,6 +71,7 @@ on:
       - 'growth-runtime-integrity-worker.js'
       - 'growth-runtime-closed-loop-worker.js'
       - 'authority-health-runtime.js'
+      - 'app.js'
       - 'agent-protocol-core-worker.js'
       - 'agent-protocol-worker.js'
       - 'machine-discovery-catalog-runtime.js'

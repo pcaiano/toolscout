@@ -284,9 +284,15 @@ export async function executeCatalogGrowthTask(env,task={}){
   const documentedSource=documentedReview?.sourceUrl;
   const documentedEvidence=Array.isArray(hint?.evidence)?hint.evidence:[];
   const datedDocument=documentedEvidence.some(x=>x?.claimScope==='toolscout_editorial_review'&&x?.sourceUrl===documentedSource&&/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(x?.verifiedAt||''));
-  const vendorHost=u=>{try{return new URL(u).hostname.replace(/^www\./,'').split('.').slice(-2).join('.')}catch{return null}};
-  const officialDocument=Boolean(documentedSource&&vendorHost(documentedSource)===vendorHost(official.url));
-  if(!documentedReview?.summary||documentedReview.verificationStatus==='catalog_only'||documentedReview?.handsOnTested===true||!datedDocument||!officialDocument){
+  const officialHost=(()=>{try{return new URL(official.url).hostname.replace(/^www\./,'').toLowerCase()}catch{return''}})();
+  const ownedDoc=u=>{try{const d=new URL(u);const h=d.hostname.replace(/^www\./,'').toLowerCase();return d.protocol==='https:'&&d.pathname!=='/'&&(h===officialHost||h.endsWith('.'+officialHost))}catch{return false}};
+  const documentUrls=[...new Set(Array.isArray(documentedReview?.sourceUrls)?documentedReview.sourceUrls:[])].filter(ownedDoc);
+  const datedSources=documentUrls.filter(url=>documentedEvidence.some(x=>x?.claimScope==='toolscout_editorial_review'&&x?.sourceUrl===url&&/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(x?.verifiedAt||'')));
+  const decisionGrade=String(documentedReview?.summary||'').trim().length>=260&&String(documentedReview?.angle||'').trim().length>=20&&
+    String(documentedReview?.buyerCheck||'').trim().length>=60&&datedSources.length>=2&&
+    (hint?.strengths||[]).length>=2&&(hint?.limitations||[]).length>=2&&(hint?.tradeoffs||[]).length>=1&&
+    Boolean(hint?.pricingDetails?.freePlanStatus);
+  if(!documentedReview?.summary||documentedReview.verificationStatus==='catalog_only'||documentedReview?.handsOnTested===true||!datedDocument||!ownedDoc(documentedSource)||!decisionGrade){
     await env.DB.prepare("UPDATE catalog_market_gaps SET status='research_required',updated_at=datetime('now') WHERE tool_slug=?").bind(slug).run().catch(()=>{});
     return{ok:true,verified:false,admitted:false,reason:'manufacturer_editorial_documentation_required',slug};
   }

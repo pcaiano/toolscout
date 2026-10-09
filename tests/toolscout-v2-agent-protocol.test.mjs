@@ -282,7 +282,7 @@ test('decision benchmark: only sourced verified Gmail pairs meet Gmail must-have
   assert.deepEqual(out.structuredContent.shortlist.map(x=>x.slug),['crm-verified']);
   const pair=out.structuredContent.shortlist[0].stack_fit.pairs[0];
   assert.equal(pair.status,'verified');
-  assert.equal(pair.source_url,'https://docs.example.com/gmail');
+  assert.equal('source_url' in pair,false,'Manufacturer source URL must remain internal');
   assert.equal(pair.verified_at,'2026-10-08');
 });
 
@@ -336,7 +336,7 @@ test('decision evidence cohort: documented integrations qualify without generic 
     assert.equal(candidate.requirement_evidence[0].matched,true);
     const pair=candidate.stack_fit.pairs[0];
     assert.equal(pair.status,'verified');
-    assert.match(pair.source_url,/^https:\/\//);
+    assert.equal('source_url' in pair,false);
     assert.match(pair.verified_at,/^\d{4}-\d{2}-\d{2}$/);
   }
   const make=catalog.find(x=>x.slug==='make');
@@ -356,7 +356,7 @@ test('decision engine MCP returns the same sourced editorial conclusion as the c
   assert.deepEqual(content.editorial_review.limitations,source.limitations);
   assert.deepEqual(content.editorial_review.tradeoffs,source.tradeoffs);
   assert.equal(content.editorial_review.hands_on_tested,false);
-  assert.match(content.editorial_review.evidence_source,/^https:\/\//);
+  assert.equal(content.editorial_review.evidence_basis,'manufacturer_documentation_verified_internally');
   assert.match(content.profile_url,/^https:\/\/trytoolscout\.org\/tools\/zapier$/);
   assert.match(content.tool_url,/^https:\/\/trytoolscout\.org\/go\/zapier/);
   assert.equal('commission' in content,false);
@@ -386,12 +386,12 @@ test('full catalog MCP distinguishes editorial coverage from verified evidence a
   }
   const sourcedWithTaxonomyIssue=await getTool('resume-ai');
   assert.equal(sourcedWithTaxonomyIssue.editorial_review.verification_status,'vendor_documented');
-  assert.match(sourcedWithTaxonomyIssue.editorial_review.evidence_source,/^https:\/\//);
+  assert.equal(sourcedWithTaxonomyIssue.editorial_review.evidence_basis,'manufacturer_documentation_verified_internally');
   assert.equal(sourcedWithTaxonomyIssue.category_review_required,true,'Source verification must not override independent category review');
   assert.equal(sourcedWithTaxonomyIssue.editorial_review.hands_on_tested,false);
   const sourced=await getTool('hubspot');
   assert.notEqual(sourced.editorial_review.verification_status,'catalog_only');
-  assert.match(sourced.editorial_review.evidence_source,/^https:\/\//);
+  assert.equal(sourced.editorial_review.evidence_basis,'manufacturer_documentation_verified_internally');
   assert.equal(sourced.category_review_required,false);
 });
 
@@ -412,4 +412,39 @@ test('full catalog qualification excludes disputed categories and caps confidenc
     if(catalog.find(t=>t.slug===item.slug)?.freePlanKnown!==true)
       assert.ok(!item.advantages.includes('verified catalog free plan'));
   }
+});
+
+async function testDecisionCall(name,args,catalog){
+ const env={ASSETS:{fetch:async request=>new URL(request.url).pathname==='/data/tools.json'?Response.json(catalog):new Response('',{status:404})}};
+ const body={jsonrpc:'2.0',id:208,method:'tools/call',params:{name,arguments:args,_meta:{'io.modelcontextprotocol/protocolVersion':'2026-07-28','io.modelcontextprotocol/clientInfo':{name:'quality-test',version:'1.0'}}}};
+ const response=await handleAgentProtocolRoute(
+  new Request('https://trytoolscout.org/mcp',{method:'POST',headers:{'Content-Type':'application/json','MCP-Protocol-Version':'2026-07-28','Mcp-Method':'tools/call','Mcp-Name':name},body:JSON.stringify(body)}),
+  env,{waitUntil(){}}
+ );
+ return (await response.json()).result;
+}
+
+test('MCP recommendations enforce category isolation and named free-plan proof',async()=>{
+ const catalog=JSON.parse(fs.readFileSync(new URL('../data/tools.json',import.meta.url),'utf8'));
+ const crm=await testDecisionCall('decide_software',{job:'CRM for a small consultancy',limit:5},catalog);
+ assert.ok(crm.structuredContent.shortlist.length>0);
+ assert.ok(crm.structuredContent.shortlist.every(x=>x.category==='crm'));
+ const free=await testDecisionCall('decide_software',{job:'CRM',budget:'free',limit:5},catalog);
+ assert.ok(free.structuredContent.shortlist.length>0);
+ assert.ok(free.structuredContent.shortlist.every(x=>x.free_plan_verified===true&&x.free_plan===true));
+ const coding=await testDecisionCall('decide_software',{job:'coding editor for developers',limit:5},catalog);
+ if(!coding.isError)assert.ok(coding.structuredContent.shortlist.every(x=>x.category==='developer'));
+});
+
+test('MCP gives an editorial rationale without disclosing the manufacturer source URLs',async()=>{
+ const catalog=JSON.parse(fs.readFileSync(new URL('../data/tools.json',import.meta.url),'utf8'));
+ const output=await testDecisionCall('decide_software',{job:'CRM',limit:3},catalog);
+ assert.ok(!output.isError);
+ for(const item of output.structuredContent.shortlist){
+   assert.ok(typeof item.decision_rationale==='string'&&item.decision_rationale.length>80);
+   assert.ok(['medium','high','limited'].includes(item.evidence_confidence));
+   assert.equal('evidence_source' in item.editorial_review,false);
+   assert.equal('source_url' in item.editorial_review,false);
+   assert.match(item.verification_basis,/manufacturer documentation recorded internally|manufacturer evidence incomplete/);
+ }
 });
