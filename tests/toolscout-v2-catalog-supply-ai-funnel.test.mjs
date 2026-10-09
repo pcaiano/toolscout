@@ -65,3 +65,11 @@ test('a viewed business guide is not misreported as a failed or completed vendor
  assert.match(funnel,/businessWorkflowViews:workflowViews/);
  assert.match(funnel,/businessWorkflowSelectionRate:rate\(workflowSelections,workflowViews\)/);
 });
+
+test('runtime software profiles never publish raw manufacturer AI documentation links',()=>{
+ const src=fs.readFileSync(new URL('../catalog-autonomy-worker.js',import.meta.url),'utf8');
+ assert.doesNotMatch(src,/Official AI source/);
+ assert.doesNotMatch(src,/const links=\(p\.sources/);
+ assert.match(src,/Manufacturer documentation is private editorial evidence/);
+ assert.match(src,/AI integration reviewed against manufacturer documentation internally/);
+});
