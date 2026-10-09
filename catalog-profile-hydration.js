@@ -1,6 +1,6 @@
 // Opt-in D1 hydration of the existing audited ToolScout 2.0 profile shell.
 // Pure presentation helper, not another catalog or editorial engine.
-const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
+const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const paragraph=value=>escapeHtml(String(value??'').trim());
 const safeItems=value=>Array.isArray(value)?value.filter(x=>typeof x==='string'&&x.trim()).slice(0,30):[];
 const validDate=value=>/^\d{4}-\d{2}-\d{2}$/.test(String(value||''))&&!Number.isNaN(Date.parse(value));
