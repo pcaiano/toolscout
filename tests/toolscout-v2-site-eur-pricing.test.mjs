@@ -27,7 +27,7 @@ const testcases=[
  ['HubSpot locale-specific Portuguese price unproven', 'crm',{country:'PT',constraints:['under €25/month per user']},'hubspot',null,null],
  ['HubSpot USD not inferred from EUR', 'crm',{constraints:['under $25/month per user']},'hubspot',null,null],
  ['HubSpot no paid seat when budget Free', 'crm',{constraints:['under €25/month per user'],budget:'free'},'hubspot',null,null],
- ['HubSpot 2 free users documented', 'crm',{constraints:['at least 2 users'],budget:'free'},'hubspot',null,null],
+ ['HubSpot 2 free users documented', 'crm',{constraints:['at least 2 users'],budget:'free'},'hubspot','FREE',null],
 ];
 test('14 first-party Webflow and HubSpot financial decisions keep plans, EUR rates and country separate',async()=>{
   assert.equal(testcases.length,14);
@@ -35,6 +35,7 @@ test('14 first-party Webflow and HubSpot financial decisions keep plans, EUR rat
     const data=await decide(job,args),out=data.shortlist?.find(t=>t.slug===slug);
     if(!plan){assert.equal(out,undefined,label+' incorrectly qualified');continue}
     assert.ok(out,label+' lacks '+slug);
+    if(plan==='FREE'){assert.equal(out.constraint_evidence[0].status,'verified');assert.equal(out.constraint_evidence[0].plan,'Free');continue;}
     const price=out.constraint_evidence?.find(x=>x.monthly_equivalent!==undefined);
     assert.ok(price,label+' is missing price evidence');
     assert.equal(price.plan,plan,label);
