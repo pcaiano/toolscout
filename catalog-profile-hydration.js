@@ -30,6 +30,9 @@ function updateStructuredData(script,tool,faq){
 }
 export function hydrateLegacyCatalogProfile(html,tool){
   if(typeof html!=='string'||!tool||!tool.slug||!tool.name||!tool.description||!tool.category)return null;
+  // A legacy product whose catalog category is still under review must retain
+  // its existing visible warning and cannot be promoted into a confident profile.
+  if(tool.categoryReviewRequired===true)return null;
   const review=tool.editorialReview;
   if(!review||typeof review!=='object'||!review.summary||!review.buyerCheck)return null;
   if(!validDate(review.reviewedAt)||!validDate(tool.lastVerified)||!safeItems(tool.bestFor).length||!safeItems(tool.features).length||!tool.pricing)return null;
