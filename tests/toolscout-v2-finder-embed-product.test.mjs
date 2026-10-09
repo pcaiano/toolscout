@@ -139,3 +139,102 @@ test('Distribution Network outreach leads with the free Finder offer',()=>{
   assert.match(src,/distribution_embed_events/);
   assert.match(src,/publishers30d/);
 });
+
+
+test('Airbnb business discovery decomposes jobs instead of fabricating property manager recommendations',async()=>{
+  for(const q of ['best software to manage an Airbnb business','melhor software para gerir um negócio de Airbnb','software for managing a vacation rental business']){
+    const response=await handleDistributionEmbedRoute(new Request('https://trytoolscout.org/api/recommend?q='+encodeURIComponent(q)),assetEnv());
+    assert.equal(response.status,200,q);
+    const data=await response.json();
+    assert.equal(data.recommendation_type,'workflow_guidance',q);
+    assert.equal(data.guidance.industry,'short_term_rentals');
+    assert.equal(data.recommendations.length,0);
+    assert.match(data.guidance.explanation,/does not currently have.*PMS/i);
+    assert.ok(data.guidance.workflows.some(w=>w.category==='crm'));
+    assert.ok(data.guidance.workflows.some(w=>w.category==='business'));
+    assert.ok(data.guidance.workflows.every(w=>typeof w.job==='string'&&w.job.length>10));
+  }
+});
+
+test('general business questions get actionable workflow decomposition',async()=>{
+  for(const q of ['software for managing a small business','best software to run a restaurant business','best platform for managing a restaurant business']){
+    const response=await handleDistributionEmbedRoute(new Request('https://trytoolscout.org/api/recommend?q='+encodeURIComponent(q)),assetEnv());
+    assert.equal(response.status,200,q);
+    const data=await response.json();
+    assert.equal(data.recommendation_type,'workflow_guidance');
+    assert.equal(data.guidance.industry,'general_business');
+    assert.equal(data.recommendations.length,0);
+    assert.equal(data.guidance.workflows.length,4);
+  }
+});
+
+test('specific business job avoids broad workflow guide',async()=>{
+  const response=await handleDistributionEmbedRoute(new Request('https://trytoolscout.org/api/recommend?q='+encodeURIComponent('CRM for my Airbnb guest enquiries')),assetEnv());
+  assert.equal(response.status,200);
+  const data=await response.json();
+  assert.notEqual(data.recommendation_type,'workflow_guidance');
+  assert.ok(data.recommendations.length>0);
+  assert.ok(data.recommendations.every(t=>t.category==='crm'));
+});
+
+test('Finder scores are evidence-weighted, differentiated and restricted to relevant categories',async()=>{
+  const queries=[
+    {q:'CRM for a small sales team',category:'crm'},
+    {q:'SEO software for agency keyword research',category:'seo'},
+    {q:'workflow automation software for repetitive tasks',category:'automation'}
+  ];
+  for(const row of queries){
+    const response=await handleDistributionEmbedRoute(new Request('https://trytoolscout.org/api/recommend?q='+encodeURIComponent(row.q)),assetEnv());
+    assert.equal(response.status,200,row.q);
+    const data=await response.json();
+    assert.ok(data.recommendations.length>=2,row.q);
+    assert.ok(data.recommendations.every(t=>t.category===row.category),row.q);
+    assert.ok(data.recommendations.every(t=>Number.isFinite(t.match)&&t.match>66),row.q);
+    assert.ok(data.recommendations.every(t=>/\/100 fit score/.test(t.match_label)),row.q);
+    assert.ok(new Set(data.recommendations.map(t=>t.match)).size>1,row.q+' has an unexplained score tie');
+    assert.ok(data.recommendations.every(t=>t.tool_url==='https://trytoolscout.org/go/'+t.slug));
+  }
+});
+
+test('homepage and publisher embeds use one recommendation endpoint and do not manufacture a percentage',()=>{
+  const home=read('app.js'),embed=read('embed/toolscout-finder.js');
+  assert.match(home,/fetch\(api\('\/api\/recommend\?/);
+  assert.doesNotMatch(home,/function scoreTool\(/);
+  assert.match(home,/workflow_guidance/);
+  assert.match(embed,/workflow_guidance/);
+  assert.match(embed,/\/api\/recommend/);
+  assert.doesNotMatch(embed,/% match/);
+});
+
+test('unverified Free status cannot enter free-only Finder shortlist',async()=>{
+  const response=await handleDistributionEmbedRoute(new Request('https://trytoolscout.org/api/recommend?q=CRM&budget=free'),assetEnv());
+  assert.equal(response.status,200);
+  const data=await response.json();
+  assert.ok(data.recommendations.length>0);
+  const rows=JSON.parse(tools);
+  for(const item of data.recommendations){
+    const product=rows.find(t=>t.slug===item.slug);
+    assert.equal(product.freePlanKnown,true);
+    assert.equal(product.freePlan,true);
+  }
+});
+
+
+test('Budget vocabulary distinguishes an affordable paid product from free only',async()=>{
+  const cheap=await handleDistributionEmbedRoute(new Request('https://trytoolscout.org/api/recommend?q=cheap%20CRM'),assetEnv());
+  assert.equal(cheap.status,200);
+  const cheapData=await cheap.json();
+  assert.equal(cheapData.profile.budget,'low');
+  assert.ok(cheapData.recommendations.length>0);
+  const free=await handleDistributionEmbedRoute(new Request('https://trytoolscout.org/api/recommend?q=free%20CRM'),assetEnv());
+  assert.equal(free.status,200);
+  const freeData=await free.json();
+  assert.equal(freeData.profile.budget,'free');
+});
+
+test('homepage sends only explicit guided selections to API and displays server-derived profile',()=>{
+  const source=read('app.js');
+  assert.match(source,/if\(profile\[k\]\)params\.set\(k,profile\[k\]\)/);
+  assert.match(source,/p=data\.profile\|\|p/);
+  assert.doesNotMatch(source,/if\(p\[k\]\)params\.set\(k,p\[k\]\)/);
+});

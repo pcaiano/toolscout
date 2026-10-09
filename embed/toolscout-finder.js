@@ -91,6 +91,8 @@
       .footer{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:12px;padding-top:11px;border-top:1px solid ${palette.line};font-size:10px;color:${palette.muted}}
       .footer a{color:${palette.muted};text-decoration:none}
       .footer a strong{color:${palette.text}}
+      .workflow-action{margin-top:8px;padding:10px 12px;font-size:11px;min-height:38px;width:auto;text-align:left}
+      .workflow .description{margin:9px 0}
       .error{margin-top:12px;border:1px solid ${palette.line};border-radius:12px;padding:11px 12px;font-size:12px;line-height:1.45;color:${palette.muted};background:${palette.panel}}
       @keyframes pulse{0%,100%{opacity:.35;transform:scale(.86)}50%{opacity:1;transform:scale(1)}}
       @keyframes reveal{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
@@ -121,6 +123,21 @@
   }
 
   function renderResults(data){
+    if(data.recommendation_type==='workflow_guidance'){
+      const guidance=data.guidance||{};
+      const workflows=Array.isArray(guidance.workflows)?guidance.workflows.slice(0,mode==='mini'?2:4):[];
+      results.innerHTML='<div class="result workflow"><div class="name">'+esc(guidance.title||'Choose the software task')+'</div><div class="description">'+esc(guidance.explanation||'')+'</div></div>'
+        +workflows.map((w,index)=>'<article class="result workflow"><div class="category">'+esc(w.category||'Software')+'</div><div class="name">'+esc(w.title)+'</div><div class="description">'+esc(w.scope)+'</div><button class="workflow-action" type="button" data-index="'+index+'">Explore this workflow</button></article>').join('');
+      results.querySelectorAll('.workflow-action').forEach(control=>control.addEventListener('click',()=>{
+        const workflow=workflows[Number(control.dataset.index)];
+        if(!workflow)return;
+        input.value=workflow.job;
+        event('workflow_selected',{intent_slug:clean(workflow.category,70)});
+        form.requestSubmit();
+      }));
+      event('workflow_guidance',{result_count:workflows.length});
+      return;
+    }
     const items=Array.isArray(data.recommendations)?data.recommendations:[];
     if(!items.length){
       renderError('No reliable match yet. Add the job, team size, budget or a must-have feature.');
@@ -129,7 +146,7 @@
     results.innerHTML=items.map((item,index)=>{
       const match=item.match_type==='category_fit'
         ?esc(item.match_label||'Strong category fit')
-        :esc(item.match_label||`${Number(item.match||0)}% match`);
+        :esc(item.match_label||`${Number(item.match||0)}/100 fit score`);
       const reasons=(item.reasons||[]).slice(0,mode==='mini'?2:3).map(reason=>`<span class="reason">${esc(reason)}</span>`).join('');
       const profile=trackedUrl(item.profile_url||`/tools/${encodeURIComponent(item.slug)}`,item.slug);
       const vendor=new URL(`/go/${encodeURIComponent(item.slug)}`,HOME);

@@ -1,3 +1,4 @@
+import {businessWorkflowGuidance} from './business-workflow-intent.js';
 import base from './distribution-command-worker.js';
 import { prioritizedDistributionFeed } from './distribution-feed-priority.js';
 import {recentDistributionAssets,handleMachineDiscoveryCatalogRoute} from './machine-discovery-catalog-runtime.js';
@@ -8,7 +9,7 @@ const JS_H={'Content-Type':'application/javascript; charset=UTF-8','Cache-Contro
 const SVG_H={'Content-Type':'image/svg+xml; charset=UTF-8','Cache-Control':'public, max-age=86400'};
 const XML_H={'Content-Type':'application/rss+xml; charset=UTF-8','Cache-Control':'public, max-age=900'};
 const safe=(v,n=500)=>String(v??'').slice(0,n);
-const normalize=v=>String(v||'').toLowerCase();
+const normalize=v=>String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 const tokenize=v=>normalize(v).split(/[^a-z0-9]+/).filter(x=>x.length>2);
 const escXml=v=>String(v??'').replace(/[<>&'\"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;',"'":'&apos;','\"':'&quot;'}[c]));
 const OBSERVED_STOPWORDS=new Set(['what','are','you','looking','for','the','a','an','and','or','with','to','of','in','on','how','can','i','my','me','need','want','please','find','best','good']);
@@ -34,7 +35,7 @@ function inferredProfile(query,profile={}){
   if(!p.team&&/\bagenc(?:y|ies)\b/.test(q))p.team='agency';
   if(!p.goal&&/\bcrm\b|sales|customer/.test(q))p.goal='crm';
   if(!p.goal&&/seo|search visibility|keywords|organic/.test(q))p.goal='seo';
-  if(!p.goal&&/forms?|surveys?|lead capture/.test(q))p.goal='forms';
+  if(!p.goal&&/\b(forms?|surveys?)\b|lead capture/.test(q))p.goal='forms';
   if(!p.goal&&/automation|automate|workflow/.test(q))p.goal='automation';
   if(!p.goal&&/prospect|cold email|outbound|sales engagement|lead database/.test(q))p.goal='sales';
   if(!p.goal&&/support|helpdesk|ticketing|customer service/.test(q))p.goal='support';
@@ -45,9 +46,10 @@ function inferredProfile(query,profile={}){
   if(!p.goal&&/developer|coding|code editor|devops|deployment/.test(q))p.goal='developer';
   if(!p.goal&&/ecommerce|online store|sell online|commerce/.test(q))p.goal='ecommerce';
   if(!p.goal&&/design|graphic|ui design|visual content/.test(q))p.goal='design';
-  if(!p.goal&&/project|team collaboration|productivity|whiteboard/.test(q))p.goal='business';
-  if(!p.goal&&/marketing|email|ads?/.test(q))p.goal='marketing';
-  if(!p.budget&&/free|budget|cheap|affordable/.test(q))p.budget='free';
+  if(!p.goal&&/\bproject\b|team collaboration|productivity|whiteboard/.test(q))p.goal='business';
+  if(!p.goal&&/\b(marketing|email|ads|advertising)\b/.test(q))p.goal='marketing';
+  if(!p.budget&&/\b(free|gratuito|gratuita|sem custos|sem pagar)\b/.test(q))p.budget='free';
+  else if(!p.budget&&/\b(cheap|affordable|low cost|economico|barato|budget)\b/.test(q))p.budget='low';
   if(!p.priority&&/automation|automate|workflow/.test(q))p.priority='automation';
   if(!p.priority&&/integration|integrate|apps?/.test(q))p.priority='integrations';
   if(!p.priority&&/simple|easy|ease/.test(q))p.priority='ease';
@@ -101,36 +103,33 @@ function querySignal(query,intent,profile,tools){
 function broadCategoryQuery(profile={},signal={}){
   return Boolean(profile.goal&&!profile.budget&&!profile.team&&!profile.priority&&!signal.directTool&&(signal.words||[]).length<=2);
 }
+function decisionDimensions(intent,profile){
+  const weights=intent?.weights||{},priority=profile.priority==='features'?'content':profile.priority;
+  const keys=priority?[priority]:Object.keys(weights).filter(x=>['price','ease','automation','integrations','sales','marketing','seo','research','content','agency','ai'].includes(x));
+  return keys.length?keys:['ease','integrations','automation','price'];
+}
 function scoreTool(t,q,intent,p={}){
   p=inferredProfile(q,p);
-  const words=tokenize(q),h=[t.name,t.category,t.description,...(t.features||[]),...(t.bestFor||[])].map(normalize).join(' '),s=t.scores||{};
-  const relevance=Math.min(10,words.reduce((v,w)=>v+(h.includes(w)?2:0)+(normalize(t.category).includes(w)?2:0),0));
-  const categoryFit=intent&&intent.category===t.category?12:0;
-  const goalFit=p.goal&&normalize(t.category)===normalize(p.goal)?10:0;
-  const budgetFit=p.budget==='free'&&t.freePlan?8:p.budget==='low'&&(s.price||0)>=7?5:p.budget==='mid'&&(s.price||0)>=5?4:0;
-  let priorityFit=0;
-  if(p.priority==='ease')priorityFit=Math.min(8,(s.ease||0)*.8);
-  if(p.priority==='automation')priorityFit=Math.min(10,s.automation||0);
-  if(p.priority==='integrations')priorityFit=Math.min(10,s.integrations||0);
-  if(p.priority==='features')priorityFit=Math.min(8,s.features||0);
-  let teamFit=0;
-  if(p.team==='agency')teamFit=Math.min(10,s.agency||0);
-  if(p.team==='solo')teamFit=Math.min(5,(s.ease||0)*.5);
-  if(p.team==='small'||p.team==='team')teamFit=Math.min(5,(s.agency||0)*.5);
-  if(p.team==='large')teamFit=Math.min(6,(s.agency||0)*.6);
-  let intentFit=0;
-  if(intent){
-    const w=intent.weights||{};
-    if(w.freePlan&&t.freePlan)intentFit+=Math.min(4,w.freePlan);
-    if(w.automation)intentFit+=Math.min(4,(s.automation||0)*w.automation/10);
-    if(w.integrations)intentFit+=Math.min(4,(s.integrations||0)*w.integrations/10);
-    if(w.features)intentFit+=Math.min(4,(s.features||0)*w.features/10);
-  }
-  const nq=normalize(q).trim(),name=normalize(t.name);
-  const exactNameFit=nq===name?24:(nq.length>=4&&name.includes(nq)?16:0);
-  const categoryDepth=p.goal&&normalize(t.category)===normalize(p.goal)?Math.min(10,Number(s[p.goal]||0)):0;
-  const raw=42+relevance+categoryFit+goalFit+categoryDepth+budgetFit+priorityFit+teamFit+intentFit+exactNameFit;
-  return Math.round(Math.min(95,raw));
+  const nq=normalize(q).replace(/[^a-z0-9]+/g,' ').trim(),name=normalize(t.name).replace(/[^a-z0-9]+/g,' ').trim();
+  const exactName=nq===name;
+  const category=p.goal||intent?.category||null,categoryMatches=category===t.category;
+  if(t.rankingEligible===false||t.categoryReviewRequired===true)return -1;
+  if(p.budget==='free'&&!(t.freePlanKnown===true&&t.freePlan===true))return -1;
+  if(category&&!categoryMatches&&!exactName)return -1;
+  const phrases=[t.name,t.category,t.description,...(t.features||[]),...(t.bestFor||[])].map(x=>normalize(x).replace(/[^a-z0-9]+/g,' '));
+  const words=tokenize(q).filter(w=>!['software','tools','tool','best','need','want','small','team','business','company','free','cheap','affordable','with','for','the','and','good','what','which','manage','managing','my','para','melhor','gerir','negocio','empresa','gestao'].includes(w));
+  const hits=words.filter(w=>phrases.some(x=>(' '+x+' ').includes(' '+w+' '))).length;
+  if(!categoryMatches&&!exactName&&hits===0)return -1;
+  const coverage=words.length?hits/words.length:0;
+  const dims=decisionDimensions(intent,p),signals=dims.map(x=>Number(t.scores?.[x])).filter(Number.isFinite);
+  const weighted=signals.length?signals.reduce((a,v)=>a+Math.max(0,Math.min(10,v)),0)/signals.length:5;
+  const proof=t.editorialReview?.verificationStatus==='vendor_documented'?4:0;
+  const taskFit=(categoryMatches?70:36)+(exactName?40:0);
+  const directStrength=categoryMatches?coverage*7:coverage*4;
+  const context=(p.priority?2:0)+(p.team==='agency'?Number(t.scores?.agency||0)*.35:0)
+    +(p.budget==='low'?Number(t.scores?.price||0)*.35:0);
+  const quality=weighted*1.15;
+  return Math.min(97,Math.max(0,Math.round((taskFit+directStrength+quality+proof+context)*10)/10));
 }
 function fitReasons(t,q,intent,p={}){
   p=inferredProfile(q,p);
@@ -167,12 +166,16 @@ async function recommend(request,env){
   const limit=Math.max(1,Math.min(5,Number.parseInt(u.searchParams.get('limit')||'3',10)||3));
   try{
     const [tools,intents]=await Promise.all([assetJson(request,env,'/data/tools.json'),assetJson(request,env,'/data/intents.json')]);
-    const p=inferredProfile(q,profile),intent=detectIntent(q,intents),signal=querySignal(q,intent,p,tools);
+    const p=inferredProfile(q,profile),guidance=businessWorkflowGuidance(q,p);
+    if(guidance)return Response.json({query:q,profile:p,intent:null,recommendation_type:'workflow_guidance',
+      guidance,count:0,recommendations:[],ranking:'Workflow decomposition before vendor ranking',
+      affiliate_disclosure:'ToolScout may earn a commission from some outbound links. Affiliate relationships do not influence recommendations.'},{headers:JSON_H});
+    const intent=detectIntent(q,intents),signal=querySignal(q,intent,p,tools);
     if(!signal.recognized){
       return Response.json({error:'recommendation_unresolved',message:'ToolScout could not identify a reliable software need. Add the job, team size, budget or a must-have feature.'},{status:422,headers:{...JSON_H,'Cache-Control':'no-store'}});
     }
     const broad=broadCategoryQuery(p,signal),observed=intent?null:deriveObservedIntent(q);
-    const ranked=tools.map(t=>({...t,match:scoreTool(t,q,intent,p)})).filter(t=>t.match>=50).sort((a,b)=>b.match-a.match).slice(0,limit);
+    const ranked=tools.map(t=>({...t,match:scoreTool(t,q,intent,p)})).filter(t=>t.match>=68).sort((a,b)=>b.match-a.match||String(a.name).localeCompare(String(b.name))).slice(0,limit);
     if(!ranked.length){
       return Response.json({error:'recommendation_unresolved',message:'ToolScout understood part of the request, but not strongly enough to rank tools. Add more decision context.'},{status:422,headers:{...JSON_H,'Cache-Control':'no-store'}});
     }
@@ -185,7 +188,7 @@ async function recommend(request,env){
       free_plan:Boolean(t.freePlan),
       match:broad?null:t.match,
       match_type:broad?'category_fit':'personalized',
-      match_label:broad?categoryLabel(t.match):`${t.match}% match`,
+      match_label:broad?categoryLabel(t.match):`${t.match}/100 fit score`,
       reasons:fitReasons(t,q,intent,p),
       best_for:t.bestFor||[],
       features:(t.features||[]).slice(0,6),
@@ -200,7 +203,7 @@ async function recommend(request,env){
       recommendation_type:broad?'category':'personalized',
       count:results.length,
       recommendations:results,
-      ranking:'ToolScout fit model with Finder quality gates',
+      ranking:'Evidence-aware editorial fit score, not a probability, with category, price and documented product gates. No paid ranking.',
       affiliate_disclosure:'ToolScout may earn a commission from some outbound links. Affiliate relationships do not influence ranking.'
     },{headers:JSON_H});
   }catch{
