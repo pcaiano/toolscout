@@ -21,13 +21,13 @@ test('all 127 current profiles have at least one dated decision-specific first-p
   assert.deepEqual(unclaimed.map(t=>t.slug),[]);
   let count=0,withCapacity=0;
   for(const t of catalog){
-    const vendor=new URL(t.sourceUrl).hostname.replace(/^www\\./,'');
+    const vendor=new URL(t.sourceUrl).hostname.replace(/^www\./,'');
     const reviewed=new Set([t.editorialReview?.sourceUrl,...(t.editorialReview?.sourceUrls||[]),t.pricingDetails?.sourceUrl].filter(Boolean));
     for(const claim of t.decisionClaims){
       assert.equal(claim.status,'verified',t.slug);
       assert.ok(['capability','integration','plan_limit','price_eur_month'].includes(claim.type),t.slug);
-      assert.ok(claim.value&&claim.sourceUrl&&/^\\d{4}-\\d{2}-\\d{2}$/.test(claim.verifiedAt),t.slug);
-      const host=new URL(claim.sourceUrl).hostname.replace(/^www\\./,'');
+      assert.ok(claim.value&&claim.sourceUrl&&/^\d{4}-\d{2}-\d{2}$/.test(claim.verifiedAt),t.slug);
+      const host=new URL(claim.sourceUrl).hostname.replace(/^www\./,'');
       assert.ok(host===vendor||host.endsWith('.'+vendor)||reviewed.has(claim.sourceUrl),t.slug+' claim has no recorded manufacturer provenance');
       if(claim.type==='plan_limit'){
         withCapacity++;
