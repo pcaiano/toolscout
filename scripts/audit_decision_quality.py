@@ -13,6 +13,7 @@ import pathlib
 import re
 import sys
 from datetime import date
+from urllib.parse import urlparse
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 DATA = ROOT / "data" / "tools.json"
@@ -83,6 +84,40 @@ def inspect(path=DATA):
                         counters["invalid_integration_evidence"] += 1
                     else:
                         counters["verified_integration_pairs"] += 1
+        claims = tool.get("decisionClaims") or []
+        if not isinstance(claims, list):
+            issues.append(f"{slug}: decisionClaims must be an array")
+            counters["invalid_decision_claims"] += 1
+            claims = []
+        if claims:
+            counters["tools_with_claim_evidence"] += 1
+        else:
+            counters["documented_without_claim_evidence"] += 1
+        for claim in claims:
+            if not isinstance(claim, dict):
+                counters["invalid_decision_claims"] += 1
+                issues.append(f"{slug}: malformed decision claim")
+                continue
+            claim_date = claim.get("verifiedAt")
+            url = str(claim.get("sourceUrl") or "")
+            try:
+                verified_on = date.fromisoformat(claim_date)
+                date_ok = verified_on.isoformat() == claim_date and 0 <= (today - verified_on).days <= 180
+                vendor = (urlparse(tool.get("sourceUrl") or "").hostname or "").removeprefix("www.")
+                host = (urlparse(url).hostname or "").removeprefix("www.")
+                sources = (review.get("sourceUrls") or [])
+                first_party = bool(host) and (not vendor or host == vendor or host.endswith("." + vendor) or url in sources)
+                ok = (date_ok and url.startswith("https://") and first_party
+                      and claim.get("status") == "verified"
+                      and claim.get("type") in ("capability", "integration", "plan_limit", "price_eur_month")
+                      and bool(claim.get("value")))
+            except (TypeError, ValueError, AttributeError):
+                ok = False
+            if not ok:
+                counters["invalid_decision_claims"] += 1
+                issues.append(f"{slug}: claim missing valid first-party source, date, or assertion")
+            else:
+                counters["verified_decision_claims"] += 1
         if not tool.get("affiliateUrl"):
             counters["no_explicit_affiliate_url"] += 1
         if not tool.get("sourceUrl"):
@@ -112,7 +147,7 @@ def inspect(path=DATA):
         "categories": dict(sorted(categories.items())),
         "metrics": dict(sorted(counters.items())),
         "missing_field_counts": dict(sorted(missing_field_counts.items())),
-        "invalid_structure": bool(duplicates) or any(not isinstance(t, dict) for t in tools),
+        "invalid_structure": bool(duplicates) or any(not isinstance(t, dict) for t in tools) or bool(counters["invalid_decision_claims"]),
         "issues": issues,
         "tools": rows,
     }

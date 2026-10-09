@@ -98,7 +98,19 @@
       ],
       "sourceUrl": "https://systeme.io/pricing",
       "verifiedAt": "2026-10-08"
-    }
+    },
+    "decisionClaims": [
+      {
+        "type": "plan_limit",
+        "value": "free contacts",
+        "unit": "contacts",
+        "quantity": 2000,
+        "plan": "Free",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://systeme.io/pricing"
+      }
+    ]
   },
   {
     "slug": "beehiiv",
@@ -201,7 +213,17 @@
       ],
       "sourceUrl": "https://www.beehiiv.com/support/article/38813477234071-welcome-email-vs-welcome-automation-which-should-you-use",
       "verifiedAt": "2026-10-08"
-    }
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "automation",
+        "plan": "Lite",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.beehiiv.com/support/article/38813477234071-welcome-email-vs-welcome-automation-which-should-you-use"
+      }
+    ]
   },
   {
     "slug": "hubspot",
@@ -309,7 +331,19 @@
       "sourceUrls": [
         "https://www.hubspot.com/pricing/crm"
       ]
-    }
+    },
+    "decisionClaims": [
+      {
+        "type": "plan_limit",
+        "value": "free user seats",
+        "unit": "users",
+        "quantity": 2,
+        "plan": "Free",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.hubspot.com/pricing/crm"
+      }
+    ]
   },
   {
     "slug": "jotform",
@@ -1134,7 +1168,19 @@
       ],
       "sourceUrl": "https://help.zapier.com/hc/en-us/articles/32337438839565-What-s-included-in-Zapier-s-Free-plan",
       "verifiedAt": "2026-10-08"
-    }
+    },
+    "decisionClaims": [
+      {
+        "type": "plan_limit",
+        "value": "free monthly tasks",
+        "unit": "tasks",
+        "quantity": 100,
+        "plan": "Free",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.zapier.com/hc/en-us/articles/32337438839565-What-s-included-in-Zapier-s-Free-plan"
+      }
+    ]
   },
   {
     "slug": "make",
@@ -3601,6 +3647,15 @@
         "verifiedAt": "2026-10-08",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
+      }
+    ],
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "social scheduling",
+        "status": "verified",
+        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://support.buffer.com/en-us/articles/setting-up-your-timezones-and-posting-schedules-P4iSag90Fl"
       }
     ]
   },

@@ -378,16 +378,49 @@ function verifiedIntegrationPair(tool,existing){
     return name===target&&/^https:\/\//i.test(source)&&/^\d{4}-\d{2}-\d{2}$/.test(verifiedAt);
   })||null;
 }
-function requirementMatch(tool,requirement){
-  // A must-have is evidence of a capability, not loose overlap with marketing text.
-  // Only declared category/features or sourced, verified integration pairs
-  // may satisfy one. Missing evidence must never be upgraded by fuzzy text matching.
+// Verified requirements are claim-scoped. A reviewed profile documents the product,
+// not automatically every catalog feature, subscription tier or buyer constraint.
+function manufacturerClaim(tool,kind,value){
+  const needle=catalogNormalize(value);
+  if(!needle||!Array.isArray(tool?.decisionClaims))return null;
+  for(const claim of tool.decisionClaims){
+    if(!claim||claim.type!==kind||claim.status!=='verified')continue;
+    if(catalogNormalize(claim.value)!==needle)continue;
+    const date=String(claim.verifiedAt||''),source=String(claim.sourceUrl||'');
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!/^https:\/\//i.test(source))continue;
+    const checked=new Date(date+'T00:00:00Z');
+    if(!Number.isFinite(checked.valueOf())||checked.toISOString().slice(0,10)!==date||checked.valueOf()>Date.now()||Date.now()-checked.valueOf()>180*86400000)continue;
+    try{
+      const host=new URL(source).hostname.replace(/^www\./,'');
+      const vendor=tool?.sourceUrl?new URL(tool.sourceUrl).hostname.replace(/^www\./,''):null;
+      const registered=Array.isArray(tool?.editorialReview?.sourceUrls)&&tool.editorialReview.sourceUrls.includes(source);
+      if(vendor&&host!==vendor&&!host.endsWith('.'+vendor)&&!registered)continue;
+    }catch{continue}
+    return claim;
+  }
+  return null;
+}
+function requirementMatch(tool,requirement,{exclude=false,budget=null}={}){
   const needle=catalogNormalize(requirement).replace(/^(?:(?:must|need|needs|require|requires|support|supports|have|has|with)\s+)+/g,'');
-  if(!needle)return {matched:false,strength:0};
+  if(!needle)return {matched:false,strength:0,status:'not_verified'};
+  const pair=verifiedIntegrationPair(tool,needle);
+  if(pair)return {matched:true,strength:1,status:'verified',evidence:'Dated manufacturer-documented integration with '+needle+'.',verified_at:pair.verifiedAt||pair.verified_at};
+  const claim=manufacturerClaim(tool,'capability',needle)||manufacturerClaim(tool,'integration',needle);
+  if(claim){
+    if(budget==='free'&&claim.plan&&catalogNormalize(claim.plan)!=='free')return {matched:false,strength:0,status:'conflict',evidence:'This capability is documented only for a non-free tier.',plan:claim.plan};
+    return {matched:true,strength:1,status:'verified',evidence:'Dated manufacturer evidence for the exact requested capability.',verified_at:claim.verifiedAt,plan:claim.plan||null};
+  }
   const declared=[tool?.category,...(Array.isArray(tool?.features)?tool.features:[])];
-  const claims=declared.map(catalogNormalize).filter(Boolean);
-  const matched=Boolean(verifiedIntegrationPair(tool,needle))||claims.some(value=>value===needle||(' '+value+' ').includes(' '+needle+' '));
-  return {matched,strength:matched?1:0};
+  const listed=declared.map(catalogNormalize).filter(Boolean).some(value=>value===needle||(' '+value+' ').includes(' '+needle+' '));
+  if(!listed)return {matched:false,strength:0,status:'not_verified'};
+  // Be conservative about explicit exclusions even if a catalog-level claim has
+  // not yet been validated feature by feature.
+  if(exclude)return {matched:true,strength:0,status:'catalog_declared',evidence:'Catalog describes this unwanted property; exclude until checked.'};
+  if(tool?.editorialReview?.verificationStatus==='vendor_documented')
+    return {matched:false,strength:0,status:'not_verified',catalog_signal:true,evidence:'Catalog-listed feature lacks a dated manufacturer claim for this exact requirement.'};
+  // Legacy unsourced fixtures remain inspectable, but publishable catalog records
+  // must first pass the manufacturer-documentation admission contract.
+  return {matched:true,strength:0.5,status:'catalog_declared',evidence:'Legacy catalog-declared capability, not independently claim-verified.'};
 }
 function budgetSignal(tool,budget){
   const price=scoreOf(tool,'price');
@@ -420,20 +453,49 @@ function explicitTextMatch(tool,value){
   ].map(catalogNormalize).filter(Boolean);
   return fields.some(field=>field===needle||field.includes(' '+needle+' ')||field.startsWith(needle+' ')||field.endsWith(' '+needle));
 }
-function constraintEvidence(tool,constraints=[]){
+function constraintEvidence(tool,constraints=[],budget=null){
   return (constraints||[]).map(raw=>{
     const constraint=String(raw||'').trim(),norm=catalogNormalize(constraint);
     if(!norm)return {constraint,status:'not_verified',evidence:'Empty constraint cannot be evaluated.'};
-    const freeIntent=/\b(?:free|free plan|no cost)\b/.test(norm);
+    // A numerical price ceiling cannot be established from a 0-10 affordability
+    // score, and a free plan never implies access to a requested paid feature.
+    const money=constraint.match(/(?:[€]|\bEUR\b)\s*(\d+(?:[.,]\d+)?)|(\d+(?:[.,]\d+)?)\s*(?:[€]|\bEUR\b)/i);
+    if(money){
+      const ceiling=Number((money[1]||money[2]).replace(',','.'));
+      const prices=(tool?.decisionClaims||[]).filter(c=>c?.type==='price_eur_month'&&manufacturerClaim(tool,'price_eur_month',c.value)===c&&Number.isFinite(Number(c.amount))&&c.plan&&c.billingCycle==='monthly'&&(budget!=='free'||catalogNormalize(c.plan)==='free'));
+      if(!prices.length)return {constraint,status:'not_verified',evidence:'No dated manufacturer evidence for a comparable monthly EUR price and plan entitlement.'};
+      const affordable=prices.filter(c=>Number(c.amount)<=ceiling).sort((a,b)=>Number(a.amount)-Number(b.amount))[0];
+      return affordable
+        ?{constraint,status:'verified',evidence:'Documented monthly EUR price for the named plan is within the requested ceiling.',plan:affordable.plan,amount_eur_month:Number(affordable.amount),verified_at:affordable.verifiedAt}
+        :{constraint,status:'not_verified',evidence:'No documented plan currently proves that the monthly EUR ceiling can be met; other rates are unknown.'};
+    }
+    const volume=norm.match(/(?:at least|minimum|need|requires?|must support|support)\s+(\d+)\s+(tasks|users|seats|channels|accounts)\s*(?:per month|monthly)?/);
+    if(volume){
+      const qty=Number(volume[1]),unit=volume[2];
+      const limits=(tool?.decisionClaims||[]).filter(c=>c?.type==='plan_limit'&&manufacturerClaim(tool,'plan_limit',c.value)===c&&c.unit===unit&&Number.isFinite(Number(c.quantity))&&c.plan&&(budget!=='free'||catalogNormalize(c.plan)==='free'));
+      if(!limits.length)return {constraint,status:'not_verified',evidence:'No plan-specific documented capacity for '+unit+'.'};
+      const suitable=limits.find(c=>Number(c.quantity)>=qty);
+      return suitable
+        ?{constraint,status:'verified',evidence:'Manufacturer-documented plan capacity meets the requested volume.',plan:suitable.plan,quantity:Number(suitable.quantity),unit,verified_at:suitable.verifiedAt}
+        :{constraint,status:'not_verified',evidence:'No documented eligible plan meets the requested volume; higher or unrecorded tiers remain unknown.'};
+    }
+    const freeIntent=/^(?:must |need |needs |require |requires |required |only )?(?:free|free plan|no cost)(?: only)?$/.test(norm);
     if(freeIntent){
       if(tool?.freePlanKnown!==true)return {constraint,status:'not_verified',evidence:'Free-plan availability has not been independently verified in the current ToolScout catalog.'};
       return tool.freePlan
-        ?{constraint,status:'verified',evidence:'ToolScout catalog has verified free-plan availability.'}
-        :{constraint,status:'conflict',evidence:'ToolScout catalog has verified that no free plan is available.'};
+        ?{constraint,status:'verified',evidence:'Manufacturer-documented free-plan availability; individual feature entitlements require separate proof.'}
+        :{constraint,status:'conflict',evidence:'The manufacturer documentation records no available free plan.'};
     }
     const stripped=norm.replace(/\b(?:must|needs?|need|requires?|require|required|support|supports|with|only|be|have|has)\b/g,' ').replace(/\s+/g,' ').trim();
-    const exact=explicitTextMatch(tool,norm)||(stripped&&explicitTextMatch(tool,stripped));
-    if(exact)return {constraint,status:'verified',evidence:'The current ToolScout catalog explicitly contains this requirement in product evidence.'};
+    const exact=manufacturerClaim(tool,'capability',stripped)||manufacturerClaim(tool,'capability',norm);
+    if(exact){
+      if(budget==='free'&&exact.plan&&catalogNormalize(exact.plan)!=='free')return {constraint,status:'conflict',evidence:'This capability is documented only for a paid tier.',plan:exact.plan};
+      return {constraint,status:'verified',evidence:'Dated manufacturer documentation proves this exact capability.',verified_at:exact.verifiedAt,plan:exact.plan||null};
+    }
+    if(tool?.editorialReview?.verificationStatus==='vendor_documented')
+      return {constraint,status:'not_verified',evidence:'Product documentation exists, but this individual requirement and plan are not independently evidenced.'};
+    const legacy=explicitTextMatch(tool,norm)||(stripped&&explicitTextMatch(tool,stripped));
+    if(legacy)return {constraint,status:'verified',evidence:'Legacy catalog field describes the requirement; current published catalog requires claim-level evidence.'};
     return {constraint,status:'not_verified',evidence:'ToolScout does not currently store explicit evidence that this product satisfies the requirement.'};
   });
 }
@@ -441,13 +503,15 @@ function constraintEvidence(tool,constraints=[]){
 // Soft preferences remain ranked trade-offs. Requirements marked "must",
 // "required", "only", "no" or "without" are exclusionary when not evidenced.
 function hardBuyerConstraint(value){
+  if(/(?:[€]|\bEUR\b)\s*\d|\d\s*(?:[€]|\bEUR\b)/i.test(String(value||'')))return true;
+  if(/\b(?:at least|minimum)\s+\d+\s+(?:tasks|users|seats|channels|accounts)\b/i.test(String(value||'')))return true;
   return /^(?:must\b|mandatory\b|required\b|require\b|requires\b|only\b|no\b|without\b|cannot\b|need\s+to\b|needs\s+to\b|has\s+to\b|have\s+to\b)/.test(catalogNormalize(value));
 }
 function decisionBlockers(evaluated,args={}){
   const reasons=[];
   if(evaluated.category_review_required)reasons.push('ToolScout category classification is pending review.');
   for(const req of evaluated.requirement_evidence||[])
-    if(!req.matched)reasons.push('Mandatory capability not substantiated in the current catalog: '+req.requirement);
+    if(!req.matched)reasons.push('Mandatory capability lacks claim-level manufacturer evidence: '+req.requirement);
   if(args.budget==='free'&&!(evaluated.free_plan_verified&&evaluated.free_plan))
     reasons.push('A documented free plan is required but not confirmed.');
   for(const c of evaluated.constraint_evidence||[])
@@ -546,14 +610,14 @@ function decisionEvaluation(tool,args){
       else if((' '+hay+' ').includes(' '+term+' '))relevance+=4;
     }
   }
-  for(const req of args.must_have||[])if(requirementMatch(tool,req).matched)relevance+=5;
+  for(const req of args.must_have||[])if(requirementMatch(tool,req,{budget:args.budget}).matched)relevance+=5;
   const dims=requestedDimensions(args);
   const dimScores=dims.map(key=>({dimension:key,score:scoreOf(tool,key)})).filter(x=>x.score!=null);
   const dimAvg=dimScores.length?dimScores.reduce((s,x)=>s+x.score,0)/dimScores.length:5;
   const budget=budgetSignal(tool,args.budget),team=teamSignal(tool,args.team);
-  const must=(args.must_have||[]).map(x=>({requirement:x,...requirementMatch(tool,x)}));
-  const avoids=(args.avoid||[]).map(x=>({requirement:x,...requirementMatch(tool,x)}));
-  const constraints=constraintEvidence(tool,args.constraints||[]);
+  const must=(args.must_have||[]).map(x=>({requirement:x,...requirementMatch(tool,x,{budget:args.budget})}));
+  const avoids=(args.avoid||[]).map(x=>({requirement:x,...requirementMatch(tool,x,{exclude:true})}));
+  const constraints=constraintEvidence(tool,args.constraints||[],args.budget);
   const mustMatched=must.filter(x=>x.matched).length;
   const avoidHits=avoids.filter(x=>x.matched).length;
   const constraintVerified=constraints.filter(x=>x.status==='verified').length;
@@ -579,7 +643,8 @@ function decisionEvaluation(tool,args){
   return {
     ...publicTool(tool),
     fit_score:fit,
-    evidence_confidence:confidence,
+    evidence_confidence:(must.length||constraints.length)?(must.every(x=>x.status==='verified')&&constraints.every(x=>x.status==='verified')&&stack.unknown_pairs===0?'high':'limited'):confidence,
+    claim_evidence_policy:'manufacturer_claim_level_for_documented_catalog',
     advantages,
     tradeoffs:[...new Set([...tradeoffs,...(Array.isArray(tool.limitations)?tool.limitations:[]).filter(Boolean).slice(0,2)])],
     decision_rationale:tool.editorialReview?.summary||null,
@@ -673,7 +738,7 @@ async function callCatalogTool(name,args,request,env){
         budget:args.budget||null,
         team:args.team||null,
         existing_tools:args.existing_tools||[],
-        methodology:'Deterministic ToolScout catalog fit. Candidates must first match the requested job/category and satisfy all evidence-backed must-haves to appear in a qualified shortlist. Missing evidence is not a confirmed capability. A free-only budget excludes products without verified free plans. Scores then combine explicit priorities, budget/team signals, must-have evidence, free-form constraint evidence and known stack evidence. Every free-form constraint is returned as verified, not_verified or conflict; missing product-specific integration evidence is never upgraded from a generic text match.',
+        methodology:'Deterministic ToolScout catalog fit. Candidates must first match the requested job/category and satisfy all evidence-backed must-haves to appear in a qualified shortlist. Manufacturer-level editorial sourcing does not automatically prove an individual requirement; a documented profile needs claim-level first-party evidence. Missing evidence is not a confirmed capability. A free-only budget excludes products without verified free plans. Scores then combine explicit priorities, budget/team signals, must-have evidence, free-form constraint evidence and known stack evidence. Every free-form constraint is returned as verified, not_verified or conflict. Numerical EUR ceilings and plan quantities are hard gates and cannot be inferred from generic price scores; missing product-specific integration evidence is never upgraded from a generic text match.',
         no_pay_to_rank:true
       },
       affiliate_disclosure:disclosure

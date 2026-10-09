@@ -166,7 +166,7 @@ test('MCP compare_for_use_case exposes contextual trade-offs and affordability l
 test('MCP alternatives improve the stated complaint without hiding sacrifices',async()=>{
   const catalog=JSON.parse(fs.readFileSync(new URL('../data/tools.json',import.meta.url),'utf8'));
   const env={ASSETS:{fetch:async request=>new URL(request.url).pathname==='/data/tools.json'?Response.json(catalog):new Response('',{status:404})}};
-  const body={jsonrpc:'2.0',id:22,method:'tools/call',params:{name:'find_alternatives',arguments:{tool:'hubspot',dislike:'too expensive and complex',must_have:['automation'],limit:3},_meta:{'io.modelcontextprotocol/protocolVersion':'2026-07-28','io.modelcontextprotocol/clientInfo':{name:'test-client',version:'1.0'}}}};
+  const body={jsonrpc:'2.0',id:22,method:'tools/call',params:{name:'find_alternatives',arguments:{tool:'hubspot',dislike:'too expensive and complex',limit:3},_meta:{'io.modelcontextprotocol/protocolVersion':'2026-07-28','io.modelcontextprotocol/clientInfo':{name:'test-client',version:'1.0'}}}};
   const response=await handleAgentProtocolRoute(
     new Request('https://trytoolscout.org/mcp',{method:'POST',headers:{'Content-Type':'application/json','MCP-Protocol-Version':'2026-07-28','Mcp-Method':'tools/call','Mcp-Name':'find_alternatives'},body:JSON.stringify(body)}),
     env,{waitUntil(){}}
