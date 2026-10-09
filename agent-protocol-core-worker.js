@@ -387,12 +387,12 @@ function manufacturerClaim(tool,kind,value){
     if(!claim||claim.type!==kind||claim.status!=='verified')continue;
     if(catalogNormalize(claim.value)!==needle)continue;
     const date=String(claim.verifiedAt||''),source=String(claim.sourceUrl||'');
-    if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(date)||!/^https:\\/\\//i.test(source))continue;
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!/^https:\/\//i.test(source))continue;
     const checked=new Date(date+'T00:00:00Z');
     if(!Number.isFinite(checked.valueOf())||checked.toISOString().slice(0,10)!==date||checked.valueOf()>Date.now())continue;
     try{
-      const host=new URL(source).hostname.replace(/^www\\./,'');
-      const vendor=tool?.sourceUrl?new URL(tool.sourceUrl).hostname.replace(/^www\\./,''):null;
+      const host=new URL(source).hostname.replace(/^www\./,'');
+      const vendor=tool?.sourceUrl?new URL(tool.sourceUrl).hostname.replace(/^www\./,''):null;
       const registered=Array.isArray(tool?.editorialReview?.sourceUrls)&&tool.editorialReview.sourceUrls.includes(source);
       if(vendor&&host!==vendor&&!host.endsWith('.'+vendor)&&!registered)continue;
     }catch{continue}
@@ -401,7 +401,7 @@ function manufacturerClaim(tool,kind,value){
   return null;
 }
 function requirementMatch(tool,requirement,{exclude=false}={}){
-  const needle=catalogNormalize(requirement).replace(/^(?:(?:must|need|needs|require|requires|support|supports|have|has|with)\\s+)+/g,'');
+  const needle=catalogNormalize(requirement).replace(/^(?:(?:must|need|needs|require|requires|support|supports|have|has|with)\s+)+/g,'');
   if(!needle)return {matched:false,strength:0,status:'not_verified'};
   const pair=verifiedIntegrationPair(tool,needle);
   if(pair)return {matched:true,strength:1,status:'verified',evidence:'Dated manufacturer-documented integration with '+needle+'.',verified_at:pair.verifiedAt||pair.verified_at};
@@ -456,7 +456,7 @@ function constraintEvidence(tool,constraints=[]){
     if(!norm)return {constraint,status:'not_verified',evidence:'Empty constraint cannot be evaluated.'};
     // A numerical price ceiling cannot be established from a 0-10 affordability
     // score, and a free plan never implies access to a requested paid feature.
-    const money=constraint.match(/(?:[€]|\\bEUR\\b)\\s*(\\d+(?:[.,]\\d+)?)|(\\d+(?:[.,]\\d+)?)\\s*(?:[€]|\\bEUR\\b)/i);
+    const money=constraint.match(/(?:[€]|\bEUR\b)\s*(\d+(?:[.,]\d+)?)|(\d+(?:[.,]\d+)?)\s*(?:[€]|\bEUR\b)/i);
     if(money){
       const ceiling=Number((money[1]||money[2]).replace(',','.'));
       const prices=(tool?.decisionClaims||[]).filter(c=>c?.type==='price_eur_month'&&manufacturerClaim(tool,'price_eur_month',c.value)===c&&Number.isFinite(Number(c.amount))&&c.plan&&c.billingCycle==='monthly');
@@ -466,7 +466,7 @@ function constraintEvidence(tool,constraints=[]){
         ?{constraint,status:'verified',evidence:'Documented monthly EUR price for the named plan is within the requested ceiling.',plan:affordable.plan,amount_eur_month:Number(affordable.amount),verified_at:affordable.verifiedAt}
         :{constraint,status:'conflict',evidence:'Documented monthly EUR plans in ToolScout exceed the requested ceiling; other rates are not assumed.'};
     }
-    const volume=norm.match(/(?:at least|minimum|need|requires?|must support|support)\\s+(\\d+)\\s+(tasks|users|seats|channels|accounts)\\s*(?:per month|monthly)?/);
+    const volume=norm.match(/(?:at least|minimum|need|requires?|must support|support)\s+(\d+)\s+(tasks|users|seats|channels|accounts)\s*(?:per month|monthly)?/);
     if(volume){
       const qty=Number(volume[1]),unit=volume[2];
       const limits=(tool?.decisionClaims||[]).filter(c=>c?.type==='plan_limit'&&manufacturerClaim(tool,'plan_limit',c.value)===c&&c.unit===unit&&Number.isFinite(Number(c.quantity))&&c.plan);
@@ -483,7 +483,7 @@ function constraintEvidence(tool,constraints=[]){
         ?{constraint,status:'verified',evidence:'Manufacturer-documented free-plan availability; individual feature entitlements require separate proof.'}
         :{constraint,status:'conflict',evidence:'The manufacturer documentation records no available free plan.'};
     }
-    const stripped=norm.replace(/\\b(?:must|needs?|need|requires?|require|required|support|supports|with|only|be|have|has)\\b/g,' ').replace(/\\s+/g,' ').trim();
+    const stripped=norm.replace(/\b(?:must|needs?|need|requires?|require|required|support|supports|with|only|be|have|has)\b/g,' ').replace(/\s+/g,' ').trim();
     const exact=manufacturerClaim(tool,'capability',stripped)||manufacturerClaim(tool,'capability',norm);
     if(exact)return {constraint,status:'verified',evidence:'Dated manufacturer documentation proves this exact capability.',verified_at:exact.verifiedAt,plan:exact.plan||null};
     if(tool?.editorialReview?.verificationStatus==='vendor_documented')
@@ -497,8 +497,8 @@ function constraintEvidence(tool,constraints=[]){
 // Soft preferences remain ranked trade-offs. Requirements marked "must",
 // "required", "only", "no" or "without" are exclusionary when not evidenced.
 function hardBuyerConstraint(value){
-  if(/(?:[€]|\\bEUR\\b)\\s*\\d|\\d\\s*(?:[€]|\\bEUR\\b)/i.test(String(value||'')))return true;
-  if(/\\b(?:at least|minimum)\\s+\\d+\\s+(?:tasks|users|seats|channels|accounts)\\b/i.test(String(value||'')))return true;
+  if(/(?:[€]|\bEUR\b)\s*\d|\d\s*(?:[€]|\bEUR\b)/i.test(String(value||'')))return true;
+  if(/\b(?:at least|minimum)\s+\d+\s+(?:tasks|users|seats|channels|accounts)\b/i.test(String(value||'')))return true;
   return /^(?:must\b|mandatory\b|required\b|require\b|requires\b|only\b|no\b|without\b|cannot\b|need\s+to\b|needs\s+to\b|has\s+to\b|have\s+to\b)/.test(catalogNormalize(value));
 }
 function decisionBlockers(evaluated,args={}){
