@@ -184,6 +184,13 @@ Grow the existing catalog rather than create a second catalog or add a parallel 
 
 To unlock specialist sectors not represented in the existing allowed category registry, expand the current catalog taxonomy only with a fully verified candidate cohort and tests. Avoid speculative indexable buying guides from thin coverage.
 
+## Canonical D1 catalog backfill (9 October 2026)
+
+Catalog Autonomy owns a single product-data catalog: existing D1 `catalog_runtime_candidates` stores documented automatic admissions and progressively mirrors all 127 original static catalog profiles. The existing Growth Brain now runs `baseline_catalog_migration` hourly, up to 40 missing original slugs per invocation. The migration preserves each entire profile including dated, internal first-party manufacturer evidence and claims; `INSERT OR IGNORE` ensures it cannot overwrite existing D1 edits or independently admitted tools. The static JSON snapshot remains a read-only outage fallback and source for the import. The public merged catalog selects a D1 row when present without changing original tool order. Neither import nor storage origin implies fresh verification of source pricing or entitlements.
+
+The compatibility guard preserves the legacy public profile HTML during backfill, avoiding a design, backlink, schema or editorial regression. This is a **storage migration**, not a claim that the 127 existing profile templates have already been converted to dynamic rendering: that separate promotion requires browser-visible parity and manufacturer-fact refresh controls. The existing public `/api/catalog-inventory` reports how many originals are seeded, what remains, D1 degradation and the preservation guard. Existing category/affiliate neutrality, /go, canonicals and source confidentiality rules remain in force.
+
+
 ## Catalog supply repair and AI workflow truth (9 October 2026)
 
 An inspection of the four preexisting trusted-candidate files found **80 records, all already present in the current 127-product catalog**. The prior admission cap of 3/day was not the actual bottleneck: **zero genuinely new trusted candidates** were flowing through those files.
