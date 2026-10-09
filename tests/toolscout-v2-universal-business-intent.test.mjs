@@ -69,7 +69,7 @@ test('generic unknown businesses degrade gracefully to cross-sector job discover
   const {status,data}=await finder(q);
   assert.equal(status,200,q);
   assert.equal(data.recommendation_type,'workflow_guidance',q);
-  assert.equal(data.guidance.industry,'other_business',q);
+  assert.equal(data.guidance.industry,'general_business',q);
   assert.equal(data.guidance.workflows.length,4);
  }
 });
