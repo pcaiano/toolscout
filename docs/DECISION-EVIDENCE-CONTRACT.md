@@ -217,3 +217,9 @@ The original 127 audited ToolScout 2.0 software HTML shells remain the public pa
 Keep existing ToolScout 2.0 layout, profile canonical URL, comparative entry and monetizable `/go/` hrefs unchanged. This is strictly the first safe subset of fully dynamic page behavior; AI interoperation paragraphs and some other legacy sections still depend on editorial template regeneration. It does **not** perform unsupervised manufacturer pricing edits, falsely date unverified changes or claim that a 200 response proves all D1 rows migrated.
 
 The existing post-deploy MCP Integrity probe also reads the live public catalog inventory and reports exactly `seeded_baseline`, `baseline_remaining`, `migration_phase` and degradation. Count unavailable means unavailable, not success. Do not claim 127 complete until the observed D1 report confirms it.
+
+### Migration truth and 2.0 presentation guard (9 October 2026)
+
+Legacy slugs remain served by their audited static HTML shell even after an approved D1 editorial revision changes `source_status` from `baseline_snapshot` to `ok`. The approved D1 fields can hydrate the existing page only after proof checks. No D1 status change alone may substitute the simpler runtime-generated HTML for an already indexed legacy profile.
+
+`/api/catalog-inventory` distinguishes `seeded_baseline` (unchanged snapshots), `baseline_revised` (legacy tools already represented by other D1 records), `baseline_present` (both groups), and `baseline_remaining` (the missing count). Counts of the two groups must reconcile, and cached/degraded inventory must explicitly say so. The read-only production probe checks those equations instead of mistaking an editorial revision for a missing migrated tool.
