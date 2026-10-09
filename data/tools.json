@@ -378,6 +378,35 @@
         "verifiedAt": "2026-10-08",
         "sourceUrl": "https://www.hubspot.com/pricing/crm",
         "period": "total"
+      },
+      {
+        "type": "price_quote",
+        "value": "starter customer platform regular monthly EUR core seat list",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://www.hubspot.com/pricing/sales?currencyCode=EUR",
+        "plan": "Starter",
+        "currency": "EUR",
+        "amount": 20,
+        "chargeAmount": 20,
+        "billingCycle": "monthly",
+        "market": "unspecified",
+        "taxStatus": "unknown",
+        "unit": "seat",
+        "unitQuantity": 1,
+        "promotion": false,
+        "pricingScope": "Standard advertised €20 monthly list price per core seat; conditional limited-time €7/mo/seat new-customer promotion also advertised, excluded from this regular-rate quote; taxes and checkout conditions remain unknown"
+      },
+      {
+        "type": "plan_limit",
+        "value": "free starter crm users",
+        "plan": "Free",
+        "unit": "users",
+        "quantity": 2,
+        "period": "total",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://www.hubspot.com/pricing/sales?currencyCode=EUR"
       }
     ]
   },
@@ -5311,6 +5340,70 @@
         "status": "verified",
         "verifiedAt": "2026-10-08",
         "sourceUrl": "https://help.webflow.com/hc/en-us/articles/33961235760531-Localize-page-settings"
+      },
+      {
+        "type": "price_quote",
+        "value": "site basic annual usd per site",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://webflow.com/pricing",
+        "plan": "Site Basic",
+        "currency": "USD",
+        "amount": 15,
+        "chargeAmount": 180,
+        "billingCycle": "annual",
+        "market": "unspecified",
+        "taxStatus": "excluded",
+        "unit": "subscription",
+        "unitQuantity": 1,
+        "promotion": false,
+        "pricingScope": "One Site plan, billed yearly; excludes separate Workspace plan, seats and addons; applicable tax added at checkout"
+      },
+      {
+        "type": "price_quote",
+        "value": "site premium annual usd per site",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://webflow.com/pricing",
+        "plan": "Site Premium",
+        "currency": "USD",
+        "amount": 25,
+        "chargeAmount": 300,
+        "billingCycle": "annual",
+        "market": "unspecified",
+        "taxStatus": "excluded",
+        "unit": "subscription",
+        "unitQuantity": 1,
+        "promotion": false,
+        "pricingScope": "One Site plan, billed yearly; excludes separate Workspace plan, seats and addons; applicable tax added at checkout"
+      },
+      {
+        "type": "capability",
+        "value": "custom domain",
+        "plan": "Site Basic",
+        "includedPlans": [
+          "Site Basic",
+          "Site Premium"
+        ],
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://webflow.com/pricing"
+      },
+      {
+        "type": "capability",
+        "value": "content management system",
+        "plan": "Site Premium",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://webflow.com/pricing"
+      },
+      {
+        "type": "capability",
+        "value": "site search",
+        "plan": "Site Premium",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://webflow.com/pricing"
       }
     ]
   },
