@@ -1685,7 +1685,13 @@
         "status": "verified",
         "verifiedAt": "2026-10-08",
         "sourceUrl": "https://www.make.com/en/product",
-        "plan": "Free"
+        "plan": "Free",
+        "includedPlans": [
+          "Free",
+          "Core",
+          "Pro",
+          "Teams"
+        ]
       },
       {
         "type": "plan_limit",
@@ -1704,7 +1710,13 @@
         "status": "verified",
         "verifiedAt": "2026-10-09",
         "sourceUrl": "https://www.make.com/en/pricing",
-        "plan": "Free"
+        "plan": "Free",
+        "includedPlans": [
+          "Free",
+          "Core",
+          "Pro",
+          "Teams"
+        ]
       },
       {
         "type": "price_quote",
@@ -1761,6 +1773,84 @@
         "amount": 38,
         "chargeAmount": 38,
         "billingCycle": "monthly",
+        "market": "unspecified",
+        "taxStatus": "unknown",
+        "unit": "subscription",
+        "unitQuantity": 1,
+        "usageTier": {
+          "unit": "credits",
+          "quantity": 10000,
+          "period": "month"
+        },
+        "promotion": false
+      },
+      {
+        "type": "capability",
+        "value": "custom variables",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://www.make.com/en/pricing",
+        "plan": "Pro",
+        "includedPlans": [
+          "Pro",
+          "Teams"
+        ]
+      },
+      {
+        "type": "price_quote",
+        "value": "core annual 10000 credits",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://www.make.com/en/pricing",
+        "plan": "Core",
+        "currency": "USD",
+        "amount": 9,
+        "chargeAmount": 108,
+        "billingCycle": "annual",
+        "market": "unspecified",
+        "taxStatus": "unknown",
+        "unit": "subscription",
+        "unitQuantity": 1,
+        "usageTier": {
+          "unit": "credits",
+          "quantity": 10000,
+          "period": "month"
+        },
+        "promotion": false
+      },
+      {
+        "type": "price_quote",
+        "value": "pro annual 10000 credits",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://www.make.com/en/pricing",
+        "plan": "Pro",
+        "currency": "USD",
+        "amount": 16,
+        "chargeAmount": 192,
+        "billingCycle": "annual",
+        "market": "unspecified",
+        "taxStatus": "unknown",
+        "unit": "subscription",
+        "unitQuantity": 1,
+        "usageTier": {
+          "unit": "credits",
+          "quantity": 10000,
+          "period": "month"
+        },
+        "promotion": false
+      },
+      {
+        "type": "price_quote",
+        "value": "teams annual 10000 credits",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://www.make.com/en/pricing",
+        "plan": "Teams",
+        "currency": "USD",
+        "amount": 29,
+        "chargeAmount": 348,
+        "billingCycle": "annual",
         "market": "unspecified",
         "taxStatus": "unknown",
         "unit": "subscription",
@@ -3237,7 +3327,14 @@
         "value": "workspaces",
         "status": "verified",
         "verifiedAt": "2026-10-08",
-        "sourceUrl": "https://support.atlassian.com/trello/docs/workspace-user-limit/"
+        "sourceUrl": "https://support.atlassian.com/trello/docs/workspace-user-limit/",
+        "includedPlans": [
+          "Free",
+          "Standard",
+          "Premium",
+          "Enterprise"
+        ],
+        "plan": "Free"
       },
       {
         "type": "plan_limit",
@@ -3249,6 +3346,99 @@
         "verifiedAt": "2026-10-08",
         "sourceUrl": "https://support.atlassian.com/trello/docs/workspace-user-limit/",
         "period": "total"
+      },
+      {
+        "type": "price_quote",
+        "value": "standard monthly per user",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://trello.com/pricing",
+        "plan": "Standard",
+        "currency": "USD",
+        "amount": 6,
+        "chargeAmount": 6,
+        "billingCycle": "monthly",
+        "market": "unspecified",
+        "taxStatus": "unknown",
+        "unit": "seat",
+        "unitQuantity": 1,
+        "promotion": false
+      },
+      {
+        "type": "price_quote",
+        "value": "standard annual per user",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://trello.com/pricing",
+        "plan": "Standard",
+        "currency": "USD",
+        "amount": 5,
+        "chargeAmount": 60,
+        "billingCycle": "annual",
+        "market": "unspecified",
+        "taxStatus": "unknown",
+        "unit": "seat",
+        "unitQuantity": 1,
+        "promotion": false
+      },
+      {
+        "type": "price_quote",
+        "value": "premium monthly per user",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://trello.com/pricing",
+        "plan": "Premium",
+        "currency": "USD",
+        "amount": 12.5,
+        "chargeAmount": 12.5,
+        "billingCycle": "monthly",
+        "market": "unspecified",
+        "taxStatus": "unknown",
+        "unit": "seat",
+        "unitQuantity": 1,
+        "promotion": false
+      },
+      {
+        "type": "price_quote",
+        "value": "premium annual per user",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://trello.com/pricing",
+        "plan": "Premium",
+        "currency": "USD",
+        "amount": 10,
+        "chargeAmount": 120,
+        "billingCycle": "annual",
+        "market": "unspecified",
+        "taxStatus": "unknown",
+        "unit": "seat",
+        "unitQuantity": 1,
+        "promotion": false
+      },
+      {
+        "type": "capability",
+        "value": "custom fields",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://trello.com/pricing",
+        "plan": "Standard",
+        "includedPlans": [
+          "Standard",
+          "Premium",
+          "Enterprise"
+        ]
+      },
+      {
+        "type": "capability",
+        "value": "timeline view",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://trello.com/pricing",
+        "plan": "Premium",
+        "includedPlans": [
+          "Premium",
+          "Enterprise"
+        ]
       }
     ]
   },

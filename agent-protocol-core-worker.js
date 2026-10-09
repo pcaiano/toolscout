@@ -409,6 +409,12 @@ function freeTierMatches(tool,plan){
     &&normalized===catalogNormalize(tool?.pricingDetails?.freePlanAlias)
     &&Boolean(normalized);
 }
+function verifiedPlans(claim){
+  const plan=String(claim?.plan||'').trim();
+  if(!plan)return [];
+  const extra=Array.isArray(claim?.includedPlans)&&claim.includedPlans.every(p=>typeof p==='string'&&p.length>0&&p.length<70)&&claim.includedPlans.includes(plan)?claim.includedPlans:[plan];
+  return [...new Set(extra)];
+}
 function requirementMatch(tool,requirement,{exclude=false,budget=null}={}){
   const needle=catalogNormalize(requirement).replace(/^(?:(?:must|need|needs|require|requires|support|supports|have|has|with)\s+)+/g,'');
   if(!needle)return {matched:false,strength:0,status:'not_verified'};
@@ -417,12 +423,12 @@ function requirementMatch(tool,requirement,{exclude=false,budget=null}={}){
   if(pair){
     if(budget==='free'&&!exclude&&!freeTierMatches(tool,pair.plan))
       return {matched:false,strength:0,status:'not_verified',evidence:'The named integration is documented, but its eligibility on a Free plan is not proven.'};
-    return {matched:true,strength:1,status:'verified',evidence:'Dated manufacturer-documented integration with '+integrationName+'.',verified_at:pair.verifiedAt||pair.verified_at};
+    return {matched:true,strength:1,status:'verified',evidence:'Dated manufacturer-documented integration with '+integrationName+'.',verified_at:pair.verifiedAt||pair.verified_at,plan:pair.plan||null,eligible_plans:verifiedPlans(pair)};
   }
   const claim=manufacturerClaim(tool,'capability',needle)||manufacturerClaim(tool,'integration',needle);
   if(claim){
-    if(budget==='free'&&!exclude&&!freeTierMatches(tool,claim.plan))return {matched:false,strength:0,status:claim.notAvailableOnFree===true?'conflict':'not_verified',evidence:claim.notAvailableOnFree===true?'Manufacturer confirms the capability is unavailable on Free.':'A Free-plan entitlement for this capability is not documented.',plan:claim.plan||null};
-    return {matched:true,strength:1,status:'verified',evidence:'Dated manufacturer evidence for the exact requested capability.',verified_at:claim.verifiedAt,plan:claim.plan||null};
+    if(budget==='free'&&!exclude&&!verifiedPlans(claim).some(plan=>freeTierMatches(tool,plan)))return {matched:false,strength:0,status:claim.notAvailableOnFree===true?'conflict':'not_verified',evidence:claim.notAvailableOnFree===true?'Manufacturer confirms the capability is unavailable on Free.':'A Free-plan entitlement for this capability is not documented.',plan:claim.plan||null,eligible_plans:verifiedPlans(claim)};
+    return {matched:true,strength:1,status:'verified',evidence:'Dated manufacturer evidence for the exact requested capability.',verified_at:claim.verifiedAt,plan:claim.plan||null,eligible_plans:verifiedPlans(claim)};
   }
   const declared=[tool?.category,...(Array.isArray(tool?.features)?tool.features:[])];
   const listed=declared.map(catalogNormalize).filter(Boolean).some(value=>value===needle||(' '+value+' ').includes(' '+needle+' '));
@@ -484,7 +490,8 @@ function priceCeiling(raw){
   if(annual&&monthly)return {invalid:true,reason:'The buyer request conflicts between annual and monthly commitments.'};
   if(!annualPeriod&&!monthlyPeriod&&!monthly)return {invalid:true,reason:'Specify whether the price ceiling is per month or per year.'};
   if(annualPeriod&&monthlyPeriod)return {invalid:true,reason:'Conflicting annual and monthly price ceiling periods.'};
-  const unit=/\b(?:per channel|for (?:one|1) channel)\b/.test(normalized)||/\/channel\b/.test(normalized)?'channel':null;
+  const unit=/\b(?:per channel|for (?:one|1) channel)\b/.test(normalized)||/\/channel\b/.test(normalized)?'channel':/\b(?:per user|per seat|for (?:one|1) user|for (?:one|1) seat)\b/.test(normalized)||/\/(?:user|seat)\b/.test(normalized)?'seat':null;
+  if(unit==='seat'&&/\bfor\s+[2-9][0-9]*\s+(?:users|seats)\b/.test(normalized))return {invalid:true,reason:'A per-user price is not a verified total for multiple seats.'};
   const taxInclusive=/\b(?:incl(?:uding)?\.? (?:vat|tax)|tax included|vat included|with vat|ttc)\b/.test(normalized);
   return {currency,amount,period:annualPeriod?'year':'month',billingCycle:annual?'annual':monthly?'monthly':null,unit,unitQuantity:unit?1:null,taxInclusive};
 }
@@ -507,6 +514,9 @@ function constraintEvidence(tool,constraints=[],budget=null,country=null){
         if(price.taxInclusive&&c.taxStatus!=='included')return false;
         if(c.unit==='channel'&&!(price.unit==='channel'&&price.unitQuantity===1))return false;
         if(c.unit!=='channel'&&price.unit==='channel')return false;
+        if(c.unit==='seat'&&!(price.unit==='seat'&&price.unitQuantity===1))return false;
+        if(c.unit!=='seat'&&price.unit==='seat')return false;
+        if(!price.unit&&c.unit!=='subscription')return false;
         if(budget==='free'&&!freeTierMatches(tool,c.plan))return false;
         if(!Number.isFinite(c.chargeAmount)||c.chargeAmount<0)return false;
         if(c.billingCycle==='monthly'&&Math.abs(c.chargeAmount-c.amount)>0.00001)return false;
@@ -514,11 +524,12 @@ function constraintEvidence(tool,constraints=[],budget=null,country=null){
         return true;
       });
       if(!candidates.length)return {constraint,status:'not_verified',evidence:'No matching first-party price for the requested currency, territory, tax treatment, billing commitment and unit. FX and annual prepayment are never assumed.'};
-      const affordable=candidates.filter(c=>price.period==='year'
+      const eligible=candidates.filter(c=>price.period==='year'
         ?c.billingCycle==='annual'&&c.chargeAmount<=price.amount
-        :c.amount<=price.amount).sort((a,b)=>a.amount-b.amount)[0];
+        :c.amount<=price.amount).sort((a,b)=>a.amount-b.amount);
+      const affordable=eligible[0];
       if(!affordable)return {constraint,status:'not_verified',evidence:'No published quote meets the ceiling in this billing and currency scenario; unrecorded prices are unknown.'};
-      return {constraint,status:'verified',evidence:'Manufacturer-published price for this exact currency, plan, billing commitment and unit. Applicable taxes and regional checkout totals may differ.',plan:affordable.plan,currency:affordable.currency,monthly_equivalent:affordable.amount,charge_amount:affordable.chargeAmount,billing_cycle:affordable.billingCycle,market:affordable.market,tax_status:affordable.taxStatus,unit:affordable.unit,verified_at:affordable.verifiedAt};
+      return {constraint,status:'verified',evidence:'Manufacturer-published price for this exact currency, plan, billing commitment and unit. Applicable taxes and regional checkout totals may differ.',plan:affordable.plan,currency:affordable.currency,monthly_equivalent:affordable.amount,charge_amount:affordable.chargeAmount,billing_cycle:affordable.billingCycle,market:affordable.market,tax_status:affordable.taxStatus,unit:affordable.unit,verified_at:affordable.verifiedAt,eligible_plans:[...new Set(eligible.map(c=>c.plan))],price_options:eligible.map(c=>({plan:c.plan,currency:c.currency,monthly_equivalent:c.amount,charge_amount:c.chargeAmount,billing_cycle:c.billingCycle,market:c.market,tax_status:c.taxStatus,unit:c.unit,verified_at:c.verifiedAt}))};
     }
     // Numerical requirements need matching unit, billing/usage period, scope,
     // manufacturer source and tier. "300/day" is not proof of "300/month".
@@ -543,10 +554,17 @@ function constraintEvidence(tool,constraints=[],budget=null,country=null){
         if(!period&&c.period!=='total')return false;
         return scope?c.scope===scope:!c.scope;
       });
+      const quoteCapacities=(tool?.decisionClaims||[]).filter(c=>{
+        if(c?.type!=='price_quote'||manufacturerClaim(tool,'price_quote',c.value)!==c||budget==='free')return false;
+        const u=c.usageTier;
+        return u&&u.unit===unit&&u.period===(period||'total')&&Number.isFinite(Number(u.quantity))&&u.quantity>0
+          &&!scope&&c.plan&&c.unit==='subscription';
+      }).map(c=>({quantity:c.usageTier.quantity,unit,plan:c.plan,period:c.usageTier.period,verifiedAt:c.verifiedAt,scope:null}));
+      limits.push(...quoteCapacities);
       if(!limits.length)return {constraint,status:'not_verified',evidence:'No dated manufacturer evidence for this exact volume, plan, period and scope.'};
       const suitable=limits.find(c=>Number(c.quantity)>=qty);
       return suitable
-        ?{constraint,status:'verified',evidence:'Manufacturer-documented capacity matches the requested unit, period and scope.',plan:suitable.plan,quantity:Number(suitable.quantity),unit,period:suitable.period,scope:suitable.scope||null,verified_at:suitable.verifiedAt}
+        ?{constraint,status:'verified',evidence:'Manufacturer-documented capacity matches the requested unit, period and scope.',plan:suitable.plan,quantity:Number(suitable.quantity),unit,period:suitable.period,scope:suitable.scope||null,verified_at:suitable.verifiedAt,eligible_plans:[...new Set(limits.filter(c=>Number(c.quantity)>=qty).map(c=>c.plan))]}
         :{constraint,status:'not_verified',evidence:'No documented eligible plan meets this quantity; unrecorded higher tiers remain unknown.'};
     }
     const freeIntent=/^(?:must |need |needs |require |requires |required |only )?(?:free|free plan|no cost)(?: only)?$/.test(norm);
@@ -562,12 +580,12 @@ function constraintEvidence(tool,constraints=[],budget=null,country=null){
     if(pair){
       if(budget==='free'&&!freeTierMatches(tool,pair.plan))
         return {constraint,status:'not_verified',evidence:'Integration documented, but not for this Free plan.'};
-      return {constraint,status:'verified',evidence:'Manufacturer-documented named integration.',verified_at:pair.verifiedAt||pair.verified_at};
+      return {constraint,status:'verified',evidence:'Manufacturer-documented named integration.',verified_at:pair.verifiedAt||pair.verified_at,plan:pair.plan||null,eligible_plans:verifiedPlans(pair)};
     }
     const exact=manufacturerClaim(tool,'capability',stripped)||manufacturerClaim(tool,'capability',norm)||manufacturerClaim(tool,'integration',integrationName);
     if(exact){
-      if(budget==='free'&&!freeTierMatches(tool,exact.plan))return {constraint,status:exact.notAvailableOnFree===true?'conflict':'not_verified',evidence:exact.notAvailableOnFree===true?'Manufacturer confirms the capability is unavailable on Free.':'No Free-plan entitlement recorded for this capability.',plan:exact.plan||null};
-      return {constraint,status:'verified',evidence:'Dated manufacturer documentation proves this exact capability.',verified_at:exact.verifiedAt,plan:exact.plan||null};
+      if(budget==='free'&&!verifiedPlans(exact).some(plan=>freeTierMatches(tool,plan)))return {constraint,status:exact.notAvailableOnFree===true?'conflict':'not_verified',evidence:exact.notAvailableOnFree===true?'Manufacturer confirms the capability is unavailable on Free.':'No Free-plan entitlement recorded for this capability.',plan:exact.plan||null,eligible_plans:verifiedPlans(exact)};
+      return {constraint,status:'verified',evidence:'Dated manufacturer documentation proves this exact capability.',verified_at:exact.verifiedAt,plan:exact.plan||null,eligible_plans:verifiedPlans(exact)};
     }
     if(tool?.editorialReview?.verificationStatus==='vendor_documented')
       return {constraint,status:'not_verified',evidence:'Product documentation exists, but this individual requirement and plan are not independently evidenced.'};
@@ -588,6 +606,7 @@ function hardBuyerConstraint(value){
 }
 function decisionBlockers(evaluated,args={}){
   const reasons=[];
+  if(evaluated.plan_coherence?.status==='not_verified')reasons.push('No manufacturer-documented single plan proves all mandatory buying requirements simultaneously.');
   if(evaluated.category_review_required)reasons.push('ToolScout category classification is pending review.');
   for(const req of evaluated.requirement_evidence||[])
     if(!req.matched)reasons.push('Mandatory capability lacks claim-level manufacturer evidence: '+req.requirement);
@@ -679,6 +698,25 @@ function buyerValidationPlan(tool,args,constraints,stack){
   if(!checks.length)checks.push('Run the specific workflow with representative data and verify the limits before purchase.');
   return [...new Set(checks)].slice(0,6);
 }
+function coherentBuyerPlan(must,constraints){
+  const required=[
+    ...(must||[]).map(x=>({kind:'feature',verified:x.matched===true,plans:x.eligible_plans||[]})),
+    ...(constraints||[]).filter(x=>hardBuyerConstraint(x.constraint)).map(x=>({kind:Array.isArray(x.price_options)?'price':'constraint',verified:x.status==='verified',plans:x.eligible_plans||[]}))
+  ];
+  if(required.length<2)return {status:'not_required',selected_plan:null};
+  if(required.some(x=>!x.verified))return {status:'incomplete',selected_plan:null};
+  const priced=required.some(x=>x.kind==='price');
+  const explicit=required.filter(x=>x.plans.length);
+  if(!priced&&explicit.length<2)return {status:'not_required',selected_plan:null};
+  if(priced&&explicit.length!==required.length)return {status:'not_verified',selected_plan:null,evidence:'Some required features or capacities have no verified entitlement on the priced tier.'};
+  const shared=explicit.reduce((acc,x)=>acc.filter(p=>x.plans.some(t=>catalogNormalize(t)===catalogNormalize(p))),explicit[0]?.plans||[]);
+  if(!shared.length)return {status:'not_verified',selected_plan:null,evidence:'No single manufacturer-documented plan satisfies all mandatory price, capacity and capability requirements.'};
+  const quotes=(constraints||[]).flatMap(x=>Array.isArray(x.price_options)?x.price_options:[])
+    .filter(x=>shared.some(p=>catalogNormalize(x.plan)===catalogNormalize(p)))
+    .sort((a,b)=>a.monthly_equivalent-b.monthly_equivalent);
+  const selected=quotes[0]?.plan||shared[0];
+  return {status:'verified',selected_plan:selected,evidence:'One manufacturer-documented plan satisfies the combined verified buying requirements.'};
+}
 function decisionEvaluation(tool,args){
   const job=String(args.job||args.use_case||args.q||'').trim(),hay=toolHay(tool),terms=textTerms(job);
   let relevance=0;
@@ -696,7 +734,13 @@ function decisionEvaluation(tool,args){
   const budget=budgetSignal(tool,args.budget),team=teamSignal(tool,args.team);
   const must=(args.must_have||[]).map(x=>({requirement:x,...requirementMatch(tool,x,{budget:args.budget})}));
   const avoids=(args.avoid||[]).map(x=>({requirement:x,...requirementMatch(tool,x,{exclude:true})}));
-  const constraints=constraintEvidence(tool,args.constraints||[],args.budget,args.country||null);
+  const initialConstraints=constraintEvidence(tool,args.constraints||[],args.budget,args.country||null);
+  const planCoherence=coherentBuyerPlan(must,initialConstraints);
+  const constraints=initialConstraints.map(x=>{
+    if(planCoherence.status!=='verified'||!x.price_options?.length)return x;
+    const price=x.price_options.find(p=>catalogNormalize(p.plan)===catalogNormalize(planCoherence.selected_plan));
+    return price?{...x,...price}:x;
+  });
   const mustMatched=must.filter(x=>x.matched).length;
   const avoidHits=avoids.filter(x=>x.matched).length;
   const constraintVerified=constraints.filter(x=>x.status==='verified').length;
@@ -734,6 +778,7 @@ function decisionEvaluation(tool,args){
     avoid_evidence:avoids,
     constraint_evidence:constraints,
     constraint_summary:{verified:constraintVerified,not_verified:constraintUnverified,conflicts:constraintConflicts},
+    plan_coherence:planCoherence,
     stack_fit:stack
   };
 }
