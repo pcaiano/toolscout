@@ -313,11 +313,17 @@ export async function executeCatalogGrowthTask(env,task={}){
     sourceUrl:hint?.sourceUrl||official.url,verificationUrl:official.url,
     lastVerified:new Date().toISOString().slice(0,10),
     scores:fullScores(cat,verifiedFeatures,hint?.scores),
+    decisionClaims:Array.isArray(hint?.decisionClaims)?hint.decisionClaims:[],
+    integrations:Array.isArray(hint?.integrations)?hint.integrations:[],
+    strengths:Array.isArray(hint?.strengths)?hint.strengths:[],
+    limitations:Array.isArray(hint?.limitations)?hint.limitations:[],
+    tradeoffs:Array.isArray(hint?.tradeoffs)?hint.tradeoffs:[],
+    pricingDetails:hint?.pricingDetails||{freePlanStatus:free.freePlanKnown?(free.freePlan?'verified_available':'verified_unavailable'):'unknown'},
     aiIntegration,
     rankingEligible:true,comparisonEligible:true,directOfficialCta:false,
     provenance:{mode:'verified_catalog_runtime',admittedAt:new Date().toISOString(),marketSignals:{count:Number(gap.signals||0),sources},affiliateNeutral:true,competitorContentUsedForEditorialFacts:false,reviewMethod:'first_party_verified_structured_profile_v2'}
   };
-  profile.editorialReview=clean(documentedReview.summary);
+  profile.editorialReview={...documentedReview,summary:clean(documentedReview.summary)};
   profile.editorialEvidence={sourceUrl:documentedSource,verifiedAt:new Date().toISOString().slice(0,10),verificationStatus:'vendor_documented',handsOnTested:false};
   profile.evidence=documentedEvidence;
   const quality=await auditCatalogTool(env,profile,{officialPage:official});
