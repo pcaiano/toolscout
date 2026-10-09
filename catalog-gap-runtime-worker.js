@@ -284,8 +284,8 @@ export async function executeCatalogGrowthTask(env,task={}){
   const documentedSource=documentedReview?.sourceUrl;
   const documentedEvidence=Array.isArray(hint?.evidence)?hint.evidence:[];
   const datedDocument=documentedEvidence.some(x=>x?.claimScope==='toolscout_editorial_review'&&x?.sourceUrl===documentedSource&&/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(x?.verifiedAt||''));
-  const officialHost=(()=>{try{return new URL(official.url).hostname.replace(/^www\\./,'').toLowerCase()}catch{return''}})();
-  const ownedDoc=u=>{try{const d=new URL(u);const h=d.hostname.replace(/^www\\./,'').toLowerCase();return d.protocol==='https:'&&d.pathname!=='/'&&(h===officialHost||h.endsWith('.'+officialHost))}catch{return false}};
+  const officialHost=(()=>{try{return new URL(official.url).hostname.replace(/^www\./,'').toLowerCase()}catch{return''}})();
+  const ownedDoc=u=>{try{const d=new URL(u);const h=d.hostname.replace(/^www\./,'').toLowerCase();return d.protocol==='https:'&&d.pathname!=='/'&&(h===officialHost||h.endsWith('.'+officialHost))}catch{return false}};
   const documentUrls=[...new Set(Array.isArray(documentedReview?.sourceUrls)?documentedReview.sourceUrls:[])].filter(ownedDoc);
   const datedSources=documentUrls.filter(url=>documentedEvidence.some(x=>x?.claimScope==='toolscout_editorial_review'&&x?.sourceUrl===url&&/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(x?.verifiedAt||'')));
   const decisionGrade=String(documentedReview?.summary||'').trim().length>=260&&String(documentedReview?.angle||'').trim().length>=20&&
