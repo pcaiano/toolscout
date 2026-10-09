@@ -314,7 +314,7 @@ function publicTool(tool){
       limitations:Array.isArray(tool.limitations)?tool.limitations:[],
       tradeoffs:Array.isArray(tool.tradeoffs)?tool.tradeoffs:[],
       reviewed_at:tool.editorialReview.reviewedAt||null,
-      evidence_source:tool.editorialReview.sourceUrl||null,
+      evidence_basis:tool.editorialReview.sourceUrl?'manufacturer_documentation_verified_internally':'not_documented',
       evidence_method:tool.editorialReview.method||null,
       verification_status:tool.editorialReview.verificationStatus||'editorial_vendor_documentation',
       evidence_caveat:tool.editorialReview.verificationStatus==='catalog_only'?'Editorial assessment derived from unverified catalog attributes. Confirm capabilities, plans and integrations with the vendor before relying on them.':null,
@@ -446,14 +446,31 @@ function jobIntentProfile(tools,job){
   const dimensionTerms=new Set(Object.values(DECISION_DIMENSIONS).flat().flatMap(textTerms));
   const contextTerms=new Set(['small','large','team','teams','company','business','businesses','consultancy','consulting','agency','agencies','solo','startup','startups','workflow','workflows','platform','solution','solutions']);
   const intentTerms=textTerms(job).filter(term=>!dimensionTerms.has(term)&&!contextTerms.has(term));
-  return {normalized,explicitCategories,intentTerms};
+  // Specific job families outrank incidental mentions of generic words.
+  const families=[
+    {category:'crm',pattern:/\\b(crm|customer relationship management|sales pipeline|manage leads)\\b/},
+    {category:'seo',pattern:/\\b(seo|keyword research|backlink|search engine optimization|organic search)\\b/},
+    {category:'developer',pattern:/\\b(coding|code editor|software development|devops|continuous deployment)\\b/},
+    {category:'support',pattern:/\\b(helpdesk|help desk|customer support|ticketing)\\b/},
+    {category:'social',pattern:/\\b(social media|social scheduling|social publishing)\\b/},
+    {category:'forms',pattern:/\\b(form builder|lead capture form|online forms|survey builder)\\b/},
+    {category:'analytics',pattern:/\\b(product analytics|web analytics|retention analysis|session replay)\\b/},
+    {category:'website',pattern:/\\b(website builder|build a website|site builder)\\b/},
+    {category:'ecommerce',pattern:/\\b(ecommerce|online store|shopping cart)\\b/},
+    {category:'business',pattern:/\\b(project management|task management|collaboration board)\\b/},
+    {category:'marketing',pattern:/\\b(email marketing|marketing automation|newsletter)\\b/},
+    {category:'sales',pattern:/\\b(sales prospecting|cold email|lead database)\\b/},
+    {category:'ai-research',pattern:/\\b(ai research|research assistant|source synthesis)\\b/},
+    {category:'ai-assistant',pattern:/\\b(ai assistant|general ai assistant|chatbot)\\b/}
+  ];
+  const familyMatches=families.filter(x=>x.pattern.test(normalized)).map(x=>x.category);
+  return {normalized,explicitCategories:explicitCategories.length?explicitCategories:familyMatches,intentTerms};
 }
 function matchesJobIntent(tool,profile){
-  const category=catalogNormalize(tool?.category),hay=toolHay(tool);
+  const category=catalogNormalize(tool?.category),hay=' '+toolHay(tool)+' ';
   if(profile.explicitCategories.length)return profile.explicitCategories.includes(category);
-  if(!profile.intentTerms.length)return true;
-  const matches=profile.intentTerms.filter(term=>category===term||hay.includes(term));
-  return matches.length>=1;
+  if(!profile.intentTerms.length)return false;
+  return profile.intentTerms.some(term=>category===term||hay.includes(' '+term+' '));
 }
 function stackAssessment(tool,existingTools=[]){
   const ai=aiIntegration(tool),hay=toolHay(tool),pairs=[];
@@ -462,7 +479,7 @@ function stackAssessment(tool,existingTools=[]){
     if(!n)continue;
     const pair=verifiedIntegrationPair(tool,existing);
     if(pair){
-      pairs.push({existing_tool:existing,status:'verified',evidence:'Verified named integration with '+existing+'.',source_url:pair.sourceUrl||pair.source_url,verified_at:pair.verifiedAt||pair.verified_at});
+      pairs.push({existing_tool:existing,status:'verified',evidence:'Verified named integration with '+existing+'.',verified_at:pair.verifiedAt||pair.verified_at});
       continue;
     }
     const assistant=ai.status==='verified'?(ai.assistants||[]).find(x=>catalogNormalize(x)===n):null;
@@ -483,7 +500,7 @@ function decisionEvaluation(tool,args){
     const category=catalogNormalize(tool.category);
     for(const term of terms){
       if(category===term)relevance+=10;
-      else if(hay.includes(term))relevance+=4;
+      else if((' '+hay+' ').includes(' '+term+' '))relevance+=4;
     }
   }
   for(const req of args.must_have||[])if(requirementMatch(tool,req).matched)relevance+=5;
@@ -499,7 +516,7 @@ function decisionEvaluation(tool,args){
   const constraintVerified=constraints.filter(x=>x.status==='verified').length;
   const constraintUnverified=constraints.filter(x=>x.status==='not_verified').length;
   const constraintConflicts=constraints.filter(x=>x.status==='conflict').length;
-  const raw=28+Math.min(28,relevance)+((dimAvg-5)*4)+budget.points+team.points+mustMatched*3+constraintVerified*3-constraintUnverified*6-constraintConflicts*20-avoidHits*8;
+  const raw=12+Math.min(38,relevance)+((dimAvg-5)*4)+budget.points+team.points+mustMatched*3+constraintVerified*3-constraintUnverified*7-constraintConflicts*22-avoidHits*12;
   const fit=clamp(Math.round(raw),0,95);
   const stack=stackAssessment(tool,args.existing_tools||[]);
   const advantages=[];
@@ -513,14 +530,17 @@ function decisionEvaluation(tool,args){
   for(const x of constraints.filter(x=>x.status==='conflict').slice(0,4))tradeoffs.push('constraint conflict: '+x.constraint);
   if(avoidHits)for(const x of avoids.filter(x=>x.matched).slice(0,3))tradeoffs.push('possible conflict with avoid constraint: '+x.requirement);
   if(args.budget==='free'&&!tool.freePlan)tradeoffs.push('no verified free plan in the current catalog');
-  const evidenceCount=dimScores.length+mustMatched+constraintVerified+stack.verified_pairs+(tool.lastVerified?1:0);
-  const confidence=tool.editorialReview?.verificationStatus==='catalog_only'?'limited':evidenceCount>=5?'high':evidenceCount>=3?'medium':'limited';
+  // A populated scorecard is not claim-level manufacturer documentation.
+  const primaryProof=(tool?.evidence||[]).filter(x=>x.claimScope==='toolscout_editorial_review'&&x.sourceUrl&&x.verifiedAt).length;
+  const confidence=primaryProof>=2&&stack.unknown_pairs===0?'high':primaryProof>=1?'medium':'limited';
   return {
     ...publicTool(tool),
     fit_score:fit,
     evidence_confidence:confidence,
     advantages,
-    tradeoffs,
+    tradeoffs:[...new Set([...tradeoffs,...(Array.isArray(tool.limitations)?tool.limitations:[]).filter(Boolean).slice(0,2)])],
+    decision_rationale:tool.editorialReview?.summary||null,
+    verification_basis:primaryProof?'manufacturer documentation recorded internally; fit scores are editorial estimates':'manufacturer evidence incomplete; do not interpret fit score as verification',
     requested_dimensions:dimScores,
     requirement_evidence:must,
     constraint_evidence:constraints,
@@ -537,7 +557,7 @@ function decisionCandidates(tools,args){
   });
   // 'must_have' is a hard gate. A product with unverified requirements can be
   // compared explicitly but must not appear as a qualified recommendation.
-  const qualified=(args.must_have||[]).length?relevant.filter(x=>x.requirement_evidence.every(r=>r.matched)):relevant;
+  const qualified=relevant.filter(x=>(args.must_have||[]).every(req=>x.requirement_evidence.some(r=>r.requirement===req&&r.matched))&&(args.budget!=='free'||(x.free_plan_verified&&x.free_plan===true)));
   return qualified.sort((a,b)=>b.fit_score-a.fit_score||String(a.name).localeCompare(String(b.name)));
 }
 function pairwiseTradeoffs(evaluated,dims){
@@ -607,7 +627,7 @@ async function callCatalogTool(name,args,request,env){
         budget:args.budget||null,
         team:args.team||null,
         existing_tools:args.existing_tools||[],
-        methodology:'Deterministic ToolScout catalog fit. Candidates must first match the requested job/category and satisfy all evidence-backed must-haves to appear in a qualified shortlist. Missing evidence is not a confirmed capability. Scores then combine explicit priorities, budget/team signals, must-have evidence, free-form constraint evidence and known stack evidence. Every free-form constraint is returned as verified, not_verified or conflict; missing product-specific integration evidence is never upgraded from a generic text match.',
+        methodology:'Deterministic ToolScout catalog fit. Candidates must first match the requested job/category and satisfy all evidence-backed must-haves to appear in a qualified shortlist. Missing evidence is not a confirmed capability. A free-only budget excludes products without verified free plans. Scores then combine explicit priorities, budget/team signals, must-have evidence, free-form constraint evidence and known stack evidence. Every free-form constraint is returned as verified, not_verified or conflict; missing product-specific integration evidence is never upgraded from a generic text match.',
         no_pay_to_rank:true
       },
       affiliate_disclosure:disclosure
