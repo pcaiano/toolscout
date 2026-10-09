@@ -146,3 +146,16 @@ The first-party /api/recommend endpoint is the single ranking owner for the home
 - Existing public URLs, manufacturer documentation privacy, /go/ commercial redirects, tracking, publication and route ownership remain unchanged.
 
 Regression tests: tests/toolscout-v2-finder-embed-product.test.mjs and tests/toolscout-v2-agent-protocol.test.mjs in existing CI.
+
+## Verified named integrations, expansion on 9 October 2026
+
+The current catalog retains 127 products. Eight first-party documented named integration pairs were added to four existing software entries rather than creating a new engine or admitting unsourced products.
+
+- HubSpot: Google Calendar, Outlook Calendar and Slack; first-party HubSpot guides confirm availability across HubSpot subscriptions, including Free. Calendar sync covers a primary calendar and is not an all-calendars synchronisation promise. Slack requires adequate workspace/app permissions.
+- Mailchimp: Shopify. First-party Mailchimp documentation confirms a Free or paid Mailchimp account can connect a supported online store. It does not guarantee every ecommerce feature is free or exempt Shopify charges.
+- Zapier: Airtable and Notion; first-party Zapier technical connection guides confirm the named pairs. Zapier tier entitlement and task quota are not recorded, so Free-plan compatibility remains unknown.
+- Make: Airtable and Google Sheets; first-party Make application documentation confirms these app connections. No per-tier capacity, quota, API permissions or free-tier entitlement is inferred.
+
+These source URLs exist only in private catalog evidence. Buyer-facing MCP results expose named status, date and caveat but not raw manufacturer documentation URLs. When mandatory stack fit is requested, only first-party verified named integrations can qualify. A plan-specific Free request still fails closed without that plan's entitlement. 
+
+All additions are guarded by tests/toolscout-v2-documented-integration-coverage.test.mjs in the existing ToolScout 2.0 CI, alongside preservation and browser checks.
