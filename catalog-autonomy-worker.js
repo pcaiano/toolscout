@@ -4,9 +4,10 @@ import { runWithLedger } from './engine-run-ledger.js';
 import { renderRuntimeRanking } from './catalog-runtime-ranking.js';
 import {auditCatalogTool,mapLimit,hasManufacturerDecisionClaim} from './catalog-quality-runtime.js';
 import {hydrateLegacyCatalogProfile} from './catalog-profile-hydration.js';
+import {verifyManufacturerDocuments,monitoredManufacturerDocuments} from './catalog-manufacturer-document-watch.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
-const MAX_VERIFY_PER_CYCLE=4;
+const MAX_VERIFY_PER_CYCLE=4; // every two hours: 48 tools/day, target full catalog scan <= 72 hours
 const MAX_NEWS_SOURCE_CHECKS_PER_CYCLE=4;
 const MAX_ADMIT_PER_DAY=6;
 const MAX_BASELINE_SEED_PER_CYCLE=40; // bounded migration inside the existing catalog autonomy engine
@@ -151,6 +152,14 @@ async function logEvent(env,slug,type,status,detail,evidence=null){
   await env.DB.prepare(`INSERT INTO catalog_runtime_events(event_id,tool_slug,event_type,status,detail,evidence_json,created_at) VALUES(?,?,?,?,?,?,datetime('now'))`)
     .bind(`cat_${crypto.randomUUID()}`,slug||null,type,status,safeText(detail,2000),JSON.stringify(evidence||null).slice(0,8000)).run().catch(()=>{});
 }
+// Unlike best-effort lifecycle logs, the documentation-watch baseline is
+// durable evidence. Never report it as saved if the database write fails.
+async function persistManufacturerWatchEvent(env,slug,eventType,status,detail,evidence){
+  const result=await env.DB.prepare(`INSERT INTO catalog_runtime_events(event_id,tool_slug,event_type,status,detail,evidence_json,created_at) VALUES(?,?,?,?,?,?,datetime('now'))`)
+    .bind('cat_'+crypto.randomUUID(),slug,eventType,status,safeText(detail,2000),JSON.stringify(evidence||null).slice(0,8000)).run();
+  if(result?.success===false)throw new Error('manufacturer_documentation_event_not_persisted');
+}
+
 function compileRuntimeSnapshot(stateRows=[],candidateRows=[],meta={}){
   const stateMap=new Map((stateRows||[]).map(row=>[String(row.tool_slug),row])),parsed=[];
   const baselineMirrors=new Set((candidateRows||[]).filter(row=>row.source_status==='baseline_snapshot').map(row=>String(row.tool_slug||'').toLowerCase()));
@@ -314,7 +323,7 @@ export async function verifyBatch(env){
     ...retryWarning.slice(0,MAX_WARNING_RETRIES_PER_CYCLE).map(x=>x.tool),
     ...regular.map(x=>x.tool)
   ].slice(0,MAX_VERIFY_PER_CYCLE);
-  let checked=0,healthy=0,changed=0,suppressed=0,warnings=0;
+  let checked=0,healthy=0,changed=0,suppressed=0,warnings=0,documentationChecked=0,documentationChanged=0,documentationWarnings=0,documentationBaselined=0;
   await mapLimit(chosen,2,async tool=>{
     const slug=String(tool.slug).toLowerCase(),prior=smap.get(slug)||{},verifyUrl=verificationUrl(tool),verificationSourceChanged=Boolean(prior.source_url&&prior.source_url!==verifyUrl),result=await fetchOfficial(verifyUrl),staticVerified=String(tool.lastVerified||tool.sourceCheckedOn||'');
     const staticVerifiedMs=staticVerified?Date.parse(/T/.test(staticVerified)?staticVerified:`${staticVerified}T00:00:00Z`):NaN;
@@ -324,11 +333,17 @@ export async function verifyBatch(env){
     const reviewedSinceChange=Boolean(prior.last_change_at&&prior.static_last_verified&&staticVerified&&staticVerified!==prior.static_last_verified);
     const fingerprintChanged=result.status==='ok'&&prior.fingerprint&&result.fingerprint&&result.fingerprint!==prior.fingerprint;
     const broken=result.status==='broken'?Number(prior.broken_consecutive||0)+1:0;
+    const documentation=await verifyManufacturerDocuments(env,tool,{fetchDocument:fetchOfficial,hash:sha,writeEvent:persistManufacturerWatchEvent})
+      .catch(error=>({status:'documentation_warning',checked:0,changed:false,error:safeText(error?.message||error,250)}));
+    documentationChecked+=Number(documentation.checked||0);
+    if(documentation.status==='baselined')documentationBaselined++;
+    if(documentation.status==='documentation_warning')documentationWarnings++;
+    if(documentation.changed)documentationChanged++;
     let quality=String(prior.quality_status||'unverified'),contentChanged=Number(prior.content_changed||0),lastChange=prior.last_change_at||null;
     let canonicalFingerprint=prior.fingerprint||result.fingerprint||null,pendingFingerprint=prior.pending_fingerprint||null,confirmations=Number(prior.change_confirmations||0);
     if(reviewedSinceChange){quality='healthy';contentChanged=0;lastChange=null;canonicalFingerprint=result.fingerprint||canonicalFingerprint;pendingFingerprint=null;confirmations=0}
-    if(verificationSourceChanged&&result.status==='ok'){canonicalFingerprint=result.fingerprint;pendingFingerprint=null;confirmations=0;quality='healthy';contentChanged=0;lastChange=null;healthy++}
-    else if(result.status==='ok'&&!prior.fingerprint){canonicalFingerprint=result.fingerprint;pendingFingerprint=null;confirmations=0;quality='healthy';contentChanged=0;healthy++}
+    if(verificationSourceChanged&&result.status==='ok'){canonicalFingerprint=result.fingerprint;pendingFingerprint=null;confirmations=0;quality='healthy';contentChanged=0;lastChange=null;}
+    else if(result.status==='ok'&&!prior.fingerprint){canonicalFingerprint=result.fingerprint;pendingFingerprint=null;confirmations=0;quality='healthy';contentChanged=0;}
     else if(fingerprintChanged&&!reviewedSinceChange){
       if(pendingFingerprint&&pendingFingerprint===result.fingerprint)confirmations+=1;else{pendingFingerprint=result.fingerprint;confirmations=1}
       if(confirmations>=2){
@@ -337,21 +352,29 @@ export async function verifyBatch(env){
         await logEvent(env,slug,'catalog_source_change_detected','completed','A new official-source fingerprint was reproduced on two consecutive checks. Volatile facts remain flagged until the static editorial record is re-verified.',{source_url:verifyUrl,http_status:result.httpStatus,news_candidate_id:newsCandidate?.candidate_id||null,news_materiality_score:newsCandidate?.materiality_score??null});
       }
     }else if(result.status==='ok'&&result.fingerprint===prior.fingerprint){
-      pendingFingerprint=null;confirmations=0;if(!prior.last_change_at){quality='healthy';contentChanged=0;healthy++}
+      pendingFingerprint=null;confirmations=0;if(!prior.last_change_at){quality='healthy';contentChanged=0;}
+    }
+    if(documentation.changed&&!reviewedSinceChange&&quality!=='confirmed_broken'){
+      if(quality!=='change_detected')changed++;
+      quality='change_detected';contentChanged=1;lastChange=new Date().toISOString().replace('T',' ').slice(0,19);
+    }else if(documentation.status==='documentation_warning'&&quality==='healthy'&&!lastChange){
+      // Document access failure is not proof that a product feature disappeared.
+      quality='source_warning';
     }
     if(broken>=2){quality='confirmed_broken';contentChanged=0;pendingFingerprint=null;confirmations=0;suppressed++;await logEvent(env,slug,'catalog_tool_suppressed','completed','Official source returned a confirmed 404/410 on two consecutive runtime checks.',{source_url:verifyUrl,http_status:result.httpStatus})}
     else if(result.status!=='ok'&&result.status!=='broken'){
       warnings++;
-      if(staticVerificationFresh&&!prior.last_change_at)quality='healthy';
+      if(staticVerificationFresh&&!lastChange&&documentation.status!=='documentation_warning')quality='healthy';
       else if(quality==='unverified')quality='source_warning';
     }
+    if(quality==='healthy')healthy++;
     await env.DB.prepare(`INSERT INTO catalog_runtime_state(tool_slug,source_url,source_status,http_status,final_url,fingerprint,pending_fingerprint,change_confirmations,content_changed,broken_consecutive,quality_status,static_last_verified,last_checked_at,last_change_at,updated_at)
       VALUES(?,?,?,?,?,?,?,?,?,?,?,?,datetime('now'),?,datetime('now'))
       ON CONFLICT(tool_slug) DO UPDATE SET source_url=excluded.source_url,source_status=excluded.source_status,http_status=excluded.http_status,final_url=excluded.final_url,fingerprint=COALESCE(excluded.fingerprint,catalog_runtime_state.fingerprint),pending_fingerprint=excluded.pending_fingerprint,change_confirmations=excluded.change_confirmations,content_changed=excluded.content_changed,broken_consecutive=excluded.broken_consecutive,quality_status=excluded.quality_status,static_last_verified=excluded.static_last_verified,last_checked_at=datetime('now'),last_change_at=excluded.last_change_at,updated_at=datetime('now')`)
       .bind(slug,verifyUrl,result.status,result.httpStatus,result.finalUrl,canonicalFingerprint,pendingFingerprint,confirmations,contentChanged,broken,quality,staticVerified,lastChange).run();
   });
   runtimeCache.at=0;
-  return{ok:true,checked,healthy,changed,suppressed,warnings,batch_limit:MAX_VERIFY_PER_CYCLE,warning_retry_hours:WARNING_RETRY_HOURS,max_warning_retries_per_cycle:MAX_WARNING_RETRIES_PER_CYCLE,evidence:'official_source_runtime',write_policy:'due_check_only'};
+  return{ok:true,checked,healthy,changed,suppressed,warnings,documentation_checked:documentationChecked,documentation_baselined:documentationBaselined,documentation_changed:documentationChanged,documentation_warnings:documentationWarnings,batch_limit:MAX_VERIFY_PER_CYCLE,warning_retry_hours:WARNING_RETRY_HOURS,max_warning_retries_per_cycle:MAX_WARNING_RETRIES_PER_CYCLE,evidence:'official_homepage_and_first_party_documentation',write_policy:'due_check_only'};
 }
 function validCandidate(candidate,config){
   const allowed=new Set(config?.admission?.allowedCatalogCategories||[]);
@@ -625,6 +648,7 @@ export async function publicQualityEnhancedToolResponse(response,env,slug){
   const proof=snapshot.verifiedRevisions?.has(key)&&trustedManufacturerEvidence(revision,{decisionGrade:true})&&hasManufacturerDecisionClaim(revision);
   const hydrated=proof?hydrateLegacyCatalogProfile(html,revision):null;
   if(hydrated)html=hydrated;
+  html=injectPendingReview(html,snapshot.stateMap.get(key));
   if(row?.logo_url){
     const logo=esc(row.logo_url);
     html=html.replace(/(<img class="toolLogo" src=")[^"]*(")/i,`$1${logo}$2`);
@@ -647,22 +671,26 @@ export async function publicRuntimeToolResponse(env,slug){
   // changed its source_status away from baseline_snapshot.
   const [snapshot,staticTools]=await Promise.all([runtimeSnapshot(env),assetJson(env,'/data/tools.json',[])]);
   if(snapshot.baselineMirrors?.has(key)||(Array.isArray(staticTools)&&staticTools.some(tool=>String(tool?.slug||'').toLowerCase()===key)))return null;
-  return new Response(candidatePage(candidate),{status:200,headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'public, max-age=60'}});
+  return new Response(injectPendingReview(candidatePage(candidate),state),{status:200,headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'public, max-age=60'}});
 }
 export async function publicMergedSitemap(response,env){return mergedSitemap(response,env)}
 export async function publicRuntimeRankingResponse(env,path){return renderRuntimeRanking(env,path,await mergedTools(env))}
 
 async function status(env){
   await ensureSchema(env);
-  const [states,candidates,gaps,events,newsSources,newsCandidates]=await Promise.all([
+  const [states,candidates,gaps,events,newsSources,newsCandidates,documents]=await Promise.all([
     env.DB.prepare(`SELECT COUNT(*) total,SUM(CASE WHEN quality_status='healthy' THEN 1 ELSE 0 END) healthy,SUM(CASE WHEN quality_status='change_detected' THEN 1 ELSE 0 END) changed,SUM(CASE WHEN quality_status='confirmed_broken' THEN 1 ELSE 0 END) suppressed,SUM(CASE WHEN source_status NOT IN ('ok','broken') THEN 1 ELSE 0 END) warnings,MAX(last_checked_at) last_checked_at FROM catalog_runtime_state`).first(),
     env.DB.prepare(`SELECT COUNT(*) total, SUM(CASE WHEN source_status='baseline_snapshot' THEN 1 ELSE 0 END) baseline_seeded, MAX(CASE WHEN source_status IS NULL OR source_status!='baseline_snapshot' THEN verified_at END) last_admitted_at FROM catalog_runtime_candidates WHERE status IN ('published','admitted_coverage','quality_hold')`).first(),
     env.DB.prepare(`SELECT COUNT(*) total FROM catalog_market_gaps WHERE status='research_required'`).first(),
     env.DB.prepare(`SELECT COUNT(*) n FROM catalog_runtime_events WHERE created_at>=datetime('now','-7 days')`).first(),
     env.DB.prepare(`SELECT COUNT(*) total,MAX(last_checked_at) last_checked_at FROM software_news_sources WHERE status='active'`).first(),
-    env.DB.prepare(`SELECT COUNT(*) total,MAX(updated_at) last_candidate_at FROM software_news_candidates WHERE status IN ('candidate','verified','published')`).first()
+    env.DB.prepare(`SELECT COUNT(*) total,MAX(updated_at) last_candidate_at FROM software_news_candidates WHERE status IN ('candidate','verified','published')`).first(),
+    env.DB.prepare(`SELECT COUNT(DISTINCT CASE WHEN event_type='catalog_docs_snapshot' THEN tool_slug END) baselined,COUNT(DISTINCT CASE WHEN event_type='catalog_docs_change_confirmed' AND created_at>=datetime('now','-7 days') THEN tool_slug END) changes_7d,MAX(CASE WHEN event_type='catalog_docs_snapshot' THEN created_at END) last_baseline_at FROM catalog_runtime_events WHERE event_type IN ('catalog_docs_snapshot','catalog_docs_change_confirmed')`).first()
   ]);
   const baseline=await assetJson(env,'/data/tools.json',[]);
+  const tracked=await mergedTools(env);
+  const watchable=tracked.filter(tool=>monitoredManufacturerDocuments(tool).length>0).length;
+  const multiSource=tracked.filter(tool=>monitoredManufacturerDocuments(tool).length===2).length;
   const baselineTotal=Array.isArray(baseline)?baseline.length:0;
   const snapshot=await runtimeSnapshot(env);
   const originalSlugs=new Set((Array.isArray(baseline)?baseline:[]).map(tool=>String(tool?.slug||'').toLowerCase()).filter(Boolean));
@@ -670,7 +698,7 @@ async function status(env){
   const baselinePresent=[...originalSlugs].filter(slug=>snapshot.candidateMap?.has(slug)).length;
   return{ok:true,version:'1.3',storage:{mode:'d1_primary_static_fallback',baseline_total:baselineTotal,baseline_seeded:baselineSeeded,
     baseline_present:baselinePresent,baseline_revised:Math.max(0,baselinePresent-baselineSeeded),
-    baseline_remaining:Math.max(0,baselineTotal-baselinePresent),migration_phase:snapshot.degraded?'runtime_degraded':baselinePresent>=baselineTotal&&baselineTotal>0?'all_baseline_records_in_d1':'baseline_seeding',legacy_html_preserved:true},state:{total:Number(states?.total||0),healthy:Number(states?.healthy||0),changed:Number(states?.changed||0),suppressed:Number(states?.suppressed||0),warnings:Number(states?.warnings||0),last_checked_at:states?.last_checked_at||null},runtime_candidates:Math.max(0,Number(candidates?.total||0)-baselineSeeded),last_admitted_at:candidates?.last_admitted_at||null,market_gaps:Number(gaps?.total||0),events_7d:Number(events?.n||0),whats_new:{official_sources:Number(newsSources?.total||0),last_source_check:newsSources?.last_checked_at||null,candidates:Number(newsCandidates?.total||0),last_candidate_at:newsCandidates?.last_candidate_at||null},rule:'Once admitted, runtime tools remain full catalog peers during recoverable quality holds, matching static-tool behavior. Only confirmed broken sources are suppressed. Official-source verification is required, and affiliate economics never affect catalog admission or ranking.'};
+    baseline_remaining:Math.max(0,baselineTotal-baselinePresent),migration_phase:snapshot.degraded?'runtime_degraded':baselinePresent>=baselineTotal&&baselineTotal>0?'all_baseline_records_in_d1':'baseline_seeding',legacy_html_preserved:true},state:{total:Number(states?.total||0),healthy:Number(states?.healthy||0),changed:Number(states?.changed||0),suppressed:Number(states?.suppressed||0),warnings:Number(states?.warnings||0),last_checked_at:states?.last_checked_at||null},runtime_candidates:Math.max(0,Number(candidates?.total||0)-baselineSeeded),last_admitted_at:candidates?.last_admitted_at||null,document_watch:{product_coverage:watchable,two_source_coverage:multiSource,products_baselined:Number(documents?.baselined||0),confirmed_changes_7d:Number(documents?.changes_7d||0),last_baseline_at:documents?.last_baseline_at||null,rule:'Document fingerprint checks detect source changes, not verified factual corrections. No automatic price or capability claims.'},market_gaps:Number(gaps?.total||0),events_7d:Number(events?.n||0),whats_new:{official_sources:Number(newsSources?.total||0),last_source_check:newsSources?.last_checked_at||null,candidates:Number(newsCandidates?.total||0),last_candidate_at:newsCandidates?.last_candidate_at||null},rule:'Once admitted, runtime tools remain full catalog peers during recoverable quality holds, matching static-tool behavior. Only confirmed broken sources are suppressed. Official-source verification is required, and affiliate economics never affect catalog admission or ranking.'};
 }
 
 export async function handleCatalogAutonomyRoute(request,env){

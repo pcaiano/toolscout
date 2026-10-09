@@ -65,7 +65,7 @@ export async function runGrowthScheduler(event,env,ctx,{delegate=null}={}){
     growthSupervisorDirective(env,'catalog').catch(()=>null)
   ]);
   const affiliateMaintenance=affiliateSupervisor?.config?.mode==='maintenance_only';
-  const catalogDemandLed=catalogSupervisor?.config?.mode==='demand_led_quality';
+  // Manufacturer-document integrity is mandatory even when catalog expansion is demand-led.
 
   if(trigger===TOOLSCOUT_CRONS.primaryGrowth||hourly||daily){
     scheduleTask(ctx,runWithLedger(env,{engine:'growth',mission:'self_audit',triggerName:trigger,singleFlightMinutes:20},()=>runGrowthSupervisorAudit(env)));
@@ -90,7 +90,7 @@ export async function runGrowthScheduler(event,env,ctx,{delegate=null}={}){
     if(twoHourly||prioritiesRecovery){
       scheduleTask(ctx,runWithLedger(env,{engine:'distribution',mission:'operating_priorities',triggerName:prioritiesRecovery?trigger+':recovery':trigger,singleFlightMinutes:20},()=>rebalanceDistributionPriorities(env)));
     }
-    if(sixHourly&&(!catalogDemandLed||twelveHourly)){
+    if(twoHourly){
       scheduleTask(ctx,runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:trigger,singleFlightMinutes:20},()=>verifyCatalogBatch(env)));
     }
     if(sixHourly||contentRecovery){
