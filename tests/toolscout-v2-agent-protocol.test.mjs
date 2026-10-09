@@ -413,3 +413,38 @@ test('full catalog qualification excludes disputed categories and caps confidenc
       assert.ok(!item.advantages.includes('verified catalog free plan'));
   }
 });
+
+async function testDecisionCall(name,args,catalog){
+ const env={ASSETS:{fetch:async request=>new URL(request.url).pathname==='/data/tools.json'?Response.json(catalog):new Response('',{status:404})}};
+ const body={jsonrpc:'2.0',id:208,method:'tools/call',params:{name,arguments:args,_meta:{'io.modelcontextprotocol/protocolVersion':'2026-07-28','io.modelcontextprotocol/clientInfo':{name:'quality-test',version:'1.0'}}}};
+ const response=await handleAgentProtocolRoute(
+  new Request('https://trytoolscout.org/mcp',{method:'POST',headers:{'Content-Type':'application/json','MCP-Protocol-Version':'2026-07-28','Mcp-Method':'tools/call','Mcp-Name':name},body:JSON.stringify(body)}),
+  env,{waitUntil(){}}
+ );
+ return (await response.json()).result;
+}
+
+test('MCP recommendations enforce category isolation and named free-plan proof',async()=>{
+ const catalog=JSON.parse(fs.readFileSync(new URL('../data/tools.json',import.meta.url),'utf8'));
+ const crm=await testDecisionCall('decide_software',{job:'CRM for a small consultancy',limit:5},catalog);
+ assert.ok(crm.structuredContent.shortlist.length>0);
+ assert.ok(crm.structuredContent.shortlist.every(x=>x.category==='crm'));
+ const free=await testDecisionCall('decide_software',{job:'CRM',budget:'free',limit:5},catalog);
+ assert.ok(free.structuredContent.shortlist.length>0);
+ assert.ok(free.structuredContent.shortlist.every(x=>x.free_plan_verified===true&&x.free_plan===true));
+ const coding=await testDecisionCall('decide_software',{job:'coding editor for developers',limit:5},catalog);
+ if(!coding.isError)assert.ok(coding.structuredContent.shortlist.every(x=>x.category==='developer'));
+});
+
+test('MCP gives an editorial rationale without disclosing the manufacturer source URLs',async()=>{
+ const catalog=JSON.parse(fs.readFileSync(new URL('../data/tools.json',import.meta.url),'utf8'));
+ const output=await testDecisionCall('decide_software',{job:'CRM',limit:3},catalog);
+ assert.ok(!output.isError);
+ for(const item of output.structuredContent.shortlist){
+   assert.ok(typeof item.decision_rationale==='string'&&item.decision_rationale.length>80);
+   assert.ok(['medium','high','limited'].includes(item.evidence_confidence));
+   assert.equal('evidence_source' in item.editorial_review,false);
+   assert.equal('source_url' in item.editorial_review,false);
+   assert.match(item.verification_basis,/manufacturer documentation recorded internally|manufacturer evidence incomplete/);
+ }
+});
