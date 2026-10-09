@@ -29,6 +29,10 @@ const cases=[
  ['Make Core price cannot prove undocumented integration','automation',{constraints:['under $25/month'],must_have:['Gmail']},'make',null,null]
 ];
 test('16 documented plan-coherent buyer cases cannot mix cheap prices with premium capabilities',async()=>{
+ const featureOnly=await decide('business',{must_have:['custom fields']});
+ const priceOnly=await decide('business',{constraints:['under $7/month per user']});
+ console.log('PLAN_DEBUG',JSON.stringify({feature:featureOnly.structuredContent?.shortlist?.filter(x=>x.slug==='trello'),price:priceOnly.structuredContent?.shortlist?.filter(x=>x.slug==='trello')}));
+
  assert.equal(cases.length,16);
  for(const [title,job,extra,slug,plan,amount] of cases){
   const r=await decide(job,extra);
