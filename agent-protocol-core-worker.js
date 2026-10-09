@@ -1,3 +1,4 @@
+import {businessWorkflowGuidance} from './business-workflow-intent.js';
 import base from './content-engine-intelligence-worker.js';
 
 const PROTOCOL_VERSION='2026-07-28';
@@ -43,7 +44,7 @@ function toolDefinitions(){
     {
       name:'decide_software',
       title:'Decide which software fits',
-      description:'Primary ToolScout decision tool. Turn a job, constraints, priorities, budget, team, must-haves, exclusions and existing stack into an evidence-aware shortlist with reasons, trade-offs and uncertainty. Use this instead of catalog search when the user is choosing software.',
+      description:'Primary ToolScout decision tool. Turn a specific software job into an evidence-aware shortlist with constraints and trade-offs. Broad business or industry requests receive workflow choices instead of unsupported software matches. Prefer this over catalog search for buying decisions.',
       inputSchema:{
         type:'object',additionalProperties:false,required:['job'],
         properties:{
@@ -878,6 +879,18 @@ async function callCatalogTool(name,args,request,env){
   try{tools=await loadCatalog(request,env)}catch{return {error:'ToolScout catalog is temporarily unavailable.',status:503}}
   const disclosure='ToolScout may earn a commission from some outbound links. Affiliate relationships do not influence ranking, shortlist order, comparison conclusions or factual output.';
   if(name==='decide_software'){
+    const guidance=businessWorkflowGuidance(args.job);
+    if(guidance)return {data:{
+      job:args.job,shortlist:[],decision_status:'needs_workflow_selection',
+      workflow_guidance:guidance,
+      decision_basis:{
+        must_have:args.must_have||[],constraints:args.constraints||[],
+        existing_tools:args.existing_tools||[],
+        methodology:'This request describes an industry or whole business, not one verifiable software job. ToolScout separates workflows before ranking. It has no manufacturer-verified vacation-rental PMS in the current catalog; adjacent tools are not presented as end-to-end property managers.',
+        no_pay_to_rank:true
+      },
+      affiliate_disclosure:disclosure
+    }};
     const limit=Math.max(2,Math.min(5,args.limit||3));
     const shortlist=decisionCandidates(tools,args).filter(x=>x.fit_score>0).slice(0,limit);
     if(!shortlist.length)return {error:'ToolScout cannot qualify a recommendation with the current catalog evidence and mandatory criteria. Unverified requirements are not treated as satisfied.',status:422,data:{job:args.job,shortlist:[],decision_status:'no_qualified_candidate'}};
