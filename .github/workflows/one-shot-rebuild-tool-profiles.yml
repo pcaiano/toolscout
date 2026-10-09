@@ -1,0 +1,46 @@
+name: One-shot source profile parity
+on:
+  push:
+    branches:
+      - fix/raw-profile-credibility-20261009
+    paths:
+      - .github/workflows/one-shot-rebuild-tool-profiles.yml
+permissions:
+  contents: write
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Regenerate 127 profiles from the existing approved generator
+        run: node scripts/generate-tool-pages.mjs
+      - name: Confirm raw pages do not expose vendor documentation or Profile H1s
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const tools=JSON.parse(fs.readFileSync('data/tools.json','utf8'));
+          for(const item of tools){
+            const html=fs.readFileSync('tools/'+item.slug+'.html','utf8');
+            if(/<h1>[^<]* profile<\/h1>/i.test(html)||/AI integration evidence:/i.test(html)||/<a\b[^>]*href=["']https?:\/\//i.test(html)){
+              throw Error('Public source profile evidence leak or outdated H1: '+item.slug);
+            }
+          }
+          console.log('Validated '+tools.length+' source profiles');
+          NODE
+      - name: Commit regenerated static pages to this temporary branch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tools/
+          if git diff --cached --quiet; then
+            echo 'No source changes necessary'
+          else
+            git commit -m 'Regenerate ToolScout profile sources without public manufacturer citations'
+            git push origin HEAD:fix/raw-profile-credibility-20261009
+          fi
