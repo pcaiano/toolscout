@@ -13,7 +13,7 @@ test('every future tool requires a dated first-party manufacturer source',()=>{
  assert.equal(pending.length,0);
  assert.deepEqual(vendorEvidenceIssues(catalog,pending),[]);
  const legacyWithoutStatus={...catalog.find(t=>t.slug==='hubspot'),editorialReview:{...catalog.find(t=>t.slug==='hubspot').editorialReview,verificationStatus:undefined}};
- assert.match(vendorEvidenceIssues(catalog.map(t=>t.slug==='hubspot'?legacyWithoutStatus:t),pending).join(' '),/Manufacturer documentation required: hubspot/);
+ assert.match(vendorEvidenceIssues(catalog.map(t=>t.slug==='hubspot'?legacyWithoutStatus:t),pending).join(' '),/Manufacturer documentation required before catalog inclusion: hubspot/);
  const allExplicit=catalog.filter(t=>t.editorialReview?.verificationStatus==='vendor_documented');
  assert.equal(allExplicit.length,catalog.length,'Every profile must carry explicit manufacturer provenance status');
  const invented={...catalog[0],slug:'unsourced-new-software',editorialReview:{summary:'Unsupported',verificationStatus:'catalog_only',sourceUrl:null},evidence:[]};
