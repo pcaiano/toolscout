@@ -400,13 +400,16 @@ function manufacturerClaim(tool,kind,value){
   }
   return null;
 }
-function requirementMatch(tool,requirement,{exclude=false}={}){
+function requirementMatch(tool,requirement,{exclude=false,budget=null}={}){
   const needle=catalogNormalize(requirement).replace(/^(?:(?:must|need|needs|require|requires|support|supports|have|has|with)\s+)+/g,'');
   if(!needle)return {matched:false,strength:0,status:'not_verified'};
   const pair=verifiedIntegrationPair(tool,needle);
   if(pair)return {matched:true,strength:1,status:'verified',evidence:'Dated manufacturer-documented integration with '+needle+'.',verified_at:pair.verifiedAt||pair.verified_at};
   const claim=manufacturerClaim(tool,'capability',needle)||manufacturerClaim(tool,'integration',needle);
-  if(claim)return {matched:true,strength:1,status:'verified',evidence:'Dated manufacturer evidence for the exact requested capability.',verified_at:claim.verifiedAt,plan:claim.plan||null};
+  if(claim){
+    if(budget==='free'&&claim.plan&&catalogNormalize(claim.plan)!=='free')return {matched:false,strength:0,status:'conflict',evidence:'This capability is documented only for a non-free tier.',plan:claim.plan};
+    return {matched:true,strength:1,status:'verified',evidence:'Dated manufacturer evidence for the exact requested capability.',verified_at:claim.verifiedAt,plan:claim.plan||null};
+  }
   const declared=[tool?.category,...(Array.isArray(tool?.features)?tool.features:[])];
   const listed=declared.map(catalogNormalize).filter(Boolean).some(value=>value===needle||(' '+value+' ').includes(' '+needle+' '));
   if(!listed)return {matched:false,strength:0,status:'not_verified'};
@@ -450,7 +453,7 @@ function explicitTextMatch(tool,value){
   ].map(catalogNormalize).filter(Boolean);
   return fields.some(field=>field===needle||field.includes(' '+needle+' ')||field.startsWith(needle+' ')||field.endsWith(' '+needle));
 }
-function constraintEvidence(tool,constraints=[]){
+function constraintEvidence(tool,constraints=[],budget=null){
   return (constraints||[]).map(raw=>{
     const constraint=String(raw||'').trim(),norm=catalogNormalize(constraint);
     if(!norm)return {constraint,status:'not_verified',evidence:'Empty constraint cannot be evaluated.'};
@@ -485,7 +488,10 @@ function constraintEvidence(tool,constraints=[]){
     }
     const stripped=norm.replace(/\b(?:must|needs?|need|requires?|require|required|support|supports|with|only|be|have|has)\b/g,' ').replace(/\s+/g,' ').trim();
     const exact=manufacturerClaim(tool,'capability',stripped)||manufacturerClaim(tool,'capability',norm);
-    if(exact)return {constraint,status:'verified',evidence:'Dated manufacturer documentation proves this exact capability.',verified_at:exact.verifiedAt,plan:exact.plan||null};
+    if(exact){
+      if(budget==='free'&&exact.plan&&catalogNormalize(exact.plan)!=='free')return {constraint,status:'conflict',evidence:'This capability is documented only for a paid tier.',plan:exact.plan};
+      return {constraint,status:'verified',evidence:'Dated manufacturer documentation proves this exact capability.',verified_at:exact.verifiedAt,plan:exact.plan||null};
+    }
     if(tool?.editorialReview?.verificationStatus==='vendor_documented')
       return {constraint,status:'not_verified',evidence:'Product documentation exists, but this individual requirement and plan are not independently evidenced.'};
     const legacy=explicitTextMatch(tool,norm)||(stripped&&explicitTextMatch(tool,stripped));
@@ -604,14 +610,14 @@ function decisionEvaluation(tool,args){
       else if((' '+hay+' ').includes(' '+term+' '))relevance+=4;
     }
   }
-  for(const req of args.must_have||[])if(requirementMatch(tool,req).matched)relevance+=5;
+  for(const req of args.must_have||[])if(requirementMatch(tool,req,{budget:args.budget}).matched)relevance+=5;
   const dims=requestedDimensions(args);
   const dimScores=dims.map(key=>({dimension:key,score:scoreOf(tool,key)})).filter(x=>x.score!=null);
   const dimAvg=dimScores.length?dimScores.reduce((s,x)=>s+x.score,0)/dimScores.length:5;
   const budget=budgetSignal(tool,args.budget),team=teamSignal(tool,args.team);
-  const must=(args.must_have||[]).map(x=>({requirement:x,...requirementMatch(tool,x)}));
+  const must=(args.must_have||[]).map(x=>({requirement:x,...requirementMatch(tool,x,{budget:args.budget})}));
   const avoids=(args.avoid||[]).map(x=>({requirement:x,...requirementMatch(tool,x,{exclude:true})}));
-  const constraints=constraintEvidence(tool,args.constraints||[]);
+  const constraints=constraintEvidence(tool,args.constraints||[],args.budget);
   const mustMatched=must.filter(x=>x.matched).length;
   const avoidHits=avoids.filter(x=>x.matched).length;
   const constraintVerified=constraints.filter(x=>x.status==='verified').length;
