@@ -148,6 +148,7 @@ on:
       - '.github/workflows/deploy-worker.yml'
       - 'scripts/verify-v2-live-smoke.mjs'
       - 'scripts/probe-v2-operational-health.mjs'
+      - 'scripts/probe-live-mcp-decision.mjs'
   workflow_dispatch:
 
 permissions:
