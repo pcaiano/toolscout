@@ -322,6 +322,30 @@
         "sourceUrl": "https://ecosystem.hubspot.com/marketplace/apps/gmail",
         "verifiedAt": "2026-10-08",
         "scope": "HubSpot-certified Gmail app supports logging and tracking email from the Gmail inbox; availability depends on the connected account and plan."
+      },
+      {
+        "product": "Google Calendar",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://knowledge.hubspot.com/integrations/use-hubspots-integration-with-google-calendar-or-outlook-calendar",
+        "scope": "Official HubSpot calendar sync, primary calendar only; source lists all HubSpot plans.",
+        "plan": "Free"
+      },
+      {
+        "product": "Outlook Calendar",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://knowledge.hubspot.com/integrations/use-hubspots-integration-with-google-calendar-or-outlook-calendar",
+        "scope": "Official HubSpot calendar sync, primary calendar only; source lists all HubSpot plans.",
+        "plan": "Free"
+      },
+      {
+        "product": "Slack",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://knowledge.hubspot.com/integrations/how-do-i-use-the-slack-integration?dsktp=1",
+        "scope": "HubSpot-managed Slack app; administrator access and compatible Slack workspace required; source lists all HubSpot plans.",
+        "plan": "Free"
       }
     ],
     "freePlanKnown": true,
@@ -1405,6 +1429,16 @@
         "verifiedAt": "2026-10-09",
         "sourceUrl": "https://mailchimp.com/help/about-mailchimp-pricing-plans/"
       }
+    ],
+    "integrations": [
+      {
+        "product": "Shopify",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://mailchimp.com/help/connect-your-online-store-to-mailchimp/",
+        "scope": "Mailchimp documentation confirms free or paid Mailchimp account can connect supported ecommerce store; individual marketing features and Shopify costs vary.",
+        "plan": "Free"
+      }
     ]
   },
   {
@@ -1467,6 +1501,20 @@
         "sourceUrl": "https://help.zapier.com/hc/en-us/articles/8495919882253-How-to-get-started-with-HubSpot-on-Zapier",
         "verifiedAt": "2026-10-08",
         "scope": "Zapier HubSpot app provides supported triggers, searches and actions; connection requires appropriate HubSpot permissions."
+      },
+      {
+        "product": "Airtable",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://help.zapier.com/hc/en-us/articles/8495995404173-How-to-get-started-with-Airtable-on-Zapier",
+        "scope": "Zapier Airtable record triggers and actions; entitlement per Zapier tier not established."
+      },
+      {
+        "product": "Notion",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://help.zapier.com/hc/en-us/articles/8496102470541-How-to-get-started-with-Notion-on-Zapier",
+        "scope": "Zapier Notion database/page workflows; permissions and plan-specific access must be checked."
       }
     ],
     "strengths": [
@@ -1661,6 +1709,20 @@
         "sourceUrl": "https://apps.make.com/hubspotcrm",
         "verifiedAt": "2026-10-08",
         "scope": "Make HubSpot CRM app supports CRM record, contact, event and workflow modules; a HubSpot Super Admin must pre-approve the app."
+      },
+      {
+        "product": "Airtable",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://apps.make.com/airtable",
+        "scope": "Make Airtable module connection via OAuth or token; plan/operation entitlement not verified."
+      },
+      {
+        "product": "Google Sheets",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://apps.make.com/google-sheets",
+        "scope": "Make Google Sheets module connection; plan/API quotas and account restrictions not verified."
       }
     ],
     "freePlanKnown": true,
