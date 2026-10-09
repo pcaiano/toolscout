@@ -104,7 +104,7 @@ test('MCP decide_software does not recommend tools without evidence for mandator
   const shortlist=payload.result.structuredContent.shortlist;
   assert.equal(payload.result.isError,true);
   assert.deepEqual(payload.result.structuredContent.shortlist,[]);
-  assert.match(payload.result.content[0].text,/could not find enough catalog evidence/i);
+  assert.match(payload.result.content[0].text,/cannot qualify a recommendation with the current catalog evidence/i);
 });
 
 test('MCP stack fit never treats incidental text such as sales teams as Microsoft Teams evidence',async()=>{
@@ -129,7 +129,7 @@ test('MCP free-form constraints are evaluated and surfaced as verified, not_veri
     {slug:'crm-cloud',name:'CRM Cloud',category:'crm',description:'Cloud CRM for sales teams.',pricing:'Paid plans',freePlan:false,freePlanKnown:true,features:['crm','automation'],bestFor:['sales teams'],lastVerified:'2026-10-08',scores:{price:6,ease:8,automation:8,integrations:7,sales:8}}
   ];
   const env={ASSETS:{fetch:async request=>new URL(request.url).pathname==='/data/tools.json'?Response.json(catalog):new Response('',{status:404})}};
-  const body={jsonrpc:'2.0',id:26,method:'tools/call',params:{name:'decide_software',arguments:{job:'CRM',constraints:['must support Linux','free plan'],limit:2},_meta:{'io.modelcontextprotocol/protocolVersion':'2026-07-28','io.modelcontextprotocol/clientInfo':{name:'test-client',version:'1.0'}}}};
+  const body={jsonrpc:'2.0',id:26,method:'tools/call',params:{name:'decide_software',arguments:{job:'CRM',constraints:['Linux','free plan'],limit:2},_meta:{'io.modelcontextprotocol/protocolVersion':'2026-07-28','io.modelcontextprotocol/clientInfo':{name:'test-client',version:'1.0'}}}};
   const response=await handleAgentProtocolRoute(
     new Request('https://trytoolscout.org/mcp',{method:'POST',headers:{'Content-Type':'application/json','MCP-Protocol-Version':'2026-07-28','Mcp-Method':'tools/call','Mcp-Name':'decide_software'},body:JSON.stringify(body)}),
     env,{waitUntil(){}}

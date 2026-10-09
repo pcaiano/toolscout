@@ -437,6 +437,30 @@ function constraintEvidence(tool,constraints=[]){
     return {constraint,status:'not_verified',evidence:'ToolScout does not currently store explicit evidence that this product satisfies the requirement.'};
   });
 }
+// A high fit score cannot overrule a mandatory buyer requirement.
+// Soft preferences remain ranked trade-offs. Requirements marked "must",
+// "required", "only", "no" or "without" are exclusionary when not evidenced.
+function hardBuyerConstraint(value){
+  return /^(?:must\b|mandatory\b|required\b|require\b|requires\b|only\b|no\b|without\b|cannot\b|need\s+to\b|needs\s+to\b|has\s+to\b|have\s+to\b)/.test(catalogNormalize(value));
+}
+function decisionBlockers(evaluated,args={}){
+  const reasons=[];
+  if(evaluated.category_review_required)reasons.push('ToolScout category classification is pending review.');
+  for(const req of evaluated.requirement_evidence||[])
+    if(!req.matched)reasons.push('Mandatory capability not substantiated in the current catalog: '+req.requirement);
+  if(args.budget==='free'&&!(evaluated.free_plan_verified&&evaluated.free_plan))
+    reasons.push('A documented free plan is required but not confirmed.');
+  for(const c of evaluated.constraint_evidence||[])
+    if(hardBuyerConstraint(c.constraint)&&c.status!=='verified')
+      reasons.push('Mandatory constraint cannot be confirmed: '+c.constraint+' ('+c.status+').');
+  for(const avoid of evaluated.avoid_evidence||[])
+    if(avoid.matched)reasons.push('Matches an expressly excluded capability: '+avoid.requirement);
+  return [...new Set(reasons)];
+}
+function qualifyDecision(evaluated,args){
+  const blocking_reasons=decisionBlockers(evaluated,args);
+  return {...evaluated,qualified_for_use_case:blocking_reasons.length===0,blocking_reasons};
+}
 function jobIntentProfile(tools,job){
   const normalized=catalogNormalize(job),categories=[...new Set(tools.map(t=>catalogNormalize(t?.category)).filter(Boolean))];
   const explicitCategories=categories.filter(cat=>{
@@ -543,13 +567,14 @@ function decisionEvaluation(tool,args){
     verification_basis:primaryProof?'manufacturer documentation recorded internally; fit scores are editorial estimates':'manufacturer evidence incomplete; do not interpret fit score as verification',
     requested_dimensions:dimScores,
     requirement_evidence:must,
+    avoid_evidence:avoids,
     constraint_evidence:constraints,
     constraint_summary:{verified:constraintVerified,not_verified:constraintUnverified,conflicts:constraintConflicts},
     stack_fit:stack
   };
 }
 function decisionCandidates(tools,args){
-  const evaluated=tools.map(t=>decisionEvaluation(t,args));
+  const evaluated=tools.map(t=>qualifyDecision(decisionEvaluation(t,args),args));
   const profile=jobIntentProfile(tools,args.job||args.use_case||'');
   const relevant=evaluated.filter(x=>{
     const source=tools.find(t=>t.slug===x.slug);
@@ -557,7 +582,7 @@ function decisionCandidates(tools,args){
   });
   // 'must_have' is a hard gate. A product with unverified requirements can be
   // compared explicitly but must not appear as a qualified recommendation.
-  const qualified=relevant.filter(x=>(args.must_have||[]).every(req=>x.requirement_evidence.some(r=>r.requirement===req&&r.matched))&&(args.budget!=='free'||(x.free_plan_verified&&x.free_plan===true)));
+  const qualified=relevant.filter(x=>x.qualified_for_use_case);
   return qualified.sort((a,b)=>b.fit_score-a.fit_score||String(a.name).localeCompare(String(b.name)));
 }
 function pairwiseTradeoffs(evaluated,dims){
@@ -614,7 +639,7 @@ async function callCatalogTool(name,args,request,env){
   if(name==='decide_software'){
     const limit=Math.max(2,Math.min(5,args.limit||3));
     const shortlist=decisionCandidates(tools,args).filter(x=>x.fit_score>0).slice(0,limit);
-    if(!shortlist.length)return {error:'ToolScout could not find enough catalog evidence for this software decision. Add a more concrete job, category or must-have constraint.',status:422,data:{job:args.job,shortlist:[]}};
+    if(!shortlist.length)return {error:'ToolScout cannot qualify a recommendation with the current catalog evidence and mandatory criteria. Unverified requirements are not treated as satisfied.',status:422,data:{job:args.job,shortlist:[],decision_status:'no_qualified_candidate'}};
     const dims=requestedDimensions(args);
     return {data:{
       job:args.job,
@@ -622,6 +647,7 @@ async function callCatalogTool(name,args,request,env){
       decision_basis:{
         dimensions:dims,
         constraints:args.constraints||[],
+        hard_constraints:(args.constraints||[]).filter(hardBuyerConstraint),
         must_have:args.must_have||[],
         avoid:args.avoid||[],
         budget:args.budget||null,
@@ -638,13 +664,14 @@ async function callCatalogTool(name,args,request,env){
     for(const value of args.tools){const tool=findCatalogTool(tools,value);if(tool)found.push(tool);else missing.push(value)}
     if(found.length<2)return {error:'At least two requested tools must exist in the ToolScout catalog.',status:404,data:{missing}};
     const evalArgs={job:args.use_case,use_case:args.use_case,must_have:args.must_have||[],budget:args.budget,team:args.team,priorities:args.priorities||[],existing_tools:args.existing_tools||[]};
-    const evaluated=found.map(t=>decisionEvaluation(t,evalArgs)).sort((a,b)=>b.fit_score-a.fit_score);
-    const dims=requestedDimensions(evalArgs),gap=evaluated[0].fit_score-evaluated[1].fit_score;
+    const evaluated=found.map(t=>qualifyDecision(decisionEvaluation(t,evalArgs),evalArgs)).sort((a,b)=>Number(b.qualified_for_use_case)-Number(a.qualified_for_use_case)||b.fit_score-a.fit_score);
+    const qualified=evaluated.filter(x=>x.qualified_for_use_case);
+    const dims=requestedDimensions(evalArgs),gap=qualified.length>=2?qualified[0].fit_score-qualified[1].fit_score:null;
     const priceRank=[...evaluated].filter(x=>scoreOf(found.find(t=>t.slug===x.slug),'price')!=null)
       .sort((a,b)=>(scoreOf(found.find(t=>t.slug===b.slug),'price')||0)-(scoreOf(found.find(t=>t.slug===a.slug),'price')||0));
     const affordable=priceRank[0]||null;
-    const leader=evaluated[0];
-    const losses=affordable?dims.filter(d=>d!=='price').map(d=>{
+    const leader=qualified[0]||null;
+    const losses=affordable&&leader?dims.filter(d=>d!=='price').map(d=>{
       const at=found.find(t=>t.slug===affordable.slug),lt=found.find(t=>t.slug===leader.slug);
       const av=scoreOf(at,d),lv=scoreOf(lt,d);
       return av!=null&&lv!=null&&lv-av>=2?{dimension:d,affordability_leader:av,best_fit_leader:lv,gap:lv-av}:null;
@@ -653,9 +680,9 @@ async function callCatalogTool(name,args,request,env){
       use_case:args.use_case,
       tools:evaluated,
       missing,
-      verdict:gap>=4?{type:'best_fit',tool:leader.name,reason:'Highest evidence-weighted fit for the supplied use case and constraints.',score_gap:gap}:{type:'close_call',tools:evaluated.slice(0,2).map(x=>x.name),reason:'The leading fit scores are close; the decision should follow the explicit trade-offs rather than a forced winner.',score_gap:gap},
+      verdict:!leader?{type:'no_qualified_winner',reason:'None of the compared products has catalog evidence satisfying every mandatory criterion; a fit score alone cannot establish suitability.',score_gap:null}:qualified.length===1?{type:'best_fit',tool:leader.name,reason:'Only compared product with evidence satisfying the supplied mandatory criteria. Check its disclosed limitations before purchasing.',score_gap:null}:gap>=4?{type:'best_fit',tool:leader.name,reason:'Highest editorial fit among products satisfying the supplied mandatory criteria.',score_gap:gap}:{type:'close_call',tools:qualified.slice(0,2).map(x=>x.name),reason:'Qualified fit scores are close; decide using the explicit trade-offs rather than a forced winner.',score_gap:gap},
       tradeoffs:pairwiseTradeoffs(evaluated,dims),
-      cheaper_option_analysis:affordable?{affordability_leader:affordable.name,pricing_signal:affordable.pricing,note:'Affordability is inferred from ToolScout price score and catalog pricing text, not a live quote.',what_you_may_lose_vs_best_fit:losses}: {note:'No comparable affordability score is available.'},
+      cheaper_option_analysis:affordable?{affordability_leader:affordable.name,qualified_for_use_case:affordable.qualified_for_use_case,blocking_reasons:affordable.blocking_reasons,pricing_signal:affordable.pricing,note:'Affordability is inferred from ToolScout price score and catalog pricing text, not a live quote. A cheaper option that fails mandatory requirements is not a recommended substitute.',what_you_may_lose_vs_best_fit:losses}: {note:'No comparable affordability score is available.'},
       affiliate_disclosure:disclosure
     }};
   }
@@ -665,7 +692,8 @@ async function callCatalogTool(name,args,request,env){
     const dims=requestedDimensions({dislike:args.dislike});
     const sourceEval=decisionEvaluation(source,{job:source.category,priorities:dims,must_have:args.must_have||[],budget:args.budget,existing_tools:args.existing_tools||[]});
     const candidates=tools.filter(t=>t.slug!==source.slug&&catalogNormalize(t.category)===catalogNormalize(source.category)).map(t=>{
-      const ev=decisionEvaluation(t,{job:source.category,priorities:dims,must_have:args.must_have||[],budget:args.budget,existing_tools:args.existing_tools||[]});
+      const altArgs={job:source.category,priorities:dims,must_have:args.must_have||[],budget:args.budget,existing_tools:args.existing_tools||[]};
+      const ev=qualifyDecision(decisionEvaluation(t,altArgs),altArgs);
       const improvements=[],sacrifices=[];
       for(const d of [...new Set([...dims,'price','ease','automation','integrations'])]){
         const ss=scoreOf(source,d),cs=scoreOf(t,d);if(ss==null||cs==null)continue;
@@ -674,7 +702,7 @@ async function callCatalogTool(name,args,request,env){
       }
       const reasonLift=improvements.filter(x=>dims.includes(x.dimension)).reduce((s,x)=>s+x.to-x.from,0);
       return {...ev,improvements_over_source:improvements,tradeoffs_vs_source:sacrifices,alternative_score:ev.fit_score+reasonLift*4};
-    }).filter(x=>(!args.must_have?.length||x.requirement_evidence.every(r=>r.matched))&&(x.improvements_over_source.some(y=>dims.includes(y.dimension))||!dims.length)).sort((a,b)=>b.alternative_score-a.alternative_score).slice(0,Math.max(1,Math.min(5,args.limit||3)));
+    }).filter(x=>x.qualified_for_use_case&&(x.improvements_over_source.some(y=>dims.includes(y.dimension))||!dims.length)).sort((a,b)=>b.alternative_score-a.alternative_score).slice(0,Math.max(1,Math.min(5,args.limit||3)));
     return {data:{source:publicTool(source),reason:args.dislike,decision_dimensions:dims,alternatives:candidates,affiliate_disclosure:disclosure}};
   }
   if(name==='check_stack_fit'){
