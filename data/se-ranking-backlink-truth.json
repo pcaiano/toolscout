@@ -3,16 +3,16 @@
   "source": "SE Ranking Data API",
   "target": "trytoolscout.org",
   "mode": "domain",
-  "observedAt": "2026-10-08T07:38:36.384Z",
+  "observedAt": "2026-10-09T08:06:23.955Z",
   "freshnessHours": 48,
   "metrics": {
-    "backlinks": 95,
-    "referringDomains": 29,
-    "subnets": 24,
-    "ips": 24,
-    "dofollowBacklinks": 14,
+    "backlinks": 97,
+    "referringDomains": 31,
+    "subnets": 25,
+    "ips": 25,
+    "dofollowBacklinks": 16,
     "nofollowBacklinks": 81,
-    "dofollowReferringDomains": 11,
+    "dofollowReferringDomains": 13,
     "eduBacklinks": 0,
     "govBacklinks": 0,
     "pageInlinkRank": 1,
@@ -250,5 +250,7 @@
     "startDomainAuthority": 1,
     "currentDomainAuthority": 2,
     "firstObservedAtCurrentValue": "2026-09-22"
-  }
+  },
+  "referringDomainsSnapshotObservedAt": "2026-10-08T07:38:36.384Z",
+  "referringDomainsSnapshotStatus": "historical_not_refreshed"
 }
