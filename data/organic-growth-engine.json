@@ -399,9 +399,9 @@
       "mixpanel": "Mixpanel's own funnel-analysis guidance explains how a sequence of user events reveals where visitors drop out before conversion, with segment-level comparisons supporting investigation. This can guide teams optimizing onboarding, checkout or product activation. The significant constraint is instrumentation: missed events, incorrect identities and inconsistent step definitions can make funnel metrics misleading. The value of Mixpanel therefore depends on reliable data governance and experiments that follow from observed problems, not the number of reporting views. Compare investigation speed against analytics maintenance overhead.",
       "freshdesk": "Freshdesk documents automation rules that classify and route newly created support tickets. This helps support teams distribute repetitive requests without manually opening every message. The trade-off is correct classification: a loosely defined subject condition can wrongly prioritize or assign a sensitive issue. Product versions, permissions and plan rights also warrant checking. Test a representative ticket mix and urgent fallback, not simply whether a rule can be created.",
       "framer": "Framer documents adding locales, choosing region fallbacks and providing manual or AI translation. This can accelerate multilingual campaign sites when the same design must reach several markets. The constraint is upkeep: each additional locale can demand translated calls to action, quality checks and accurate metadata, not just a language toggle. Evaluate the publishing workflow and the team's localization capacity before buying on visual polish.",
-      "perplexity": "Perplexity's documentation describes Spaces as collaborative topic hubs with research threads and optional uploaded file search. That is useful for organizing recurring investigations rather than collecting unrelated answers. However, source citations still require checking against originals, and file-search eligibility and collaboration vary by subscription. A research assistant should not be confused with a verified system of record or transaction platform. Test the tool using factual questions with known reference answers and the privacy controls required by the team.",
+      "perplexity": "Perplexity now describes its former Spaces as Projects, shared workspaces that bring together files, connected applications, conversations and ongoing tasks. This changes the comparison with a simple answer engine: teams can retain context across repeated research instead of collecting isolated search threads. But cited answers still require inspection against their actual sources, and workspace files and collaboration permissions must be governed deliberately. Subscription entitlements and retained knowledge can also change. Choose it based on verified research quality and manageable project access, not one convincing search result.",
       "slack": "Slack's documentation covers canvases and lists with separate view, comment and edit permissions. Combined with workflow capabilities, this makes it useful for coordinating requests and keeping teams informed. The trade-off is knowledge governance: busy channels alone do not make decisions easy to retrieve, and external collaborators should not receive broader access than intended. Some automation features require paid plans. Compare collaboration speed with retention, search quality and permissions in the real workplace.",
-      "cursor": "Cursor documents repository-scoped project rules that guide its AI assistant and separate account privacy settings. Those are relevant to development teams who need generated changes to follow existing project conventions. The risk is mistaking fast code generation for a safely reviewed modification. Regression tests, diff inspection and secure secret handling remain necessary, and teams must understand what data can be processed. Compare completed, reviewed changes against the existing editor rather than lines generated.",
+      "cursor": "Cursor's current manufacturer documentation explains version-controlled Project Rules stored in .cursor/rules, alongside user rules and organization-level options. These controls let a development team encode coding conventions and repeatable workflows without restating them for every agent request. Yet applying a rule is not evidence that generated code is correct, secure or maintainable; branch reviews, automated tests and privacy decisions remain essential. Judge the product by regression-free work accepted into the codebase, and verify that the team can audit which instructions guided each change.",
       "shopify": "Shopify's documentation covers capture of payments, order edits, fulfilment, refunds and returns from its store administration. That breadth supports merchants who need a single order operating workflow rather than only a storefront builder. The full cost may depend on payment providers, shipping, sales channels and additional applications. Compare the real path from checkout to delivery and exception resolution; an attractive theme and headline subscription tell only part of the story.",
       "loom": "Loom's first-party support documentation under Atlassian describes recording-sharing options with different viewer permissions. Short videos can reduce recurring explanatory meetings, particularly for internal demonstrations and handovers. The risk is treating a shareable URL as an acceptable access policy for client or internal information. Searchability, permission changes and viewer access need review when content outlives the initial discussion. Compare whether a recipient can actually discover and use a recording safely.",
       "miro": "Miro documents different board privacy capabilities between Free and paid plans. In Free teams, boards can be visible to teammates without individual invitations, while private boards need eligible plans. This matters for strategy sessions and client work where drafts may be confidential. A useful whiteboard is not necessarily an appropriate permanent records store. Compare participant rights and data retention before inviting external organizations.",
@@ -911,10 +911,10 @@
         "handsOnTested": false
       },
       "perplexity": {
-        "angle": "Cited research needs verification and collaboration controls",
-        "buyerCheck": "Audit five answers against sources and test collaborators' file visibility.",
-        "sourceUrl": "https://hub-prod.perplexity.ai/hub/faq/what-are-spaces",
-        "checkedOn": "2026-10-08",
+        "angle": "Projects extend cited research into shared work, with new governance needs",
+        "buyerCheck": "Create a Project with approved sources, check five cited claims, then test collaborator access and repeat the research task.",
+        "sourceUrl": "https://www.perplexity.ai/hub/products/projects",
+        "checkedOn": "2026-10-09",
         "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
@@ -927,10 +927,10 @@
         "handsOnTested": false
       },
       "cursor": {
-        "angle": "Safe code changes are the relevant output",
-        "buyerCheck": "Define project rules and privacy settings, then review a tested refactor.",
-        "sourceUrl": "https://docs.cursor.com/context/rules-for-ai",
-        "checkedOn": "2026-10-08",
+        "angle": "Project rules give context to agents but cannot replace code review",
+        "buyerCheck": "Configure version-controlled project rules, review an agent-generated refactor and confirm tests, permissions and team rule ownership.",
+        "sourceUrl": "https://cursor.com/docs/rules",
+        "checkedOn": "2026-10-09",
         "evidenceType": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       },
