@@ -87,5 +87,5 @@ test('Growth Brain itself owns bounded two-hourly documentary verification, no n
   const catalog=fs.readFileSync(new URL('../catalog-autonomy-worker.js',import.meta.url),'utf8');
   assert.match(catalog,/documentation_changed:documentationChanged/);
   assert.match(catalog,/injectPendingReview\(html,snapshot.stateMap.get\(key\)\)/);
-  assert.match(catalog,/source_status IN \('published','admitted_coverage','quality_hold'\)/);
+  assert.match(catalog,/WHERE status IN \('published','admitted_coverage','quality_hold'\)/);
 });
