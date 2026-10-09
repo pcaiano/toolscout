@@ -448,3 +448,28 @@ test('MCP gives an editorial rationale without disclosing the manufacturer sourc
    assert.match(item.verification_basis,/manufacturer documentation recorded internally|manufacturer evidence incomplete/);
  }
 });
+
+
+test('AI decision tool decomposes broad Airbnb business requests before recommending unrelated tools',async()=>{
+  const catalog=JSON.parse(fs.readFileSync(new URL('../data/tools.json',import.meta.url),'utf8'));
+  for(const query of ['best software to manage an Airbnb business','melhor software para gerir um negócio de Airbnb']){
+    const result=await benchmarkDecision(catalog,{job:query});
+    assert.equal(result.isError,false,query);
+    assert.equal(result.structuredContent.decision_status,'needs_workflow_selection');
+    assert.deepEqual(result.structuredContent.shortlist,[]);
+    assert.equal(result.structuredContent.workflow_guidance.industry,'short_term_rentals');
+    assert.match(result.structuredContent.workflow_guidance.explanation,/PMS/);
+    assert.equal(result.structuredContent.decision_basis.no_pay_to_rank,true);
+    assert.ok(result.structuredContent.workflow_guidance.workflows.every(w=>w.job&&w.category));
+    assert.ok(!JSON.stringify(result).includes('sourceUrl'));
+  }
+});
+
+test('specific AI decision job in Airbnb operations still selects the matching software category',async()=>{
+  const catalog=JSON.parse(fs.readFileSync(new URL('../data/tools.json',import.meta.url),'utf8'));
+  const result=await benchmarkDecision(catalog,{job:'CRM for an Airbnb guest enquiries workflow'});
+  assert.equal(result.isError,false);
+  assert.ok(result.structuredContent.shortlist.length>0);
+  assert.ok(result.structuredContent.shortlist.every(t=>t.category==='crm'));
+  assert.equal(result.structuredContent.decision_status,undefined);
+});
