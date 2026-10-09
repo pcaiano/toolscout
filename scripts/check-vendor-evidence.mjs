@@ -41,7 +41,7 @@ export function vendorEvidenceIssues(tools, pendingSlugs, newSlugs=[]) {
     })();
     const dated=evidence.some(x=>x.sourceUrl===source&&/^\d{4}-\d\d-\d\d$/.test(x.verifiedAt));
     const firstParty=ownedSource(tool.sourceUrl,source,slug);
-    const documented=r.verificationStatus!=='catalog_only'&&sourceLooksValid&&dated&&firstParty&&r.handsOnTested!==true;
+    const documented=r.verificationStatus==='vendor_documented'&&sourceLooksValid&&dated&&firstParty&&r.handsOnTested!==true;
     if(allow.has(slug)){
       if(documented)issues.push('Remove now-documented product from pending baseline: '+slug);
       continue;
