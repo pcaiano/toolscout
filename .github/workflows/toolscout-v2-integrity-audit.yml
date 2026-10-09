@@ -28,6 +28,9 @@ on:
       - 'data/tools.json'
       - 'scripts/probe-live-mcp-decision.mjs'
       - 'tests/toolscout-v2-*.test.mjs'
+      - 'agent-protocol-core-worker.js'
+      - 'data/tools.json'
+      - 'scripts/probe-mcp-decision-live.mjs'
 
 permissions:
   contents: read
@@ -200,6 +203,13 @@ jobs:
             cat integrity-report.json
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Verify live MCP buyer decision through external JSON-RPC POST
+        timeout-minutes: 5
+        env:
+          TOOLSCOUT_MCP_MAX_ATTEMPTS: '24'
+          TOOLSCOUT_MCP_RETRY_MS: '3000'
+        run: node scripts/probe-mcp-decision-live.mjs
 
       - name: Enforce Integrity Audit result
         if: steps.production_audit.outcome != 'success'
