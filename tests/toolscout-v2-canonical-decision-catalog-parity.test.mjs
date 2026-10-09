@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {publicMergedTools} from '../catalog-autonomy-worker.js';
+import {publicMergedTools,publicRuntimeToolResponse} from '../catalog-autonomy-worker.js';
 import {handleDistributionEmbedRoute} from '../distribution-embed-worker.js';
 import {handleAgentProtocolRoute} from '../agent-protocol-core-worker.js';
 
@@ -73,10 +73,30 @@ test('MCP named lookup and AI shortlisting include the same runtime catalog, res
 test('static catalog fallback remains usable when D1 is unavailable',async()=>{
  const env=fullEnvironment({withDb:false});
  const catalog=await publicMergedTools(env);
- assert.equal(catalog.length,original.length);
+ assert.ok(catalog.length>=original.length,'catalog must not lose static entries during D1 errors');
+ assert.ok(catalog.some(t=>t.slug==='hubspot'));
+ // A worker may retain its last-known-good runtime snapshot while D1 is down.
  const response=await handleDistributionEmbedRoute(new Request('https://trytoolscout.org/api/recommend?q=CRM'),env);
  assert.equal(response.status,200);
  const result=await response.json();
  assert.ok(result.recommendations.length>0);
- assert.ok(result.recommendations.every(x=>x.slug!==admitted.slug));
+ assert.ok(result.recommendations.every(x=>x.slug!==broken.slug));
+});
+
+test('runtime profile renders structured first-party editorial proof as prose without an old profile H1',async()=>{
+ const response=await publicRuntimeToolResponse(fullEnvironment(),admitted.slug);
+ assert.equal(response.status,200);
+ const html=await response.text();
+ assert.match(html,/<h1>Runtime Evidence CRM<\/h1>/);
+ assert.doesNotMatch(html,/<h1>Runtime Evidence CRM profile<\/h1>|\[object Object\]/);
+ assert.ok(html.includes('ToolScout view'));
+ assert.ok(typeof admitted.editorialReview?.summary==='string');
+ assert.ok(html.includes(admitted.editorialReview.summary.slice(0,30)));
+ assert.doesNotMatch(html,/href=["']https:\/\/(?:knowledge\.hubspot\.com|help\.zapier\.com)/);
+});
+test('market-gap catalog growth retains manufacturer-review objects and individual claims',()=>{
+ const src=fs.readFileSync(new URL('../catalog-gap-runtime-worker.js',import.meta.url),'utf8');
+ assert.match(src,/profile\.editorialReview=\{\.\.\.documentedReview,summary:clean\(documentedReview\.summary\)\}/);
+ assert.match(src,/decisionClaims:Array\.isArray\(hint\?\.decisionClaims\)/);
+ assert.match(src,/pricingDetails:hint\?\.pricingDetails/);
 });
