@@ -20,15 +20,17 @@ async function trackSearch(i,p={},observedIntent=null){postEvent('/api/search',{
 function resultLabels(){return{crm:'CRM',marketing:'Marketing',seo:'SEO',forms:'Forms',automation:'Automation',sales:'Sales prospecting',support:'Customer support',social:'Social media',website:'Website',analytics:'Analytics','ai-assistant':'AI assistant',developer:'Developer tools',ecommerce:'Ecommerce',design:'Design',business:'Projects & teamwork',free:'Free budget',low:'Under $25',mid:'$25-100',high:'$100+',solo:'Solo',small:'Small team',team:'Team',large:'Large team',agency:'Agency',ease:'Easy to use',integrations:'Integrations',features:'Advanced features'}}
 const finderEsc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 async function renderResults(q,profile={},run=recommendationRun){
-  const o=document.getElementById('results'),p=inferredProfile(q,profile),intent=detectIntent(q),observed=intent?null:deriveObservedIntent(q);
+  const o=document.getElementById('results'),intent=detectIntent(q),observed=intent?null:deriveObservedIntent(q);
+  let p=inferredProfile(q,profile);
   if(!o)return;
   const params=new URLSearchParams({q,limit:'3'});
-  for(const k of ['goal','budget','team','priority'])if(p[k])params.set(k,p[k]);
+  for(const k of ['goal','budget','team','priority'])if(profile[k])params.set(k,profile[k]);
   let data;
   try{
     const response=await fetch(api('/api/recommend?'+params.toString()),{headers:{Accept:'application/json'},cache:'no-store'});
     data=await response.json();
     if(run!==recommendationRun)return;
+    p=data.profile||p;
     if(!response.ok){
       trackFunnel('recommendation_unresolved',{intent_slug:observed||intent?.slug||'unrecognized'});
       o.innerHTML='<div class="empty-state" role="status"><strong>No reliable match yet.</strong><span>'+finderEsc(data.message||'Try a more specific software task, workflow or requirement.')+'</span></div>';
