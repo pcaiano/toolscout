@@ -79,7 +79,9 @@ test('bounded baseline backfill is complete, lossless and idempotent without ove
  assert.equal(fallbackPage,null,'legacy HTML remains the public presentation until renderer parity validation');
  const inventory=await publicCatalogInventory(env);
  assert.equal(inventory.total,3);
- assert.deepEqual([inventory.storage.seeded_baseline,inventory.storage.baseline_remaining],[2,1],'distinguishes imported baseline rows from reviewed D1 revisions');
+ assert.deepEqual([inventory.storage.seeded_baseline,inventory.storage.baseline_present,inventory.storage.baseline_revised,inventory.storage.baseline_remaining],[2,3,1,0],'revised original records also count as successfully migrated to D1');
+ assert.equal(inventory.storage.migration_phase,'all_baseline_records_in_d1');
+ assert.equal(await publicRuntimeToolResponse(env,'hubspot'),null,'newer D1 reviews of legacy slugs must retain their original ToolScout 2.0 HTML instead of the basic runtime renderer');
  assert.equal(inventory.storage.primary,'cloudflare_d1');
  assert.equal(inventory.storage.legacy_html_preserved,true);
 });
