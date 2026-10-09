@@ -51,7 +51,7 @@ export function vendorEvidenceIssues(tools, pendingSlugs, newSlugs=[]) {
       const docs=[...new Set(Array.isArray(r.sourceUrls)?r.sourceUrls:[])].filter(u=>{
         try{const x=new URL(u);return x.protocol==='https:'&&x.pathname!=='/'&&ownedSource(tool.sourceUrl,u,slug)}catch{return false}
       });
-      const datedDocs=docs.filter(u=>evidence.some(x=>x.sourceUrl===u&&/^\\d{4}-\\d{2}-\\d{2}$/.test(x.verifiedAt)));
+      const datedDocs=docs.filter(u=>evidence.some(x=>x.sourceUrl===u&&/^\d{4}-\d{2}-\d{2}$/.test(x.verifiedAt)));
       if(typeof r.summary!=='string'||r.summary.trim().length<260||typeof r.angle!=='string'||r.angle.trim().length<20||typeof r.buyerCheck!=='string'||r.buyerCheck.trim().length<60)
         issues.push('Decision-grade analysis, distinctive angle and actionable buyer check required: '+slug);
       if(docs.length<2||datedDocs.length<2)
