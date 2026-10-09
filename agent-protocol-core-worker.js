@@ -403,11 +403,16 @@ function manufacturerClaim(tool,kind,value){
 function requirementMatch(tool,requirement,{exclude=false,budget=null}={}){
   const needle=catalogNormalize(requirement).replace(/^(?:(?:must|need|needs|require|requires|support|supports|have|has|with)\s+)+/g,'');
   if(!needle)return {matched:false,strength:0,status:'not_verified'};
-  const pair=verifiedIntegrationPair(tool,needle);
-  if(pair)return {matched:true,strength:1,status:'verified',evidence:'Dated manufacturer-documented integration with '+needle+'.',verified_at:pair.verifiedAt||pair.verified_at};
+  const integrationName=needle.replace(/^(?:integrate|integrates|integration|connect|connects|sync|syncs)\s+(?:with|to)\s+/,'');
+  const pair=verifiedIntegrationPair(tool,integrationName);
+  if(pair){
+    if(budget==='free'&&!exclude&&catalogNormalize(pair.plan||'')!=='free')
+      return {matched:false,strength:0,status:'not_verified',evidence:'The named integration is documented, but its eligibility on a Free plan is not proven.'};
+    return {matched:true,strength:1,status:'verified',evidence:'Dated manufacturer-documented integration with '+integrationName+'.',verified_at:pair.verifiedAt||pair.verified_at};
+  }
   const claim=manufacturerClaim(tool,'capability',needle)||manufacturerClaim(tool,'integration',needle);
   if(claim){
-    if(budget==='free'&&claim.plan&&catalogNormalize(claim.plan)!=='free')return {matched:false,strength:0,status:'conflict',evidence:'This capability is documented only for a non-free tier.',plan:claim.plan};
+    if(budget==='free'&&!exclude&&catalogNormalize(claim.plan||'')!=='free')return {matched:false,strength:0,status:claim.plan?'conflict':'not_verified',evidence:claim.plan?'This capability is documented only for a non-free tier.':'This capability is documented, but its Free-plan entitlement is not proven.',plan:claim.plan||null};
     return {matched:true,strength:1,status:'verified',evidence:'Dated manufacturer evidence for the exact requested capability.',verified_at:claim.verifiedAt,plan:claim.plan||null};
   }
   const declared=[tool?.category,...(Array.isArray(tool?.features)?tool.features:[])];
@@ -469,7 +474,7 @@ function constraintEvidence(tool,constraints=[],budget=null){
         ?{constraint,status:'verified',evidence:'Documented monthly EUR price for the named plan is within the requested ceiling.',plan:affordable.plan,amount_eur_month:Number(affordable.amount),verified_at:affordable.verifiedAt}
         :{constraint,status:'not_verified',evidence:'No documented plan currently proves that the monthly EUR ceiling can be met; other rates are unknown.'};
     }
-    const volume=norm.match(/(?:at least|minimum|need|requires?|must support|support)\s+(\d+)\s+(tasks|users|seats|channels|accounts)\s*(?:per month|monthly)?/);
+    const volume=norm.match(/(?:at least|minimum|need|requires?|must support|support)\s+(\d+)\s+(tasks|users|seats|channels|accounts|emails|contacts|submissions|collaborators|records|spaces|funnels|workflows|credits|events|automations|teams|urls|forms)\s*(?:per month|monthly)?/);
     if(volume){
       const qty=Number(volume[1]),unit=volume[2];
       const limits=(tool?.decisionClaims||[]).filter(c=>c?.type==='plan_limit'&&manufacturerClaim(tool,'plan_limit',c.value)===c&&c.unit===unit&&Number.isFinite(Number(c.quantity))&&c.plan&&(budget!=='free'||catalogNormalize(c.plan)==='free'));
@@ -487,9 +492,16 @@ function constraintEvidence(tool,constraints=[],budget=null){
         :{constraint,status:'conflict',evidence:'The manufacturer documentation records no available free plan.'};
     }
     const stripped=norm.replace(/\b(?:must|needs?|need|requires?|require|required|support|supports|with|only|be|have|has)\b/g,' ').replace(/\s+/g,' ').trim();
-    const exact=manufacturerClaim(tool,'capability',stripped)||manufacturerClaim(tool,'capability',norm);
+    const integrationName=stripped.replace(/^(?:integrate|integrates|integration|connect|connects|sync|syncs)\s+(?:with|to)\s+/,'');
+    const pair=verifiedIntegrationPair(tool,integrationName);
+    if(pair){
+      if(budget==='free'&&catalogNormalize(pair.plan||'')!=='free')
+        return {constraint,status:'not_verified',evidence:'Integration documented, but not for this Free plan.'};
+      return {constraint,status:'verified',evidence:'Manufacturer-documented named integration.',verified_at:pair.verifiedAt||pair.verified_at};
+    }
+    const exact=manufacturerClaim(tool,'capability',stripped)||manufacturerClaim(tool,'capability',norm)||manufacturerClaim(tool,'integration',integrationName);
     if(exact){
-      if(budget==='free'&&exact.plan&&catalogNormalize(exact.plan)!=='free')return {constraint,status:'conflict',evidence:'This capability is documented only for a paid tier.',plan:exact.plan};
+      if(budget==='free'&&catalogNormalize(exact.plan||'')!=='free')return {constraint,status:exact.plan?'conflict':'not_verified',evidence:exact.plan?'This capability is documented only for a paid tier.':'No Free-plan entitlement recorded for this capability.',plan:exact.plan||null};
       return {constraint,status:'verified',evidence:'Dated manufacturer documentation proves this exact capability.',verified_at:exact.verifiedAt,plan:exact.plan||null};
     }
     if(tool?.editorialReview?.verificationStatus==='vendor_documented')
