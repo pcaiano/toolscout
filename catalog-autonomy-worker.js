@@ -269,12 +269,16 @@ export async function publicCatalogInventory(env){
   });
   const active=rows.filter(x=>x.affiliate_active).length;
   const snapshot=await runtimeSnapshot(env);
-  const seeded=[...staticSet].filter(slug=>snapshot.baselineMirrors?.has(slug)).length;
+  const mirrored=[...staticSet].filter(slug=>snapshot.baselineMirrors?.has(slug)).length;
+  const present=[...staticSet].filter(slug=>snapshot.candidateMap?.has(slug)).length;
+  const revised=Math.max(0,present-mirrored);
   return {
     ok:true,
     version:'canonical-catalog-v1',
-    storage:{primary:'cloudflare_d1',fallback:'read_only_static_snapshot',seeded_baseline:seeded,baseline_total:staticSet.size,
-      baseline_remaining:Math.max(0,staticSet.size-seeded),migration_phase:seeded===staticSet.size&&staticSet.size?'seeded_pending_public_renderer_validation':'seeding',
+    storage:{primary:'cloudflare_d1',fallback:'read_only_static_snapshot',
+      seeded_baseline:mirrored,baseline_present:present,baseline_revised:revised,baseline_total:staticSet.size,
+      baseline_remaining:Math.max(0,staticSet.size-present),
+      migration_phase:snapshot.degraded?'runtime_degraded':present===staticSet.size&&staticSet.size?'all_baseline_records_in_d1':'seeding',
       degraded:Boolean(snapshot.degraded),source:snapshot.source||'d1',legacy_html_preserved:true},
     total:rows.length,
     static_unique:rows.filter(x=>x.origin==='static').length,
@@ -637,7 +641,12 @@ export async function publicRuntimeToolResponse(env,slug){
   if(!key)return null;
   const [state,candidate]=await Promise.all([toolState(env,key),runtimeCandidate(env,key)]);
   if(state?.quality_status==='confirmed_broken')return new Response('Tool profile temporarily unavailable while the official source is re-verified.',{status:404,headers:{'Content-Type':'text/plain; charset=UTF-8','Cache-Control':'no-store','X-Robots-Tag':'noindex'}});
-  if(!candidate||(await runtimeSnapshot(env)).baselineMirrors?.has(key))return null;
+  if(!candidate)return null;
+  // The original 127 indexed profiles must never switch to the newer, more
+  // basic runtime template merely because a verified D1 editorial revision
+  // changed its source_status away from baseline_snapshot.
+  const [snapshot,staticTools]=await Promise.all([runtimeSnapshot(env),assetJson(env,'/data/tools.json',[])]);
+  if(snapshot.baselineMirrors?.has(key)||(Array.isArray(staticTools)&&staticTools.some(tool=>String(tool?.slug||'').toLowerCase()===key)))return null;
   return new Response(candidatePage(candidate),{status:200,headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'public, max-age=60'}});
 }
 export async function publicMergedSitemap(response,env){return mergedSitemap(response,env)}
@@ -655,8 +664,13 @@ async function status(env){
   ]);
   const baseline=await assetJson(env,'/data/tools.json',[]);
   const baselineTotal=Array.isArray(baseline)?baseline.length:0;
-  const baselineSeeded=Number(candidates?.baseline_seeded||0);
-  return{ok:true,version:'1.2',storage:{mode:'d1_primary_static_fallback',baseline_total:baselineTotal,baseline_seeded:baselineSeeded,baseline_remaining:Math.max(0,baselineTotal-baselineSeeded),migration_phase:baselineSeeded>=baselineTotal&&baselineTotal>0?'baseline_seeded_pending_public_renderer_validation':'baseline_seeding',legacy_html_preserved:true},state:{total:Number(states?.total||0),healthy:Number(states?.healthy||0),changed:Number(states?.changed||0),suppressed:Number(states?.suppressed||0),warnings:Number(states?.warnings||0),last_checked_at:states?.last_checked_at||null},runtime_candidates:Math.max(0,Number(candidates?.total||0)-baselineSeeded),last_admitted_at:candidates?.last_admitted_at||null,market_gaps:Number(gaps?.total||0),events_7d:Number(events?.n||0),whats_new:{official_sources:Number(newsSources?.total||0),last_source_check:newsSources?.last_checked_at||null,candidates:Number(newsCandidates?.total||0),last_candidate_at:newsCandidates?.last_candidate_at||null},rule:'Once admitted, runtime tools remain full catalog peers during recoverable quality holds, matching static-tool behavior. Only confirmed broken sources are suppressed. Official-source verification is required, and affiliate economics never affect catalog admission or ranking.'};
+  const snapshot=await runtimeSnapshot(env);
+  const originalSlugs=new Set((Array.isArray(baseline)?baseline:[]).map(tool=>String(tool?.slug||'').toLowerCase()).filter(Boolean));
+  const baselineSeeded=[...originalSlugs].filter(slug=>snapshot.baselineMirrors?.has(slug)).length;
+  const baselinePresent=[...originalSlugs].filter(slug=>snapshot.candidateMap?.has(slug)).length;
+  return{ok:true,version:'1.3',storage:{mode:'d1_primary_static_fallback',baseline_total:baselineTotal,baseline_seeded:baselineSeeded,
+    baseline_present:baselinePresent,baseline_revised:Math.max(0,baselinePresent-baselineSeeded),
+    baseline_remaining:Math.max(0,baselineTotal-baselinePresent),migration_phase:snapshot.degraded?'runtime_degraded':baselinePresent>=baselineTotal&&baselineTotal>0?'all_baseline_records_in_d1':'baseline_seeding',legacy_html_preserved:true},state:{total:Number(states?.total||0),healthy:Number(states?.healthy||0),changed:Number(states?.changed||0),suppressed:Number(states?.suppressed||0),warnings:Number(states?.warnings||0),last_checked_at:states?.last_checked_at||null},runtime_candidates:Math.max(0,Number(candidates?.total||0)-baselineSeeded),last_admitted_at:candidates?.last_admitted_at||null,market_gaps:Number(gaps?.total||0),events_7d:Number(events?.n||0),whats_new:{official_sources:Number(newsSources?.total||0),last_source_check:newsSources?.last_checked_at||null,candidates:Number(newsCandidates?.total||0),last_candidate_at:newsCandidates?.last_candidate_at||null},rule:'Once admitted, runtime tools remain full catalog peers during recoverable quality holds, matching static-tool behavior. Only confirmed broken sources are suppressed. Official-source verification is required, and affiliate economics never affect catalog admission or ranking.'};
 }
 
 export async function handleCatalogAutonomyRoute(request,env){
