@@ -43,7 +43,7 @@ async function renderResults(q,profile={},run=recommendationRun){
   if(data.recommendation_type==='workflow_guidance'){
     const guidance=data.guidance||{},workflows=Array.isArray(guidance.workflows)?guidance.workflows:[];
     trackSearch(null,p,'business-workflow-guidance');
-    trackFunnel('recommendation_unresolved',{intent_slug:'business-workflow-guidance'});
+    trackFunnel('business_workflow_viewed',{intent_slug:(guidance.industry||'general_business').replace(/_/g,'-').slice(0,95)});
     const intro='<div class="profile-card"><div><span class="eyebrow">Understand your business need</span><h2>'+finderEsc(guidance.title||'Choose your main task')+'</h2><p class="broad-note">'+finderEsc(guidance.explanation||'')+'</p>'+(guidance.specialist_requirements?.length?'<p class="broad-note"><strong>Specialist systems to assess separately:</strong> '+guidance.specialist_requirements.map(finderEsc).join('; ')+'</p>':'')+'</div></div>';
     const cards=workflows.map(w=>{
       const examples=(w.category_examples||[]).slice(0,2).map(t=>'<a href="/tools/'+encodeURIComponent(t.slug)+'" class="textLink">'+finderEsc(t.name)+'</a>').join(' · ');
@@ -55,6 +55,8 @@ async function renderResults(q,profile={},run=recommendationRun){
         o.innerHTML=intro+cards;
     o.querySelectorAll('.workflow-select').forEach(button=>button.addEventListener('click',()=>{
       const job=button.dataset.job;const input=document.getElementById('need');if(input)input.value=job;
+      trackFunnel('business_workflow_selected',{intent_slug:(guidance.industry||'general_business').replace(/_/g,'-').slice(0,95)});
+      trackFunnel('recommendation_started',{intent_slug:'business-workflow-selected'});
       runRecommendation(job,{});
     }));
     o.scrollIntoView({behavior:reducedMotion?'auto':'smooth',block:'start'});return;
