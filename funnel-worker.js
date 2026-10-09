@@ -86,6 +86,8 @@ async function funnelSnapshot(env) {
   const sessions = Number(sessionCount?.sessions || 0);
   const starts = counts.recommendation_started || 0;
   const completions = counts.recommendation_completed || 0;
+  const workflowViews = counts.business_workflow_viewed || 0;
+  const workflowSelections = counts.business_workflow_selected || 0;
   const resultViews = counts.recommendation_result_viewed || 0;
   const toolViews = counts.tool_viewed || 0;
   const outboundClicks = counts.outbound_clicked || 0;
@@ -97,6 +99,9 @@ async function funnelSnapshot(env) {
     recommendationStarts:starts,
     recommendationCompletions:completions,
     recommendationCompletionRate:rate(completions,starts),
+    businessWorkflowViews:workflowViews,
+    businessWorkflowSelections:workflowSelections,
+    businessWorkflowSelectionRate:rate(workflowSelections,workflowViews),
     recommendationResultViews:resultViews,
     toolViews,
     outboundClicks,
