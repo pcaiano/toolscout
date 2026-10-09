@@ -19,6 +19,8 @@ test('every future tool requires a dated first-party manufacturer source',()=>{
  assert.match(vendorEvidenceIssues([...catalog,copied],pending).join(' '),/Duplicate or empty product name/);
  const documented={...original,slug:'future-verified-example',name:'Future Verified Example',sourceUrl:'https://example-vendor.test/',editorialReview:{...original.editorialReview,sourceUrl:'https://example-vendor.test/docs',verificationStatus:'vendor_documented'},evidence:[{claimScope:'toolscout_editorial_review',sourceUrl:'https://example-vendor.test/docs',verifiedAt:'2026-10-08'}]};
  assert.deepEqual(vendorEvidenceIssues([...catalog,documented],pending),[]);
+ const homepageOnly={...documented,slug:'homepage-only-example',name:'Homepage Only Example',sourceUrl:'https://example-vendor.test/',editorialReview:{...documented.editorialReview,sourceUrl:'https://example-vendor.test/',verificationStatus:'vendor_documented'},evidence:[{claimScope:'toolscout_editorial_review',sourceUrl:'https://example-vendor.test/',verifiedAt:'2026-10-08'}]};
+ assert.match(vendorEvidenceIssues([...catalog,homepageOnly],pending).join(' '),/Manufacturer documentation required/);
 });
 
 test('generated profiles use the product name as the only H1',()=>{

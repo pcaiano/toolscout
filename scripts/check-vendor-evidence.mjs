@@ -29,7 +29,15 @@ export function vendorEvidenceIssues(tools, pendingSlugs) {
     const r=tool.editorialReview||{};
     const source=r.sourceUrl;
     const evidence=(tool.evidence||[]).filter(x=>x?.claimScope==='toolscout_editorial_review'&&x.sourceUrl&&x.verifiedAt);
-    const sourceLooksValid=typeof source==='string'&&/^https:\/\/[^\s/]+\//.test(source);
+    // A manufacturer homepage is not sufficient documentary proof for a new tool.
+    // Resume AI's current homepage explicitly publishes its features and pricing;
+    // that single reviewed legacy exception must not generalize to new admissions.
+    const sourceLooksValid=typeof source==='string'&&/^https:\/\/[^\s/]+\//.test(source)&&(()=>{
+      try{
+        const u=new URL(source);
+        return u.pathname.replace(/\/+$/,'')!==''||(slug==='resume-ai'&&u.origin==='https://resume-ai.com'&&u.pathname==='/');
+      }catch{return false}
+    })();
     const dated=evidence.some(x=>x.sourceUrl===source&&/^\d{4}-\d\d-\d\d$/.test(x.verifiedAt));
     const firstParty=ownedSource(tool.sourceUrl,source,slug);
     const documented=r.verificationStatus!=='catalog_only'&&sourceLooksValid&&dated&&firstParty&&r.handsOnTested!==true;
