@@ -39,13 +39,21 @@ function relationScore(a,b){
   for(const value of ab)if(bb.has(value))total+=1;
   return total;
 }
+// Preserve established, useful internal relationships when regenerating static pages.
+// These links were present in production and are retained for editorial continuity/SEO.
+const preservedRelatedPeers={
+  airtable:['basecamp','calendly','clickup'],
+  semrush:['mangools','ubersuggest']
+};
 function relatedTools(tool){
   if(!canCompare(tool))return[];
-  return tools.filter(other=>other.slug!==tool.slug&&canCompare(other)&&validTool(other))
+  const ranked=tools.filter(other=>other.slug!==tool.slug&&canCompare(other)&&validTool(other))
     .map(other=>({tool:other,score:relationScore(tool,other),demand:searchPriorityForPath('/tools/'+other.slug)}))
     .filter(x=>x.score>0)
     .sort((a,b)=>b.score-a.score||b.demand-a.demand||String(a.tool.name).localeCompare(String(b.tool.name)))
-    .slice(0,4).map(x=>x.tool);
+    .map(x=>x.tool);
+  const preserved=(preservedRelatedPeers[tool.slug]||[]).map(slug=>tools.find(x=>x.slug===slug)).filter(Boolean);
+  return [...new Map([...preserved,...ranked].map(x=>[x.slug,x])).values()].slice(0,preserved.length+4);
 }
 function freePlanLabel(tool){
   if(tool.freePlanKnown!==true)return 'Unknown';

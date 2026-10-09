@@ -45,6 +45,19 @@ test('existing live profile pages remove only redundant H1 profile suffix',async
  assert.match(result,/href="\/go\/hubspot"/);
 });
 
+test('raw static profile sources have no redundant Profile H1 or public manufacturer-documentation anchors',()=>{
+ const catalog=read('data/tools.json');
+ for(const tool of catalog){
+   const raw=fs.readFileSync(new URL('../tools/'+tool.slug+'.html',import.meta.url),'utf8');
+   assert.ok(raw.includes('<h1>'+tool.name.replaceAll('&','&amp;')+'</h1>'),'Raw H1 must be the product name alone: '+tool.slug);
+   assert.doesNotMatch(raw,/<h1>[^<]* profile<\/h1>/i,'Legacy Profile suffix in raw HTML: '+tool.slug);
+   assert.doesNotMatch(raw,/AI integration evidence:/i,'Legacy public vendor evidence block: '+tool.slug);
+   const direct=[...raw.matchAll(/<a\b[^>]*href=["'](https?:\/\/[^"']+)["']/gi)].map(x=>x[1]);
+   assert.deepEqual(direct,[],'Direct external anchor in raw profile: '+tool.slug);
+   assert.ok(raw.includes('href="/go/'+tool.slug+'"'),'Monetizable CTA missing in raw profile: '+tool.slug);
+ }
+});
+
 test('public product profiles do not render manufacturer-documentation links',async()=>{
  const catalog=read('data/tools.json');
  for(const tool of catalog){
