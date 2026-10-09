@@ -2,7 +2,7 @@ export {executeCatalogGrowthTask} from './catalog-gap-runtime-worker.js';
 import base from './dynamic-worker.js';
 import { runWithLedger } from './engine-run-ledger.js';
 import { renderRuntimeRanking } from './catalog-runtime-ranking.js';
-import {auditCatalogTool,mapLimit} from './catalog-quality-runtime.js';
+import {auditCatalogTool,mapLimit,hasManufacturerDecisionClaim} from './catalog-quality-runtime.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
 const MAX_VERIFY_PER_CYCLE=4;
@@ -49,7 +49,7 @@ export function trustedManufacturerEvidence(tool,{decisionGrade=false}={}) {
   const datedDocs=docs.filter(value=>evidence.some(x=>x?.claimScope==='toolscout_editorial_review'&&x?.sourceUrl===value&&/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(x?.verifiedAt||'')));
   return review.summary.trim().length>=260&&String(review.angle||'').trim().length>=20&&String(review.buyerCheck||'').trim().length>=60&&
     docs.length>=2&&datedDocs.length>=2&&(tool.strengths||[]).length>=2&&(tool.limitations||[]).length>=2&&
-    (tool.tradeoffs||[]).length>=1&&Boolean(tool.pricingDetails?.freePlanStatus);
+    (tool.tradeoffs||[]).length>=1&&Boolean(tool.pricingDetails?.freePlanStatus)&&hasManufacturerDecisionClaim(tool);
 }
 function stripHtml(html){return String(html||'').replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/&[a-z#0-9]+;/gi,' ').replace(/\s+/g,' ').trim()}
 function meta(html,name){const a=new RegExp(`<meta[^>]+(?:name|property)=["']${name}["'][^>]+content=["']([^"']+)["']`,'i'),b=new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]+(?:name|property)=["']${name}["']`,'i');return (String(html).match(a)?.[1]||String(html).match(b)?.[1]||'').trim()}
