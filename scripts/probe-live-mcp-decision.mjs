@@ -61,4 +61,47 @@ for(const c of cases){
 }
 const denied=await rpc('tools/call',{name:'decide_software',arguments:{job:'website builder',constraints:['under $16/month billed annually'],must_have:['content management system'],limit:5}});
 assert(denied.isError===true||!denied.structuredContent?.shortlist?.some(x=>x.slug==='webflow'),'live buyer budget incorrectly qualifies Premium at Basic pricing');
-console.log(JSON.stringify({ok:true,liveNetworkMcpPost:true,base:BASE,method:'tools/call',canaryAfterAttempts:current,positiveDecisions:3,blockedInvalidTier:1,currency:['USD','EUR'],manufacturerSourcesExposed:false},null,2));
+// The same existing Integrity Audit proves real production responses to
+// broad buyer questions after the Cloudflare commit is available at the edge.
+// Check this independently from the pricing data cohort above.
+const broadCases=[
+  {job:'best software to run my restaurant business',sector:'restaurants'},
+  {job:'best software for a marketing agency',sector:'marketing_agencies'},
+  {job:'best software to run an architecture practice',sector:'architecture'},
+  {job:'best software for my dog grooming business',sector:'general_business'}
+];
+async function liveGuidance(job){
+  const response=await request('/api/recommend?q='+encodeURIComponent(job)+'&universal_probe='+Date.now());
+  if(!response.ok)throw Error('Finder general job HTTP '+response.status);
+  return response.json();
+}
+let industryAttempts=0;
+for(let i=1;i<=15;i++){
+  try{
+    const data=await liveGuidance(broadCases[0].job);
+    if(data.recommendation_type==='workflow_guidance'&&data.guidance?.industry==='restaurants'){
+      industryAttempts=i;break;
+    }
+  }catch(error){if(i===15)throw Error('Live general-business Finder probe unavailable: '+String(error?.message||error))}
+  if(i<15)await sleep(5000);
+}
+assert(industryAttempts>0,'Latest universal business Finder version not observed after deployment checks');
+for(const c of broadCases){
+  const data=await liveGuidance(c.job);
+  assert(data.recommendation_type==='workflow_guidance'&&data.guidance?.industry===c.sector,'wrong live sector interpretation: '+c.sector);
+  assert(data.recommendations?.length===0,'live broad request fabricated a cross-category winner: '+c.sector);
+  assert(data.guidance.workflows?.length===4,'missing sector-relevant workflow decomposition: '+c.sector);
+  assert(data.guidance.workflows.every(w=>w.finder_url?.startsWith('https://trytoolscout.org/?q=')),'AI to Finder handoff links missing: '+c.sector);
+  assert(data.guidance.workflows.every(w=>Array.isArray(w.category_examples)&&w.category_examples.every(t=>
+    t.profile_url?.startsWith('https://trytoolscout.org/tools/')&&t.status==='category_example_not_industry_qualified')),'unverified or external examples in guidance: '+c.sector);
+  assert(!JSON.stringify(data).includes('sourceUrl'),'manufacturer source URLs leaked from business guidance: '+c.sector);
+}
+const aiBusiness=await rpc('tools/call',{name:'decide_software',arguments:{job:'best software for an architecture studio',limit:3}});
+assert(aiBusiness.isError===false&&aiBusiness.structuredContent?.decision_status==='needs_workflow_selection','live MCP did not expose universal business guidance');
+assert(aiBusiness.structuredContent.workflow_guidance?.industry==='architecture','MCP industry not in parity with Finder');
+assert(aiBusiness.structuredContent.shortlist?.length===0,'MCP fabricated industry-wide winner');
+const narrow=await liveGuidance('CRM for my marketing agency');
+assert(narrow.recommendation_type!=='workflow_guidance'&&narrow.recommendations?.length>0&&narrow.recommendations.every(x=>x.category==='crm'),
+  'Specific CRM need was hijacked by marketing-agency industry detection');
+
+console.log(JSON.stringify({ok:true,liveNetworkMcpPost:true,base:BASE,method:'tools/call',canaryAfterAttempts:current,positiveDecisions:3,blockedInvalidTier:1,currency:['USD','EUR'],manufacturerSourcesExposed:false,liveBusinessSectors:broadCases.map(x=>x.sector),businessCanaryAfterAttempts:industryAttempts,narrowBusinessJobVerified:true},null,2));
