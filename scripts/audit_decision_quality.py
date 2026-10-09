@@ -125,16 +125,24 @@ def inspect(path=DATA):
                     pricing = tool.get("pricingDetails") or {}
                     if (not isinstance(number, (int, float)) or isinstance(number, bool) or number <= 0
                             or not claim.get("unit") or not claim.get("plan")
+                            or claim.get("period") not in ("day", "month", "total")
+                            or (claim.get("unit") == "contacts" and claim.get("scope") not in ("stored", "automation"))
                             or not pricing.get("sourceUrl") or not pricing.get("limits")):
                         counters["invalid_decision_claims"] += 1
                         issues.append(f"{slug}: plan limit lacks numerical entitlement or first-party pricing record")
                     else:
                         counters["verified_plan_limit_claims"] += 1
+                        counters["plan_limits_" + claim["period"]] += 1
+                        if claim.get("scope"):
+                            counters["scoped_plan_limits"] += 1
                 elif claim.get("type") == "price_eur_month":
                     if (not isinstance(claim.get("amount"), (int, float)) or claim.get("amount") < 0
                             or not claim.get("plan") or claim.get("billingCycle") != "monthly"):
                         counters["invalid_decision_claims"] += 1
                         issues.append(f"{slug}: EUR monthly price lacks comparable monthly plan")
+        for pair in tool.get("integrations") or []:
+            if isinstance(pair, dict) and pair.get("status") == "verified" and pair.get("plan") == "Free":
+                counters["named_free_plan_integrations"] += 1
         if not tool.get("affiliateUrl"):
             counters["no_explicit_affiliate_url"] += 1
         if not tool.get("sourceUrl"):
