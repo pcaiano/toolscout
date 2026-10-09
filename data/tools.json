@@ -4012,16 +4012,17 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Cited research needs verification and collaboration controls",
-      "summary": "Perplexity's documentation describes Spaces as collaborative topic hubs with research threads and optional uploaded file search. That is useful for organizing recurring investigations rather than collecting unrelated answers. However, source citations still require checking against originals, and file-search eligibility and collaboration vary by subscription. A research assistant should not be confused with a verified system of record or transaction platform. Test the tool using factual questions with known reference answers and the privacy controls required by the team.",
-      "buyerCheck": "Audit five answers against sources and test collaborators' file visibility.",
-      "reviewedAt": "2026-10-08",
-      "sourceUrl": "https://hub-prod.perplexity.ai/hub/faq/what-are-spaces",
+      "angle": "Projects extend cited research into shared work, with new governance needs",
+      "summary": "Perplexity now describes its former Spaces as Projects, shared workspaces that bring together files, connected applications, conversations and ongoing tasks. This changes the comparison with a simple answer engine: teams can retain context across repeated research instead of collecting isolated search threads. But cited answers still require inspection against their actual sources, and workspace files and collaboration permissions must be governed deliberately. Subscription entitlements and retained knowledge can also change. Choose it based on verified research quality and manageable project access, not one convincing search result.",
+      "buyerCheck": "Create a Project with approved sources, check five cited claims, then test collaborator access and repeat the research task.",
+      "reviewedAt": "2026-10-09",
+      "sourceUrl": "https://www.perplexity.ai/hub/products/projects",
       "method": "first_party_documentation_plus_editorial_judgment",
       "verificationStatus": "vendor_documented",
       "handsOnTested": false,
       "sourceUrls": [
-        "https://hub-prod.perplexity.ai/hub/faq/what-are-spaces"
+        "https://www.perplexity.ai/hub/products/projects",
+        "https://www.perplexity.ai/help-center/en/articles/11187416-which-perplexity-subscription-plan-is-right-for-you"
       ]
     },
     "strengths": [
@@ -4038,8 +4039,15 @@
     "evidence": [
       {
         "claimScope": "toolscout_editorial_review",
-        "sourceUrl": "https://hub-prod.perplexity.ai/hub/faq/what-are-spaces",
-        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://www.perplexity.ai/hub/products/projects",
+        "verifiedAt": "2026-10-09",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.perplexity.ai/help-center/en/articles/11187416-which-perplexity-subscription-plan-is-right-for-you",
+        "verifiedAt": "2026-10-09",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
@@ -4187,16 +4195,17 @@
       "sources": []
     },
     "editorialReview": {
-      "angle": "Safe code changes are the relevant output",
-      "summary": "Cursor documents repository-scoped project rules that guide its AI assistant and separate account privacy settings. Those are relevant to development teams who need generated changes to follow existing project conventions. The risk is mistaking fast code generation for a safely reviewed modification. Regression tests, diff inspection and secure secret handling remain necessary, and teams must understand what data can be processed. Compare completed, reviewed changes against the existing editor rather than lines generated.",
-      "buyerCheck": "Define project rules and privacy settings, then review a tested refactor.",
-      "reviewedAt": "2026-10-08",
-      "sourceUrl": "https://docs.cursor.com/context/rules-for-ai",
+      "angle": "Project rules give context to agents but cannot replace code review",
+      "summary": "Cursor's current manufacturer documentation explains version-controlled Project Rules stored in .cursor/rules, alongside user rules and organization-level options. These controls let a development team encode coding conventions and repeatable workflows without restating them for every agent request. Yet applying a rule is not evidence that generated code is correct, secure or maintainable; branch reviews, automated tests and privacy decisions remain essential. Judge the product by regression-free work accepted into the codebase, and verify that the team can audit which instructions guided each change.",
+      "buyerCheck": "Configure version-controlled project rules, review an agent-generated refactor and confirm tests, permissions and team rule ownership.",
+      "reviewedAt": "2026-10-09",
+      "sourceUrl": "https://cursor.com/docs/rules",
       "method": "first_party_documentation_plus_editorial_judgment",
       "verificationStatus": "vendor_documented",
       "handsOnTested": false,
       "sourceUrls": [
-        "https://docs.cursor.com/context/rules-for-ai"
+        "https://cursor.com/docs/rules",
+        "https://prod.cursor.com/help/customization/rules"
       ]
     },
     "strengths": [
@@ -4213,8 +4222,15 @@
     "evidence": [
       {
         "claimScope": "toolscout_editorial_review",
-        "sourceUrl": "https://docs.cursor.com/context/rules-for-ai",
-        "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://cursor.com/docs/rules",
+        "verifiedAt": "2026-10-09",
+        "method": "first_party_documentation_plus_editorial_judgment",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://prod.cursor.com/help/customization/rules",
+        "verifiedAt": "2026-10-09",
         "method": "first_party_documentation_plus_editorial_judgment",
         "handsOnTested": false
       }
