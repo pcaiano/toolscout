@@ -24,7 +24,7 @@ function authorized(request,env){const token=(request.headers.get('Authorization
 async function assetJson(env,path,fallback){try{const r=await env.ASSETS.fetch(new Request('https://trytoolscout.org'+path));return r.ok?await r.json():fallback}catch{return fallback}}
 function publicHttps(value){try{const u=new URL(String(value||''));return u.protocol==='https:'?u:null}catch{return null}}
 // Strictly separate marketing-page discovery from documented editorial admission.
-export function trustedManufacturerEvidence(tool) {
+export function trustedManufacturerEvidence(tool,{decisionGrade=false}={}) {
   const review=tool?.editorialReview;
   const url=review?.sourceUrl;
   const evidence=Array.isArray(tool?.evidence)?tool.evidence:[];
@@ -36,8 +36,19 @@ export function trustedManufacturerEvidence(tool) {
   const doc=document.hostname.toLowerCase().replace(/^www[.]/,'');
   const extra=tool?.slug==='trello'&&(doc==='atlassian.com'||doc.endsWith('.atlassian.com'));
   if(!(doc===home||doc.endsWith('.'+home)||extra))return false;
-  return evidence.some(x=>x?.claimScope==='toolscout_editorial_review'&&x?.sourceUrl===url&&
+  const primaryDated=evidence.some(x=>x?.claimScope==='toolscout_editorial_review'&&x?.sourceUrl===url&&
     /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(x?.verifiedAt||'')&&!Number.isNaN(Date.parse(x.verifiedAt)));
+  if(!primaryDated)return false;
+  if(!decisionGrade)return true; // legacy product evidence remains valid without rewriting historical records
+  const docs=[...new Set(Array.isArray(review.sourceUrls)?review.sourceUrls:[])].filter(value=>{
+    const u=publicHttps(value);if(!u||u.pathname==='/'||!u.pathname)return false;
+    const d=u.hostname.toLowerCase().replace(/^www[.]/,'');
+    return d===home||d.endsWith('.'+home)||extra;
+  });
+  const datedDocs=docs.filter(value=>evidence.some(x=>x?.claimScope==='toolscout_editorial_review'&&x?.sourceUrl===value&&/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(x?.verifiedAt||'')));
+  return review.summary.trim().length>=260&&String(review.angle||'').trim().length>=20&&String(review.buyerCheck||'').trim().length>=60&&
+    docs.length>=2&&datedDocs.length>=2&&(tool.strengths||[]).length>=2&&(tool.limitations||[]).length>=2&&
+    (tool.tradeoffs||[]).length>=1&&Boolean(tool.pricingDetails?.freePlanStatus);
 }
 function stripHtml(html){return String(html||'').replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/&[a-z#0-9]+;/gi,' ').replace(/\s+/g,' ').trim()}
 function meta(html,name){const a=new RegExp(`<meta[^>]+(?:name|property)=["']${name}["'][^>]+content=["']([^"']+)["']`,'i'),b=new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]+(?:name|property)=["']${name}["']`,'i');return (String(html).match(a)?.[1]||String(html).match(b)?.[1]||'').trim()}
@@ -391,7 +402,7 @@ export async function admitTrustedCandidates(env){
     const {raw,slug,priority}=item;considered++;
     const errors=validCandidate(raw,config);if(errors.length){held++;continue}
     const source=await fetchOfficial(raw.sourceUrl);if(config?.admission?.requireReachableOfficialSource!==false&&source.status!=='ok'){held++;continue}
-    if(!trustedManufacturerEvidence(raw)){
+    if(!trustedManufacturerEvidence(raw,{decisionGrade:true})){
       held++;
       await logEvent(env,slug,'catalog_candidate_quality_hold','completed',
         'Manufacturer documentation and dated editorial evidence required before runtime admission.',{reason:'manufacturer_editorial_documentation_required'});
