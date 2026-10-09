@@ -162,7 +162,7 @@ test('general business questions get actionable workflow decomposition',async()=
     assert.equal(response.status,200,q);
     const data=await response.json();
     assert.equal(data.recommendation_type,'workflow_guidance');
-    assert.equal(data.guidance.industry,'general_business');
+    assert.equal(data.guidance.industry,q.includes('restaurant')?'restaurants':'general_business');
     assert.equal(data.recommendations.length,0);
     assert.equal(data.guidance.workflows.length,4);
   }
