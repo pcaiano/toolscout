@@ -135,6 +135,13 @@ def inspect(path=DATA):
                         counters["plan_limits_" + claim["period"]] += 1
                         if claim.get("scope"):
                             counters["scoped_plan_limits"] += 1
+                if claim.get("includedPlans") is not None:
+                    included = claim["includedPlans"]
+                    if (not isinstance(included, list) or not included or claim.get("plan") not in included
+                            or any(not isinstance(p, str) or not p.strip() for p in included)
+                            or len(included) != len(set(included))):
+                        counters["invalid_decision_claims"] += 1
+                        issues.append(f"{slug}: plan inheritance must be backed by explicit documented tiers")
                 elif claim.get("type") == "price_quote":
                     currency = claim.get("currency")
                     amount = claim.get("amount")
@@ -150,7 +157,7 @@ def inspect(path=DATA):
                         and bool(claim.get("plan")) and cycle in ("monthly", "annual")
                         and market in ("unspecified", "US", "PT", "GB", "DE", "FR", "ES")
                         and tax in ("unknown", "included", "excluded")
-                        and unit in ("subscription", "channel")
+                        and unit in ("subscription", "channel", "seat")
                         and claim.get("unitQuantity") == 1
                         and claim.get("promotion") is False
                         and abs((charge / 12 if cycle == "annual" else charge) - amount) < 0.011
@@ -164,6 +171,8 @@ def inspect(path=DATA):
                         counters["price_quotes_" + cycle] += 1
                         if unit == "channel":
                             counters["price_quotes_per_channel"] += 1
+                        if unit == "seat":
+                            counters["price_quotes_per_seat"] += 1
                 elif claim.get("type") == "price_eur_month":
                     if (not isinstance(claim.get("amount"), (int, float)) or claim.get("amount") < 0
                             or not claim.get("plan") or claim.get("billingCycle") != "monthly"):
