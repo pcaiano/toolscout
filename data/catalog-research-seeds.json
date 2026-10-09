@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "researchedAt": "2026-10-09",
+  "status": "internal_manufacturer_research_only",
+  "admissionRule": "Never auto-publish these seeds. They are research inputs, not completed ToolScout editorial analyses. Before admission obtain current two dated manufacturer source excerpts and independently written assessment, buyer checks, claimed capabilities, exact free/pricing evidence, visual logo and valid monetizable /go route. Vendor sources remain internal.",
+  "candidates": [
+    {
+      "slug": "toast-pos",
+      "name": "Toast",
+      "industry": "restaurants",
+      "category": "business",
+      "home": "https://pos.toasttab.com/",
+      "documentation": [
+        "https://pos.toasttab.com/pricing",
+        "https://pos.toasttab.com/compare/toast-vs-lightspeed"
+      ],
+      "researchFocus": "Restaurant POS and hardware/payment obligations; plan and territorial restrictions must be checked.",
+      "reviewStatus": "source_urls_identified_editorial_pending",
+      "planStatus": "unknown_pending_exact_vendor_tier_proof",
+      "affiliateRouteStatus": "not_verified",
+      "decisionClaimsStatus": "not_verified"
+    },
+    {
+      "slug": "square-for-restaurants",
+      "name": "Square for Restaurants",
+      "industry": "restaurants",
+      "category": "business",
+      "home": "https://squareup.com/",
+      "documentation": [
+        "https://squareup.com/ie/en/point-of-sale/restaurants/pricing",
+        "https://squareup.com/gb/en/point-of-sale/restaurants/pricing"
+      ],
+      "researchFocus": "POS scope and country-specific card fees; GB and Ireland prices must never be projected onto Portugal.",
+      "reviewStatus": "source_urls_identified_editorial_pending",
+      "planStatus": "unknown_pending_exact_vendor_tier_proof",
+      "affiliateRouteStatus": "not_verified",
+      "decisionClaimsStatus": "not_verified"
+    },
+    {
+      "slug": "bqe-core",
+      "name": "BQE CORE",
+      "industry": "architecture",
+      "category": "business",
+      "home": "https://www.bqe.com/",
+      "documentation": [
+        "https://corehelpcenter.bqe.com/hc/en-us/articles/4402832133911-BQE-CORE-Features-and-Benefits",
+        "https://corehelpcenter.bqe.com/hc/en-us/articles/33815713949591-Where-can-I-find-a-full-list-of-features-that-BQE-CORE-offers"
+      ],
+      "researchFocus": "Architectural firm project management, forecasting, time and billing; confirm exact subscriptions.",
+      "reviewStatus": "source_urls_identified_editorial_pending",
+      "planStatus": "unknown_pending_exact_vendor_tier_proof",
+      "affiliateRouteStatus": "not_verified",
+      "decisionClaimsStatus": "not_verified"
+    },
+    {
+      "slug": "clio-manage",
+      "name": "Clio Manage",
+      "industry": "legal",
+      "category": "business",
+      "home": "https://www.clio.com/",
+      "documentation": [
+        "https://www.clio.com/features/case-management/",
+        "https://www.clio.com/features/legal-billing-software/"
+      ],
+      "researchFocus": "Legal matters and billing; verify law society jurisdiction, privacy and country-specific plans.",
+      "reviewStatus": "source_urls_identified_editorial_pending",
+      "planStatus": "unknown_pending_exact_vendor_tier_proof",
+      "affiliateRouteStatus": "not_verified",
+      "decisionClaimsStatus": "not_verified"
+    },
+    {
+      "slug": "fresha",
+      "name": "Fresha",
+      "industry": "beauty",
+      "category": "business",
+      "home": "https://www.fresha.com/",
+      "documentation": [
+        "https://www.fresha.com/for-business/features",
+        "https://www.fresha.com/for-business/features/scheduling"
+      ],
+      "researchFocus": "Appointments, customer profiles and POS; confirm local market and transaction pricing.",
+      "reviewStatus": "source_urls_identified_editorial_pending",
+      "planStatus": "unknown_pending_exact_vendor_tier_proof",
+      "affiliateRouteStatus": "not_verified",
+      "decisionClaimsStatus": "not_verified"
+    },
+    {
+      "slug": "ezyvet",
+      "name": "ezyVet",
+      "industry": "healthcare",
+      "category": "business",
+      "home": "https://www.ezyvet.com/",
+      "documentation": [
+        "https://www.ezyvet.com/cloud-based-software",
+        "https://www.ezyvet.com/cloud-veterinary-software"
+      ],
+      "researchFocus": "Veterinary records, calendar, invoices and stock; confirm veterinary-specific privacy and clinic costs.",
+      "reviewStatus": "source_urls_identified_editorial_pending",
+      "planStatus": "unknown_pending_exact_vendor_tier_proof",
+      "affiliateRouteStatus": "not_verified",
+      "decisionClaimsStatus": "not_verified"
+    },
+    {
+      "slug": "guesty",
+      "name": "Guesty",
+      "industry": "short_term_rentals",
+      "category": "business",
+      "home": "https://www.guesty.com/",
+      "documentation": [
+        "https://help.guesty.com/hc/en-gb/articles/9391073145885-About-Guesty",
+        "https://www.guesty.com/features/channel-manager/airbnb/"
+      ],
+      "researchFocus": "Channel manager and reservations; manufacturer support and tier for intended property count.",
+      "reviewStatus": "source_urls_identified_editorial_pending",
+      "planStatus": "unknown_pending_exact_vendor_tier_proof",
+      "affiliateRouteStatus": "not_verified",
+      "decisionClaimsStatus": "not_verified"
+    },
+    {
+      "slug": "hostaway",
+      "name": "Hostaway",
+      "industry": "short_term_rentals",
+      "category": "business",
+      "home": "https://www.hostaway.com/",
+      "documentation": [
+        "https://www.hostaway.com/features/property-management-system/",
+        "https://www.hostaway.com/features/channel-manager/"
+      ],
+      "researchFocus": "Channel coverage, PMS features, operational task handling and current commercial quote.",
+      "reviewStatus": "source_urls_identified_editorial_pending",
+      "planStatus": "unknown_pending_exact_vendor_tier_proof",
+      "affiliateRouteStatus": "not_verified",
+      "decisionClaimsStatus": "not_verified"
+    },
+    {
+      "slug": "lodgify",
+      "name": "Lodgify",
+      "industry": "short_term_rentals",
+      "category": "business",
+      "home": "https://www.lodgify.com/",
+      "documentation": [
+        "https://www.lodgify.com/all-features/",
+        "https://www.lodgify.com/vacation-rental-channel-manager/"
+      ],
+      "researchFocus": "Direct booking and channel synchronization; free trial not equal to perpetual free plan.",
+      "reviewStatus": "source_urls_identified_editorial_pending",
+      "planStatus": "unknown_pending_exact_vendor_tier_proof",
+      "affiliateRouteStatus": "not_verified",
+      "decisionClaimsStatus": "not_verified"
+    }
+  ]
+}
