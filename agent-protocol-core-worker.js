@@ -468,11 +468,11 @@ function explicitTextMatch(tool,value){
   return fields.some(field=>field===needle||field.includes(' '+needle+' ')||field.startsWith(needle+' ')||field.endsWith(' '+needle));
 }
 function priceCeiling(raw){
-  const value=String(raw||''),currency=(/[€]|\bEUR\b/i.test(value)?'EUR':null)||(/[$]|\bUSD\b/i.test(value)?'USD':null);
+  const value=String(raw||''),currency=(/[€]|\bEUR\b/i.test(value)?'EUR':null)||(/[$]|\bUSD\b/i.test(value)?'USD':null)||(/[£]|\bGBP\b/i.test(value)?'GBP':null);
   if(!currency)return null;
-  const tokens=value.match(/(?:[€$]|\b(?:EUR|USD)\b)\s*(\d+(?:[.,]\d{1,2})?)|(\d+(?:[.,]\d{1,2})?)\s*(?:[€$]|\b(?:EUR|USD)\b)/i);
+  const tokens=value.match(/(?:[€$£]|\b(?:EUR|USD|GBP)\b)\s*(\d+(?:[.,]\d{1,2})?)|(\d+(?:[.,]\d{1,2})?)\s*(?:[€$£]|\b(?:EUR|USD|GBP)\b)/i);
   if(!tokens)return {invalid:true,reason:'Price and currency amount must be explicit; no numeric budget can be inferred.'};
-  if((/[€]|\bEUR\b/i.test(value))&&(/[$]|\bUSD\b/i.test(value)))return {invalid:true,reason:'Mixed EUR and USD price limits are not comparable without an explicit FX rate.'};
+  if([/[€]|\bEUR\b/i.test(value),/[$]|\bUSD\b/i.test(value),/[£]|\bGBP\b/i.test(value)].filter(Boolean).length>1)return {invalid:true,reason:'Mixed EUR and USD price limits are not comparable without an explicit FX rate.'};
   const amount=Number((tokens[1]||tokens[2]).replace(',','.'));
   if(!Number.isFinite(amount)||amount<0)return {invalid:true,reason:'Unsupported price number.'};
   const normalized=value.toLowerCase();
@@ -582,7 +582,7 @@ function constraintEvidence(tool,constraints=[],budget=null,country=null){
 function hardBuyerConstraint(value){
   if(priceCeiling(value))return true;
   const normalized=catalogNormalize(value);
-  if(/(?:[€$]|\b(?:EUR|USD)\b)\s*\d|\d\s*(?:[€$]|\b(?:EUR|USD)\b)/i.test(String(value||'')))return true;
+  if(/(?:[€$£]|\b(?:EUR|USD|GBP)\b)\s*\d|\d\s*(?:[€$£]|\b(?:EUR|USD|GBP)\b)/i.test(String(value||'')))return true;
   if(/\b(?:at least|minimum)\s+\d+\s+(?:stored\s+|automation\s+|active\s+|open\s+|monthly\s+|daily\s+)?(?:tasks|users|seats|channels|accounts|emails|contacts|responses|submissions|collaborators|records|spaces|funnels|workflows|credits|events|automations|teams|urls|forms|pipelines|deals|calendars|inboxes)\b/.test(normalized))return true;
   return /^(?:must\b|mandatory\b|required\b|require\b|requires\b|only\b|no\b|without\b|cannot\b|need\s+to\b|needs\s+to\b|has\s+to\b|have\s+to\b)/.test(normalized);
 }
