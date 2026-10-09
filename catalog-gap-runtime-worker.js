@@ -1,4 +1,4 @@
-import {auditCatalogTool} from './catalog-quality-runtime.js';
+import {auditCatalogTool,hasManufacturerDecisionClaim} from './catalog-quality-runtime.js';
 const BASE='https://trytoolscout.org';
 const TIMEOUT=12000;
 const PROFILE_HINTS=Object.freeze({
@@ -291,7 +291,7 @@ export async function executeCatalogGrowthTask(env,task={}){
   const decisionGrade=String(documentedReview?.summary||'').trim().length>=260&&String(documentedReview?.angle||'').trim().length>=20&&
     String(documentedReview?.buyerCheck||'').trim().length>=60&&datedSources.length>=2&&
     (hint?.strengths||[]).length>=2&&(hint?.limitations||[]).length>=2&&(hint?.tradeoffs||[]).length>=1&&
-    Boolean(hint?.pricingDetails?.freePlanStatus);
+    Boolean(hint?.pricingDetails?.freePlanStatus)&&hasManufacturerDecisionClaim(hint);
   if(!documentedReview?.summary||documentedReview.verificationStatus==='catalog_only'||documentedReview?.handsOnTested===true||!datedDocument||!ownedDoc(documentedSource)||!decisionGrade){
     await env.DB.prepare("UPDATE catalog_market_gaps SET status='research_required',updated_at=datetime('now') WHERE tool_slug=?").bind(slug).run().catch(()=>{});
     return{ok:true,verified:false,admitted:false,reason:'manufacturer_editorial_documentation_required',slug};

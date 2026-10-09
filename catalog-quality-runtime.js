@@ -108,6 +108,28 @@ export async function resolveCatalogLogo(env,tool,{officialPage=null}={}){
     page
   };
 }
+// Admission-only decision evidence gate. A polished review and two supplier pages
+// are necessary but not sufficient: at least one concrete, dated, first-party
+// product claim must be available to the plan/feature decision engine.
+export function hasManufacturerDecisionClaim(tool){
+  let home=null;
+  try{home=new URL(String(tool?.sourceUrl||''));if(home.protocol!=='https:')return false}catch{return false}
+  const root=home.hostname.replace(/^www\./,'').toLowerCase();
+  const isOwned=url=>{
+    try{
+      const doc=new URL(String(url||'')),host=doc.hostname.replace(/^www\./,'').toLowerCase();
+      return doc.protocol==='https:'&&doc.pathname!=='/'&&(host===root||host.endsWith('.'+root));
+    }catch{return false}
+  };
+  return (Array.isArray(tool?.decisionClaims)?tool.decisionClaims:[]).some(claim=>
+    claim&&claim.status==='verified'&&
+    typeof claim.type==='string'&&claim.type.trim().length>0&&
+    (typeof claim.value==='string'?claim.value.trim().length>0:claim.value!==null&&claim.value!==undefined)&&
+    /^\d{4}-\d{2}-\d{2}$/.test(String(claim.verifiedAt||''))&&
+    !Number.isNaN(Date.parse(claim.verifiedAt))&&isOwned(claim.sourceUrl)
+  );
+}
+
 export function structuralCatalogIssues(tool){
   const issues=[];
   const required=['slug','name','category','description','pricing','features','bestFor','sourceUrl','scores'];
