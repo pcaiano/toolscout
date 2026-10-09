@@ -389,7 +389,7 @@ function manufacturerClaim(tool,kind,value){
     const date=String(claim.verifiedAt||''),source=String(claim.sourceUrl||'');
     if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!/^https:\/\//i.test(source))continue;
     const checked=new Date(date+'T00:00:00Z');
-    if(!Number.isFinite(checked.valueOf())||checked.toISOString().slice(0,10)!==date||checked.valueOf()>Date.now())continue;
+    if(!Number.isFinite(checked.valueOf())||checked.toISOString().slice(0,10)!==date||checked.valueOf()>Date.now()||Date.now()-checked.valueOf()>180*86400000)continue;
     try{
       const host=new URL(source).hostname.replace(/^www\./,'');
       const vendor=tool?.sourceUrl?new URL(tool.sourceUrl).hostname.replace(/^www\./,''):null;
@@ -462,22 +462,22 @@ function constraintEvidence(tool,constraints=[],budget=null){
     const money=constraint.match(/(?:[€]|\bEUR\b)\s*(\d+(?:[.,]\d+)?)|(\d+(?:[.,]\d+)?)\s*(?:[€]|\bEUR\b)/i);
     if(money){
       const ceiling=Number((money[1]||money[2]).replace(',','.'));
-      const prices=(tool?.decisionClaims||[]).filter(c=>c?.type==='price_eur_month'&&manufacturerClaim(tool,'price_eur_month',c.value)===c&&Number.isFinite(Number(c.amount))&&c.plan&&c.billingCycle==='monthly');
+      const prices=(tool?.decisionClaims||[]).filter(c=>c?.type==='price_eur_month'&&manufacturerClaim(tool,'price_eur_month',c.value)===c&&Number.isFinite(Number(c.amount))&&c.plan&&c.billingCycle==='monthly'&&(budget!=='free'||catalogNormalize(c.plan)==='free'));
       if(!prices.length)return {constraint,status:'not_verified',evidence:'No dated manufacturer evidence for a comparable monthly EUR price and plan entitlement.'};
       const affordable=prices.filter(c=>Number(c.amount)<=ceiling).sort((a,b)=>Number(a.amount)-Number(b.amount))[0];
       return affordable
         ?{constraint,status:'verified',evidence:'Documented monthly EUR price for the named plan is within the requested ceiling.',plan:affordable.plan,amount_eur_month:Number(affordable.amount),verified_at:affordable.verifiedAt}
-        :{constraint,status:'conflict',evidence:'Documented monthly EUR plans in ToolScout exceed the requested ceiling; other rates are not assumed.'};
+        :{constraint,status:'not_verified',evidence:'No documented plan currently proves that the monthly EUR ceiling can be met; other rates are unknown.'};
     }
     const volume=norm.match(/(?:at least|minimum|need|requires?|must support|support)\s+(\d+)\s+(tasks|users|seats|channels|accounts)\s*(?:per month|monthly)?/);
     if(volume){
       const qty=Number(volume[1]),unit=volume[2];
-      const limits=(tool?.decisionClaims||[]).filter(c=>c?.type==='plan_limit'&&manufacturerClaim(tool,'plan_limit',c.value)===c&&c.unit===unit&&Number.isFinite(Number(c.quantity))&&c.plan);
+      const limits=(tool?.decisionClaims||[]).filter(c=>c?.type==='plan_limit'&&manufacturerClaim(tool,'plan_limit',c.value)===c&&c.unit===unit&&Number.isFinite(Number(c.quantity))&&c.plan&&(budget!=='free'||catalogNormalize(c.plan)==='free'));
       if(!limits.length)return {constraint,status:'not_verified',evidence:'No plan-specific documented capacity for '+unit+'.'};
       const suitable=limits.find(c=>Number(c.quantity)>=qty);
       return suitable
         ?{constraint,status:'verified',evidence:'Manufacturer-documented plan capacity meets the requested volume.',plan:suitable.plan,quantity:Number(suitable.quantity),unit,verified_at:suitable.verifiedAt}
-        :{constraint,status:'conflict',evidence:'Recorded plan capacities fall below the requested volume; higher unrecorded tiers are not assumed.'};
+        :{constraint,status:'not_verified',evidence:'No documented eligible plan meets the requested volume; higher or unrecorded tiers remain unknown.'};
     }
     const freeIntent=/^(?:must |need |needs |require |requires |required |only )?(?:free|free plan|no cost)(?: only)?$/.test(norm);
     if(freeIntent){
