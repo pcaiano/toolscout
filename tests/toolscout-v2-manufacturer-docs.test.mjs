@@ -80,3 +80,39 @@ test('scheduled trusted catalog admissions require dated manufacturer proof',()=
  assert.equal(trustedManufacturerEvidence(forged),false);
  assert.match(fs.readFileSync(new URL('../catalog-autonomy-worker.js',import.meta.url),'utf8'),/if\(!trustedManufacturerEvidence\(raw\)\)/);
 });
+
+test('future catalog additions require a real buying analysis and two dated manufacturer documents',()=>{
+ const catalog=read('data/tools.json'),pending=read('data/vendor-evidence-backlog.json').pendingSlugs;
+ const sourceA='https://vendor-quality.example/docs/capabilities';
+ const sourceB='https://vendor-quality.example/docs/pricing';
+ const review={
+   verificationStatus:'vendor_documented',
+   angle:'Product-specific opportunity cost for a technical buying team',
+   summary:'This tool has a documented workflow that suits a specific customer and offers distinct strengths. It also imposes clear limits that buyers should evaluate carefully before committing to a plan. Teams should test the feature configuration, access rules, price limits and operational handoffs with a real use case rather than accepting a generic headline ranking.',
+   buyerCheck:'Configure a real end-to-end scenario, evaluate plan limits and measure approval and delivery effort.',
+   sourceUrl:sourceA,sourceUrls:[sourceA,sourceB],handsOnTested:false
+ };
+ const sample={
+   slug:'quality-new-tool',name:'Quality New Tool',category:'crm',sourceUrl:'https://vendor-quality.example/',
+   description:'Manufacturer-documented specialist CRM for buyer teams.',
+   pricing:'See vendor for current pricing',freePlan:false,
+   features:['leads','deals','workflow'],bestFor:['sales teams','buyers'],
+   strengths:['configurable records','structured workflow'],
+   limitations:['setup effort','paid plan constraints'],
+   tradeoffs:['speed versus configuration overhead'],
+   pricingDetails:{freePlanStatus:'unverified'},
+   editorialReview:review,
+   evidence:[sourceA,sourceB].map(sourceUrl=>({claimScope:'toolscout_editorial_review',sourceUrl,verifiedAt:'2026-10-09'}))
+ };
+ assert.deepEqual(vendorEvidenceIssues([...catalog,sample],pending,[sample.slug]),[]);
+ assert.equal(trustedManufacturerEvidence(sample,{decisionGrade:true}),true);
+ const oneSource={...sample,evidence:sample.evidence.slice(0,1)};
+ assert.match(vendorEvidenceIssues([...catalog,oneSource],pending,[oneSource.slug]).join(' '),/Two distinct dated manufacturer documentation pages/);
+ assert.equal(trustedManufacturerEvidence(oneSource,{decisionGrade:true}),false);
+ const shallow={...sample,editorialReview:{...review,summary:'Generic helpful software.'}};
+ assert.match(vendorEvidenceIssues([...catalog,shallow],pending,[shallow.slug]).join(' '),/Decision-grade analysis/);
+ assert.equal(trustedManufacturerEvidence(shallow,{decisionGrade:true}),false);
+ const noTradeoff={...sample,tradeoffs:[]};
+ assert.match(vendorEvidenceIssues([...catalog,noTradeoff],pending,[noTradeoff.slug]).join(' '),/Explicit strengths, limitations and tradeoffs/);
+ assert.equal(trustedManufacturerEvidence(noTradeoff,{decisionGrade:true}),false);
+});
