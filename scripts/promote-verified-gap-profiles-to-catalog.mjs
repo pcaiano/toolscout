@@ -139,8 +139,8 @@ if (policy.autoPromoteVerifiedCompetitiveGapProfiles !== false) {
     const reviewSource=review?.sourceUrl;
     const evidence=Array.isArray(profile?.evidence)?profile.evidence:[];
     const documentSource=evidence.some(x=>x?.claimScope==='toolscout_editorial_review'&&x?.sourceUrl===reviewSource&&/^\d{4}-\d{2}-\d{2}$/.test(x?.verifiedAt||''));
-    const officialHost=(()=>{try{return new URL(source.finalUrl||profile.sourceUrl).hostname.replace(/^www\\./,'')}catch{return''}})();
-    const firstPartyDocument=u=>{try{const d=new URL(u),h=d.hostname.replace(/^www\\./,'');return d.protocol==='https:'&&d.pathname!=='/'&&(h===officialHost||h.endsWith('.'+officialHost))}catch{return false}};
+    const officialHost=(()=>{try{return new URL(source.finalUrl||profile.sourceUrl).hostname.replace(/^www\./,'')}catch{return''}})();
+    const firstPartyDocument=u=>{try{const d=new URL(u),h=d.hostname.replace(/^www\./,'');return d.protocol==='https:'&&d.pathname!=='/'&&(h===officialHost||h.endsWith('.'+officialHost))}catch{return false}};
     const docs=[...new Set(Array.isArray(review?.sourceUrls)?review.sourceUrls:[])].filter(firstPartyDocument);
     const datedDocs=docs.filter(url=>evidence.some(x=>x?.claimScope==='toolscout_editorial_review'&&x?.sourceUrl===url&&/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(x?.verifiedAt||'')));
     const decisionGrade=String(review?.summary||'').trim().length>=260&&String(review?.angle||'').trim().length>=20&&
