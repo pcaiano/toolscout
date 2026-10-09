@@ -109,4 +109,15 @@ The independently verified second cohort adds ClickUp Unlimited and Business, Ai
 Airtable's self-serve Business has a documented private-domain email eligibility condition and distinct contributor billing permissions. Recorded seat prices are list-price references, not evidence a team with Gmail signups is eligible for Business. The publication does not claim regional EUR checkout evidence.
 
 `tests/toolscout-v2-seat-subtotals.test.mjs` covers 26 documented buyer scenarios including plan-specific feature inheritance, Airtable per-base record limits, annual invoices, billed-seat subtotals, country unknowns and protected all-in totals.
+## Webflow 2026 Site plan and HubSpot EUR price evidence (9 October 2026)
+
+Webflow now uses Site Basic and Site Premium rather than the older standalone CMS Site package. Webflow's own new-customer list prices are USD 15/month equivalent when Basic is billed annually (USD 180 invoice), and USD 25/month equivalent for Premium (USD 300 invoice), excluding tax. Site Premium is documented with a CMS and site search; Basic includes custom-domain publishing but does not satisfy a buyer demanding a content management system. A Site subscription is not a Workspace subscription: these quotes are for one site only, and are not transferable as evidence for separate workspace or seat add-ons.
+
+HubSpot's official euro sales pricing page advertises a regular EUR 20 per core seat per month Starter list rate as well as a conditional EUR 7 introductory promotion for eligible new customers. To avoid treating the conditional offer as the universally available price, ToolScout records only the EUR 20 standard reference price. Both regional checkout availability and VAT remain unknown; no PT-specific quote or guaranteed post-tax invoice is claimed. The same vendor price page verifies that the Free Sales CRM permits up to two users.
+
+The cohort now contains 29 manufacturer price quotes across eight tools: 28 USD records and one EUR regular list-price record. One EUR record does not establish broad EU market coverage.
+
+## Independent production MCP tool invocation
+
+After changes reach `main`, the existing `.github/workflows/toolscout-v2-integrity-audit.yml` calls `scripts/probe-live-mcp-decision.mjs` from a GitHub-hosted runner. This is a genuine external network POST to the public `/mcp` endpoint, **not** an in-memory mock. The probe waits for the exact new price cohort to appear in the live catalog, then reads live `tools/list`, submits buyer decisions for Webflow Premium and HubSpot EUR, and verifies that a too-cheap Webflow quote cannot satisfy a CMS requirement. It checks `/go/` URLs and that manufacturer documentation URLs do not appear in the MCP response. Failure leaves the Integrity workflow red; success is evidenced by the GitHub job log. The workflow is the existing owner, not a new deployment mechanism. The CI syntax-checks this probe and tests the logic locally before any deploy.
 No new GitHub Actions deployment route: Cloudflare Workers Builds continues to publish merged `main` commits automatically; GitHub Actions recovery remains manual-only.
