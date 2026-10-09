@@ -67,11 +67,27 @@ async function d1CatalogPublicRoute(env,tool){
 async function trackedRedirect(request,env,tool){
   try{
     const config=await (await env.ASSETS.fetch(new Request(new URL('/data/affiliate.json',request.url)))).json();
-    const staticEntry=config[tool]||null,[d1Route,catalogPublic]=await Promise.all([d1AffiliateRoute(env,tool),d1CatalogPublicRoute(env,tool)]);
+    const staticEntry=config[tool]||null;
+    const [d1Route,catalogPublic,staticTools]=await Promise.all([
+      d1AffiliateRoute(env,tool),
+      d1CatalogPublicRoute(env,tool),
+      env.ASSETS.fetch(new Request(new URL('/data/tools.json',request.url)))
+        .then(async response=>response.ok?response.json():[])
+        .catch(()=>[])
+    ]);
+    // The live affiliate ledger takes priority over bundled routes. A product
+    // without any active affiliate must still navigate to its actual vendor,
+    // never loop back into the ToolScout tools index.
     const routeEntry=d1Route?{...(staticEntry||{}),enabled:true,url:d1Route.affiliate_url}:staticEntry;
     const affiliateActive=Boolean(routeEntry?.enabled&&safeAffiliateUrl(routeEntry?.url));
-    const baseDestination=affiliateActive?routeEntry.url:(staticEntry?.publicUrl||catalogPublic);
+    const catalogTool=Array.isArray(staticTools)?staticTools.find(item=>item?.slug===tool):null;
+    const publicDestination=safeAffiliateUrl(staticEntry?.publicUrl)
+      ||safeAffiliateUrl(catalogPublic)
+      ||safeAffiliateUrl(catalogTool?.sourceUrl);
+    const baseDestination=affiliateActive?safeAffiliateUrl(routeEntry.url):publicDestination;
     if(!baseDestination)return null;
+    const parsedDestination=new URL(baseDestination);
+    if(parsedDestination.hostname==='trytoolscout.org'&&/^\/(?:tools(?:\/|$)|go(?:\/|$))/.test(parsedDestination.pathname))return null;
     const healthCheck=request.headers.get('X-ToolScout-Health-Check')==='affiliate-route';
     const referrer=request.headers.get('Referer')||request.headers.get('Referrer')||'';
     let seoIntent='general',referrerHost=null;
