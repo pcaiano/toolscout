@@ -428,7 +428,7 @@ function requirementMatch(tool,requirement,{exclude=false,budget=null}={}){
   const claim=manufacturerClaim(tool,'capability',needle)||manufacturerClaim(tool,'integration',needle);
   if(claim){
     if(budget==='free'&&!exclude&&!verifiedPlans(claim).some(plan=>freeTierMatches(tool,plan)))return {matched:false,strength:0,status:claim.notAvailableOnFree===true?'conflict':'not_verified',evidence:claim.notAvailableOnFree===true?'Manufacturer confirms the capability is unavailable on Free.':'A Free-plan entitlement for this capability is not documented.',plan:claim.plan||null,eligible_plans:verifiedPlans(claim)};
-    return {matched:true,strength:1,status:'verified',evidence:'Dated manufacturer evidence for the exact requested capability.',verified_at:claim.verifiedAt,plan:claim.plan||null};
+    return {matched:true,strength:1,status:'verified',evidence:'Dated manufacturer evidence for the exact requested capability.',verified_at:claim.verifiedAt,plan:claim.plan||null,eligible_plans:verifiedPlans(claim)};
   }
   const declared=[tool?.category,...(Array.isArray(tool?.features)?tool.features:[])];
   const listed=declared.map(catalogNormalize).filter(Boolean).some(value=>value===needle||(' '+value+' ').includes(' '+needle+' '));
@@ -585,7 +585,7 @@ function constraintEvidence(tool,constraints=[],budget=null,country=null){
     const exact=manufacturerClaim(tool,'capability',stripped)||manufacturerClaim(tool,'capability',norm)||manufacturerClaim(tool,'integration',integrationName);
     if(exact){
       if(budget==='free'&&!verifiedPlans(exact).some(plan=>freeTierMatches(tool,plan)))return {constraint,status:exact.notAvailableOnFree===true?'conflict':'not_verified',evidence:exact.notAvailableOnFree===true?'Manufacturer confirms the capability is unavailable on Free.':'No Free-plan entitlement recorded for this capability.',plan:exact.plan||null,eligible_plans:verifiedPlans(exact)};
-      return {constraint,status:'verified',evidence:'Dated manufacturer documentation proves this exact capability.',verified_at:exact.verifiedAt,plan:exact.plan||null};
+      return {constraint,status:'verified',evidence:'Dated manufacturer documentation proves this exact capability.',verified_at:exact.verifiedAt,plan:exact.plan||null,eligible_plans:verifiedPlans(exact)};
     }
     if(tool?.editorialReview?.verificationStatus==='vendor_documented')
       return {constraint,status:'not_verified',evidence:'Product documentation exists, but this individual requirement and plan are not independently evidenced.'};
