@@ -45,8 +45,14 @@ async function renderResults(q,profile={},run=recommendationRun){
     trackSearch(null,p,'business-workflow-guidance');
     trackFunnel('recommendation_unresolved',{intent_slug:'business-workflow-guidance'});
     const intro='<div class="profile-card"><div><span class="eyebrow">Understand your business need</span><h2>'+finderEsc(guidance.title||'Choose your main task')+'</h2><p class="broad-note">'+finderEsc(guidance.explanation||'')+'</p>'+(guidance.specialist_requirements?.length?'<p class="broad-note"><strong>Specialist systems to assess separately:</strong> '+guidance.specialist_requirements.map(finderEsc).join('; ')+'</p>':'')+'</div></div>';
-    const cards=workflows.map(w=>'<article class="result-card workflow-option"><div class="meta">'+finderEsc(w.category)+'</div><h3>'+finderEsc(w.title)+'</h3><p>'+finderEsc(w.scope)+'</p><p class="buyer-guidance">'+finderEsc(w.catalog_coverage>0?w.catalog_coverage+' general-category products in the catalog; sector-specific fit is not established.':'Catalog gap: no documented option currently in this category.')+'</p><button class="btn workflow-select" type="button" data-job="'+finderEsc(w.job)+'">Find tools for this task →</button></article>').join('');
-    o.innerHTML=intro+cards;
+    const cards=workflows.map(w=>{
+      const examples=(w.category_examples||[]).slice(0,2).map(t=>'<a href="/tools/'+encodeURIComponent(t.slug)+'" class="textLink">'+finderEsc(t.name)+'</a>').join(' · ');
+      return '<article class="result-card workflow-option"><div class="meta">'+finderEsc(w.category)+'</div><h3>'+finderEsc(w.title)+'</h3>'
+        +'<p>'+finderEsc(w.scope)+'</p><p class="buyer-guidance">'+finderEsc(w.catalog_coverage>0?w.catalog_coverage+' documented general-category products; sector fit remains unverified.':'Coverage gap: no documented catalog option in this category.')+'</p>'
+        +(examples?'<p class="buyer-guidance"><strong>Catalog examples, not specialist winners:</strong> '+examples+'</p>':'')
+        +'<button class="btn workflow-select" type="button" data-job="'+finderEsc(w.job)+'">Compare tools for this task →</button></article>';
+    }).join('');
+        o.innerHTML=intro+cards;
     o.querySelectorAll('.workflow-select').forEach(button=>button.addEventListener('click',()=>{
       const job=button.dataset.job;const input=document.getElementById('need');if(input)input.value=job;
       runRecommendation(job,{});
