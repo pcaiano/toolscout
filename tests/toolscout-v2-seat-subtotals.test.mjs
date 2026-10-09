@@ -78,9 +78,9 @@ test('Legacy full checkout budget cannot be inferred from a known pre-tax quote'
  assert.ok(!out.structuredContent?.shortlist?.some(t=>t.slug==='clickup'));
  assert.ok(!out.structuredContent?.shortlist?.some(t=>t.slug==='asana'));
 });
-test('The catalog now has 29 manufacturer-sourced quotes across eight products',()=>{
+test('The catalog now has 31 manufacturer-sourced quotes across eight products',()=>{
  const q=catalog.flatMap(t=>(t.decisionClaims||[]).filter(c=>c.type==='price_quote').map(c=>({slug:t.slug,...c})));
- assert.equal(q.length,29);
+ assert.equal(q.length,31);
  assert.equal(new Set(q.map(c=>c.slug)).size,8);
  assert.ok(q.every(c=>c.unit==='seat'||c.unit==='channel'||c.unit==='subscription'));
 });

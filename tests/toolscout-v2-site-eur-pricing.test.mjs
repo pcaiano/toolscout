@@ -18,7 +18,7 @@ const testcases=[
  ['Webflow Basic does not include CMS', 'website builder',{constraints:['under $16/month billed annually'],must_have:['content management system']},'webflow',null,null],
  ['Webflow Basic includes custom domain', 'website builder',{constraints:['under $16/month billed annually'],must_have:['custom domain']},'webflow','Site Basic',15],
  ['Webflow Basic below price floor', 'website builder',{constraints:['under $14/month billed annually'],must_have:['custom domain']},'webflow',null,null],
- ['Webflow monthly invoice unproven', 'website builder',{constraints:['under $26/month billed monthly'],must_have:['content management system']},'webflow',null,null],
+ ['Webflow CMS unavailable at Basic monthly price', 'website builder',{constraints:['under $26/month billed monthly'],must_have:['content management system']},'webflow',null,null],
  ['Webflow EUR exchange rates unavailable', 'website builder',{constraints:['under €26/month billed annually'],must_have:['content management system']},'webflow',null,null],
  ['Webflow Portugal checkout unavailable', 'website builder',{country:'PT',constraints:['under $26/month billed annually'],must_have:['content management system']},'webflow',null,null],
  ['HubSpot regular list EUR price', 'crm',{constraints:['under €25/month per user']},'hubspot','Starter',20],
@@ -51,8 +51,9 @@ test('vendor quotes are dated, site-scoped and reject unwarranted permanent disc
   const web=catalog.find(x=>x.slug==='webflow');
   const hub=catalog.find(x=>x.slug==='hubspot');
   const quotes=[...web.decisionClaims.filter(x=>x.type==='price_quote'),...hub.decisionClaims.filter(x=>x.type==='price_quote')];
-  assert.equal(quotes.length,3);
+  assert.equal(quotes.length,5);
   assert.ok(quotes.every(x=>x.status==='verified'&&x.verifiedAt==='2026-10-09'&&x.sourceUrl.startsWith('https://')));
-  assert.ok(web.decisionClaims.filter(x=>x.type==='price_quote').every(x=>x.unit==='subscription'&&x.billingCycle==='annual'));
+  assert.ok(web.decisionClaims.filter(x=>x.type==='price_quote').every(x=>x.unit==='subscription'&&['annual','monthly'].includes(x.billingCycle)));
+  assert.equal(web.decisionClaims.filter(x=>x.type==='price_quote'&&x.billingCycle==='monthly').length,2);
   assert.ok(hub.decisionClaims.filter(x=>x.type==='price_quote').every(x=>x.currency==='EUR'&&x.promotion===false&&x.market==='unspecified'));
 });

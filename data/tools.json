@@ -5404,6 +5404,42 @@
         "status": "verified",
         "verifiedAt": "2026-10-09",
         "sourceUrl": "https://webflow.com/pricing"
+      },
+      {
+        "type": "price_quote",
+        "value": "site basic monthly usd per site",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://help.webflow.com/hc/en-us/articles/51059955082387-Updated-pricing-and-simplified-plans-for-May-2026",
+        "plan": "Site Basic",
+        "currency": "USD",
+        "amount": 25,
+        "chargeAmount": 25,
+        "billingCycle": "monthly",
+        "market": "unspecified",
+        "taxStatus": "excluded",
+        "unit": "subscription",
+        "unitQuantity": 1,
+        "promotion": false,
+        "pricingScope": "One paid Webflow Site plan billed monthly; excludes Workspace fees, seats, addons and checkout taxes"
+      },
+      {
+        "type": "price_quote",
+        "value": "site premium monthly usd per site",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://help.webflow.com/hc/en-us/articles/51059955082387-Updated-pricing-and-simplified-plans-for-May-2026",
+        "plan": "Site Premium",
+        "currency": "USD",
+        "amount": 39,
+        "chargeAmount": 39,
+        "billingCycle": "monthly",
+        "market": "unspecified",
+        "taxStatus": "excluded",
+        "unit": "subscription",
+        "unitQuantity": 1,
+        "promotion": false,
+        "pricingScope": "One paid Webflow Site plan billed monthly; excludes Workspace fees, seats, addons and checkout taxes"
       }
     ]
   },
