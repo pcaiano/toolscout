@@ -4,9 +4,10 @@ import { runWithLedger } from './engine-run-ledger.js';
 import { renderRuntimeRanking } from './catalog-runtime-ranking.js';
 import {auditCatalogTool,mapLimit,hasManufacturerDecisionClaim} from './catalog-quality-runtime.js';
 import {hydrateLegacyCatalogProfile} from './catalog-profile-hydration.js';
+import {verifyManufacturerDocuments} from './catalog-manufacturer-document-watch.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
-const MAX_VERIFY_PER_CYCLE=4;
+const MAX_VERIFY_PER_CYCLE=4; // every two hours: 48 tools/day, target full catalog scan <= 72 hours
 const MAX_NEWS_SOURCE_CHECKS_PER_CYCLE=4;
 const MAX_ADMIT_PER_DAY=6;
 const MAX_BASELINE_SEED_PER_CYCLE=40; // bounded migration inside the existing catalog autonomy engine
@@ -151,6 +152,14 @@ async function logEvent(env,slug,type,status,detail,evidence=null){
   await env.DB.prepare(`INSERT INTO catalog_runtime_events(event_id,tool_slug,event_type,status,detail,evidence_json,created_at) VALUES(?,?,?,?,?,?,datetime('now'))`)
     .bind(`cat_${crypto.randomUUID()}`,slug||null,type,status,safeText(detail,2000),JSON.stringify(evidence||null).slice(0,8000)).run().catch(()=>{});
 }
+// Unlike best-effort lifecycle logs, the documentation-watch baseline is
+// durable evidence. Never report it as saved if the database write fails.
+async function persistManufacturerWatchEvent(env,slug,eventType,status,detail,evidence){
+  const result=await env.DB.prepare(`INSERT INTO catalog_runtime_events(event_id,tool_slug,event_type,status,detail,evidence_json,created_at) VALUES(?,?,?,?,?,?,datetime('now'))`)
+    .bind('cat_'+crypto.randomUUID(),slug,eventType,status,safeText(detail,2000),JSON.stringify(evidence||null).slice(0,8000)).run();
+  if(result?.success===false)throw new Error('manufacturer_documentation_event_not_persisted');
+}
+
 function compileRuntimeSnapshot(stateRows=[],candidateRows=[],meta={}){
   const stateMap=new Map((stateRows||[]).map(row=>[String(row.tool_slug),row])),parsed=[];
   const baselineMirrors=new Set((candidateRows||[]).filter(row=>row.source_status==='baseline_snapshot').map(row=>String(row.tool_slug||'').toLowerCase()));
@@ -314,7 +323,7 @@ export async function verifyBatch(env){
     ...retryWarning.slice(0,MAX_WARNING_RETRIES_PER_CYCLE).map(x=>x.tool),
     ...regular.map(x=>x.tool)
   ].slice(0,MAX_VERIFY_PER_CYCLE);
-  let checked=0,healthy=0,changed=0,suppressed=0,warnings=0;
+  let checked=0,healthy=0,changed=0,suppressed=0,warnings=0,documentationChecked=0,documentationChanged=0,documentationWarnings=0,documentationBaselined=0;
   await mapLimit(chosen,2,async tool=>{
     const slug=String(tool.slug).toLowerCase(),prior=smap.get(slug)||{},verifyUrl=verificationUrl(tool),verificationSourceChanged=Boolean(prior.source_url&&prior.source_url!==verifyUrl),result=await fetchOfficial(verifyUrl),staticVerified=String(tool.lastVerified||tool.sourceCheckedOn||'');
     const staticVerifiedMs=staticVerified?Date.parse(/T/.test(staticVerified)?staticVerified:`${staticVerified}T00:00:00Z`):NaN;
@@ -324,6 +333,12 @@ export async function verifyBatch(env){
     const reviewedSinceChange=Boolean(prior.last_change_at&&prior.static_last_verified&&staticVerified&&staticVerified!==prior.static_last_verified);
     const fingerprintChanged=result.status==='ok'&&prior.fingerprint&&result.fingerprint&&result.fingerprint!==prior.fingerprint;
     const broken=result.status==='broken'?Number(prior.broken_consecutive||0)+1:0;
+    const documentation=await verifyManufacturerDocuments(env,tool,{fetchDocument:fetchOfficial,hash:sha,writeEvent:persistManufacturerWatchEvent})
+      .catch(error=>({status:'documentation_warning',checked:0,changed:false,error:safeText(error?.message||error,250)}));
+    documentationChecked+=Number(documentation.checked||0);
+    if(documentation.status==='baselined')documentationBaselined++;
+    if(documentation.status==='documentation_warning')documentationWarnings++;
+    if(documentation.changed)documentationChanged++;
     let quality=String(prior.quality_status||'unverified'),contentChanged=Number(prior.content_changed||0),lastChange=prior.last_change_at||null;
     let canonicalFingerprint=prior.fingerprint||result.fingerprint||null,pendingFingerprint=prior.pending_fingerprint||null,confirmations=Number(prior.change_confirmations||0);
     if(reviewedSinceChange){quality='healthy';contentChanged=0;lastChange=null;canonicalFingerprint=result.fingerprint||canonicalFingerprint;pendingFingerprint=null;confirmations=0}
@@ -339,6 +354,13 @@ export async function verifyBatch(env){
     }else if(result.status==='ok'&&result.fingerprint===prior.fingerprint){
       pendingFingerprint=null;confirmations=0;if(!prior.last_change_at){quality='healthy';contentChanged=0;healthy++}
     }
+    if(documentation.changed&&!reviewedSinceChange&&quality!=='confirmed_broken'){
+      if(quality!=='change_detected')changed++;
+      quality='change_detected';contentChanged=1;lastChange=new Date().toISOString().replace('T',' ').slice(0,19);
+    }else if(documentation.status==='documentation_warning'&&quality==='healthy'&&!lastChange){
+      // Document access failure is not proof that a product feature disappeared.
+      quality='source_warning';
+    }
     if(broken>=2){quality='confirmed_broken';contentChanged=0;pendingFingerprint=null;confirmations=0;suppressed++;await logEvent(env,slug,'catalog_tool_suppressed','completed','Official source returned a confirmed 404/410 on two consecutive runtime checks.',{source_url:verifyUrl,http_status:result.httpStatus})}
     else if(result.status!=='ok'&&result.status!=='broken'){
       warnings++;
@@ -351,7 +373,7 @@ export async function verifyBatch(env){
       .bind(slug,verifyUrl,result.status,result.httpStatus,result.finalUrl,canonicalFingerprint,pendingFingerprint,confirmations,contentChanged,broken,quality,staticVerified,lastChange).run();
   });
   runtimeCache.at=0;
-  return{ok:true,checked,healthy,changed,suppressed,warnings,batch_limit:MAX_VERIFY_PER_CYCLE,warning_retry_hours:WARNING_RETRY_HOURS,max_warning_retries_per_cycle:MAX_WARNING_RETRIES_PER_CYCLE,evidence:'official_source_runtime',write_policy:'due_check_only'};
+  return{ok:true,checked,healthy,changed,suppressed,warnings,documentation_checked:documentationChecked,documentation_baselined:documentationBaselined,documentation_changed:documentationChanged,documentation_warnings:documentationWarnings,batch_limit:MAX_VERIFY_PER_CYCLE,warning_retry_hours:WARNING_RETRY_HOURS,max_warning_retries_per_cycle:MAX_WARNING_RETRIES_PER_CYCLE,evidence:'official_homepage_and_first_party_documentation',write_policy:'due_check_only'};
 }
 function validCandidate(candidate,config){
   const allowed=new Set(config?.admission?.allowedCatalogCategories||[]);
@@ -625,6 +647,7 @@ export async function publicQualityEnhancedToolResponse(response,env,slug){
   const proof=snapshot.verifiedRevisions?.has(key)&&trustedManufacturerEvidence(revision,{decisionGrade:true})&&hasManufacturerDecisionClaim(revision);
   const hydrated=proof?hydrateLegacyCatalogProfile(html,revision):null;
   if(hydrated)html=hydrated;
+  html=injectPendingReview(html,snapshot.stateMap.get(key));
   if(row?.logo_url){
     const logo=esc(row.logo_url);
     html=html.replace(/(<img class="toolLogo" src=")[^"]*(")/i,`$1${logo}$2`);
@@ -647,7 +670,7 @@ export async function publicRuntimeToolResponse(env,slug){
   // changed its source_status away from baseline_snapshot.
   const [snapshot,staticTools]=await Promise.all([runtimeSnapshot(env),assetJson(env,'/data/tools.json',[])]);
   if(snapshot.baselineMirrors?.has(key)||(Array.isArray(staticTools)&&staticTools.some(tool=>String(tool?.slug||'').toLowerCase()===key)))return null;
-  return new Response(candidatePage(candidate),{status:200,headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'public, max-age=60'}});
+  return new Response(injectPendingReview(candidatePage(candidate),state),{status:200,headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'public, max-age=60'}});
 }
 export async function publicMergedSitemap(response,env){return mergedSitemap(response,env)}
 export async function publicRuntimeRankingResponse(env,path){return renderRuntimeRanking(env,path,await mergedTools(env))}
