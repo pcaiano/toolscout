@@ -82,3 +82,14 @@ test('Unqualified integrations retain private first-party source URLs',async()=>
   assert.ok(!JSON.stringify(result).includes('help.typeform.com'));
   assert.ok(hit(result,'typeform')?.tool_url.startsWith('https://trytoolscout.org/go/typeform'));
 });
+test('AI assistant interoperability signal alone never proves a mandatory named app-pair entitlement',async()=>{
+  const synthetic=[{slug:'crm-ai-only',name:'CRM AI Only',category:'crm',
+    description:'A CRM with AI assistant interoperability',features:['crm','integrations'],
+    scores:{integrations:9,ease:8},aiIntegration:{status:'verified',assistants:['ChatGPT']}}];
+  const soft=await invoke('decide_software',{job:'crm',existing_tools:['ChatGPT'],limit:2},synthetic);
+  assert.equal(soft.structuredContent?.shortlist[0].stack_fit.pairs[0].status,'verified');
+  const mandatory=await invoke('decide_software',{job:'crm',existing_tools:['ChatGPT'],
+    require_stack_fit:true,limit:2},synthetic);
+  assert.equal(mandatory.isError,true);
+  assert.equal(mandatory.structuredContent?.decision_status,'no_qualified_candidate');
+});
