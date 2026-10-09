@@ -1,4 +1,4 @@
-import {businessWorkflowGuidance} from './business-workflow-intent.js';
+import {businessWorkflowGuidance,verifiedPmsCandidates} from './business-workflow-intent.js';
 import base from './distribution-command-worker.js';
 import { prioritizedDistributionFeed } from './distribution-feed-priority.js';
 import {recentDistributionAssets,handleMachineDiscoveryCatalogRoute} from './machine-discovery-catalog-runtime.js';
@@ -114,6 +114,7 @@ function scoreTool(t,q,intent,p={}){
   const exactName=nq===name;
   const category=p.goal||intent?.category||null,categoryMatches=category===t.category;
   if(t.rankingEligible===false||t.categoryReviewRequired===true)return -1;
+  if(t.category==='vacation-rental'&&!verifiedPmsCandidates([t]).length)return -1;
   if(p.budget==='free'&&!(t.freePlanKnown===true&&t.freePlan===true))return -1;
   if(category&&!categoryMatches&&!exactName)return -1;
   const phrases=[t.name,t.category,t.description,...(t.features||[]),...(t.bestFor||[])].map(x=>normalize(x).replace(/[^a-z0-9]+/g,' '));
@@ -166,7 +167,9 @@ async function recommend(request,env){
   const limit=Math.max(1,Math.min(5,Number.parseInt(u.searchParams.get('limit')||'3',10)||3));
   try{
     const [tools,intents]=await Promise.all([assetJson(request,env,'/data/tools.json'),assetJson(request,env,'/data/intents.json')]);
-    const p=inferredProfile(q,profile),guidance=businessWorkflowGuidance(q,p);
+    const p=inferredProfile(q,profile);
+    if(!p.goal&&/\b(airbnb|vacation rental|short.term rental|holiday rental|alojamento local)\b/.test(normalize(q))&&verifiedPmsCandidates(tools).length)p.goal='vacation-rental';
+    const guidance=businessWorkflowGuidance(q,p,tools);
     if(guidance)return Response.json({query:q,profile:p,intent:null,recommendation_type:'workflow_guidance',
       guidance,count:0,recommendations:[],ranking:'Workflow decomposition before vendor ranking',
       affiliate_disclosure:'ToolScout may earn a commission from some outbound links. Affiliate relationships do not influence recommendations.'},{headers:JSON_H});
