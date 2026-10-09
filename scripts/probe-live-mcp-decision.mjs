@@ -112,6 +112,8 @@ const inventory=await inventoryResponse.json();
 assert(inventory.ok&&inventory.storage?.primary==='cloudflare_d1','D1 canonical storage contract missing in production');
 assert(inventory.storage.baseline_total===127,'Unexpected legacy catalog count, migration may lose or duplicate profiles');
 assert(Number.isInteger(inventory.storage.seeded_baseline)&&inventory.storage.seeded_baseline>=0&&inventory.storage.seeded_baseline<=127,'Invalid migrated D1 count');
+assert(Number.isInteger(inventory.storage.baseline_present),'Missing canonical D1 migration count');
+assert(inventory.storage.baseline_present===inventory.storage.seeded_baseline+inventory.storage.baseline_revised,'D1 baseline and revised product counts differ');
 assert(inventory.storage.baseline_remaining===127-inventory.storage.baseline_present,'Migration progress includes revised D1 catalog profiles');
 assert(inventory.storage.legacy_html_preserved===true,'Public legacy HTML preservation contract missing');
 assert(inventory.total>=127,'Published merged catalog lost a legacy product');
