@@ -29,6 +29,9 @@ test('manufacturer document selection prefers plan evidence and two distinct own
   assert.equal(urls[0],tool.pricingDetails.sourceUrl);
   assert.ok(urls.every(url=>url.startsWith('https://systeme.io/')||url.startsWith('https://help.systeme.io/')));
   assert.deepEqual(monitoredManufacturerDocuments({...tool,sourceUrl:'https://hijacked.example',pricingDetails:{sourceUrl:'https://another.example/path'},editorialReview:{sourceUrls:['https://evil.example/docs']},decisionClaims:[]}),[]);
+  const chatgpt=all.find(x=>x.slug==='chatgpt');
+  assert.ok(monitoredManufacturerDocuments(chatgpt).some(url=>url.startsWith('https://help.openai.com/')),'must follow exact previously attested manufacturer evidence when brand and parent company domains differ');
+  assert.ok(all.filter(x=>monitoredManufacturerDocuments(x).length>0).length>=125,'original catalog contains missing documentary monitoring coverage');
 });
 test('first documentary scan is a baseline, not a freshness endorsement or auto-changed price',async()=>{
   const f=watchFixture();
