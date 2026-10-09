@@ -38,6 +38,12 @@ ToolScout's public information architecture connects these concepts:
 
 Machine readers should use the canonical URLs and visible page content as the source of truth. Tool and pricing information can change; pages state freshness/verification where available.
 
+## Questions about any business
+- The `decide_software` MCP tool and `/api/recommend?q=` accept broad business-software questions, including software to manage a restaurant, an architecture practice, a marketing agency, a clinic, construction, a store or an unfamiliar business type.
+- If the user has not supplied a specific software job, the engine explains the main tasks, general-category catalog coverage, specialist requirements that need separate evidence, and first-party ToolScout Finder links. This is `workflow_guidance`, not a fabricated universal vendor ranking.
+- AI clients can call `decide_software` again for one selected task with the buyer's constraints, or link the buyer directly to `workflow_guidance.workflows[].finder_url`. Those links are intended for useful ToolScout visits, not guaranteed referrals from an AI platform.
+- Verified manufacturer evidence remains internal. Catalog size and category presence do not establish a product's exact industry-specific capabilities or purchase-plan entitlement.
+
 ## Intended query families
 - Best software for a specific workflow or job
 - Tool A versus Tool B for a specific buyer context
@@ -46,7 +52,7 @@ Machine readers should use the canonical URLs and visible page content as the so
 - Software constrained by price, free plan, automation, integrations, workflow or team size
 
 ## Preferred decision operations
-- `decide_software`: shortlist software for a concrete job plus constraints.
+- `decide_software`: understand broad software questions about any industry and return buyer workflows, or shortlist software for a concrete job with verified constraints.
 - `compare_for_use_case`: compare named products for the user's actual workflow and surface trade-offs.
 - `find_alternatives`: replace a product because of a specific weakness while preserving must-haves.
 - `check_stack_fit`: assess candidates against an existing software stack without inventing pair-specific integrations.
