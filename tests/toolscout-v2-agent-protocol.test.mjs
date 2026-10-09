@@ -104,7 +104,7 @@ test('MCP decide_software does not recommend tools without evidence for mandator
   const shortlist=payload.result.structuredContent.shortlist;
   assert.equal(payload.result.isError,true);
   assert.deepEqual(payload.result.structuredContent.shortlist,[]);
-  assert.match(payload.result.content[0].text,/could not find enough catalog evidence/i);
+  assert.match(payload.result.content[0].text,/cannot qualify a recommendation with the current catalog evidence/i);
 });
 
 test('MCP stack fit never treats incidental text such as sales teams as Microsoft Teams evidence',async()=>{
