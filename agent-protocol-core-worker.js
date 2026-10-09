@@ -543,7 +543,7 @@ function constraintEvidence(tool,constraints=[],budget=null){
 function hardBuyerConstraint(value){
   const normalized=catalogNormalize(value);
   if(/(?:[€]|\bEUR\b)\s*\d|\d\s*(?:[€]|\bEUR\b)/i.test(String(value||'')))return true;
-  if(/\b(?:at least|minimum)\s+\d+\s+(?:stored\s+|automation\s+|active\s+|monthly\s+|daily\s+)?(?:tasks|users|seats|channels|accounts|emails|contacts|responses|submissions|collaborators|records|spaces|funnels|workflows|credits|events|automations|teams|urls|forms|pipelines|deals|calendars|inboxes)\b/.test(normalized))return true;
+  if(/\b(?:at least|minimum)\s+\d+\s+(?:stored\s+|automation\s+|active\s+|open\s+|monthly\s+|daily\s+)?(?:tasks|users|seats|channels|accounts|emails|contacts|responses|submissions|collaborators|records|spaces|funnels|workflows|credits|events|automations|teams|urls|forms|pipelines|deals|calendars|inboxes)\b/.test(normalized))return true;
   return /^(?:must\b|mandatory\b|required\b|require\b|requires\b|only\b|no\b|without\b|cannot\b|need\s+to\b|needs\s+to\b|has\s+to\b|have\s+to\b)/.test(normalized);
 }
 function decisionBlockers(evaluated,args={}){
