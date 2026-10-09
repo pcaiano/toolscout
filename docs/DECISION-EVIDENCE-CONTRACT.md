@@ -31,7 +31,8 @@ Optional `decisionClaims` entries in a catalog record use:
 - `verifiedAt`: ISO calendar date, not future dated or more than 180 days old
 - `plan`: exact documented tier entitlement. Under `budget: "free"`, an individual capability or named integration only qualifies if its availability on the Free tier is positively documented. Missing tier data means `not_verified`. Paid-tier presence alone never proves that Free excludes it: `conflict` requires an explicit manufacturer-supported `notAvailableOnFree: true` claim.
 - For `plan_limit`: `unit` such as `tasks`, `emails` or `users`; numeric `quantity`, `plan`, and **explicit `period`** (`day`, `month` or `total`). For contacts also require `scope` (`stored` or `automation`). A daily allocation never proves a monthly allocation. `total` is an account/workspace concurrent cap, not a recurring quota.
-- For `price_eur_month`: `amount`, `plan`, `billingCycle: "monthly"`. No currency conversion, promotional pricing or annual equivalent is inferred.
+- For `price_quote`: `currency` (USD/EUR/GBP), `amount` (manufacturer-stated monthly price or monthly equivalent), `chargeAmount` (actual invoiced amount per billing cycle), `billingCycle` (`monthly`/`annual`), `plan`, `unit` (`subscription` or `channel`), `unitQuantity: 1`, `market` (country ISO code or `unspecified`), `taxStatus` (`unknown`, `included`, `excluded`), `promotion: false`, `sourceUrl` and `verifiedAt`. Annual monthly equivalents require the corresponding documented full annual invoice. No inferred FX conversion, VAT, monthly cancelability, extra users/channels or local geographic availability.
+- The earlier `price_eur_month` record is legacy-only; new positive buying decisions use `price_quote`.
 
 Do **not** auto-promote product descriptions, feature lists, raw search snippets or generalized manufacturer review source URLs to `decisionClaims`.
 
@@ -79,5 +80,13 @@ For Free buyers, Jotform's manufacturer-named `Starter` plan is recognized as a 
 Every qualifying recommendation must return the matched `plan`, `period`, `scope` (where relevant) and documented capacity. Missing duration, contact scope or entitlement fails closed instead of being scored as a feature match.
 
 The regression cohort (`tests/toolscout-v2-buyer-plan-constraints.test.mjs`) includes 19 real purchase scenarios and tier-specific named-integration checks. It is mandatory in existing CI. This focused cohort is not 100% price/feature coverage of the full catalog, and does not authorize inferred EUR prices.
+
+## Precise quoted pricing cohort (9 October 2026)
+
+The first pricing-enriched products are Buffer and Make. Buffer's own pricing documentation states Essentials $6 per channel per month or $60 per channel per year ($5 monthly equivalent); Team $12 or $120 annually ($10 equivalent), at the 1–10-channel band. Make's published USD Core $12, Pro $21, and Teams $38 monthly amounts are for the 10,000-credit monthly usage selector. The tool retains all these terms internally, with manufacturer source URLs omitted from buyer-facing MCP output.
+
+`decide_software` accepts USD, EUR and GBP price ceilings with explicit periods, and optional `country` (ISO two-letter code). A quote marked `market: unspecified` only qualifies when no country-specific checkout price was requested. A 1-channel quote only qualifies a per-channel or one-channel constraint; it never proves the total price for 3 channels. Annual prices cannot qualify a monthly-billed ceiling without explicit annual commitment. VAT-inclusive requests require an explicitly tax-inclusive quote. Mismatched or mixed currencies fail closed without calculated conversions.
+
+`tests/toolscout-v2-price-quotes.test.mjs` runs 22 grounded buyer-price scenarios in CI, including annual versus monthly, USD/EUR/GBP, explicit country, VAT, and per-channel minimum. Do not report full catalog-wide price coverage: the first cohort is 2 products and 7 price quotes, and does not include live regional tax-inclusive checkout tests.
 
 No new GitHub Actions deployment route: Cloudflare Workers Builds continues to publish merged `main` commits automatically; GitHub Actions recovery remains manual-only.
