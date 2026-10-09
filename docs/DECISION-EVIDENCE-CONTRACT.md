@@ -89,4 +89,15 @@ The first pricing-enriched products are Buffer and Make. Buffer's own pricing do
 
 `tests/toolscout-v2-price-quotes.test.mjs` runs 22 grounded buyer-price scenarios in CI, including annual versus monthly, USD/EUR/GBP, explicit country, VAT, and per-channel minimum. Do not report full catalog-wide price coverage: the first cohort is 2 products and 7 price quotes, and does not include live regional tax-inclusive checkout tests.
 
+## Single-plan purchase truth (9 October 2026)
+
+Mandatory feature, price and capacity requirements must be proven on **one shared manufacturer-documented plan**. A `price_quote` may have several options within the buyer ceiling, but the Decision Engine selects the cheapest **compatible** plan, not an unrelated cheapest tier. An unscoped feature cannot inherit paid tiers by assumption. `includedPlans` is recorded only where the manufacturer states that higher plans include a source capability. Unknown plan compatibility remains `not_verified`.
+
+The Make manufacturer publishes annual Core USD 9/month equivalent (USD 108 billed annually), Pro USD 16 (USD 192 annually), and Teams USD 29 (USD 348 annually) at 10,000 credits/month. Pro custom variables apply to Pro and Teams. This complements separately verified monthly billing quotes.
+
+Trello publishes Standard USD 6 monthly per user or USD 5/month equivalent if billed annually (USD 60/year), and Premium USD 12.50 monthly per user or USD 10 equivalent annually (USD 120/year). Timeline view starts with Premium. Price records use `unit: seat` for one user, never a verified total for a multi-user team. USD prices remain marked with unspecified market and unknown tax status.
+
+`usageTier` on a verified quote establishes the usage allowance for that **same paid plan** (Make Core/Pro/Teams at 10,000 credits/month). It must not be confused with the Free plan's 1,000 monthly credits. All manufacturer documentation URLs are kept internal.
+
+CI includes `tests/toolscout-v2-plan-coherence.test.mjs`, with 16 documented buying cases, billing commitments, multiple mandatory requirements, and proof that cheap tiers cannot inherit Premium capabilities.
 No new GitHub Actions deployment route: Cloudflare Workers Builds continues to publish merged `main` commits automatically; GitHub Actions recovery remains manual-only.
