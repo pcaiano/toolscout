@@ -448,20 +448,20 @@ function jobIntentProfile(tools,job){
   const intentTerms=textTerms(job).filter(term=>!dimensionTerms.has(term)&&!contextTerms.has(term));
   // Specific job families outrank incidental mentions of generic words.
   const families=[
-    {category:'crm',pattern:/\\b(crm|customer relationship management|sales pipeline|manage leads)\\b/},
-    {category:'seo',pattern:/\\b(seo|keyword research|backlink|search engine optimization|organic search)\\b/},
-    {category:'developer',pattern:/\\b(coding|code editor|software development|devops|continuous deployment)\\b/},
-    {category:'support',pattern:/\\b(helpdesk|help desk|customer support|ticketing)\\b/},
-    {category:'social',pattern:/\\b(social media|social scheduling|social publishing)\\b/},
-    {category:'forms',pattern:/\\b(form builder|lead capture form|online forms|survey builder)\\b/},
-    {category:'analytics',pattern:/\\b(product analytics|web analytics|retention analysis|session replay)\\b/},
-    {category:'website',pattern:/\\b(website builder|build a website|site builder)\\b/},
-    {category:'ecommerce',pattern:/\\b(ecommerce|online store|shopping cart)\\b/},
-    {category:'business',pattern:/\\b(project management|task management|collaboration board)\\b/},
-    {category:'marketing',pattern:/\\b(email marketing|marketing automation|newsletter)\\b/},
-    {category:'sales',pattern:/\\b(sales prospecting|cold email|lead database)\\b/},
-    {category:'ai-research',pattern:/\\b(ai research|research assistant|source synthesis)\\b/},
-    {category:'ai-assistant',pattern:/\\b(ai assistant|general ai assistant|chatbot)\\b/}
+    {category:'crm',pattern:/\b(crm|customer relationship management|sales pipeline|manage leads)\b/},
+    {category:'seo',pattern:/\b(seo|keyword research|backlink|search engine optimization|organic search)\b/},
+    {category:'developer',pattern:/\b(coding|code editor|software development|devops|continuous deployment)\b/},
+    {category:'support',pattern:/\b(helpdesk|help desk|customer support|ticketing)\b/},
+    {category:'social',pattern:/\b(social media|social scheduling|social publishing)\b/},
+    {category:'forms',pattern:/\b(form builder|lead capture form|online forms|survey builder)\b/},
+    {category:'analytics',pattern:/\b(product analytics|web analytics|retention analysis|session replay)\b/},
+    {category:'website',pattern:/\b(website builder|build a website|site builder)\b/},
+    {category:'ecommerce',pattern:/\b(ecommerce|online store|shopping cart)\b/},
+    {category:'business',pattern:/\b(project management|task management|collaboration board)\b/},
+    {category:'marketing',pattern:/\b(email marketing|marketing automation|newsletter)\b/},
+    {category:'sales',pattern:/\b(sales prospecting|cold email|lead database)\b/},
+    {category:'ai-research',pattern:/\b(ai research|research assistant|source synthesis)\b/},
+    {category:'ai-assistant',pattern:/\b(ai assistant|general ai assistant|chatbot)\b/}
   ];
   const familyMatches=families.filter(x=>x.pattern.test(normalized)).map(x=>x.category);
   return {normalized,explicitCategories:explicitCategories.length?explicitCategories:familyMatches,intentTerms};
