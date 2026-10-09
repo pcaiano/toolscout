@@ -3,6 +3,10 @@ name: ToolScout Worker Recovery Fallback
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/deploy-worker.yml'
 
 permissions:
   contents: read
@@ -93,8 +97,34 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
+      - name: Verify decision routes and buyer checks
+        run: |
+          node --test tests/toolscout-v2-go-route-truth.test.mjs tests/toolscout-v2-decision-qualification.test.mjs
+
       - name: Verify ToolScout 2.0 live preservation
         run: node scripts/verify-v2-live-smoke.mjs
 
       - name: Probe ToolScout 2.0 operational state after cutover
         run: node scripts/probe-v2-operational-health.mjs
+
+      - name: Confirm live decision verification response
+        run: |
+          node --input-type=module <<'NODE'
+          const body={
+            jsonrpc:'2.0',id:702,method:'tools/call',
+            params:{name:'decide_software',arguments:{job:'CRM for a small consultancy',limit:3,existing_tools:['Microsoft Teams']},
+            _meta:{'io.modelcontextprotocol/protocolVersion':'2026-07-28','io.modelcontextprotocol/clientInfo':{name:'recovery-smoke',version:'1.0'}}}
+          };
+          const r=await fetch('https://trytoolscout.org/mcp',{method:'POST',headers:{
+            'Content-Type':'application/json',
+            'MCP-Protocol-Version':'2026-07-28',
+            'Mcp-Method':'tools/call',
+            'Mcp-Name':'decide_software'
+          },body:JSON.stringify(body)});
+          if(!r.ok)throw Error('MCP returned '+r.status);
+          const payload=await r.json();
+          const choices=payload?.result?.structuredContent?.shortlist||[];
+          if(payload.result?.isError||!choices.length||choices.some(x=>!Array.isArray(x.buyer_validation_plan)||!x.buyer_validation_plan.length))
+            throw Error('Latest decision engine not detected in production');
+          console.log('Production buyer validation plans verified in '+choices.length+' candidates');
+          NODE
