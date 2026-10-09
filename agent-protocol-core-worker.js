@@ -52,7 +52,8 @@ function toolDefinitions(){
           must_have:{type:'array',maxItems:12,items:{type:'string',minLength:1,maxLength:100}},
           avoid:{type:'array',maxItems:12,items:{type:'string',minLength:1,maxLength:100}},
           budget:{type:'string',enum:['free','low','mid','high']},
-          country:{type:'string',pattern:'^[A-Z]{2}$',description:'ISO 3166-1 alpha-2 country for geographically verified quotes; unknown locale must not qualify.'},
+          country:{type:'string',pattern:'^[A-Z]{2}$',description:'ISO 3166-1 alpha-2 country for a geographically verified price; missing regional evidence cannot qualify.'},
+          seat_count:{type:'integer',minimum:1,maximum:100,description:'Exact paid seat count used only for explicitly labelled before-tax subscription subtotals.'},
           team:{type:'string',enum:['solo','small','team','large','agency']},
           priorities:{type:'array',maxItems:6,uniqueItems:true,items:{type:'string',enum:['price','ease','automation','integrations','sales','ai','marketing','seo','research','content','agency']}},
           existing_tools:{type:'array',maxItems:12,items:{type:'string',minLength:1,maxLength:100}},
@@ -208,6 +209,7 @@ function validToolArguments(name,a){
     if(!validStrings(a.constraints,12,160)||!validStrings(a.must_have,12,100)||!validStrings(a.avoid,12,100)||!validStrings(a.existing_tools,12,100))return 'constraints, must_have, avoid and existing_tools must be valid string arrays';
     if(!validBudget(a.budget)||!validTeam(a.team)||!validPriorities(a.priorities))return 'budget, team or priorities is invalid';
     if(a.country!==undefined&&(typeof a.country!=='string'||!/^[A-Z]{2}$/.test(a.country)))return 'country must be an ISO 3166-1 alpha-2 code';
+    if(a.seat_count!==undefined&&(!Number.isInteger(a.seat_count)||a.seat_count<1||a.seat_count>100))return 'seat_count must be an integer from 1 to 100';
     if(a.limit!==undefined&&(!Number.isInteger(a.limit)||a.limit<2||a.limit>5))return 'limit must be an integer from 2 to 5';
     return null;
   }
@@ -473,7 +475,7 @@ function explicitTextMatch(tool,value){
   ].map(catalogNormalize).filter(Boolean);
   return fields.some(field=>field===needle||field.includes(' '+needle+' ')||field.startsWith(needle+' ')||field.endsWith(' '+needle));
 }
-function priceCeiling(raw){
+function priceCeiling(raw,seatCount=null){
   const value=String(raw||''),currency=(/[€]|\bEUR\b/i.test(value)?'EUR':null)||(/[$]|\bUSD\b/i.test(value)?'USD':null)||(/[£]|\bGBP\b/i.test(value)?'GBP':null);
   if(!currency)return null;
   const tokens=value.match(/(?:[€$£]|\b(?:EUR|USD|GBP)\b)\s*(\d+(?:[.,]\d{1,2})?)|(\d+(?:[.,]\d{1,2})?)\s*(?:[€$£]|\b(?:EUR|USD|GBP)\b)/i);
@@ -493,15 +495,25 @@ function priceCeiling(raw){
   const unit=/\b(?:per channel|for (?:one|1) channel)\b/.test(normalized)||/\/channel\b/.test(normalized)?'channel':/\b(?:per user|per seat|for (?:one|1) user|for (?:one|1) seat)\b/.test(normalized)||/\/(?:user|seat)\b/.test(normalized)?'seat':null;
   if(unit==='seat'&&/\bfor\s+[2-9][0-9]*\s+(?:users|seats)\b/.test(normalized))return {invalid:true,reason:'A per-user price is not a verified total for multiple seats.'};
   const taxInclusive=/\b(?:incl(?:uding)?\.? (?:vat|tax)|tax included|vat included|with vat|ttc)\b/.test(normalized);
-  return {currency,amount,period:annualPeriod?'year':'month',billingCycle:annual?'annual':monthly?'monthly':null,unit,unitQuantity:unit?1:null,taxInclusive};
+  const totalRequested=/\b(?:total|overall|entire team|all seats|whole team)\b/.test(normalized);
+  const beforeTax=/\b(?:before tax|excluding tax|before vat|excluding vat|excl vat|subscription subtotal|licen[sc]e subtotal)\b/.test(normalized);
+  const explicitSeatMatch=normalized.match(/\bfor\s+(\d+)\s+(?:billed\s+)?(?:seats|users|members|editors|collaborators)\b/);
+  const explicitSeats=explicitSeatMatch?Number(explicitSeatMatch[1]):null;
+  if(explicitSeats!==null&&(!Number.isInteger(explicitSeats)||explicitSeats<1||explicitSeats>100))return {invalid:true,reason:'Seat quantities must be between 1 and 100.'};
+  if(explicitSeats!==null&&seatCount!==null&&explicitSeats!==seatCount)return {invalid:true,reason:'Buyer seat_count differs from the seats in the price constraint.'};
+  const seats=explicitSeats||seatCount||null;
+  if(totalRequested&&!beforeTax)return {invalid:true,reason:'Total checkout cost cannot be proven by a pre-tax per-seat quote; taxes, addons and prorations are not verified.'};
+  if((totalRequested||beforeTax)&&!seats)return {invalid:true,reason:'A team subtotal requires an exact billed seat count.'};
+  if(seats&&seats>1&&unit==='channel')return {invalid:true,reason:'Seat count cannot be applied to per-channel pricing.'};
+  return {currency,amount,period:annualPeriod?'year':'month',billingCycle:annual?'annual':monthly?'monthly':null,unit:(totalRequested||beforeTax)?'seat_subtotal':unit,unitQuantity:(totalRequested||beforeTax)?seats:unit?1:null,taxInclusive,seatCount:seats,subtotalOnly:Boolean(totalRequested||beforeTax)};
 }
-function constraintEvidence(tool,constraints=[],budget=null,country=null){
+function constraintEvidence(tool,constraints=[],budget=null,country=null,seatCount=null){
   return (constraints||[]).map(raw=>{
     const constraint=String(raw||'').trim(),norm=catalogNormalize(constraint);
     if(!norm)return {constraint,status:'not_verified',evidence:'Empty constraint cannot be evaluated.'};
     // A numerical price ceiling cannot be established from a 0-10 affordability
     // score, and a free plan never implies access to a requested paid feature.
-    const price=priceCeiling(constraint);
+    const price=priceCeiling(constraint,seatCount);
     if(price){
       if(price.invalid)return {constraint,status:'not_verified',evidence:price.reason};
       const candidates=(tool?.decisionClaims||[]).filter(c=>{
@@ -514,8 +526,8 @@ function constraintEvidence(tool,constraints=[],budget=null,country=null){
         if(price.taxInclusive&&c.taxStatus!=='included')return false;
         if(c.unit==='channel'&&!(price.unit==='channel'&&price.unitQuantity===1))return false;
         if(c.unit!=='channel'&&price.unit==='channel')return false;
-        if(c.unit==='seat'&&!(price.unit==='seat'&&price.unitQuantity===1))return false;
-        if(c.unit!=='seat'&&price.unit==='seat')return false;
+        if(c.unit==='seat'&&!((price.unit==='seat'&&price.unitQuantity===1)||(price.unit==='seat_subtotal'&&price.seatCount)))return false;
+        if(c.unit!=='seat'&&(price.unit==='seat'||price.unit==='seat_subtotal'))return false;
         if(!price.unit&&c.unit!=='subscription')return false;
         if(budget==='free'&&!freeTierMatches(tool,c.plan))return false;
         if(!Number.isFinite(c.chargeAmount)||c.chargeAmount<0)return false;
@@ -524,12 +536,13 @@ function constraintEvidence(tool,constraints=[],budget=null,country=null){
         return true;
       });
       if(!candidates.length)return {constraint,status:'not_verified',evidence:'No matching first-party price for the requested currency, territory, tax treatment, billing commitment and unit. FX and annual prepayment are never assumed.'};
+      const seatQuantity=c=>c.unit==='seat'&&price.unit==='seat_subtotal'?price.seatCount:1;
       const eligible=candidates.filter(c=>price.period==='year'
-        ?c.billingCycle==='annual'&&c.chargeAmount<=price.amount
-        :c.amount<=price.amount).sort((a,b)=>a.amount-b.amount);
+        ?c.billingCycle==='annual'&&c.chargeAmount*seatQuantity(c)<=price.amount+0.001
+        :c.amount*seatQuantity(c)<=price.amount+0.001).sort((a,b)=>a.amount*seatQuantity(a)-b.amount*seatQuantity(b));
       const affordable=eligible[0];
       if(!affordable)return {constraint,status:'not_verified',evidence:'No published quote meets the ceiling in this billing and currency scenario; unrecorded prices are unknown.'};
-      return {constraint,status:'verified',evidence:'Manufacturer-published price for this exact currency, plan, billing commitment and unit. Applicable taxes and regional checkout totals may differ.',plan:affordable.plan,currency:affordable.currency,monthly_equivalent:affordable.amount,charge_amount:affordable.chargeAmount,billing_cycle:affordable.billingCycle,market:affordable.market,tax_status:affordable.taxStatus,unit:affordable.unit,verified_at:affordable.verifiedAt,eligible_plans:[...new Set(eligible.map(c=>c.plan))],price_options:eligible.map(c=>({plan:c.plan,currency:c.currency,monthly_equivalent:c.amount,charge_amount:c.chargeAmount,billing_cycle:c.billingCycle,market:c.market,tax_status:c.taxStatus,unit:c.unit,verified_at:c.verifiedAt}))};
+      return {constraint,status:'verified',evidence:'Manufacturer-published price for this exact currency, plan, billing commitment and unit. Applicable taxes and regional checkout totals may differ.',plan:affordable.plan,currency:affordable.currency,monthly_equivalent:affordable.amount,charge_amount:affordable.chargeAmount,billing_cycle:affordable.billingCycle,market:affordable.market,tax_status:affordable.taxStatus,unit:affordable.unit,seat_count:price.seatCount,seat_monthly_subtotal:affordable.unit==='seat'&&price.seatCount?Number((affordable.amount*price.seatCount).toFixed(2)):null,seat_invoice_subtotal:affordable.unit==='seat'&&price.seatCount?Number((affordable.chargeAmount*price.seatCount).toFixed(2)):null,price_scope:price.subtotalOnly?'seat_subscription_subtotal_before_tax':'quoted_unit_price_before_unknown_taxes',verified_at:affordable.verifiedAt,eligible_plans:[...new Set(eligible.map(c=>c.plan))],price_options:eligible.map(c=>({plan:c.plan,currency:c.currency,monthly_equivalent:c.amount,charge_amount:c.chargeAmount,billing_cycle:c.billingCycle,market:c.market,tax_status:c.taxStatus,unit:c.unit,seat_count:price.seatCount,seat_monthly_subtotal:c.unit==='seat'&&price.seatCount?Number((c.amount*price.seatCount).toFixed(2)):null,seat_invoice_subtotal:c.unit==='seat'&&price.seatCount?Number((c.chargeAmount*price.seatCount).toFixed(2)):null,price_scope:price.subtotalOnly?'seat_subscription_subtotal_before_tax':'quoted_unit_price_before_unknown_taxes',verified_at:c.verifiedAt}))};
     }
     // Numerical requirements need matching unit, billing/usage period, scope,
     // manufacturer source and tier. "300/day" is not proof of "300/month".
@@ -734,7 +747,7 @@ function decisionEvaluation(tool,args){
   const budget=budgetSignal(tool,args.budget),team=teamSignal(tool,args.team);
   const must=(args.must_have||[]).map(x=>({requirement:x,...requirementMatch(tool,x,{budget:args.budget})}));
   const avoids=(args.avoid||[]).map(x=>({requirement:x,...requirementMatch(tool,x,{exclude:true})}));
-  const initialConstraints=constraintEvidence(tool,args.constraints||[],args.budget,args.country||null);
+  const initialConstraints=constraintEvidence(tool,args.constraints||[],args.budget,args.country||null,args.seat_count||null);
   const planCoherence=coherentBuyerPlan(must,initialConstraints);
   const constraints=initialConstraints.map(x=>{
     if(planCoherence.status!=='verified'||!x.price_options?.length)return x;

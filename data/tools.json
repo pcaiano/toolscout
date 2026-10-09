@@ -2689,6 +2689,128 @@
         "status": "verified",
         "verifiedAt": "2026-10-09",
         "sourceUrl": "https://help.clickup.com/hc/en-us/articles/6309390855319-Create-and-edit-Spaces"
+      },
+      {
+        "type": "price_quote",
+        "value": "unlimited monthly per user",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://clickup.com/pricing",
+        "plan": "Unlimited",
+        "currency": "USD",
+        "amount": 10,
+        "chargeAmount": 10,
+        "billingCycle": "monthly",
+        "market": "unspecified",
+        "taxStatus": "unknown",
+        "unit": "seat",
+        "unitQuantity": 1,
+        "promotion": false,
+        "pricingScope": "Per paid member/seat; taxes, addons and checkout terms not established"
+      },
+      {
+        "type": "price_quote",
+        "value": "unlimited annual per user",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://clickup.com/pricing",
+        "plan": "Unlimited",
+        "currency": "USD",
+        "amount": 7,
+        "chargeAmount": 84,
+        "billingCycle": "annual",
+        "market": "unspecified",
+        "taxStatus": "unknown",
+        "unit": "seat",
+        "unitQuantity": 1,
+        "promotion": false,
+        "pricingScope": "Per paid member/seat; taxes, addons and checkout terms not established"
+      },
+      {
+        "type": "price_quote",
+        "value": "business monthly per user",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://clickup.com/pricing",
+        "plan": "Business",
+        "currency": "USD",
+        "amount": 19,
+        "chargeAmount": 19,
+        "billingCycle": "monthly",
+        "market": "unspecified",
+        "taxStatus": "unknown",
+        "unit": "seat",
+        "unitQuantity": 1,
+        "promotion": false,
+        "pricingScope": "Per paid member/seat; taxes, addons and checkout terms not established"
+      },
+      {
+        "type": "price_quote",
+        "value": "business annual per user",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://clickup.com/pricing",
+        "plan": "Business",
+        "currency": "USD",
+        "amount": 12,
+        "chargeAmount": 144,
+        "billingCycle": "annual",
+        "market": "unspecified",
+        "taxStatus": "unknown",
+        "unit": "seat",
+        "unitQuantity": 1,
+        "promotion": false,
+        "pricingScope": "Per paid member/seat; taxes, addons and checkout terms not established"
+      },
+      {
+        "type": "capability",
+        "value": "unlimited spaces",
+        "plan": "Unlimited",
+        "includedPlans": [
+          "Unlimited",
+          "Business",
+          "Enterprise"
+        ],
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://clickup.com/pricing"
+      },
+      {
+        "type": "capability",
+        "value": "gantt charts",
+        "plan": "Unlimited",
+        "includedPlans": [
+          "Unlimited",
+          "Business",
+          "Enterprise"
+        ],
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://clickup.com/pricing"
+      },
+      {
+        "type": "capability",
+        "value": "timeline views",
+        "plan": "Business",
+        "includedPlans": [
+          "Business",
+          "Enterprise"
+        ],
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://clickup.com/pricing"
+      },
+      {
+        "type": "capability",
+        "value": "google sso",
+        "plan": "Business",
+        "includedPlans": [
+          "Business",
+          "Enterprise"
+        ],
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://clickup.com/pricing"
       }
     ]
   },
@@ -3221,6 +3343,146 @@
         "status": "verified",
         "verifiedAt": "2026-10-08",
         "sourceUrl": "https://help.asana.com/s/article/asana-personal-plan-details"
+      },
+      {
+        "type": "price_quote",
+        "value": "starter monthly per user",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://asana.com/pricing",
+        "plan": "Starter",
+        "currency": "USD",
+        "amount": 13.49,
+        "chargeAmount": 13.49,
+        "billingCycle": "monthly",
+        "market": "unspecified",
+        "taxStatus": "unknown",
+        "unit": "seat",
+        "unitQuantity": 1,
+        "promotion": false,
+        "pricingScope": "Per paid member/seat; taxes, addons and checkout terms not established"
+      },
+      {
+        "type": "price_quote",
+        "value": "starter annual per user",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://asana.com/pricing",
+        "plan": "Starter",
+        "currency": "USD",
+        "amount": 10.99,
+        "chargeAmount": 131.88,
+        "billingCycle": "annual",
+        "market": "unspecified",
+        "taxStatus": "unknown",
+        "unit": "seat",
+        "unitQuantity": 1,
+        "promotion": false,
+        "pricingScope": "Per paid member/seat; taxes, addons and checkout terms not established"
+      },
+      {
+        "type": "price_quote",
+        "value": "advanced monthly per user",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://asana.com/pricing",
+        "plan": "Advanced",
+        "currency": "USD",
+        "amount": 30.49,
+        "chargeAmount": 30.49,
+        "billingCycle": "monthly",
+        "market": "unspecified",
+        "taxStatus": "unknown",
+        "unit": "seat",
+        "unitQuantity": 1,
+        "promotion": false,
+        "pricingScope": "Per paid member/seat; taxes, addons and checkout terms not established"
+      },
+      {
+        "type": "price_quote",
+        "value": "advanced annual per user",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://asana.com/pricing",
+        "plan": "Advanced",
+        "currency": "USD",
+        "amount": 24.99,
+        "chargeAmount": 299.88,
+        "billingCycle": "annual",
+        "market": "unspecified",
+        "taxStatus": "unknown",
+        "unit": "seat",
+        "unitQuantity": 1,
+        "promotion": false,
+        "pricingScope": "Per paid member/seat; taxes, addons and checkout terms not established"
+      },
+      {
+        "type": "capability",
+        "value": "timeline view",
+        "plan": "Starter",
+        "includedPlans": [
+          "Starter",
+          "Advanced",
+          "Enterprise",
+          "Enterprise+"
+        ],
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://asana.com/pricing"
+      },
+      {
+        "type": "capability",
+        "value": "gantt view",
+        "plan": "Starter",
+        "includedPlans": [
+          "Starter",
+          "Advanced",
+          "Enterprise",
+          "Enterprise+"
+        ],
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://asana.com/pricing"
+      },
+      {
+        "type": "capability",
+        "value": "custom fields",
+        "plan": "Starter",
+        "includedPlans": [
+          "Starter",
+          "Advanced",
+          "Enterprise",
+          "Enterprise+"
+        ],
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://asana.com/pricing"
+      },
+      {
+        "type": "capability",
+        "value": "portfolios",
+        "plan": "Advanced",
+        "includedPlans": [
+          "Advanced",
+          "Enterprise",
+          "Enterprise+"
+        ],
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://asana.com/pricing"
+      },
+      {
+        "type": "capability",
+        "value": "resource management",
+        "plan": "Advanced",
+        "includedPlans": [
+          "Advanced",
+          "Enterprise",
+          "Enterprise+"
+        ],
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://asana.com/pricing"
       }
     ]
   },
@@ -3501,7 +3763,9 @@
       "freePlanSummary": "Free plan exists for individuals and very small teams, with a 1,000-record-per-base limit at the time checked.",
       "limits": [
         "Free tier 1,000 records per base",
-        "Free workspace API calls and storage are capped"
+        "Free workspace API calls and storage are capped",
+        "Team up to 50,000 records per base",
+        "Self-serve Business up to 125,000 records per base"
       ],
       "sourceUrl": "https://support.airtable.com/articles/2277136852-airtable-plans-overview",
       "verifiedAt": "2026-10-08"
@@ -3557,6 +3821,148 @@
         "sourceUrl": "https://support.airtable.com/articles/2277136852-airtable-plans-overview",
         "period": "total",
         "scope": "per_base"
+      },
+      {
+        "type": "price_quote",
+        "value": "team monthly per user",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://support.airtable.com/articles/2277136852-airtable-plans-overview",
+        "plan": "Team",
+        "currency": "USD",
+        "amount": 24,
+        "chargeAmount": 24,
+        "billingCycle": "monthly",
+        "market": "unspecified",
+        "taxStatus": "unknown",
+        "unit": "seat",
+        "unitQuantity": 1,
+        "promotion": false,
+        "pricingScope": "Per billable collaborator; monthly equivalent and annual renewal list-price only"
+      },
+      {
+        "type": "price_quote",
+        "value": "team annual per user",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://support.airtable.com/articles/2277136852-airtable-plans-overview",
+        "plan": "Team",
+        "currency": "USD",
+        "amount": 20,
+        "chargeAmount": 240,
+        "billingCycle": "annual",
+        "market": "unspecified",
+        "taxStatus": "unknown",
+        "unit": "seat",
+        "unitQuantity": 1,
+        "promotion": false,
+        "pricingScope": "Per billable collaborator; monthly equivalent and annual renewal list-price only"
+      },
+      {
+        "type": "price_quote",
+        "value": "business monthly per user",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://support.airtable.com/articles/2277136852-airtable-plans-overview",
+        "plan": "Business",
+        "currency": "USD",
+        "amount": 54,
+        "chargeAmount": 54,
+        "billingCycle": "monthly",
+        "market": "unspecified",
+        "taxStatus": "unknown",
+        "unit": "seat",
+        "unitQuantity": 1,
+        "promotion": false,
+        "pricingScope": "Per billable collaborator; monthly equivalent and annual renewal list-price only"
+      },
+      {
+        "type": "price_quote",
+        "value": "business annual per user",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://support.airtable.com/articles/2277136852-airtable-plans-overview",
+        "plan": "Business",
+        "currency": "USD",
+        "amount": 45,
+        "chargeAmount": 540,
+        "billingCycle": "annual",
+        "market": "unspecified",
+        "taxStatus": "unknown",
+        "unit": "seat",
+        "unitQuantity": 1,
+        "promotion": false,
+        "pricingScope": "Per billable collaborator; monthly equivalent and annual renewal list-price only"
+      },
+      {
+        "type": "capability",
+        "value": "gantt views",
+        "plan": "Team",
+        "includedPlans": [
+          "Team",
+          "Business"
+        ],
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://support.airtable.com/articles/2277136852-airtable-plans-overview"
+      },
+      {
+        "type": "capability",
+        "value": "timeline views",
+        "plan": "Team",
+        "includedPlans": [
+          "Team",
+          "Business"
+        ],
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://support.airtable.com/articles/2277136852-airtable-plans-overview"
+      },
+      {
+        "type": "capability",
+        "value": "two-way sync",
+        "plan": "Business",
+        "includedPlans": [
+          "Business"
+        ],
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://support.airtable.com/articles/2277136852-airtable-plans-overview"
+      },
+      {
+        "type": "capability",
+        "value": "admin panel",
+        "plan": "Business",
+        "includedPlans": [
+          "Business"
+        ],
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://support.airtable.com/articles/2277136852-airtable-plans-overview"
+      },
+      {
+        "type": "plan_limit",
+        "value": "team records per base",
+        "plan": "Team",
+        "quantity": 50000,
+        "unit": "records",
+        "scope": "per_base",
+        "period": "total",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://support.airtable.com/articles/2277136852-airtable-plans-overview"
+      },
+      {
+        "type": "plan_limit",
+        "value": "business records per base",
+        "plan": "Business",
+        "quantity": 125000,
+        "unit": "records",
+        "scope": "per_base",
+        "period": "total",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://support.airtable.com/articles/2277136852-airtable-plans-overview"
       }
     ]
   },
