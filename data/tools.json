@@ -3333,7 +3333,8 @@
           "Standard",
           "Premium",
           "Enterprise"
-        ]
+        ],
+        "plan": "Free"
       },
       {
         "type": "plan_limit",
