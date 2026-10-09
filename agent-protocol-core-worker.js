@@ -483,24 +483,26 @@ function constraintEvidence(tool,constraints=[],budget=null){
     }
     // Numerical requirements need matching unit, billing/usage period, scope,
     // manufacturer source and tier. "300/day" is not proof of "300/month".
-    const volume=norm.match(/(?:at least|minimum|need|requires?|must support|support)\s+(\d+)\s+(?:(stored|automation|active|monthly|daily)\s+)?(tasks|users|seats|channels|accounts|emails|contacts|submissions|collaborators|records|spaces|funnels|workflows|credits|events|automations|teams|urls|forms|pipelines|deals|calendars|inboxes)\b/);
+    const volume=norm.match(/(?:at least|minimum|need|requires?|must support|support)\s+(\d+)\s+(?:(stored|automation|active|open|monthly|daily)\s+)?(tasks|users|seats|channels|accounts|emails|contacts|responses|submissions|collaborators|records|spaces|funnels|workflows|credits|events|automations|teams|urls|forms|pipelines|deals|calendars|inboxes)\b/);
     if(volume){
-      const qty=Number(volume[1]),modifier=volume[2]||'',unit=volume[3];
+      const qty=Number(volume[1]),modifier=volume[2]||'',unit=volume[3]==='responses'?'submissions':volume[3];
       const explicitMonth=/\b(?:per month|a month|monthly|month)\b/.test(norm)||modifier==='monthly';
       const explicitDay=/\b(?:per day|a day|daily|day)\b/.test(norm)||modifier==='daily';
       const period=explicitMonth?'month':explicitDay?'day':null;
       if(explicitMonth&&explicitDay)return {constraint,status:'not_verified',evidence:'The buyer request mixes daily and monthly limits.'};
       const recurring=new Set(['tasks','emails','submissions','credits','events']);
       if(recurring.has(unit)&&!period)return {constraint,status:'not_verified',evidence:'Specify a daily or monthly volume; ToolScout cannot assume the usage period.'};
-      const scope=unit==='contacts'?(modifier==='automation'||/\bautomation\b/.test(norm)?'automation':modifier==='stored'||/\b(?:stored|audience|list)\b/.test(norm)?'stored':null):null;
+      const scope=unit==='contacts'?(modifier==='automation'||/\bautomation\b/.test(norm)?'automation':modifier==='stored'||/\b(?:stored|audience|list)\b/.test(norm)?'stored':null):unit==='deals'&&modifier==='open'?'open':unit==='records'&&/\bper base\b/.test(norm)?'per_base':null;
       if(unit==='contacts'&&!scope)return {constraint,status:'not_verified',evidence:'Specify stored contacts or contacts entering automations; the two limits are different.'};
+      if(unit==='deals'&&!scope)return {constraint,status:'not_verified',evidence:'Clarify whether the deal capacity refers to open deals or total deal records.'};
+      if(unit==='records'&&!scope&&(tool?.decisionClaims||[]).some(c=>c?.type==='plan_limit'&&c.unit==='records'&&c.scope))return {constraint,status:'not_verified',evidence:'Record capacity is scoped; specify per base or the relevant product-specific scope.'};
       const limits=(tool?.decisionClaims||[]).filter(c=>{
         if(c?.type!=='plan_limit'||manufacturerClaim(tool,'plan_limit',c.value)!==c)return false;
         if(c.unit!==unit||!Number.isFinite(Number(c.quantity))||!c.plan)return false;
         if(budget==='free'&&!freeTierMatches(tool,c.plan))return false;
         if(period&&c.period!==period)return false;
         if(!period&&c.period!=='total')return false;
-        return !scope||c.scope===scope;
+        return scope?c.scope===scope:!c.scope;
       });
       if(!limits.length)return {constraint,status:'not_verified',evidence:'No dated manufacturer evidence for this exact volume, plan, period and scope.'};
       const suitable=limits.find(c=>Number(c.quantity)>=qty);
@@ -541,7 +543,7 @@ function constraintEvidence(tool,constraints=[],budget=null){
 function hardBuyerConstraint(value){
   const normalized=catalogNormalize(value);
   if(/(?:[€]|\bEUR\b)\s*\d|\d\s*(?:[€]|\bEUR\b)/i.test(String(value||'')))return true;
-  if(/\b(?:at least|minimum)\s+\d+\s+(?:stored\s+|automation\s+|active\s+|monthly\s+|daily\s+)?(?:tasks|users|seats|channels|accounts|emails|contacts|submissions|collaborators|records|spaces|funnels|workflows|credits|events|automations|teams|urls|forms|pipelines|deals|calendars|inboxes)\b/.test(normalized))return true;
+  if(/\b(?:at least|minimum)\s+\d+\s+(?:stored\s+|automation\s+|active\s+|monthly\s+|daily\s+)?(?:tasks|users|seats|channels|accounts|emails|contacts|responses|submissions|collaborators|records|spaces|funnels|workflows|credits|events|automations|teams|urls|forms|pipelines|deals|calendars|inboxes)\b/.test(normalized))return true;
   return /^(?:must\b|mandatory\b|required\b|require\b|requires\b|only\b|no\b|without\b|cannot\b|need\s+to\b|needs\s+to\b|has\s+to\b|have\s+to\b)/.test(normalized);
 }
 function decisionBlockers(evaluated,args={}){
