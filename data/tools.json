@@ -108,7 +108,9 @@
         "plan": "Free",
         "status": "verified",
         "verifiedAt": "2026-10-08",
-        "sourceUrl": "https://systeme.io/pricing"
+        "sourceUrl": "https://systeme.io/pricing",
+        "period": "total",
+        "scope": "stored"
       },
       {
         "type": "plan_limit",
@@ -118,7 +120,8 @@
         "plan": "Free",
         "status": "verified",
         "verifiedAt": "2026-10-08",
-        "sourceUrl": "https://systeme.io/pricing"
+        "sourceUrl": "https://systeme.io/pricing",
+        "period": "total"
       },
       {
         "type": "plan_limit",
@@ -128,7 +131,8 @@
         "plan": "Free",
         "status": "verified",
         "verifiedAt": "2026-10-08",
-        "sourceUrl": "https://systeme.io/pricing"
+        "sourceUrl": "https://systeme.io/pricing",
+        "period": "total"
       }
     ]
   },
@@ -251,7 +255,8 @@
         "plan": "Lite",
         "status": "verified",
         "verifiedAt": "2026-10-08",
-        "sourceUrl": "https://www.beehiiv.com/support/article/38813477234071-welcome-email-vs-welcome-automation-which-should-you-use"
+        "sourceUrl": "https://www.beehiiv.com/support/article/38813477234071-welcome-email-vs-welcome-automation-which-should-you-use",
+        "period": "total"
       }
     ]
   },
@@ -371,7 +376,8 @@
         "plan": "Free",
         "status": "verified",
         "verifiedAt": "2026-10-08",
-        "sourceUrl": "https://www.hubspot.com/pricing/crm"
+        "sourceUrl": "https://www.hubspot.com/pricing/crm",
+        "period": "total"
       }
     ]
   },
@@ -474,7 +480,8 @@
         "Account-wide upload and submission storage ceilings"
       ],
       "sourceUrl": "https://www.jotform.com/help/408-understanding-your-account-usage-and-limits/",
-      "verifiedAt": "2026-10-08"
+      "verifiedAt": "2026-10-08",
+      "freePlanAlias": "Starter"
     },
     "decisionClaims": [
       {
@@ -492,7 +499,8 @@
         "plan": "Starter",
         "status": "verified",
         "verifiedAt": "2026-10-08",
-        "sourceUrl": "https://www.jotform.com/help/408-understanding-your-account-usage-and-limits/"
+        "sourceUrl": "https://www.jotform.com/help/408-understanding-your-account-usage-and-limits/",
+        "period": "month"
       },
       {
         "type": "plan_limit",
@@ -502,7 +510,8 @@
         "plan": "Starter",
         "status": "verified",
         "verifiedAt": "2026-10-08",
-        "sourceUrl": "https://www.jotform.com/help/408-understanding-your-account-usage-and-limits/"
+        "sourceUrl": "https://www.jotform.com/help/408-understanding-your-account-usage-and-limits/",
+        "period": "total"
       }
     ]
   },
@@ -948,7 +957,12 @@
       "limits": [
         "300 daily emails",
         "100,000 stored contacts",
-        "2,000 unique contacts entering automations"
+        "2,000 unique contacts entering automations",
+        "1 user account owner",
+        "50 open deals",
+        "1 pipeline",
+        "1 connected calendar",
+        "1 connected inbox"
       ],
       "sourceUrl": "https://help.brevo.com/hc/en-us/articles/208580669-FAQs-What-are-the-limits-of-the-Free-plan",
       "verifiedAt": "2026-10-08"
@@ -991,7 +1005,8 @@
         "plan": "Free",
         "status": "verified",
         "verifiedAt": "2026-10-08",
-        "sourceUrl": "https://help.brevo.com/hc/en-us/articles/208580669-FAQs-What-are-the-limits-of-the-Free-plan"
+        "sourceUrl": "https://help.brevo.com/hc/en-us/articles/208580669-FAQs-What-are-the-limits-of-the-Free-plan",
+        "period": "day"
       },
       {
         "type": "plan_limit",
@@ -1001,7 +1016,103 @@
         "plan": "Free",
         "status": "verified",
         "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.brevo.com/hc/en-us/articles/208580669-FAQs-What-are-the-limits-of-the-Free-plan",
+        "period": "total",
+        "scope": "stored"
+      },
+      {
+        "type": "capability",
+        "value": "email campaigns",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://help.brevo.com/hc/en-us/articles/208580669-FAQs-What-are-the-limits-of-the-Free-plan",
+        "plan": "Free"
+      },
+      {
+        "type": "capability",
+        "value": "marketing automations",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://help.brevo.com/hc/en-us/articles/208580669-FAQs-What-are-the-limits-of-the-Free-plan",
+        "plan": "Free"
+      },
+      {
+        "type": "capability",
+        "value": "sales deals",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://help.brevo.com/hc/en-us/articles/208580669-FAQs-What-are-the-limits-of-the-Free-plan",
+        "plan": "Free"
+      },
+      {
+        "type": "plan_limit",
+        "value": "free automation entrants",
+        "unit": "contacts",
+        "quantity": 2000,
+        "period": "total",
+        "plan": "Free",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://help.brevo.com/hc/en-us/articles/208580669-FAQs-What-are-the-limits-of-the-Free-plan",
+        "scope": "automation"
+      },
+      {
+        "type": "plan_limit",
+        "value": "free users",
+        "unit": "users",
+        "quantity": 1,
+        "period": "total",
+        "plan": "Free",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
         "sourceUrl": "https://help.brevo.com/hc/en-us/articles/208580669-FAQs-What-are-the-limits-of-the-Free-plan"
+      },
+      {
+        "type": "plan_limit",
+        "value": "free open deals",
+        "unit": "deals",
+        "quantity": 50,
+        "period": "total",
+        "plan": "Free",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://help.brevo.com/hc/en-us/articles/208580669-FAQs-What-are-the-limits-of-the-Free-plan",
+        "scope": "open"
+      },
+      {
+        "type": "plan_limit",
+        "value": "free pipelines",
+        "unit": "pipelines",
+        "quantity": 1,
+        "period": "total",
+        "plan": "Free",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://help.brevo.com/hc/en-us/articles/208580669-FAQs-What-are-the-limits-of-the-Free-plan"
+      },
+      {
+        "type": "plan_limit",
+        "value": "free connected calendars",
+        "unit": "calendars",
+        "quantity": 1,
+        "period": "total",
+        "plan": "Free",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://help.brevo.com/hc/en-us/articles/208580669-FAQs-What-are-the-limits-of-the-Free-plan",
+        "scope": "connected"
+      },
+      {
+        "type": "plan_limit",
+        "value": "free connected inboxes",
+        "unit": "inboxes",
+        "quantity": 1,
+        "period": "total",
+        "plan": "Free",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://help.brevo.com/hc/en-us/articles/208580669-FAQs-What-are-the-limits-of-the-Free-plan",
+        "scope": "connected"
       }
     ]
   },
@@ -1167,7 +1278,8 @@
       "limits": [
         "250 contacts",
         "500 monthly emails",
-        "250 daily sends"
+        "250 daily sends",
+        "1 user seat"
       ],
       "sourceUrl": "https://mailchimp.com/help/about-mailchimp-pricing-plans/",
       "verifiedAt": "2026-10-08"
@@ -1200,7 +1312,8 @@
         "value": "email campaigns",
         "status": "verified",
         "verifiedAt": "2026-10-08",
-        "sourceUrl": "https://mailchimp.com/help/about-mailchimp-pricing-plans/"
+        "sourceUrl": "https://mailchimp.com/help/about-mailchimp-pricing-plans/",
+        "plan": "Free"
       },
       {
         "type": "plan_limit",
@@ -1210,7 +1323,8 @@
         "plan": "Free",
         "status": "verified",
         "verifiedAt": "2026-10-08",
-        "sourceUrl": "https://mailchimp.com/help/about-mailchimp-pricing-plans/"
+        "sourceUrl": "https://mailchimp.com/help/about-mailchimp-pricing-plans/",
+        "period": "month"
       },
       {
         "type": "plan_limit",
@@ -1220,6 +1334,46 @@
         "plan": "Free",
         "status": "verified",
         "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://mailchimp.com/help/about-mailchimp-pricing-plans/",
+        "period": "total",
+        "scope": "stored"
+      },
+      {
+        "type": "capability",
+        "value": "basic email reporting",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://mailchimp.com/help/about-mailchimp-pricing-plans/",
+        "plan": "Free"
+      },
+      {
+        "type": "capability",
+        "value": "forms",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://mailchimp.com/help/about-mailchimp-pricing-plans/",
+        "plan": "Free"
+      },
+      {
+        "type": "plan_limit",
+        "value": "free daily email sends",
+        "unit": "emails",
+        "quantity": 250,
+        "period": "day",
+        "plan": "Free",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://mailchimp.com/help/about-mailchimp-pricing-plans/"
+      },
+      {
+        "type": "plan_limit",
+        "value": "free user seats",
+        "unit": "users",
+        "quantity": 1,
+        "period": "total",
+        "plan": "Free",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
         "sourceUrl": "https://mailchimp.com/help/about-mailchimp-pricing-plans/"
       }
     ]
@@ -1326,7 +1480,8 @@
         "100 monthly tasks",
         "Two-step Zap workflows",
         "One user",
-        "15-minute polling interval"
+        "15-minute polling interval",
+        "2,500 records"
       ],
       "sourceUrl": "https://help.zapier.com/hc/en-us/articles/32337438839565-What-s-included-in-Zapier-s-Free-plan",
       "verifiedAt": "2026-10-08"
@@ -1340,7 +1495,8 @@
         "plan": "Free",
         "status": "verified",
         "verifiedAt": "2026-10-08",
-        "sourceUrl": "https://help.zapier.com/hc/en-us/articles/32337438839565-What-s-included-in-Zapier-s-Free-plan"
+        "sourceUrl": "https://help.zapier.com/hc/en-us/articles/32337438839565-What-s-included-in-Zapier-s-Free-plan",
+        "period": "month"
       },
       {
         "type": "plan_limit",
@@ -1350,6 +1506,68 @@
         "plan": "Free",
         "status": "verified",
         "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.zapier.com/hc/en-us/articles/32337438839565-What-s-included-in-Zapier-s-Free-plan",
+        "period": "total"
+      },
+      {
+        "type": "capability",
+        "value": "two-step Zap workflows",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://help.zapier.com/hc/en-us/articles/32337438839565-What-s-included-in-Zapier-s-Free-plan",
+        "plan": "Free"
+      },
+      {
+        "type": "capability",
+        "value": "Zapier Tables",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://help.zapier.com/hc/en-us/articles/32337438839565-What-s-included-in-Zapier-s-Free-plan",
+        "plan": "Free"
+      },
+      {
+        "type": "capability",
+        "value": "Zapier Forms",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://help.zapier.com/hc/en-us/articles/32337438839565-What-s-included-in-Zapier-s-Free-plan",
+        "plan": "Free"
+      },
+      {
+        "type": "capability",
+        "value": "custom actions",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://help.zapier.com/hc/en-us/articles/32337438839565-What-s-included-in-Zapier-s-Free-plan",
+        "plan": "Free"
+      },
+      {
+        "type": "capability",
+        "value": "multi-step Zap workflows",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://help.zapier.com/hc/en-us/articles/32337438839565-What-s-included-in-Zapier-s-Free-plan",
+        "plan": "Paid",
+        "notAvailableOnFree": true
+      },
+      {
+        "type": "capability",
+        "value": "premium apps",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://help.zapier.com/hc/en-us/articles/32337438839565-What-s-included-in-Zapier-s-Free-plan",
+        "plan": "Paid",
+        "notAvailableOnFree": true
+      },
+      {
+        "type": "plan_limit",
+        "value": "free records",
+        "unit": "records",
+        "quantity": 2500,
+        "period": "total",
+        "plan": "Free",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
         "sourceUrl": "https://help.zapier.com/hc/en-us/articles/32337438839565-What-s-included-in-Zapier-s-Free-plan"
       }
     ]
@@ -1422,7 +1640,8 @@
       "freePlanSummary": "Free plan includes 1,000 credits per month and a 15-minute minimum scheduled interval at the time checked.",
       "limits": [
         "Free tier 1,000 credits per month",
-        "Scheduled scenario minimum interval 15 minutes"
+        "Scheduled scenario minimum interval 15 minutes",
+        "1,000 credits per month"
       ],
       "sourceUrl": "https://www.make.com/en/pricing",
       "verifiedAt": "2026-10-08"
@@ -1465,7 +1684,8 @@
         "value": "visual workflow builder",
         "status": "verified",
         "verifiedAt": "2026-10-08",
-        "sourceUrl": "https://www.make.com/en/product"
+        "sourceUrl": "https://www.make.com/en/product",
+        "plan": "Free"
       },
       {
         "type": "plan_limit",
@@ -1475,7 +1695,16 @@
         "plan": "Free",
         "status": "verified",
         "verifiedAt": "2026-10-08",
-        "sourceUrl": "https://www.make.com/en/pricing"
+        "sourceUrl": "https://www.make.com/en/pricing",
+        "period": "month"
+      },
+      {
+        "type": "capability",
+        "value": "routers and filters",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://www.make.com/en/pricing",
+        "plan": "Free"
       }
     ]
   },
@@ -1594,7 +1823,8 @@
         "plan": "Free",
         "status": "verified",
         "verifiedAt": "2026-10-08",
-        "sourceUrl": "https://help.zoho.com/portal/en/kb/crm/getting-started/articles/choose-your-path-edition-and-role-guide"
+        "sourceUrl": "https://help.zoho.com/portal/en/kb/crm/getting-started/articles/choose-your-path-edition-and-role-guide",
+        "period": "total"
       }
     ]
   },
@@ -1772,10 +2002,12 @@
       "freePlanStatus": "verified_available",
       "freePlanSummary": "Free plan collects up to ten responses per month across all forms.",
       "limits": [
-        "Ten responses monthly across all forms"
+        "Ten responses monthly across all forms",
+        "10 responses per month"
       ],
       "sourceUrl": "https://help.typeform.com/hc/en-us/articles/360032972852-Free-plan",
-      "verifiedAt": "2026-10-08"
+      "verifiedAt": "2026-10-08",
+      "freePlanAlias": "Free"
     },
     "decisionClaims": [
       {
@@ -1783,7 +2015,123 @@
         "value": "forms",
         "status": "verified",
         "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.typeform.com/hc/en-us/articles/360032972852-Free-plan",
+        "plan": "Free"
+      },
+      {
+        "type": "capability",
+        "value": "branching logic",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://help.typeform.com/hc/en-us/articles/360032972852-Free-plan",
+        "plan": "Free"
+      },
+      {
+        "type": "capability",
+        "value": "form embedding",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://help.typeform.com/hc/en-us/articles/360032972852-Free-plan",
+        "plan": "Free"
+      },
+      {
+        "type": "capability",
+        "value": "form result exports",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://help.typeform.com/hc/en-us/articles/360032972852-Free-plan",
+        "plan": "Free"
+      },
+      {
+        "type": "capability",
+        "value": "URL parameters",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://help.typeform.com/hc/en-us/articles/360032972852-Free-plan",
+        "plan": "Free"
+      },
+      {
+        "type": "capability",
+        "value": "file upload",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://help.typeform.com/hc/en-us/articles/360032972852-Free-plan",
+        "plan": "Paid",
+        "notAvailableOnFree": true
+      },
+      {
+        "type": "capability",
+        "value": "payment question",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://help.typeform.com/hc/en-us/articles/360032972852-Free-plan",
+        "plan": "Paid",
+        "notAvailableOnFree": true
+      },
+      {
+        "type": "capability",
+        "value": "SSO authentication",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://help.typeform.com/hc/en-us/articles/360032972852-Free-plan",
+        "plan": "Paid",
+        "notAvailableOnFree": true
+      },
+      {
+        "type": "capability",
+        "value": "EU data hosting",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://help.typeform.com/hc/en-us/articles/360032972852-Free-plan",
+        "plan": "Paid",
+        "notAvailableOnFree": true
+      },
+      {
+        "type": "plan_limit",
+        "value": "free monthly responses",
+        "unit": "submissions",
+        "quantity": 10,
+        "period": "month",
+        "plan": "Free",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
         "sourceUrl": "https://help.typeform.com/hc/en-us/articles/360032972852-Free-plan"
+      }
+    ],
+    "integrations": [
+      {
+        "product": "Mailchimp",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://help.typeform.com/hc/en-us/articles/360032972852-Free-plan",
+        "scope": "Manufacturer-documented Typeform integration; Free entitlement: included.",
+        "plan": "Free"
+      },
+      {
+        "product": "Airtable",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://help.typeform.com/hc/en-us/articles/360032972852-Free-plan",
+        "scope": "Manufacturer-documented Typeform integration; Free entitlement: included.",
+        "plan": "Free"
+      },
+      {
+        "product": "HubSpot",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://help.typeform.com/hc/en-us/articles/360032972852-Free-plan",
+        "scope": "Manufacturer-documented Typeform integration; Free entitlement: excluded.",
+        "plan": "Paid",
+        "notAvailableOnFree": true
+      },
+      {
+        "product": "Pipedrive",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
+        "sourceUrl": "https://help.typeform.com/hc/en-us/articles/360032972852-Free-plan",
+        "scope": "Manufacturer-documented Typeform integration; Free entitlement: excluded.",
+        "plan": "Paid",
+        "notAvailableOnFree": true
       }
     ]
   },
@@ -2160,7 +2508,8 @@
       "freePlanSummary": "Free Forever includes five Spaces and 60 Custom Field uses.",
       "limits": [
         "Five Spaces",
-        "60 Custom Field value uses"
+        "60 Custom Field value uses",
+        "5 Spaces"
       ],
       "sourceUrl": "https://help.clickup.com/hc/en-us/articles/6309390855319-Create-and-edit-Spaces",
       "verifiedAt": "2026-10-08"
@@ -2171,6 +2520,18 @@
         "value": "spaces",
         "status": "verified",
         "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://help.clickup.com/hc/en-us/articles/6309390855319-Create-and-edit-Spaces",
+        "plan": "Free"
+      },
+      {
+        "type": "plan_limit",
+        "value": "free spaces",
+        "unit": "spaces",
+        "quantity": 5,
+        "period": "total",
+        "plan": "Free",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
         "sourceUrl": "https://help.clickup.com/hc/en-us/articles/6309390855319-Create-and-edit-Spaces"
       }
     ]
@@ -2485,7 +2846,8 @@
         "plan": "Free",
         "status": "verified",
         "verifiedAt": "2026-10-08",
-        "sourceUrl": "https://posthog.com/pricing"
+        "sourceUrl": "https://posthog.com/pricing",
+        "period": "month"
       }
     ]
   },
@@ -2693,7 +3055,8 @@
         "Automation rules and timeline require paid features"
       ],
       "sourceUrl": "https://help.asana.com/s/article/asana-personal-plan-details",
-      "verifiedAt": "2026-10-08"
+      "verifiedAt": "2026-10-08",
+      "freePlanAlias": "Personal"
     },
     "decisionClaims": [
       {
@@ -2818,7 +3181,8 @@
         "plan": "Free",
         "status": "verified",
         "verifiedAt": "2026-10-08",
-        "sourceUrl": "https://support.atlassian.com/trello/docs/workspace-user-limit/"
+        "sourceUrl": "https://support.atlassian.com/trello/docs/workspace-user-limit/",
+        "period": "total"
       }
     ]
   },
@@ -2934,7 +3298,9 @@
         "plan": "Free",
         "status": "verified",
         "verifiedAt": "2026-10-08",
-        "sourceUrl": "https://support.airtable.com/articles/2277136852-airtable-plans-overview"
+        "sourceUrl": "https://support.airtable.com/articles/2277136852-airtable-plans-overview",
+        "period": "total",
+        "scope": "per_base"
       }
     ]
   },
@@ -3891,7 +4257,8 @@
         "Three combined Design and Sites files in the Starter team folder"
       ],
       "sourceUrl": "https://help.figma.com/hc/en-us/articles/13838684089751-Starter-plan-overview",
-      "verifiedAt": "2026-10-08"
+      "verifiedAt": "2026-10-08",
+      "freePlanAlias": "Starter"
     },
     "evidence": [
       {
@@ -8858,7 +9225,8 @@
       "freePlanStatus": "verified_available",
       "freePlanSummary": "Linear Free allows two teams in a Workspace.",
       "limits": [
-        "Two teams on Free"
+        "Two teams on Free",
+        "2 teams"
       ],
       "sourceUrl": "https://linear.app/docs/teams",
       "verifiedAt": "2026-10-08"
@@ -8891,6 +9259,18 @@
         "value": "teams",
         "status": "verified",
         "verifiedAt": "2026-10-08",
+        "sourceUrl": "https://linear.app/docs/teams",
+        "plan": "Free"
+      },
+      {
+        "type": "plan_limit",
+        "value": "free teams",
+        "unit": "teams",
+        "quantity": 2,
+        "period": "total",
+        "plan": "Free",
+        "status": "verified",
+        "verifiedAt": "2026-10-09",
         "sourceUrl": "https://linear.app/docs/teams"
       }
     ]

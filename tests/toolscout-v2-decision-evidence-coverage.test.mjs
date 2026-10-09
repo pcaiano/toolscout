@@ -63,13 +63,13 @@ test('unverified Free-tier capability does not qualify even when product has a v
 });
 
 test('free plan capacity proofs respect monthly caps and unknown tiers',async()=>{
- const yes=await run('decide_software',{job:'automation',budget:'free',constraints:['at least 100 tasks'],limit:5});
+ const yes=await run('decide_software',{job:'automation',budget:'free',constraints:['at least 100 tasks per month'],limit:5});
  assert.equal(yes.isError,false);
  const zapier=yes.structuredContent.shortlist.find(x=>x.slug==='zapier');
  assert.ok(zapier);
  assert.equal(zapier.constraint_evidence[0].status,'verified');
  assert.equal(zapier.constraint_evidence[0].plan,'Free');
- const no=await run('decide_software',{job:'automation',budget:'free',constraints:['at least 101 tasks'],limit:5});
+ const no=await run('decide_software',{job:'automation',budget:'free',constraints:['at least 101 tasks per month'],limit:5});
  assert.equal(no.isError,true);
  assert.equal(no.structuredContent.decision_status,'no_qualified_candidate');
 });

@@ -29,8 +29,8 @@ Optional `decisionClaims` entries in a catalog record use:
 - `status`: only `verified` can qualify
 - `sourceUrl`: first-party manufacturer evidence, private to the catalog; a vendor subdomain or an existing internally accepted editorial source URL
 - `verifiedAt`: ISO calendar date, not future dated or more than 180 days old
-- `plan`: exact documented tier entitlement. Under `budget: "free"`, an individual capability or named integration only qualifies if its availability on the Free tier is positively documented. Missing tier data means `not_verified`; a documented paid-only tier means `conflict`.
-- For `plan_limit`: `unit` such as `tasks` or `users`, plus numeric `quantity` and `plan`
+- `plan`: exact documented tier entitlement. Under `budget: "free"`, an individual capability or named integration only qualifies if its availability on the Free tier is positively documented. Missing tier data means `not_verified`. Paid-tier presence alone never proves that Free excludes it: `conflict` requires an explicit manufacturer-supported `notAvailableOnFree: true` claim.
+- For `plan_limit`: `unit` such as `tasks`, `emails` or `users`; numeric `quantity`, `plan`, and **explicit `period`** (`day`, `month` or `total`). For contacts also require `scope` (`stored` or `automation`). A daily allocation never proves a monthly allocation. `total` is an account/workspace concurrent cap, not a recurring quota.
 - For `price_eur_month`: `amount`, `plan`, `billingCycle: "monthly"`. No currency conversion, promotional pricing or annual equivalent is inferred.
 
 Do **not** auto-promote product descriptions, feature lists, raw search snippets or generalized manufacturer review source URLs to `decisionClaims`.
@@ -61,5 +61,23 @@ All 127 catalog entries now contain at least one **individually selected, dated 
 For new catalog admissions, claim-level evidence should be sourced with the same rigor as the editorial manufacturer review; adding a product profile alone does not prove all buying constraints.
 
 Manufacturer documentation stays private, and existing public profile canonicals, schema and monetizable `/go/` links are unchanged.
+
+## Focused buyer-plan validation (9 October 2026)
+
+Live first-party documentation was rechecked for Brevo, Mailchimp, Typeform, Zapier, Make, ClickUp and Linear. The private catalog now separates Free and paid entitlements, named integrations, daily from monthly usage and structured account/scope limits. In particular:
+
+- Brevo's Free plan: 300 email sends/day, 100,000 stored contacts, 2,000 contacts entering automations, one user, 50 open deals, one pipeline and limited calendars/inboxes. Daily sends do not establish a monthly allowance.
+- Mailchimp's Free plan: 500 sends/month, 250 sends/day, 250 stored contacts and one user.
+- Typeform's Free plan: 10 responses/month across forms, basic form logic and embeds, and manufacturer-listed Free-tier Mailchimp/Airtable connectivity. Paid-only items like file uploads, payment questions and HubSpot integration are not Free entitlements.
+- Zapier's Free plan: 100 tasks/month, two-step workflows, 2,500 table records and one user; multi-step workflows require a paid plan.
+- Make's Free plan: 1,000 credits/month, visual workflows and routers/filters.
+- ClickUp Free Forever: five Spaces.
+- Linear Free: two teams.
+
+For Free buyers, Jotform's manufacturer-named `Starter` plan is recognized as a Free-tier alias, whereas a generic Paid plan is never treated as Free.
+
+Every qualifying recommendation must return the matched `plan`, `period`, `scope` (where relevant) and documented capacity. Missing duration, contact scope or entitlement fails closed instead of being scored as a feature match.
+
+The regression cohort (`tests/toolscout-v2-buyer-plan-constraints.test.mjs`) includes 19 real purchase scenarios and tier-specific named-integration checks. It is mandatory in existing CI. This focused cohort is not 100% price/feature coverage of the full catalog, and does not authorize inferred EUR prices.
 
 No new GitHub Actions deployment route: Cloudflare Workers Builds continues to publish merged `main` commits automatically; GitHub Actions recovery remains manual-only.
