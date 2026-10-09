@@ -476,14 +476,15 @@ function priceCeiling(raw){
   const amount=Number((tokens[1]||tokens[2]).replace(',','.'));
   if(!Number.isFinite(amount)||amount<0)return {invalid:true,reason:'Unsupported price number.'};
   const normalized=value.toLowerCase();
-  const annual=/\b(?:billed annually|annual billing|paid annually|annual prepay|yearly billing|per year|a year|\/year|yearly|annual commitment)\b/.test(normalized);
+  if(/\b(?:in|for)\s+(?:portugal|spain|france|germany|united states|united kingdom|usa|uk|canada|europe|european union)\b/.test(normalized))return {invalid:true,reason:'Country-specific checkout prices need verified local-currency manufacturer quotes; a global price cannot prove a local payable total.'};
+  const annual=/\b(?:billed annually|annual billing|paid annually|annual prepay|yearly billing|per year|a year|yearly|annual commitment)\b/.test(normalized)||/\/year\b/.test(normalized);
   const monthly=/\b(?:billed monthly|monthly billing|monthly payment|monthly commitment)\b/.test(normalized);
-  const annualPeriod=/\b(?:per year|a year|\/year)\b/.test(normalized);
-  const monthlyPeriod=/\b(?:per month|a month|\/month|\/mo|monthly)\b/.test(normalized);
+  const annualPeriod=/\b(?:per year|a year)\b/.test(normalized)||/\/year\b/.test(normalized);
+  const monthlyPeriod=/\b(?:per month|a month|monthly)\b/.test(normalized)||/\/(?:month|mo)\b/.test(normalized);
   if(annual&&monthly)return {invalid:true,reason:'The buyer request conflicts between annual and monthly commitments.'};
   if(!annualPeriod&&!monthlyPeriod&&!monthly)return {invalid:true,reason:'Specify whether the price ceiling is per month or per year.'};
   if(annualPeriod&&monthlyPeriod)return {invalid:true,reason:'Conflicting annual and monthly price ceiling periods.'};
-  const unit=/\b(?:per channel|\/channel|for (?:one|1) channel)\b/.test(normalized)?'channel':null;
+  const unit=/\b(?:per channel|for (?:one|1) channel)\b/.test(normalized)||/\/channel\b/.test(normalized)?'channel':null;
   const taxInclusive=/\b(?:incl(?:uding)?\.? (?:vat|tax)|tax included|vat included|with vat|ttc)\b/.test(normalized);
   return {currency,amount,period:annualPeriod?'year':'month',billingCycle:annual?'annual':monthly?'monthly':null,unit,unitQuantity:unit?1:null,taxInclusive};
 }
