@@ -167,10 +167,13 @@ async function recommend(request,env){
   const limit=Math.max(1,Math.min(5,Number.parseInt(u.searchParams.get('limit')||'3',10)||3));
   try{
     const [tools,intents]=await Promise.all([assetJson(request,env,'/data/tools.json'),assetJson(request,env,'/data/intents.json')]);
+    // Interpret the whole-business question BEFORE category hints inferred from
+    // sector names such as marketing agency, software company or architecture firm.
+    // Only a user-supplied goal is a hard category instruction at this stage.
+    const guidance=businessWorkflowGuidance(q,profile,tools);
     const p=inferredProfile(q,profile);
-    if(!p.goal&&/\b(airbnb|vacation rental|short.term rental|holiday rental|alojamento local)\b/.test(normalize(q))&&verifiedPmsCandidates(tools).length)p.goal='vacation-rental';
-    const guidance=businessWorkflowGuidance(q,p,tools);
-    if(guidance)return Response.json({query:q,profile:p,intent:null,recommendation_type:'workflow_guidance',
+    if(!guidance&&!p.goal&&/\b(airbnb|vacation rental|short.term rental|holiday rental|alojamento local)\b/.test(normalize(q))&&verifiedPmsCandidates(tools).length)p.goal='vacation-rental';
+    if(guidance)return Response.json({query:q,profile:profile,intent:null,recommendation_type:'workflow_guidance',
       guidance,count:0,recommendations:[],ranking:'Workflow decomposition before vendor ranking',
       affiliate_disclosure:'ToolScout may earn a commission from some outbound links. Affiliate relationships do not influence recommendations.'},{headers:JSON_H});
     const intent=detectIntent(q,intents),signal=querySignal(q,intent,p,tools);
