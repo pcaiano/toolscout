@@ -106,9 +106,24 @@ assert(narrow.recommendation_type!=='workflow_guidance'&&narrow.recommendations?
 
 // Read-only live D1 migration truth. An incomplete cycle remains visible as
 // incomplete; never infer the imported count from the build or static JSON.
-const inventoryResponse=await request('/api/catalog-inventory?catalog_migration_probe='+Date.now());
-assert(inventoryResponse.ok,'Production catalog inventory unavailable, HTTP '+inventoryResponse.status);
-const inventory=await inventoryResponse.json();
+// Cloudflare Workers Build and the separate GitHub Integrity job can race.
+// Wait for the *new* read-only schema to be live rather than failing on an
+// otherwise healthy earlier production release. Never accept the old schema.
+let inventory=null,inventoryAttempts=0;
+for(let i=1;i<=18;i++){
+  inventoryAttempts=i;
+  try{
+    const response=await request('/api/catalog-inventory?catalog_migration_probe='+Date.now());
+    if(response.ok){
+      const current=await response.json();
+      if(current?.ok&&current.storage?.primary==='cloudflare_d1'&&
+        Number.isInteger(current.storage.baseline_present)&&
+        Number.isInteger(current.storage.baseline_revised)){inventory=current;break}
+    }
+  }catch{}
+  if(i<18)await sleep(5000);
+}
+assert(inventory,'Production catalog inventory did not expose the canonical migration schema after deployment readiness retries');
 assert(inventory.ok&&inventory.storage?.primary==='cloudflare_d1','D1 canonical storage contract missing in production');
 assert(inventory.storage.baseline_total===127,'Unexpected legacy catalog count, migration may lose or duplicate profiles');
 assert(Number.isInteger(inventory.storage.seeded_baseline)&&inventory.storage.seeded_baseline>=0&&inventory.storage.seeded_baseline<=127,'Invalid migrated D1 count');
@@ -117,7 +132,7 @@ assert(inventory.storage.baseline_present===inventory.storage.seeded_baseline+in
 assert(inventory.storage.baseline_remaining===127-inventory.storage.baseline_present,'Migration progress includes revised D1 catalog profiles');
 assert(inventory.storage.legacy_html_preserved===true,'Public legacy HTML preservation contract missing');
 assert(inventory.total>=127,'Published merged catalog lost a legacy product');
-console.log(JSON.stringify({catalogMigrationProductionVerified:true,at:new Date().toISOString(),staticBaseline:inventory.storage.baseline_total,seededBaseline:inventory.storage.seeded_baseline,
+console.log(JSON.stringify({catalogMigrationProductionVerified:true,liveInventorySchemaWaitAttempts:inventoryAttempts,at:new Date().toISOString(),staticBaseline:inventory.storage.baseline_total,seededBaseline:inventory.storage.seeded_baseline,
   remaining:inventory.storage.baseline_remaining,phase:inventory.storage.migration_phase,source:inventory.storage.source,degraded:inventory.storage.degraded,
   publiclyVisibleProducts:inventory.total},null,2));
 console.log(JSON.stringify({ok:true,liveNetworkMcpPost:true,base:BASE,method:'tools/call',canaryAfterAttempts:current,positiveDecisions:3,blockedInvalidTier:1,currency:['USD','EUR'],manufacturerSourcesExposed:false,liveBusinessSectors:broadCases.map(x=>x.sector),businessCanaryAfterAttempts:industryAttempts,narrowBusinessJobVerified:true},null,2));
