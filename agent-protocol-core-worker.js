@@ -1,4 +1,4 @@
-import {businessWorkflowGuidance} from './business-workflow-intent.js';
+import {businessWorkflowGuidance,verifiedPmsCandidates} from './business-workflow-intent.js';
 import base from './content-engine-intelligence-worker.js';
 
 const PROTOCOL_VERSION='2026-07-28';
@@ -661,6 +661,7 @@ function jobIntentProfile(tools,job){
   const intentTerms=textTerms(job).filter(term=>!dimensionTerms.has(term)&&!contextTerms.has(term));
   // Specific job families outrank incidental mentions of generic words.
   const families=[
+    {category:'vacation rental',pattern:/\b(airbnb|vacation rental|short term rental|holiday rental|alojamento local)\b/},
     {category:'crm',pattern:/\b(crm|customer relationship management|sales pipeline|manage leads)\b/},
     {category:'seo',pattern:/\b(seo|keyword research|backlink|search engine optimization|organic search)\b/},
     {category:'developer',pattern:/\b(coding|code editor|software development|devops|continuous deployment)\b/},
@@ -820,7 +821,7 @@ function decisionCandidates(tools,args){
   const profile=jobIntentProfile(tools,args.job||args.use_case||'');
   const relevant=evaluated.filter(x=>{
     const source=tools.find(t=>t.slug===x.slug);
-    return source&&!source.categoryReviewRequired?matchesJobIntent(source,profile):false;
+    return source&&!source.categoryReviewRequired&&(source.category!=='vacation-rental'||verifiedPmsCandidates([source]).length>0)?matchesJobIntent(source,profile):false;
   });
   // 'must_have' is a hard gate. A product with unverified requirements can be
   // compared explicitly but must not appear as a qualified recommendation.
@@ -879,7 +880,7 @@ async function callCatalogTool(name,args,request,env){
   try{tools=await loadCatalog(request,env)}catch{return {error:'ToolScout catalog is temporarily unavailable.',status:503}}
   const disclosure='ToolScout may earn a commission from some outbound links. Affiliate relationships do not influence ranking, shortlist order, comparison conclusions or factual output.';
   if(name==='decide_software'){
-    const guidance=businessWorkflowGuidance(args.job);
+    const guidance=businessWorkflowGuidance(args.job,{},tools);
     if(guidance)return {data:{
       job:args.job,shortlist:[],decision_status:'needs_workflow_selection',
       workflow_guidance:guidance,
