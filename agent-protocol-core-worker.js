@@ -57,6 +57,7 @@ function toolDefinitions(){
           team:{type:'string',enum:['solo','small','team','large','agency']},
           priorities:{type:'array',maxItems:6,uniqueItems:true,items:{type:'string',enum:['price','ease','automation','integrations','sales','ai','marketing','seo','research','content','agency']}},
           existing_tools:{type:'array',maxItems:12,items:{type:'string',minLength:1,maxLength:100}},
+          require_stack_fit:{type:'boolean',description:'When true, every existing tool must have a documented, plan-compatible named integration; otherwise fail closed.'},
           limit:{type:'integer',minimum:2,maximum:5,default:3}
         }
       },
@@ -76,7 +77,8 @@ function toolDefinitions(){
           budget:{type:'string',enum:['free','low','mid','high']},
           team:{type:'string',enum:['solo','small','team','large','agency']},
           priorities:{type:'array',maxItems:6,uniqueItems:true,items:{type:'string',enum:['price','ease','automation','integrations','sales','ai','marketing','seo','research','content','agency']}},
-          existing_tools:{type:'array',maxItems:12,items:{type:'string',minLength:1,maxLength:100}}
+          existing_tools:{type:'array',maxItems:12,items:{type:'string',minLength:1,maxLength:100}},
+          require_stack_fit:{type:'boolean',description:'Require evidence for every named existing-stack integration to award a winner.'}
         }
       },
       outputSchema:{type:'object',required:['use_case','tools','verdict','tradeoffs','affiliate_disclosure'],properties:{use_case:{type:'string'},tools:{type:'array',items:{type:'object'}},verdict:{type:'object'},tradeoffs:{type:'array',items:{type:'object'}},cheaper_option_analysis:{type:'object'},affiliate_disclosure:{type:'string'}}},
@@ -94,6 +96,7 @@ function toolDefinitions(){
           must_have:{type:'array',maxItems:12,items:{type:'string',minLength:1,maxLength:100}},
           budget:{type:'string',enum:['free','low','mid','high']},
           existing_tools:{type:'array',maxItems:12,items:{type:'string',minLength:1,maxLength:100}},
+          require_stack_fit:{type:'boolean',description:'Exclude alternatives without evidence for each required stack integration.'},
           limit:{type:'integer',minimum:1,maximum:5,default:3}
         }
       },
@@ -109,6 +112,7 @@ function toolDefinitions(){
         properties:{
           candidates:{type:'array',minItems:1,maxItems:5,uniqueItems:true,items:{type:'string',minLength:1,maxLength:120}},
           existing_tools:{type:'array',minItems:1,maxItems:12,uniqueItems:true,items:{type:'string',minLength:1,maxLength:100}},
+          budget:{type:'string',enum:['free','low','mid','high'],description:'Free-plan checks must have a verified Free-tier entitlement.'},
           use_case:{type:'string',maxLength:300}
         }
       },
@@ -208,6 +212,8 @@ function validToolArguments(name,a){
     if(typeof a.job!=='string'||a.job.trim().length<3||a.job.length>500)return 'job must be a string between 3 and 500 characters';
     if(!validStrings(a.constraints,12,160)||!validStrings(a.must_have,12,100)||!validStrings(a.avoid,12,100)||!validStrings(a.existing_tools,12,100))return 'constraints, must_have, avoid and existing_tools must be valid string arrays';
     if(!validBudget(a.budget)||!validTeam(a.team)||!validPriorities(a.priorities))return 'budget, team or priorities is invalid';
+    if(a.require_stack_fit!==undefined&&typeof a.require_stack_fit!=='boolean')return 'require_stack_fit must be boolean';
+    if(a.require_stack_fit===true&&(!Array.isArray(a.existing_tools)||!a.existing_tools.length))return 'require_stack_fit requires at least one existing tool';
     if(a.country!==undefined&&(typeof a.country!=='string'||!/^[A-Z]{2}$/.test(a.country)))return 'country must be an ISO 3166-1 alpha-2 code';
     if(a.seat_count!==undefined&&(!Number.isInteger(a.seat_count)||a.seat_count<1||a.seat_count>100))return 'seat_count must be an integer from 1 to 100';
     if(a.limit!==undefined&&(!Number.isInteger(a.limit)||a.limit<2||a.limit>5))return 'limit must be an integer from 2 to 5';
@@ -218,18 +224,23 @@ function validToolArguments(name,a){
     if(a.tools.some(x=>typeof x!=='string'||!x.trim()||x.length>120))return 'each tool must be a non-empty string up to 120 characters';
     if(typeof a.use_case!=='string'||a.use_case.trim().length<3||a.use_case.length>500)return 'use_case must be a string between 3 and 500 characters';
     if(!validStrings(a.must_have,12,100)||!validStrings(a.existing_tools,12,100)||!validBudget(a.budget)||!validTeam(a.team)||!validPriorities(a.priorities))return 'comparison constraints are invalid';
+    if(a.require_stack_fit!==undefined&&typeof a.require_stack_fit!=='boolean')return 'require_stack_fit must be boolean';
+    if(a.require_stack_fit===true&&(!Array.isArray(a.existing_tools)||!a.existing_tools.length))return 'require_stack_fit requires at least one existing tool';
     return null;
   }
   if(name==='find_alternatives'){
     if(typeof a.tool!=='string'||!a.tool.trim()||a.tool.length>120)return 'tool must be a non-empty string up to 120 characters';
     if(typeof a.dislike!=='string'||a.dislike.trim().length<2||a.dislike.length>300)return 'dislike must be a string between 2 and 300 characters';
     if(!validStrings(a.must_have,12,100)||!validStrings(a.existing_tools,12,100)||!validBudget(a.budget))return 'alternative constraints are invalid';
+    if(a.require_stack_fit!==undefined&&typeof a.require_stack_fit!=='boolean')return 'require_stack_fit must be boolean';
+    if(a.require_stack_fit===true&&(!Array.isArray(a.existing_tools)||!a.existing_tools.length))return 'require_stack_fit requires at least one existing tool';
     if(a.limit!==undefined&&(!Number.isInteger(a.limit)||a.limit<1||a.limit>5))return 'limit must be an integer from 1 to 5';
     return null;
   }
   if(name==='check_stack_fit'){
     if(!validStrings(a.candidates,5,120)||!Array.isArray(a.candidates)||!a.candidates.length)return 'candidates must contain 1 to 5 tool names or slugs';
     if(!validStrings(a.existing_tools,12,100)||!Array.isArray(a.existing_tools)||!a.existing_tools.length)return 'existing_tools must contain 1 to 12 software names';
+    if(!validBudget(a.budget))return 'budget is invalid';
     if(a.use_case!==undefined&&(typeof a.use_case!=='string'||a.use_case.length>300))return 'use_case is invalid';
     return null;
   }
@@ -625,6 +636,8 @@ function decisionBlockers(evaluated,args={}){
     if(!req.matched)reasons.push('Mandatory capability lacks claim-level manufacturer evidence: '+req.requirement);
   if(args.budget==='free'&&!(evaluated.free_plan_verified&&evaluated.free_plan))
     reasons.push('A documented free plan is required but not confirmed.');
+  if(args.require_stack_fit===true)for(const pair of evaluated.stack_fit?.pairs||[])
+    if(pair.status!=='verified'||pair.proof_scope==='ai_interoperability_only')reasons.push('Mandatory stack integration with '+pair.existing_tool+' is not verified on the requested plan.');
   for(const c of evaluated.constraint_evidence||[])
     if(hardBuyerConstraint(c.constraint)&&c.status!=='verified')
       reasons.push('Mandatory constraint cannot be confirmed: '+c.constraint+' ('+c.status+').');
@@ -671,18 +684,23 @@ function matchesJobIntent(tool,profile){
   if(!profile.intentTerms.length)return false;
   return profile.intentTerms.some(term=>category===term||hay.includes(' '+term+' '));
 }
-function stackAssessment(tool,existingTools=[]){
+function stackAssessment(tool,existingTools=[],{budget=null}={}){
   const ai=aiIntegration(tool),hay=toolHay(tool),pairs=[];
   for(const existing of existingTools||[]){
     const n=catalogNormalize(existing);
     if(!n)continue;
     const pair=verifiedIntegrationPair(tool,existing);
     if(pair){
-      pairs.push({existing_tool:existing,status:'verified',evidence:'Verified named integration with '+existing+'.',verified_at:pair.verifiedAt||pair.verified_at});
+      const eligiblePlans=verifiedPlans(pair);
+      if(budget==='free'&&!eligiblePlans.some(plan=>freeTierMatches(tool,plan))){
+        pairs.push({existing_tool:existing,status:'pair_unverified',evidence:'Named integration is documented, but an entitlement for this exact Free plan is not verified.',verified_at:pair.verifiedAt||pair.verified_at,eligible_plans:eligiblePlans});
+        continue;
+      }
+      pairs.push({existing_tool:existing,status:'verified',evidence:'Verified named integration with '+existing+'.',verified_at:pair.verifiedAt||pair.verified_at,eligible_plans:eligiblePlans});
       continue;
     }
     const assistant=ai.status==='verified'?(ai.assistants||[]).find(x=>catalogNormalize(x)===n):null;
-    if(assistant){pairs.push({existing_tool:existing,status:'verified',evidence:'Verified AI interoperability with '+assistant+'.'});continue}
+    if(assistant){pairs.push({existing_tool:existing,status:budget==='free'?'pair_unverified':'verified',proof_scope:'ai_interoperability_only',evidence:'Verified AI interoperability with '+assistant+', but no plan-specific named integration entitlement is recorded.'});continue}
     if((tool.features||[]).some(x=>catalogNormalize(x)==='integrations')||scoreOf(tool,'integrations')>=8){
       pairs.push({existing_tool:existing,status:'pair_unverified',evidence:'Strong general integration capability, but ToolScout does not currently store verified product-specific evidence for '+existing+'.'});
       continue;
@@ -748,7 +766,9 @@ function decisionEvaluation(tool,args){
   const must=(args.must_have||[]).map(x=>({requirement:x,...requirementMatch(tool,x,{budget:args.budget})}));
   const avoids=(args.avoid||[]).map(x=>({requirement:x,...requirementMatch(tool,x,{exclude:true})}));
   const initialConstraints=constraintEvidence(tool,args.constraints||[],args.budget,args.country||null,args.seat_count||null);
-  const planCoherence=coherentBuyerPlan(must,initialConstraints);
+  const stack=stackAssessment(tool,args.existing_tools||[],{budget:args.budget});
+  const required= args.require_stack_fit===true?[...must,...stack.pairs.map(pair=>({matched:pair.status==='verified'&&pair.proof_scope!=='ai_interoperability_only',eligible_plans:pair.eligible_plans||[]}))]:must;
+  const planCoherence=coherentBuyerPlan(required,initialConstraints);
   const constraints=initialConstraints.map(x=>{
     if(planCoherence.status!=='verified'||!x.price_options?.length)return x;
     const price=x.price_options.find(p=>catalogNormalize(p.plan)===catalogNormalize(planCoherence.selected_plan));
@@ -761,7 +781,6 @@ function decisionEvaluation(tool,args){
   const constraintConflicts=constraints.filter(x=>x.status==='conflict').length;
   const raw=12+Math.min(38,relevance)+((dimAvg-5)*4)+budget.points+team.points+mustMatched*3+constraintVerified*3-constraintUnverified*7-constraintConflicts*22-avoidHits*12;
   const fit=clamp(Math.round(raw),0,95);
-  const stack=stackAssessment(tool,args.existing_tools||[]);
   const advantages=[];
   for(const d of [...dimScores].sort((a,b)=>b.score-a.score).slice(0,3))if(d.score>=7)advantages.push(d.dimension+': '+d.score+'/10');
   if(tool.freePlanKnown===true&&tool.freePlan&&args.budget==='free')advantages.push('verified catalog free plan');
@@ -875,6 +894,7 @@ async function callCatalogTool(name,args,request,env){
         budget:args.budget||null,
         team:args.team||null,
         existing_tools:args.existing_tools||[],
+        require_stack_fit:args.require_stack_fit===true,
         methodology:'Deterministic ToolScout catalog fit. Candidates must first match the requested job/category and satisfy all evidence-backed must-haves to appear in a qualified shortlist. Manufacturer-level editorial sourcing does not automatically prove an individual requirement; a documented profile needs claim-level first-party evidence. Missing evidence is not a confirmed capability. A free-only budget excludes products without verified free plans. Scores then combine explicit priorities, budget/team signals, must-have evidence, free-form constraint evidence and known stack evidence. Every free-form constraint is returned as verified, not_verified or conflict. Currency, country, taxes, per-channel units and billing-cycle commitments are strict price gates, never inferred from generic price scores or FX conversions; missing product-specific integration evidence is never upgraded from a generic text match.',
         no_pay_to_rank:true
       },
@@ -885,7 +905,7 @@ async function callCatalogTool(name,args,request,env){
     const found=[],missing=[];
     for(const value of args.tools){const tool=findCatalogTool(tools,value);if(tool)found.push(tool);else missing.push(value)}
     if(found.length<2)return {error:'At least two requested tools must exist in the ToolScout catalog.',status:404,data:{missing}};
-    const evalArgs={job:args.use_case,use_case:args.use_case,must_have:args.must_have||[],budget:args.budget,team:args.team,priorities:args.priorities||[],existing_tools:args.existing_tools||[]};
+    const evalArgs={job:args.use_case,use_case:args.use_case,must_have:args.must_have||[],budget:args.budget,team:args.team,priorities:args.priorities||[],existing_tools:args.existing_tools||[],require_stack_fit:args.require_stack_fit===true};
     const evaluated=found.map(t=>qualifyDecision(decisionEvaluation(t,evalArgs),evalArgs)).sort((a,b)=>Number(b.qualified_for_use_case)-Number(a.qualified_for_use_case)||b.fit_score-a.fit_score);
     const qualified=evaluated.filter(x=>x.qualified_for_use_case);
     const dims=requestedDimensions(evalArgs),gap=qualified.length>=2?qualified[0].fit_score-qualified[1].fit_score:null;
@@ -914,7 +934,7 @@ async function callCatalogTool(name,args,request,env){
     const dims=requestedDimensions({dislike:args.dislike});
     const sourceEval=decisionEvaluation(source,{job:source.category,priorities:dims,must_have:args.must_have||[],budget:args.budget,existing_tools:args.existing_tools||[]});
     const candidates=tools.filter(t=>t.slug!==source.slug&&catalogNormalize(t.category)===catalogNormalize(source.category)).map(t=>{
-      const altArgs={job:source.category,priorities:dims,must_have:args.must_have||[],budget:args.budget,existing_tools:args.existing_tools||[]};
+      const altArgs={job:source.category,priorities:dims,must_have:args.must_have||[],budget:args.budget,existing_tools:args.existing_tools||[],require_stack_fit:args.require_stack_fit===true};
       const ev=qualifyDecision(decisionEvaluation(t,altArgs),altArgs);
       const improvements=[],sacrifices=[];
       for(const d of [...new Set([...dims,'price','ease','automation','integrations'])]){
@@ -930,7 +950,7 @@ async function callCatalogTool(name,args,request,env){
   if(name==='check_stack_fit'){
     const found=[],missing=[];
     for(const value of args.candidates){const tool=findCatalogTool(tools,value);if(tool)found.push(tool);else missing.push(value)}
-    const candidates=found.map(t=>({tool:publicTool(t),stack_fit:stackAssessment(t,args.existing_tools),integration_score:scoreOf(t,'integrations'),use_case:args.use_case||null}));
+    const candidates=found.map(t=>({tool:publicTool(t),stack_fit:stackAssessment(t,args.existing_tools,{budget:args.budget}),integration_score:scoreOf(t,'integrations'),use_case:args.use_case||null}));
     return {data:{existing_tools:args.existing_tools,candidates,missing,evidence_note:'ToolScout distinguishes exact catalog/AI evidence from general integration capability. pair_unverified and unknown mean compatibility must be checked before a migration or purchase.'}};
   }
   if(name==='recent_changes'){

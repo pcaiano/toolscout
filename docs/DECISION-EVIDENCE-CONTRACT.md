@@ -126,3 +126,11 @@ Source-checked Webflow Site Basic and Site Premium monthly-billed USD prices are
 
 Existing `scripts/probe-live-mcp-decision.mjs`, run from the existing `toolscout-v2-integrity-audit.yml`, is now extended to wait for a Cloudflare catalog containing the new monthly Premium quote and to validate the monthly-priced Premium MCP decision, together with earlier annual Webflow and HubSpot EUR live checks. This is a real read-only external JSON-RPC POST from a GitHub Actions runner. It cannot be called a live success until that job returns a completed successful result. There is no duplicate MCP probe, deployment workflow, engine, or service.
 No new GitHub Actions deployment route: Cloudflare Workers Builds continues to publish merged `main` commits automatically; GitHub Actions recovery remains manual-only.
+
+## Mandatory existing-stack compatibility (9 October 2026)
+
+The existing `decide_software`, `compare_for_use_case` and `find_alternatives` tools now accept optional `require_stack_fit: true`, which requires at least one `existing_tools` entry. For each named integration, a manufacturer-documented product pair is required; general integration scores and incidental product mentions never qualify. The default remains soft compatibility context to preserve existing integrations, but all uncertain matches are labelled unknown or pair-unverified.
+
+For a Free-only budget, a confirmed product pair is **not** enough: the exact Free-plan entitlement must also be manufacturer-documented. For priced decisions, a required integration without a verified plan entitlement cannot be combined with an unrelated cheap quote; the candidate fails the shared-plan coherence gate. AI interoperability with an assistant is a useful signal, but it does not substitute for vendor-backed, plan-specific pair evidence.
+
+The `check_stack_fit` tool accepts optional `budget` to expose Free-tier unknowns. Empty qualified shortlists and comparisons with no qualified winner are factual uncertainty, **not** claims that no real integration exists. These safeguards never modify editorial scoring for affiliate status, public URLs, page design or vendor documentation link policies. Regression cases run in the existing CI at `tests/toolscout-v2-stack-fit-qualification.test.mjs`.
