@@ -8,6 +8,7 @@ const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'
 const MAX_VERIFY_PER_CYCLE=4;
 const MAX_NEWS_SOURCE_CHECKS_PER_CYCLE=4;
 const MAX_ADMIT_PER_DAY=6;
+const MAX_BASELINE_SEED_PER_CYCLE=40; // bounded migration inside the existing catalog autonomy engine
 const MAX_CANDIDATE_CHECKS_PER_CYCLE=12;
 const WARNING_RETRY_HOURS=6;
 const MAX_WARNING_RETRIES_PER_CYCLE=2;
@@ -151,8 +152,9 @@ async function logEvent(env,slug,type,status,detail,evidence=null){
 }
 function compileRuntimeSnapshot(stateRows=[],candidateRows=[],meta={}){
   const stateMap=new Map((stateRows||[]).map(row=>[String(row.tool_slug),row])),parsed=[];
+  const baselineMirrors=new Set((candidateRows||[]).filter(row=>row.source_status==='baseline_snapshot').map(row=>String(row.tool_slug||'').toLowerCase()));
   for(const row of candidateRows||[]){try{const p=JSON.parse(row.profile_json);if(p)parsed.push(p)}catch{}}
-  return{at:Date.now(),candidates:parsed,candidateMap:new Map(parsed.map(x=>[String(x.slug||'').toLowerCase(),x])),stateMap,suppressed:new Set([...stateMap.entries()].filter(([,v])=>v.quality_status==='confirmed_broken').map(([k])=>k)),degraded:Boolean(meta.degraded),lastError:meta.lastError||null,source:meta.source||'d1'};
+  return{at:Date.now(),candidates:parsed,candidateMap:new Map(parsed.map(x=>[String(x.slug||'').toLowerCase(),x])),stateMap,suppressed:new Set([...stateMap.entries()].filter(([,v])=>v.quality_status==='confirmed_broken').map(([k])=>k)),degraded:Boolean(meta.degraded),lastError:meta.lastError||null,source:meta.source||'d1',baselineMirrors};
 }
 async function writeRuntimeEdgeSnapshot(stateRows,candidateRows){
   try{
@@ -188,13 +190,55 @@ async function runtimeSnapshot(env,{force=false}={}){
 async function runtimeCandidates(env){return (await runtimeSnapshot(env)).candidates}
 async function suppressedSlugs(env){return (await runtimeSnapshot(env)).suppressed}
 async function mergedTools(env){
-  const [staticTools,candidates,suppressed]=await Promise.all([assetJson(env,'/data/tools.json',[]),runtimeCandidates(env),suppressedSlugs(env)]);
+  // D1 is the primary product-data store once a legacy slug has been seeded.
+  // Keep the existing static index order and an intact read-only fallback for
+  // partial migration, D1 outages, and recovery. No duplicate public products.
+  const [staticTools,snapshot]=await Promise.all([assetJson(env,'/data/tools.json',[]),runtimeSnapshot(env)]);
+  const stored=snapshot.candidateMap||new Map(),suppressed=snapshot.suppressed||new Set();
   const out=[],seen=new Set();
-  for(const tool of [...(Array.isArray(staticTools)?staticTools:[]),...candidates]){
-    const slug=String(tool?.slug||'').toLowerCase();if(!slug||seen.has(slug)||suppressed.has(slug))continue;
-    seen.add(slug);out.push(tool);
+  for(const fileTool of Array.isArray(staticTools)?staticTools:[]){
+    const slug=String(fileTool?.slug||'').toLowerCase();if(!slug||seen.has(slug)||suppressed.has(slug))continue;
+    const canonical=stored.get(slug);
+    out.push(canonical&&canonical.slug===slug?canonical:fileTool);seen.add(slug);
+  }
+  for(const candidate of snapshot.candidates||[]){
+    const slug=String(candidate?.slug||'').toLowerCase();
+    if(!slug||seen.has(slug)||suppressed.has(slug))continue;
+    out.push(candidate);seen.add(slug);
   }
   return out;
+}
+
+export async function seedBaselineCatalog(env,{limit=MAX_BASELINE_SEED_PER_CYCLE}={}){
+  await ensureSchema(env);
+  const original=await assetJson(env,'/data/tools.json',null);
+  if(!Array.isArray(original)||!original.length)throw new Error('baseline_catalog_asset_unavailable');
+  const unique=new Map();
+  for(const tool of original){
+    const slug=String(tool?.slug||'').toLowerCase();
+    if(!/^[a-z0-9][a-z0-9-]*$/.test(slug)||unique.has(slug))throw new Error('baseline_catalog_invalid_or_duplicate:'+slug);
+    unique.set(slug,tool);
+  }
+  const rows=await env.DB.prepare('SELECT tool_slug FROM catalog_runtime_candidates').all();
+  const existing=new Set((rows.results||[]).map(x=>String(x.tool_slug||'').toLowerCase()));
+  const pending=[...unique].filter(([slug])=>!existing.has(slug));
+  const selected=pending.slice(0,Math.max(1,Math.min(MAX_BASELINE_SEED_PER_CYCLE,Number(limit)||MAX_BASELINE_SEED_PER_CYCLE)));
+  let copied=0;
+  for(const [slug,tool] of selected){
+    // INSERT OR IGNORE never replaces a revised D1 profile or a product admitted
+    // by Catalog Autonomy. Retain every original claim and manufacturer proof.
+    const result=await env.DB.prepare(`INSERT OR IGNORE INTO catalog_runtime_candidates(tool_slug,profile_json,status,source_status,verified_at,updated_at)
+      VALUES(?,?,'published','baseline_snapshot',?,datetime('now'))`)
+      .bind(slug,JSON.stringify(tool),tool.lastVerified||tool.sourceCheckedOn||null).run();
+    copied+=Number(result?.meta?.changes||result?.changes||0);
+  }
+  if(copied)runtimeCache.at=0;
+  const remaining=await env.DB.prepare(`SELECT COUNT(*) n FROM catalog_runtime_candidates WHERE tool_slug IN (${[...unique].map(()=>'?').join(',')})`).bind(...unique.keys()).first();
+  const present=Math.min(unique.size,Number(remaining?.n||0));
+  return {ok:true,phase:present===unique.size?'seeded_pending_surface_promotion':'seeding',
+    source:'existing_127_tool_static_snapshot',total:unique.size,copied,seeded:present,remaining:Math.max(0,unique.size-present),
+    per_cycle_limit:MAX_BASELINE_SEED_PER_CYCLE,non_destructive:true,legacy_static_html_preserved:true,
+    rule:'D1 copies retain exact original manufacturer evidence; published legacy HTML remains unchanged until a separately verified dynamic renderer promotion.'};
 }
 async function affiliateStateMap(env){
   const map=new Map();
@@ -235,9 +279,7 @@ export async function publicCatalogInventory(env){
 }
 export async function verifyBatch(env){
   await ensureSchema(env);
-  const staticTools=await assetJson(env,'/data/tools.json',[]);
-  const candidates=await runtimeCandidates(env);
-  const all=[...(Array.isArray(staticTools)?staticTools:[]),...candidates];
+  const all=await mergedTools(env);
   const states=await env.DB.prepare(`SELECT tool_slug,source_url,source_status,fingerprint,pending_fingerprint,change_confirmations,content_changed,broken_consecutive,quality_status,static_last_verified,last_checked_at,last_change_at FROM catalog_runtime_state`).all();
   const smap=new Map((states.results||[]).map(x=>[x.tool_slug,x]));
   const toolsWithSources=all.filter(x=>x?.slug&&x?.sourceUrl);
@@ -583,7 +625,7 @@ export async function publicRuntimeToolResponse(env,slug){
   if(!key)return null;
   const [state,candidate]=await Promise.all([toolState(env,key),runtimeCandidate(env,key)]);
   if(state?.quality_status==='confirmed_broken')return new Response('Tool profile temporarily unavailable while the official source is re-verified.',{status:404,headers:{'Content-Type':'text/plain; charset=UTF-8','Cache-Control':'no-store','X-Robots-Tag':'noindex'}});
-  if(!candidate)return null;
+  if(!candidate||(await runtimeSnapshot(env)).baselineMirrors?.has(key))return null;
   return new Response(candidatePage(candidate),{status:200,headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'public, max-age=60'}});
 }
 export async function publicMergedSitemap(response,env){return mergedSitemap(response,env)}
@@ -593,13 +635,16 @@ async function status(env){
   await ensureSchema(env);
   const [states,candidates,gaps,events,newsSources,newsCandidates]=await Promise.all([
     env.DB.prepare(`SELECT COUNT(*) total,SUM(CASE WHEN quality_status='healthy' THEN 1 ELSE 0 END) healthy,SUM(CASE WHEN quality_status='change_detected' THEN 1 ELSE 0 END) changed,SUM(CASE WHEN quality_status='confirmed_broken' THEN 1 ELSE 0 END) suppressed,SUM(CASE WHEN source_status NOT IN ('ok','broken') THEN 1 ELSE 0 END) warnings,MAX(last_checked_at) last_checked_at FROM catalog_runtime_state`).first(),
-    env.DB.prepare(`SELECT COUNT(*) total,MAX(verified_at) last_admitted_at FROM catalog_runtime_candidates WHERE status IN ('published','admitted_coverage','quality_hold')`).first(),
+    env.DB.prepare(`SELECT COUNT(*) total, SUM(CASE WHEN source_status='baseline_snapshot' THEN 1 ELSE 0 END) baseline_seeded, MAX(CASE WHEN source_status IS NULL OR source_status!='baseline_snapshot' THEN verified_at END) last_admitted_at FROM catalog_runtime_candidates WHERE status IN ('published','admitted_coverage','quality_hold')`).first(),
     env.DB.prepare(`SELECT COUNT(*) total FROM catalog_market_gaps WHERE status='research_required'`).first(),
     env.DB.prepare(`SELECT COUNT(*) n FROM catalog_runtime_events WHERE created_at>=datetime('now','-7 days')`).first(),
     env.DB.prepare(`SELECT COUNT(*) total,MAX(last_checked_at) last_checked_at FROM software_news_sources WHERE status='active'`).first(),
     env.DB.prepare(`SELECT COUNT(*) total,MAX(updated_at) last_candidate_at FROM software_news_candidates WHERE status IN ('candidate','verified','published')`).first()
   ]);
-  return{ok:true,version:'1.1',state:{total:Number(states?.total||0),healthy:Number(states?.healthy||0),changed:Number(states?.changed||0),suppressed:Number(states?.suppressed||0),warnings:Number(states?.warnings||0),last_checked_at:states?.last_checked_at||null},runtime_candidates:Number(candidates?.total||0),last_admitted_at:candidates?.last_admitted_at||null,market_gaps:Number(gaps?.total||0),events_7d:Number(events?.n||0),whats_new:{official_sources:Number(newsSources?.total||0),last_source_check:newsSources?.last_checked_at||null,candidates:Number(newsCandidates?.total||0),last_candidate_at:newsCandidates?.last_candidate_at||null},rule:'Once admitted, runtime tools remain full catalog peers during recoverable quality holds, matching static-tool behavior. Only confirmed broken sources are suppressed. Official-source verification is required, and affiliate economics never affect catalog admission or ranking.'};
+  const baseline=await assetJson(env,'/data/tools.json',[]);
+  const baselineTotal=Array.isArray(baseline)?baseline.length:0;
+  const baselineSeeded=Number(candidates?.baseline_seeded||0);
+  return{ok:true,version:'1.2',storage:{mode:'d1_primary_static_fallback',baseline_total:baselineTotal,baseline_seeded:baselineSeeded,baseline_remaining:Math.max(0,baselineTotal-baselineSeeded),migration_phase:baselineSeeded>=baselineTotal&&baselineTotal>0?'baseline_seeded_pending_public_renderer_validation':'baseline_seeding',legacy_html_preserved:true},state:{total:Number(states?.total||0),healthy:Number(states?.healthy||0),changed:Number(states?.changed||0),suppressed:Number(states?.suppressed||0),warnings:Number(states?.warnings||0),last_checked_at:states?.last_checked_at||null},runtime_candidates:Math.max(0,Number(candidates?.total||0)-baselineSeeded),last_admitted_at:candidates?.last_admitted_at||null,market_gaps:Number(gaps?.total||0),events_7d:Number(events?.n||0),whats_new:{official_sources:Number(newsSources?.total||0),last_source_check:newsSources?.last_checked_at||null,candidates:Number(newsCandidates?.total||0),last_candidate_at:newsCandidates?.last_candidate_at||null},rule:'Once admitted, runtime tools remain full catalog peers during recoverable quality holds, matching static-tool behavior. Only confirmed broken sources are suppressed. Official-source verification is required, and affiliate economics never affect catalog admission or ranking.'};
 }
 
 export async function handleCatalogAutonomyRoute(request,env){
