@@ -94,6 +94,7 @@ export function businessWorkflowGuidance(query,profile={},tools=[]){
     const category=key==='tasks'?'business':key;
     const covered=eligible.filter(t=>t.category===category).length;
     return{title,job,scope,category,catalog_coverage:covered,availability:covered?'category_available':'catalog_gap',
+      finder_url:'https://trytoolscout.org/?q='+encodeURIComponent(job)+'&source=ai-agent#finder',
       evidence_scope:'Category coverage, not documented suitability for this specific industry.'};
   });
   const rental=sector.id==='short_term_rentals';
@@ -103,6 +104,7 @@ export function businessWorkflowGuidance(query,profile={},tools=[]){
       ?'ToolScout does not currently have a manufacturer-verified end-to-end vacation-rental PMS in its catalog. It can help assess the workflows below, but cannot yet recommend a channel manager or property management suite.'
       :'A business has several different software jobs. Pick the operation to improve before comparing products. General software category coverage does not prove specialized operational fit.',
     industry:sector.id,industry_label:sector.label,specialist_requirements:sector.specialist,
+    finder_url:'https://trytoolscout.org/?q='+encodeURIComponent(query)+'&source=ai-agent#finder',
     workflows,decision_status:'needs_workflow_selection',decision_scope:'industry_workflows_not_product_winners',
     next_step:'Choose a workflow and specify budget, team size, required integrations and must-have capabilities.',
     catalog_coverage:{covered_workflows:workflows.filter(w=>w.catalog_coverage>0).length,total_workflows:workflows.length},
