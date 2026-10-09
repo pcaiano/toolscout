@@ -5,7 +5,7 @@ import {handleAgentProtocolRoute} from '../agent-protocol-core-worker.js';
 const catalog=JSON.parse(fs.readFileSync(new URL('../data/tools.json',import.meta.url),'utf8'));
 async function run(extra={}){
  const env={ASSETS:{fetch:async req=>new URL(req.url).pathname==='/data/tools.json'?Response.json(catalog):new Response('',{status:404})}};
- const request=new Request('https://trytoolscout.org/mcp',{method:'POST',headers:{'Content-Type':'application/json','MCP-Protocol-Version':'2026-07-28','Mcp-Method':'tools/call','Mcp-Name':'decide_software'},body:JSON.stringify({jsonrpc:'2.0',id:122,method:'tools/call',params:{name:'decide_software',arguments:{job:'business',limit:5,...extra}}})});
+ const request=new Request('https://trytoolscout.org/mcp',{method:'POST',headers:{'Content-Type':'application/json','MCP-Protocol-Version':'2026-07-28','Mcp-Method':'tools/call','Mcp-Name':'decide_software'},body:JSON.stringify({jsonrpc:'2.0',id:122,method:'tools/call',params:{name:'decide_software',arguments:{job:'business',limit:5,...extra},_meta:{'io.modelcontextprotocol/protocolVersion':'2026-07-28','io.modelcontextprotocol/clientInfo':{name:'seat-budget-regressions',version:'1.0'}}}})});
  const reply=await handleAgentProtocolRoute(request,env,{waitUntil(){}});
  assert.equal(reply.status,200);
  return (await reply.json()).result;
