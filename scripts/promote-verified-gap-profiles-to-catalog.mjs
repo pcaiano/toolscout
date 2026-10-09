@@ -139,9 +139,15 @@ if (policy.autoPromoteVerifiedCompetitiveGapProfiles !== false) {
     const reviewSource=review?.sourceUrl;
     const evidence=Array.isArray(profile?.evidence)?profile.evidence:[];
     const documentSource=evidence.some(x=>x?.claimScope==='toolscout_editorial_review'&&x?.sourceUrl===reviewSource&&/^\d{4}-\d{2}-\d{2}$/.test(x?.verifiedAt||''));
-    const manufacturerDomain=u=>{try{return new URL(u).hostname.replace(/^www\./,'').split('.').slice(-2).join('.')}catch{return null}};
-    const firstParty=Boolean(reviewSource&&manufacturerDomain(reviewSource)===manufacturerDomain(source.finalUrl||profile.sourceUrl));
-    if(!review?.summary||!firstParty||!documentSource||review?.verificationStatus==='catalog_only'||review?.handsOnTested===true){
+    const officialHost=(()=>{try{return new URL(source.finalUrl||profile.sourceUrl).hostname.replace(/^www\\./,'')}catch{return''}})();
+    const firstPartyDocument=u=>{try{const d=new URL(u),h=d.hostname.replace(/^www\\./,'');return d.protocol==='https:'&&d.pathname!=='/'&&(h===officialHost||h.endsWith('.'+officialHost))}catch{return false}};
+    const docs=[...new Set(Array.isArray(review?.sourceUrls)?review.sourceUrls:[])].filter(firstPartyDocument);
+    const datedDocs=docs.filter(url=>evidence.some(x=>x?.claimScope==='toolscout_editorial_review'&&x?.sourceUrl===url&&/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(x?.verifiedAt||'')));
+    const decisionGrade=String(review?.summary||'').trim().length>=260&&String(review?.angle||'').trim().length>=20&&
+      String(review?.buyerCheck||'').trim().length>=60&&datedDocs.length>=2&&
+      (profile?.strengths||[]).length>=2&&(profile?.limitations||[]).length>=2&&(profile?.tradeoffs||[]).length>=1&&
+      Boolean(profile?.pricingDetails?.freePlanStatus);
+    if(!decisionGrade||!firstPartyDocument(reviewSource)||!documentSource||review?.verificationStatus==='catalog_only'||review?.handsOnTested===true){
       held.push({slug,reason:'manufacturer_editorial_documentation_required',retry:'source_review'});
       continue;
     }
@@ -170,6 +176,10 @@ if (policy.autoPromoteVerifiedCompetitiveGapProfiles !== false) {
       aiIntegration:profile?.aiIntegration && typeof profile.aiIntegration==='object' ? profile.aiIntegration : {...UNKNOWN_AI_INTEGRATION},
       editorialReview:review,
       evidence,
+      strengths:profile.strengths,
+      limitations:profile.limitations,
+      tradeoffs:profile.tradeoffs,
+      pricingDetails:profile.pricingDetails,
       catalogTier:'coverage',
       rankingEligible:policy.rankingEligibleOnAdmission === true,
       comparisonEligible:policy.comparisonEligibleOnAdmission === true,
