@@ -1,3 +1,4 @@
+import {businessWorkflowGuidance} from './business-workflow-intent.js';
 import base from './distribution-command-worker.js';
 import { prioritizedDistributionFeed } from './distribution-feed-priority.js';
 import {recentDistributionAssets,handleMachineDiscoveryCatalogRoute} from './machine-discovery-catalog-runtime.js';
@@ -102,35 +103,6 @@ function querySignal(query,intent,profile,tools){
 function broadCategoryQuery(profile={},signal={}){
   return Boolean(profile.goal&&!profile.budget&&!profile.team&&!profile.priority&&!signal.directTool&&(signal.words||[]).length<=2);
 }
-// Industry-only questions need workflow decomposition before any catalog ranking.
-// The catalog contains no verified end-to-end vacation-rental PMS. Never imply
-// a CRM, booking form or team task app is a property/channel manager.
-function businessGuidance(query,profile={}){
-  const q=normalize(query),hasSpecificJob=Boolean(profile.goal)
-    ||/\b(crm|seo|marketing|automation|automate|workflow|email|newsletter|design|website builder|analytics|reporting|customer support|ticketing|forms|lead generation|project management|social media)\b/.test(q);
-  if(hasSpecificJob)return null;
-  const rental=/\b(airbnb|short.term rental|vacation rental|holiday rental|rental property|alojamento local|arrendamento turistico|holiday let|hospitality)\b/.test(q);
-  const generalBusiness=/\b(manag(?:e|ing|ement)|run(?:ning)?|operat(?:e|ing|ions)|gerir|gestao|administrar|organizar|software para|software for|tools? for)\b/.test(q)
-    &&/\b(business|company|empresa|negocio|restaurant|restaurante|shop|store|loja|clinic|clinica|practice|hotel|salon|agency|agencia|team|equipa)\b/.test(q);
-  if(!rental&&!generalBusiness)return null;
-  const workflows=rental?[
-    {title:'Guest enquiries and relationships',job:'CRM to track guest enquiries and follow-ups',category:'crm',scope:'Guest communication workflows, not booking-channel synchronisation'},
-    {title:'Cleaning and turnovers',job:'project management for recurring cleaning tasks and team handoffs',category:'business',scope:'Task coordination, not live occupancy or reservations'},
-    {title:'Guest follow-up automation',job:'workflow automation for guest follow-ups',category:'automation',scope:'General automation; property booking integrations must be verified'},
-    {title:'Guest intake forms',job:'form builder for guest intake and requests',category:'forms',scope:'Forms, not a guest booking engine'}
-  ]:[
-    {title:'Customers and sales',job:'CRM for managing customers and sales pipeline',category:'crm',scope:'Customer relationship management'},
-    {title:'Team tasks and operations',job:'project management and task coordination for teams',category:'business',scope:'Projects and team operations'},
-    {title:'Marketing and customer retention',job:'email marketing and customer follow-up',category:'marketing',scope:'Marketing communication'},
-    {title:'Repetitive admin',job:'workflow automation between business apps',category:'automation',scope:'Automation requires verified integrations'}
-  ];
-  return {
-    title:rental?'Managing a short-term rental business needs more than one software job.':'Which part of the business are you trying to improve?',
-    explanation:rental?'ToolScout does not currently have a manufacturer-verified end-to-end vacation-rental PMS in its catalog. It can help assess the workflows below, but cannot yet recommend a channel manager or property management suite.':'A business involves several distinct jobs. Choose the workflow that matters most so ToolScout compares relevant software rather than an arbitrary cross-category ranking.',
-    industry:rental?'short_term_rentals':'general_business',
-    workflows
-  };
-}
 function decisionDimensions(intent,profile){
   const weights=intent?.weights||{},priority=profile.priority==='features'?'content':profile.priority;
   const keys=priority?[priority]:Object.keys(weights).filter(x=>['price','ease','automation','integrations','sales','marketing','seo','research','content','agency','ai'].includes(x));
@@ -194,7 +166,7 @@ async function recommend(request,env){
   const limit=Math.max(1,Math.min(5,Number.parseInt(u.searchParams.get('limit')||'3',10)||3));
   try{
     const [tools,intents]=await Promise.all([assetJson(request,env,'/data/tools.json'),assetJson(request,env,'/data/intents.json')]);
-    const p=inferredProfile(q,profile),guidance=businessGuidance(q,p);
+    const p=inferredProfile(q,profile),guidance=businessWorkflowGuidance(q,p);
     if(guidance)return Response.json({query:q,profile:p,intent:null,recommendation_type:'workflow_guidance',
       guidance,count:0,recommendations:[],ranking:'Workflow decomposition before vendor ranking',
       affiliate_disclosure:'ToolScout may earn a commission from some outbound links. Affiliate relationships do not influence recommendations.'},{headers:JSON_H});
