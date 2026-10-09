@@ -83,7 +83,7 @@ test('monthly EUR ceilings require a dated price, not a price score',async()=>{
 
 test('volume requirements respect documented plan limits and free-tier availability',async()=>{
  const source=base('tasks-100',['crm'],[{
-   type:'plan_limit',value:'free monthly tasks',unit:'tasks',quantity:100,plan:'Free',
+   type:'plan_limit',value:'free monthly tasks',unit:'tasks',quantity:100,plan:'Free',period:'month',
    status:'verified',verifiedAt:'2026-10-08',sourceUrl:SOURCE
  }]);
  const yes=await decide([source],{constraints:['at least 100 tasks per month'],budget:'free'});
