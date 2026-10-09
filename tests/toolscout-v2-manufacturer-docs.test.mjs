@@ -78,7 +78,7 @@ test('scheduled trusted catalog admissions require dated manufacturer proof',()=
  assert.equal(trustedManufacturerEvidence({...hubspot,editorialReview:{...hubspot.editorialReview,sourceUrl:'https://unrelated.co.uk/docs'}}),false);
  const forged={...hubspot,sourceUrl:'https://seller.co.uk/',editorialReview:{...hubspot.editorialReview,sourceUrl:'https://unrelated.co.uk/pricing'},evidence:[{claimScope:'toolscout_editorial_review',sourceUrl:'https://unrelated.co.uk/pricing',verifiedAt:'2026-10-08'}]};
  assert.equal(trustedManufacturerEvidence(forged),false);
- assert.match(fs.readFileSync(new URL('../catalog-autonomy-worker.js',import.meta.url),'utf8'),/if\(!trustedManufacturerEvidence\(raw\)\)/);
+ assert.match(fs.readFileSync(new URL('../catalog-autonomy-worker.js',import.meta.url),'utf8'),/trustedManufacturerEvidence\(raw,\{decisionGrade:true\}\)/);
 });
 
 test('future catalog additions require a real buying analysis and two dated manufacturer documents',()=>{
