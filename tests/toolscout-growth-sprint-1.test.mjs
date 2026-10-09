@@ -37,7 +37,7 @@ test('Authority truth admits only machine-observed provider metrics',()=>{
   assert.equal(authority.sources.ahrefs.metrics.domainRating,null);
   assert.equal(authority.sources.ahrefs.metrics.backlinks,null);
   assert.equal(authority.sources.seRanking.status,'available');
-  assert.equal(authority.sources.seRanking.metrics.backlinks,95);
+  assert.equal(authority.sources.seRanking.metrics.backlinks,JSON.parse(read('data/se-ranking-backlink-truth.json')).metrics.backlinks);
   assert.equal(authority.sources.seRanking.metrics.referringDomains,29);
   assert.equal(authority.sources.seRanking.metrics.dofollowBacklinks,14);
   assert.equal(authority.sources.seRanking.metrics.domainInlinkRank,2);
