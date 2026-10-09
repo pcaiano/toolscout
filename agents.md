@@ -64,6 +64,8 @@ The MCP is intentionally a **decision engine**, not a catalog search wrapper. Fo
 - `compare_tools` - raw factual side-by-side catalog comparison. Prefer `compare_for_use_case` for decision support.
 - `get_ai_compatibility` - verified MCP, API and AI-assistant interoperability evidence for one product.
 
+Each evaluated decision now includes a `buyer_validation_plan` drawn from ToolScout's product-specific editorial buyer check, unverified named integrations and unresolved buying constraints. Treat this as a pre-purchase checklist, not as a claim of hands-on testing. Manufacturer evidence URLs remain internal and are not exposed through decision responses.
+
 ToolScout decision output is deterministic and evidence-aware. A mandatory `must_have`, an explicitly required constraint (for example, `must support Linux`), an explicitly excluded capability in `avoid`, or a free-only budget is an eligibility gate, not a weighted preference. If no product satisfies those requirements based on catalog evidence, ToolScout returns no qualified recommendation. Comparisons may display ineligible candidates for transparency but must not declare them winners. Alternatives respect the same free-plan and must-have gates. Missing pair-specific integration evidence and unverified requirements remain explicit rather than inferred. Returned vendor navigation uses ToolScout `/go/` URLs with AI-agent attribution. Affiliate participation never changes ranking, shortlist order, comparison conclusions or factual output.
 
 ## A2A

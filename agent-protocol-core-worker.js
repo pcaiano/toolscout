@@ -517,6 +517,25 @@ function stackAssessment(tool,existingTools=[]){
   const verified=pairs.filter(x=>x.status==='verified').length;
   return {pairs,verified_pairs:verified,unknown_pairs:pairs.length-verified,summary:pairs.length?verified===pairs.length?'All requested stack links have catalog evidence.':verified?'Some stack links are evidenced; the rest should be verified before switching.':'ToolScout does not currently have pair-specific evidence for this stack; do not assume compatibility.':'No existing stack supplied.'};
 }
+function buyerValidationPlan(tool,args,constraints,stack){
+  // The manufacturer's documentary review is already stored privately.
+  // These are honest pre-purchase actions, not claims that ToolScout has tested a tool.
+  const checks=[];
+  const reviewed=String(tool?.editorialReview?.buyerCheck||'').trim();
+  if(reviewed)checks.push(reviewed);
+  for(const pair of (stack?.pairs||[]).filter(pair=>pair.status!=='verified'))
+    checks.push('Verify a product-specific integration between '+tool.name+' and '+pair.existing_tool+' before relying on this workflow.');
+  for(const item of (constraints||[]).filter(item=>item.status!=='verified'))
+    checks.push('Confirm this requirement against the exact product and plan: '+item.constraint+'.');
+  if(args?.budget==='free'&&tool?.freePlanKnown===true&&tool?.freePlan)
+    checks.push('Recheck free-plan usage limits and feature entitlements for the actual workflow.');
+  else if(args?.budget)
+    checks.push('Confirm current total subscription cost, billing terms and the features included in the intended tier.');
+  if((args?.priorities||[]).includes('ai')&&tool?.aiIntegration?.status!=='verified')
+    checks.push('Confirm current named AI integrations and access conditions; ToolScout has not verified them for this product.');
+  if(!checks.length)checks.push('Run the specific workflow with representative data and verify the limits before purchase.');
+  return [...new Set(checks)].slice(0,6);
+}
 function decisionEvaluation(tool,args){
   const job=String(args.job||args.use_case||args.q||'').trim(),hay=toolHay(tool),terms=textTerms(job);
   let relevance=0;
@@ -564,6 +583,7 @@ function decisionEvaluation(tool,args){
     advantages,
     tradeoffs:[...new Set([...tradeoffs,...(Array.isArray(tool.limitations)?tool.limitations:[]).filter(Boolean).slice(0,2)])],
     decision_rationale:tool.editorialReview?.summary||null,
+    buyer_validation_plan:buyerValidationPlan(tool,args,constraints,stack),
     verification_basis:primaryProof?'manufacturer documentation recorded internally; fit scores are editorial estimates':'manufacturer evidence incomplete; do not interpret fit score as verification',
     requested_dimensions:dimScores,
     requirement_evidence:must,

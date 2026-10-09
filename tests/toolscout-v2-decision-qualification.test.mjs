@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import {handleAgentProtocolRoute} from '../agent-protocol-core-worker.js';
 
 async function runDecision(name,args,catalog){
@@ -84,4 +85,24 @@ test('alternatives with a free-only budget require an actually confirmed free pl
   assert.equal(out.isError,false);
   assert.deepEqual(out.structuredContent.alternatives.map(x=>x.slug),['confirmed-free-crm']);
   assert.equal(out.structuredContent.alternatives[0].free_plan_verified,true);
+});
+
+test('decision engine provides a product-specific buyer validation plan without exposing vendor documentation URLs',async()=>{
+ const catalog=JSON.parse(fs.readFileSync(new URL('../data/tools.json',import.meta.url),'utf8'));
+ const out=await runDecision('decide_software',{
+   job:'CRM for a small team',budget:'low',existing_tools:['Gmail','Microsoft Teams'],limit:3
+ },catalog);
+ assert.equal(out.isError,false);
+ const shortlist=out.structuredContent.shortlist;
+ assert.ok(shortlist.length>0);
+ for(const item of shortlist){
+   assert.ok(Array.isArray(item.buyer_validation_plan)&&item.buyer_validation_plan.length);
+   assert.ok(item.buyer_validation_plan.some(x=>typeof x==='string'&&x.length>20));
+   assert.ok(item.buyer_validation_plan.every(x=>!x.includes('https://')&&!x.includes('http://')));
+ }
+ const hubspot=shortlist.find(x=>x.slug==='hubspot');
+ if(hubspot){
+   assert.ok(hubspot.buyer_validation_plan.some(x=>x.includes('Microsoft Teams')));
+   assert.ok(hubspot.buyer_validation_plan.some(x=>x.includes('subscription')||x.includes('tier')||x.includes('users')));
+ }
 });
