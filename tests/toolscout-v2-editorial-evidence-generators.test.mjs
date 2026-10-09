@@ -60,7 +60,7 @@ test('decision editorial catalog has 127 individual assessments with transparent
     const html=read('tools/'+slug+'.html');
     assert.ok(catalog.some(x=>x.slug===slug),'Missing catalog product '+slug);
     assert.ok(review&&review.length>=190,'Weak profile analysis '+slug);
-    assert.ok(evidence.angle&&evidence.buyerCheck&&evidence.checkedOn==='2026-10-08','Missing buyer evidence '+slug);
+    assert.ok(evidence.angle&&evidence.buyerCheck&&/^\d{4}-\d{2}-\d{2}$/.test(evidence.checkedOn)&&evidence.checkedOn===catalog.find(x=>x.slug===slug)?.editorialReview?.reviewedAt,'Missing buyer evidence '+slug);
     if(evidence.evidenceType==='catalog_assessment_unverified')assert.equal(evidence.sourceUrl,null,'Catalog-only is not verified vendor evidence '+slug);
     else assert.match(evidence.sourceUrl,/^https:\/\//);
     assert.equal(evidence.handsOnTested,false,'No unperformed hands-on tests may be asserted');
