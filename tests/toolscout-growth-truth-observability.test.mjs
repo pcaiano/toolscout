@@ -16,7 +16,7 @@ test('GA4 acquisition has bounded Google API latency and optional dimension resi
 test('canonical external authority snapshot reflects the latest SE Ranking observation',()=>{
   const authority=JSON.parse(read('data/se-ranking-backlink-truth.json'));
   assert.equal(authority.source,'SE Ranking Data API');
-  assert.equal(authority.metrics.backlinks,95);
+  assert.equal(authority.metrics.backlinks,JSON.parse(read('data/authority-truth.json')).sources.seRanking.metrics.backlinks);
   assert.equal(authority.metrics.referringDomains,29);
   assert.equal(authority.metrics.dofollowBacklinks,14);
   assert.equal(authority.metrics.dofollowReferringDomains,11);
