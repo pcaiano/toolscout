@@ -118,6 +118,7 @@ test('future catalog additions require a real buying analysis and two dated manu
    limitations:['setup effort','paid plan constraints'],
    tradeoffs:['speed versus configuration overhead'],
    pricingDetails:{freePlanStatus:'unverified'},
+   decisionClaims:[{type:'feature',value:'structured CRM workflow',status:'verified',verifiedAt:'2026-10-09',sourceUrl:sourceA}],
    editorialReview:review,
    evidence:[sourceA,sourceB].map(sourceUrl=>({claimScope:'toolscout_editorial_review',sourceUrl,verifiedAt:'2026-10-09'}))
  };
