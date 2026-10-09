@@ -7,8 +7,8 @@ import {auditCatalogTool,mapLimit} from './catalog-quality-runtime.js';
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
 const MAX_VERIFY_PER_CYCLE=4;
 const MAX_NEWS_SOURCE_CHECKS_PER_CYCLE=4;
-const MAX_ADMIT_PER_DAY=3;
-const MAX_CANDIDATE_CHECKS_PER_CYCLE=4;
+const MAX_ADMIT_PER_DAY=6;
+const MAX_CANDIDATE_CHECKS_PER_CYCLE=12;
 const WARNING_RETRY_HOURS=6;
 const MAX_WARNING_RETRIES_PER_CYCLE=2;
 const FETCH_TIMEOUT_MS=6000;
@@ -385,6 +385,8 @@ export async function admitTrustedCandidates(env){
   const existing=new Set((Array.isArray(staticTools)?staticTools:[]).map(x=>String(x?.slug||'').toLowerCase()));
   for(const x of await runtimeCandidates(env))existing.add(String(x?.slug||'').toLowerCase());
   const affiliateRegistry=await affiliateResearchRegistry(env);
+  const seeds=await assetJson(env,'/data/catalog-research-seeds.json',{candidates:[]});
+  const researchSeeds=(Array.isArray(seeds?.candidates)?seeds.candidates:[]).filter(x=>x?.slug&&!existing.has(String(x.slug).toLowerCase()));
   const pool=[],seen=new Set();let sequence=0;
   for(const file of config?.trustedCandidateFiles||[]){
     const candidates=await assetJson(env,'/'+String(file).replace(/^\//,''),[]);
@@ -392,25 +394,29 @@ export async function admitTrustedCandidates(env){
       const slug=String(raw?.slug||'').toLowerCase();if(!slug||existing.has(slug)||seen.has(slug))continue;
       seen.add(slug);
       const priority=catalogCandidateResearchPriority(raw,affiliateRegistry.get(slug)||null,config);
-      pool.push({raw,slug,priority,sequence:sequence++});
+      pool.push({raw,slug,priority,ready:trustedManufacturerEvidence(raw,{decisionGrade:true}),sequence:sequence++});
     }
   }
-  pool.sort((a,b)=>b.priority.score-a.priority.score||b.priority.affiliate-a.priority.affiliate||b.priority.ai-a.priority.ai||a.sequence-b.sequence||a.slug.localeCompare(b.slug));
-  let admitted=0,held=0,considered=0;
+  const categoryCounts=new Map();
+  for(const t of staticTools||[]){const key=String(t.category||'');categoryCounts.set(key,(categoryCounts.get(key)||0)+1)}
+  const target=Math.max(1,Number(config?.coverage?.minimumToolsPerIntentCategory||5));
+  pool.sort((a,b)=>Number(b.ready)-Number(a.ready)||
+    Math.max(0,target-(categoryCounts.get(b.raw.category)||0))-Math.max(0,target-(categoryCounts.get(a.raw.category)||0))||
+    b.priority.score-a.priority.score||a.sequence-b.sequence||a.slug.localeCompare(b.slug));
+  let admitted=0,held=0,considered=0,missingManufacturerEvidence=0;
   for(const item of pool){
     if(admitted>=MAX_ADMIT_PER_DAY||considered>=MAX_CANDIDATE_CHECKS_PER_CYCLE)break;
     const {raw,slug,priority}=item;considered++;
     const errors=validCandidate(raw,config);if(errors.length){held++;continue}
+    // Pure preflight before any network fetch. Undocumented research seeds
+    // cannot become published software merely through a reachable homepage.
+    if(!trustedManufacturerEvidence(raw,{decisionGrade:true})){held++;missingManufacturerEvidence++;continue}
     const source=await fetchOfficial(raw.sourceUrl);if(config?.admission?.requireReachableOfficialSource!==false&&source.status!=='ok'){held++;continue}
-    if(!trustedManufacturerEvidence(raw,{decisionGrade:true})){
-      held++;
-      await logEvent(env,slug,'catalog_candidate_quality_hold','completed',
-        'Manufacturer documentation and dated editorial evidence required before runtime admission.',{reason:'manufacturer_editorial_documentation_required'});
-      continue;
-    }
     const aiIntegration=raw?.aiIntegration&&typeof raw.aiIntegration==='object'?raw.aiIntegration:{status:'unverified',tier:'unknown',mcp:'unknown',publicApi:null,assistants:[],summary:'ToolScout has not yet verified this tool\'s current ChatGPT, Claude, Gemini, MCP or agent integration options.',verifiedAt:null,sources:[]};
     let profile={...raw,aiIntegration,sourceUrl:source.finalUrl||raw.sourceUrl,lastVerified:new Date().toISOString().slice(0,10),rankingEligible:true,comparisonEligible:true,provenance:{...(raw.provenance||{}),mode:'runtime_trusted_catalog',admittedAt:new Date().toISOString(),affiliateNeutral:true,reviewMethod:'first_party_verified_structured_profile_v2',researchPriority:{score:priority.score,aiSignal:priority.aiSignal,affiliateSignal:priority.affiliateSignal}}};
-    profile.editorialReview=raw.editorialReview.summary;
+    // Keep the structured review and dated private manufacturer sources. A
+    // flattened string destroys verification evidence in downstream decisions.
+    profile.editorialReview={...raw.editorialReview};
     profile.editorialEvidence={sourceUrl:raw.editorialReview.sourceUrl,verifiedAt:new Date().toISOString().slice(0,10),verificationStatus:'vendor_documented'};
     const quality=await auditCatalogTool(env,profile);
     if(!quality.publishable){held++;await logEvent(env,slug,'catalog_candidate_quality_hold','completed','Trusted candidate failed full catalog quality gate before publication.',{issues:quality.issues,warnings:quality.warnings,research_priority:priority});continue}
@@ -424,7 +430,12 @@ export async function admitTrustedCandidates(env){
   const market_gaps=await syncMarketGaps(env);
   runtimeCache.at=0;
   if(admitted>0)await runtimeSnapshot(env,{force:true}).catch(()=>null);
-  return{ok:true,considered,admitted,held,market_gaps_synced:market_gaps,max_admissions:MAX_ADMIT_PER_DAY,candidate_check_limit:MAX_CANDIDATE_CHECKS_PER_CYCLE,priority_policy:'affiliate_plus_ai_mcp_research_first',rule:'Affiliate programme availability and verified AI or MCP connectivity may prioritize research throughput. Admission, rankings and fit remain affiliate-neutral.'};
+  return{ok:true,considered,admitted,held,missing_manufacturer_evidence:missingManufacturerEvidence,
+    trusted_sources_total:seen.size,ready_trusted_sources:pool.filter(x=>x.ready).length,
+    research_seeds_total:researchSeeds.length,research_seeds_status:'first_party_documentation_research_only_not_admission_ready',
+    candidate_supply_status:pool.some(x=>x.ready)?'documented_candidates_available':researchSeeds.length?'research_evidence_incomplete':'no_new_candidate_supply',
+    market_gaps_synced:market_gaps,max_admissions:MAX_ADMIT_PER_DAY,candidate_check_limit:MAX_CANDIDATE_CHECKS_PER_CYCLE,
+    priority_policy:'documented_first_then_category_coverage_then_affiliate_ai_research',rule:'Documented manufacturer evidence and unmet category coverage outrank commercial discovery hints. Admission and rankings remain affiliate-neutral. Research seeds are not published tools.'};
 }
 export async function auditCatalogQualityBatch(env,{limit=12}={}){
   await ensureSchema(env);
@@ -509,8 +520,10 @@ function aiInteroperabilitySection(tool){
   const p=aiProfile(tool),verified=p.status==='verified',assistants=(p.assistants||[]).filter(Boolean),mcp=p.mcp==='official'?'Official':p.mcp==='community'?'Community':'Not verified',api=p.publicApi===true?'Verified':p.publicApi===false?'No':'Not verified';
   const tier=verified?(p.tier==='strong'?'Strong':p.tier==='moderate'?'Moderate':p.tier==='limited'?'Limited':'Verified'):'Not yet verified';
   const summary=p.summary||'ToolScout has not yet verified this tool\'s current AI assistant, MCP or agent integration options.';
-  const links=(p.sources||[]).filter(x=>/^https:\/\//.test(String(x||''))).slice(0,3).map((url,i)=>'<a href="'+esc(url)+'" target="_blank" rel="noopener">Official AI source '+(i+1)+'</a>').join(' · ');
-  return '<section class="section" data-ai-interoperability="1"><div class="eyebrow">AI interoperability</div><h2>How '+esc(tool.name)+' works with AI assistants and agents</h2><p style="color:#667085;line-height:1.65">'+esc(summary)+'</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0"><span style="font-size:12px;border:1px solid #e4e7ec;border-radius:10px;padding:8px 10px"><strong>AI fit:</strong> '+esc(tier)+'</span><span style="font-size:12px;border:1px solid #e4e7ec;border-radius:10px;padding:8px 10px"><strong>Assistants:</strong> '+esc(assistants.length?assistants.join(', '):'Not verified')+'</span><span style="font-size:12px;border:1px solid #e4e7ec;border-radius:10px;padding:8px 10px"><strong>MCP:</strong> '+esc(mcp)+'</span><span style="font-size:12px;border:1px solid #e4e7ec;border-radius:10px;padding:8px 10px"><strong>Public API:</strong> '+esc(api)+'</span></div>'+(links?'<p class="small"><strong>Evidence:</strong> '+links+(p.verifiedAt?' · Checked '+esc(p.verifiedAt):'')+'</p>':'<p class="small">Unknown is not treated as no integration. ToolScout publishes a positive AI-integration claim only after first-party verification.</p>')+'</section>';
+  // Manufacturer documentation is private editorial evidence, never a
+  // public non-monetized outbound link on runtime software profiles.
+  const internallyDocumented=verified&&(p.sources||[]).some(x=>/^https:\/\//.test(String(x||'')));
+  return '<section class="section" data-ai-interoperability="1"><div class="eyebrow">AI interoperability</div><h2>How '+esc(tool.name)+' works with AI assistants and agents</h2><p style="color:#667085;line-height:1.65">'+esc(summary)+'</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0"><span style="font-size:12px;border:1px solid #e4e7ec;border-radius:10px;padding:8px 10px"><strong>AI fit:</strong> '+esc(tier)+'</span><span style="font-size:12px;border:1px solid #e4e7ec;border-radius:10px;padding:8px 10px"><strong>Assistants:</strong> '+esc(assistants.length?assistants.join(', '):'Not verified')+'</span><span style="font-size:12px;border:1px solid #e4e7ec;border-radius:10px;padding:8px 10px"><strong>MCP:</strong> '+esc(mcp)+'</span><span style="font-size:12px;border:1px solid #e4e7ec;border-radius:10px;padding:8px 10px"><strong>Public API:</strong> '+esc(api)+'</span></div>'+(internallyDocumented?'<p class="small">AI integration reviewed against manufacturer documentation internally'+(p.verifiedAt?' · Checked '+esc(p.verifiedAt):'')+'.</p>':'<p class="small">Unknown is not treated as no integration. ToolScout publishes a positive AI-integration claim only after first-party verification.</p>')+'</section>';
 }
 function injectAiInteroperability(html,tool){
   if(!tool||String(html).includes('data-ai-interoperability="1"'))return html;

@@ -2,6 +2,8 @@ export const FUNNEL_EVENT_TYPES = new Set([
   'session_started',
   'page_confirmed',
   'recommendation_started',
+  'business_workflow_viewed',
+  'business_workflow_selected',
   'recommendation_completed',
   'recommendation_result_viewed',
   'tool_viewed',

@@ -183,3 +183,17 @@ Grow the existing catalog rather than create a second catalog or add a parallel 
 5. Monitor unique documented vendors, category/workflow coverage, verified claims and integrations, AI-referral-qualified human sessions, Finder workflow completions, ToolScout profile opens, and actual monetized outbound and commission evidence. Never collapse these populations into vanity traffic.
 
 To unlock specialist sectors not represented in the existing allowed category registry, expand the current catalog taxonomy only with a fully verified candidate cohort and tests. Avoid speculative indexable buying guides from thin coverage.
+
+## Catalog supply repair and AI workflow truth (9 October 2026)
+
+An inspection of the four preexisting trusted-candidate files found **80 records, all already present in the current 127-product catalog**. The prior admission cap of 3/day was not the actual bottleneck: **zero genuinely new trusted candidates** were flowing through those files.
+
+The existing Catalog Autonomy intake now:
+- Exposes `trusted_sources_total`, `ready_trusted_sources`, `research_seeds_total`, `candidate_supply_status` and explicit missing manufacturer evidence counts. A successful cycle with zero new products must not masquerade as growth.
+- Performs strict first-party two-document editorial preflight *before* vendor HTTP requests, preserving Cloudflare resources for admission-ready candidates.
+- Gives manufacturer-documented candidates priority over commercial discovery signals, then balances against under-covered catalog categories. Affiliate income does not change admission or ranking.
+- Has conditional headroom for **six qualified admissions per cycle** and **12 candidate checks** if genuinely documented candidates arrive; these are processing caps, **not growth claims**.
+- Retains `editorialReview` as the structured, source-verifiable object when promoting a candidate, rather than flattening it into a text string.
+- Maintains a separate first-party-sourced research-only seed list in `data/catalog-research-seeds.json`, presently nine prospective products across six different industries. Their URLs have been identified for follow-up documentary verification but these are **not** decision-ready reviews, confirmed affiliate routes, or published pages. They do not enter `trustedCandidateFiles` or bypass admission QA.
+
+For audience measurement, the homepage Finder now records `business_workflow_viewed` and `business_workflow_selected` as separate first-party funnel events. Workflow advice is not a failed software recommendation, and a displayed industry guide is not a vendor-shortlist conversion. The existing 30-day browser-confirmed funnel reports `businessWorkflowViews`, `businessWorkflowSelections` and `businessWorkflowSelectionRate`; these are **diagnostic D1 funnel metrics**, never replacements for canonical GA4 acquisition or server-side monetized outbound. The `source=ai-agent` query parameter is self-declared campaign attribution; it is not verification of a specific AI platform, a true referral, or a strict human.
