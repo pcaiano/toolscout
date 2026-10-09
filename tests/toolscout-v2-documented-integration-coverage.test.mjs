@@ -30,7 +30,8 @@ test('Eight new integration pairs have manufacturer provenance, dates and no dup
    assert.equal(matches.length,1,slug+' -> '+name);
    const pair=matches[0];
    assert.match(pair.sourceUrl,/^https:\/\//);
-   assert.match(pair.verifiedAt,/^\d{4}-\d{2}-\d{2}$/);\n   assert.ok(pair.verifiedAt<='2026-10-09','manufacturer evidence cannot be future-dated');
+   assert.match(pair.verifiedAt,/^\d{4}-\d{2}-\d{2}$/);
+   assert.ok(pair.verifiedAt<='2026-10-09','manufacturer evidence cannot be future-dated');
    const doc=new URL(pair.sourceUrl).hostname.replace(/^www\./,'');
    const manufacturer=new URL(record.sourceUrl).hostname.replace(/^www\./,'');
    assert.ok(doc===manufacturer||doc.endsWith('.'+manufacturer),slug+' -> '+name+' first-party');
