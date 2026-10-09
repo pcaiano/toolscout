@@ -21,7 +21,7 @@ const cases=[
  ['Make explicit PT unknown','automation','under $15/month',[],{country:'PT'}],
  ['Make explicit US unknown','automation','under $15/month',[],{country:'US'}],
  ['Make $15 billed monthly','automation','under $15/mo billed monthly',['make']],
- ['Make annual price unknown','automation','under $15/month billed annually',[]],
+ ['Make annual price available','automation','under $15/month billed annually',['make']],
  ['Buffer one channel monthly','social','under $6/month per channel',['buffer']],
  ['Buffer one channel $5.50 monthly','social','under $5.50/month per channel',[]],
  ['Buffer annual monthly-equivalent','social','under $5.50/month per channel billed annually',['buffer']],
@@ -58,7 +58,7 @@ test('verified Buffer annual quote preserves actual up-front charge',async()=>{
 test('Make quoted price is for 10k credits, not proof of another usage tier',()=>{
  const make=catalog.find(x=>x.slug==='make');
  const quotes=make.decisionClaims.filter(c=>c.type==='price_quote');
- assert.equal(quotes.length,3);
+ assert.equal(quotes.length,6);
  assert.ok(quotes.every(q=>q.usageTier.unit==='credits'&&q.usageTier.quantity===10000&&q.usageTier.period==='month'));
 });
 test('price evidence never passes a country-restricted buyer requirement on unspecified market',async()=>{
