@@ -43,7 +43,7 @@ const SECTORS=[
   ['nonprofits','nonprofit organisation',/\b(nonprofits?|non.profits?|charit(?:y|ies)|associac(?:ao|oes)|associações?|ngos?|fundacoes?|fundações?)\b/,['crm','marketing','forms','tasks'],['Donor CRM, fundraising compliance and grants']],
   ['consulting','consultancy',/\b(consultanc(?:y|ies)|consulting (?:company|business|firm)|consultoria|consultores?|professional services? firm)\b/,['tasks','crm','forms','automation'],['Time billing, engagement profitability and client contracts']],
   ['technology','software or IT business',/\b(software (?:company|business|agency|studio)|it (?:business|company|services|consultancy)|startups?|tech (?:company|business)|saas (?:company|business))\b/,['tasks','developer','analytics','support'],['Security, software delivery and incident management']],
-  ['events','events business',/\b(event (?:management|planning|company|agency|business)|organizadores? de eventos|wedding planner)\b/,['tasks','crm','forms','marketing'],['Ticketing, seating and vendor contracts']],
+  ['events','events business',/\b(events? (?:management|planning|company|agency|business)|organizadores? de eventos|wedding planner)\b/,['tasks','crm','forms','marketing'],['Ticketing, seating and vendor contracts']],
   ['travel','travel agency',/\b(travel (?:agency|business|company)|tour operators?|agencias? de viagens|agências? de viagens)\b/,['crm','tasks','marketing','forms'],['Travel booking systems, settlements and itinerary management']],
   ['agriculture','farming business',/\b(farms?|farming (?:business|company)|agriculture|agricultural business|quinta agricola|exploracao agricola)\b/,['tasks','analytics','crm','automation'],['Farm planning, crops, livestock and traceability']]
 ];
@@ -66,7 +66,7 @@ export function interpretBusinessIndustry(query){
   const q=clean(query),hit=SECTORS.find(x=>x[2].test(q));
   if(hit)return{id:hit[0],label:hit[1],roles:hit[3],specialist:hit[4]};
   return /\b(business|businesses|company|companies|firm|enterprise|negocio|negocios|empresa|empresas|agency|agencia|agência|practice|studio)\b/.test(q)
-    ?{id:'other_business',label:'business',roles:GENERAL,specialist:[]}:null;
+    ?{id:'general_business',label:'business',roles:GENERAL,specialist:[]}:null;
 }
 function specificJob(query,profile){
   if(profile?.goal)return true;
