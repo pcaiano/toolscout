@@ -218,3 +218,23 @@ test('unverified Free status cannot enter free-only Finder shortlist',async()=>{
     assert.equal(product.freePlan,true);
   }
 });
+
+
+test('Budget vocabulary distinguishes an affordable paid product from free only',async()=>{
+  const cheap=await handleDistributionEmbedRoute(new Request('https://trytoolscout.org/api/recommend?q=cheap%20CRM'),assetEnv());
+  assert.equal(cheap.status,200);
+  const cheapData=await cheap.json();
+  assert.equal(cheapData.profile.budget,'low');
+  assert.ok(cheapData.recommendations.length>0);
+  const free=await handleDistributionEmbedRoute(new Request('https://trytoolscout.org/api/recommend?q=free%20CRM'),assetEnv());
+  assert.equal(free.status,200);
+  const freeData=await free.json();
+  assert.equal(freeData.profile.budget,'free');
+});
+
+test('homepage sends only explicit guided selections to API and displays server-derived profile',()=>{
+  const source=read('app.js');
+  assert.match(source,/if\(profile\[k\]\)params\.set\(k,profile\[k\]\)/);
+  assert.match(source,/p=data\.profile\|\|p/);
+  assert.doesNotMatch(source,/if\(p\[k\]\)params\.set\(k,p\[k\]\)/);
+});
