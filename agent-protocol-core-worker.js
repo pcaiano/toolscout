@@ -486,11 +486,11 @@ function constraintEvidence(tool,constraints=[],budget=null){
     const volume=norm.match(/(?:at least|minimum|need|requires?|must support|support)\s+(\d+)\s+(?:(stored|automation|active|monthly|daily)\s+)?(tasks|users|seats|channels|accounts|emails|contacts|submissions|collaborators|records|spaces|funnels|workflows|credits|events|automations|teams|urls|forms|pipelines|deals|calendars|inboxes)\b/);
     if(volume){
       const qty=Number(volume[1]),modifier=volume[2]||'',unit=volume[3];
-      const explicitMonth=/(?:per month|a month|monthly|\/month)\b/.test(norm)||modifier==='monthly';
-      const explicitDay=/(?:per day|a day|daily|\/day)\b/.test(norm)||modifier==='daily';
+      const explicitMonth=/\b(?:per month|a month|monthly|month)\b/.test(norm)||modifier==='monthly';
+      const explicitDay=/\b(?:per day|a day|daily|day)\b/.test(norm)||modifier==='daily';
       const period=explicitMonth?'month':explicitDay?'day':null;
       if(explicitMonth&&explicitDay)return {constraint,status:'not_verified',evidence:'The buyer request mixes daily and monthly limits.'};
-      const recurring=new Set(['tasks','emails','submissions','credits','events','automations']);
+      const recurring=new Set(['tasks','emails','submissions','credits','events']);
       if(recurring.has(unit)&&!period)return {constraint,status:'not_verified',evidence:'Specify a daily or monthly volume; ToolScout cannot assume the usage period.'};
       const scope=unit==='contacts'?(modifier==='automation'||/\bautomation\b/.test(norm)?'automation':modifier==='stored'||/\b(?:stored|audience|list)\b/.test(norm)?'stored':null):null;
       if(unit==='contacts'&&!scope)return {constraint,status:'not_verified',evidence:'Specify stored contacts or contacts entering automations; the two limits are different.'};
