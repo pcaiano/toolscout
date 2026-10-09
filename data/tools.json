@@ -304,7 +304,11 @@
       "reviewedAt": "2026-10-08",
       "sourceUrl": "https://www.hubspot.com/pricing/crm",
       "method": "vendor_documentation_and_toolscout_editorial_interpretation",
-      "handsOnTested": false
+      "handsOnTested": false,
+      "verificationStatus": "vendor_documented",
+      "sourceUrls": [
+        "https://www.hubspot.com/pricing/crm"
+      ]
     }
   },
   {
@@ -572,7 +576,11 @@
       "reviewedAt": "2026-10-08",
       "sourceUrl": "https://www.pipedrive.com/en/features/pipeline-management",
       "method": "vendor_documentation_and_toolscout_editorial_interpretation",
-      "handsOnTested": false
+      "handsOnTested": false,
+      "verificationStatus": "vendor_documented",
+      "sourceUrls": [
+        "https://www.pipedrive.com/en/features/pipeline-management"
+      ]
     }
   },
   {
@@ -659,7 +667,11 @@
       "reviewedAt": "2026-10-08",
       "sourceUrl": "https://www.semrush.com/kb/32-position-tracking",
       "method": "vendor_documentation_and_toolscout_editorial_interpretation",
-      "handsOnTested": false
+      "handsOnTested": false,
+      "verificationStatus": "vendor_documented",
+      "sourceUrls": [
+        "https://www.semrush.com/kb/32-position-tracking"
+      ]
     }
   },
   {
@@ -828,7 +840,11 @@
       "reviewedAt": "2026-10-08",
       "sourceUrl": "https://help.brevo.com/hc/en-us/articles/208580669-FAQs-What-are-the-limits-of-the-Free-plan",
       "method": "first_party_documentation_plus_editorial_judgment",
-      "handsOnTested": false
+      "handsOnTested": false,
+      "verificationStatus": "vendor_documented",
+      "sourceUrls": [
+        "https://help.brevo.com/hc/en-us/articles/208580669-FAQs-What-are-the-limits-of-the-Free-plan"
+      ]
     }
   },
   {
@@ -904,7 +920,11 @@
       "reviewedAt": "2026-10-08",
       "sourceUrl": "https://help.activecampaign.com/hc/en-us/articles/218789987-Free-trial-capabilities",
       "method": "first_party_documentation_plus_editorial_judgment",
-      "handsOnTested": false
+      "handsOnTested": false,
+      "verificationStatus": "vendor_documented",
+      "sourceUrls": [
+        "https://help.activecampaign.com/hc/en-us/articles/218789987-Free-trial-capabilities"
+      ]
     },
     "freePlanKnown": false,
     "pricingDetails": {
@@ -1001,7 +1021,11 @@
       "reviewedAt": "2026-10-08",
       "sourceUrl": "https://mailchimp.com/help/about-mailchimp-pricing-plans/",
       "method": "first_party_documentation_plus_editorial_judgment",
-      "handsOnTested": false
+      "handsOnTested": false,
+      "verificationStatus": "vendor_documented",
+      "sourceUrls": [
+        "https://mailchimp.com/help/about-mailchimp-pricing-plans/"
+      ]
     }
   },
   {
@@ -1092,7 +1116,11 @@
       "reviewedAt": "2026-10-08",
       "sourceUrl": "https://help.zapier.com/hc/en-us/articles/8496181445261-Zap-limits",
       "method": "vendor_documentation_and_toolscout_editorial_interpretation",
-      "handsOnTested": false
+      "handsOnTested": false,
+      "verificationStatus": "vendor_documented",
+      "sourceUrls": [
+        "https://help.zapier.com/hc/en-us/articles/8496181445261-Zap-limits"
+      ]
     },
     "freePlanKnown": true,
     "pricingDetails": {
@@ -1207,7 +1235,11 @@
       "reviewedAt": "2026-10-08",
       "sourceUrl": "https://www.make.com/en/product",
       "method": "vendor_documentation_and_toolscout_editorial_interpretation",
-      "handsOnTested": false
+      "handsOnTested": false,
+      "verificationStatus": "vendor_documented",
+      "sourceUrls": [
+        "https://www.make.com/en/product"
+      ]
     }
   },
   {
@@ -1464,7 +1496,11 @@
       "reviewedAt": "2026-10-08",
       "sourceUrl": "https://help.typeform.com/hc/en-us/articles/360032972852-Free-plan",
       "method": "first_party_documentation_plus_editorial_judgment",
-      "handsOnTested": false
+      "handsOnTested": false,
+      "verificationStatus": "vendor_documented",
+      "sourceUrls": [
+        "https://help.typeform.com/hc/en-us/articles/360032972852-Free-plan"
+      ]
     },
     "freePlanKnown": true,
     "pricingDetails": {
@@ -1560,7 +1596,11 @@
       "reviewedAt": "2026-10-08",
       "sourceUrl": "https://tally.so/help/faq",
       "method": "first_party_documentation_plus_editorial_judgment",
-      "handsOnTested": false
+      "handsOnTested": false,
+      "verificationStatus": "vendor_documented",
+      "sourceUrls": [
+        "https://tally.so/help/faq"
+      ]
     }
   },
   {
@@ -1646,7 +1686,11 @@
       "reviewedAt": "2026-10-08",
       "sourceUrl": "https://help.ahrefs.com/en/articles/9419051-about-ahrefs-starter-plan",
       "method": "vendor_documentation_and_toolscout_editorial_interpretation",
-      "handsOnTested": false
+      "handsOnTested": false,
+      "verificationStatus": "vendor_documented",
+      "sourceUrls": [
+        "https://help.ahrefs.com/en/articles/9419051-about-ahrefs-starter-plan"
+      ]
     }
   },
   {
@@ -1721,7 +1765,11 @@
       "reviewedAt": "2026-10-08",
       "sourceUrl": "https://seranking.com/website-audit.html",
       "method": "vendor_documentation_and_toolscout_editorial_interpretation",
-      "handsOnTested": false
+      "handsOnTested": false,
+      "verificationStatus": "vendor_documented",
+      "sourceUrls": [
+        "https://seranking.com/website-audit.html"
+      ]
     }
   },
   {
@@ -1799,7 +1847,11 @@
       "reviewedAt": "2026-10-08",
       "sourceUrl": "https://help.clickup.com/hc/en-us/articles/6309390855319-Create-and-edit-Spaces",
       "method": "first_party_documentation_plus_editorial_judgment",
-      "handsOnTested": false
+      "handsOnTested": false,
+      "verificationStatus": "vendor_documented",
+      "sourceUrls": [
+        "https://help.clickup.com/hc/en-us/articles/6309390855319-Create-and-edit-Spaces"
+      ]
     },
     "freePlanKnown": true,
     "pricingDetails": {
@@ -2181,7 +2233,11 @@
       "reviewedAt": "2026-10-08",
       "sourceUrl": "https://www.notion.com/help/database-automations",
       "method": "vendor_documentation_and_toolscout_editorial_interpretation",
-      "handsOnTested": false
+      "handsOnTested": false,
+      "verificationStatus": "vendor_documented",
+      "sourceUrls": [
+        "https://www.notion.com/help/database-automations"
+      ]
     }
   },
   {
@@ -2265,7 +2321,11 @@
       "reviewedAt": "2026-10-08",
       "sourceUrl": "https://help.asana.com/s/article/asana-personal-plan-details",
       "method": "first_party_documentation_plus_editorial_judgment",
-      "handsOnTested": false
+      "handsOnTested": false,
+      "verificationStatus": "vendor_documented",
+      "sourceUrls": [
+        "https://help.asana.com/s/article/asana-personal-plan-details"
+      ]
     },
     "freePlanKnown": true,
     "pricingDetails": {
@@ -2370,7 +2430,11 @@
       "reviewedAt": "2026-10-08",
       "sourceUrl": "https://support.atlassian.com/trello/docs/workspace-user-limit/",
       "method": "first_party_documentation_plus_editorial_judgment",
-      "handsOnTested": false
+      "handsOnTested": false,
+      "verificationStatus": "vendor_documented",
+      "sourceUrls": [
+        "https://support.atlassian.com/trello/docs/workspace-user-limit/"
+      ]
     }
   },
   {
@@ -2463,7 +2527,11 @@
       "reviewedAt": "2026-10-08",
       "sourceUrl": "https://support.airtable.com/articles/3199652922-managing-airtable-automations",
       "method": "vendor_documentation_and_toolscout_editorial_interpretation",
-      "handsOnTested": false
+      "handsOnTested": false,
+      "verificationStatus": "vendor_documented",
+      "sourceUrls": [
+        "https://support.airtable.com/articles/3199652922-managing-airtable-automations"
+      ]
     }
   },
   {
@@ -2547,7 +2615,11 @@
       "reviewedAt": "2026-10-08",
       "sourceUrl": "https://docs.n8n.io/hosting/",
       "method": "vendor_documentation_and_toolscout_editorial_interpretation",
-      "handsOnTested": false
+      "handsOnTested": false,
+      "verificationStatus": "vendor_documented",
+      "sourceUrls": [
+        "https://docs.n8n.io/hosting/"
+      ]
     }
   },
   {
@@ -3352,7 +3424,11 @@
       "reviewedAt": "2026-10-08",
       "sourceUrl": "https://help.figma.com/hc/en-us/articles/13838684089751-Starter-plan-overview",
       "method": "first_party_documentation_plus_editorial_judgment",
-      "handsOnTested": false
+      "handsOnTested": false,
+      "verificationStatus": "vendor_documented",
+      "sourceUrls": [
+        "https://help.figma.com/hc/en-us/articles/13838684089751-Starter-plan-overview"
+      ]
     }
   },
   {
@@ -7838,7 +7914,11 @@
       "reviewedAt": "2026-10-08",
       "sourceUrl": "https://linear.app/docs/teams",
       "method": "first_party_documentation_plus_editorial_judgment",
-      "handsOnTested": false
+      "handsOnTested": false,
+      "verificationStatus": "vendor_documented",
+      "sourceUrls": [
+        "https://linear.app/docs/teams"
+      ]
     }
   },
   {
