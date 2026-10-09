@@ -3,6 +3,7 @@ import base from './dynamic-worker.js';
 import { runWithLedger } from './engine-run-ledger.js';
 import { renderRuntimeRanking } from './catalog-runtime-ranking.js';
 import {auditCatalogTool,mapLimit,hasManufacturerDecisionClaim} from './catalog-quality-runtime.js';
+import {hydrateLegacyCatalogProfile} from './catalog-profile-hydration.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
 const MAX_VERIFY_PER_CYCLE=4;
@@ -153,8 +154,9 @@ async function logEvent(env,slug,type,status,detail,evidence=null){
 function compileRuntimeSnapshot(stateRows=[],candidateRows=[],meta={}){
   const stateMap=new Map((stateRows||[]).map(row=>[String(row.tool_slug),row])),parsed=[];
   const baselineMirrors=new Set((candidateRows||[]).filter(row=>row.source_status==='baseline_snapshot').map(row=>String(row.tool_slug||'').toLowerCase()));
+  const verifiedRevisions=new Set((candidateRows||[]).filter(row=>row.source_status==='ok').map(row=>String(row.tool_slug||'').toLowerCase()));
   for(const row of candidateRows||[]){try{const p=JSON.parse(row.profile_json);if(p)parsed.push(p)}catch{}}
-  return{at:Date.now(),candidates:parsed,candidateMap:new Map(parsed.map(x=>[String(x.slug||'').toLowerCase(),x])),stateMap,suppressed:new Set([...stateMap.entries()].filter(([,v])=>v.quality_status==='confirmed_broken').map(([k])=>k)),degraded:Boolean(meta.degraded),lastError:meta.lastError||null,source:meta.source||'d1',baselineMirrors};
+  return{at:Date.now(),candidates:parsed,candidateMap:new Map(parsed.map(x=>[String(x.slug||'').toLowerCase(),x])),stateMap,suppressed:new Set([...stateMap.entries()].filter(([,v])=>v.quality_status==='confirmed_broken').map(([k])=>k)),degraded:Boolean(meta.degraded),lastError:meta.lastError||null,source:meta.source||'d1',baselineMirrors,verifiedRevisions};
 }
 async function writeRuntimeEdgeSnapshot(stateRows,candidateRows){
   try{
@@ -615,6 +617,10 @@ export async function publicQualityEnhancedToolResponse(response,env,slug){
   const tool=(Array.isArray(staticTools)?staticTools:[]).find(x=>String(x?.slug||'').toLowerCase()===key)||null;
   if(!row?.logo_url&&!tool)return response;
   let html=await response.text();
+  const snapshot=await runtimeSnapshot(env),revision=snapshot.candidateMap.get(key);
+  const proof=snapshot.verifiedRevisions?.has(key)&&trustedManufacturerEvidence(revision,{decisionGrade:true})&&hasManufacturerDecisionClaim(revision);
+  const hydrated=proof?hydrateLegacyCatalogProfile(html,revision):null;
+  if(hydrated)html=hydrated;
   if(row?.logo_url){
     const logo=esc(row.logo_url);
     html=html.replace(/(<img class="toolLogo" src=")[^"]*(")/i,`$1${logo}$2`);
@@ -623,6 +629,7 @@ export async function publicQualityEnhancedToolResponse(response,env,slug){
   }
   if(tool)html=injectAiInteroperability(html,tool);
   const h=new Headers(response.headers);h.delete('Content-Length');h.delete('Content-Encoding');h.set('Cache-Control','public, max-age=60');
+  if(hydrated)h.set('X-ToolScout-Catalog-Hydration','verified-d1-revision');
   return new Response(html,{status:response.status,statusText:response.statusText,headers:h});
 }
 export async function publicRuntimeToolResponse(env,slug){
