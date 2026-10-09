@@ -8,12 +8,18 @@ function vendorHost(value){
 export function monitoredManufacturerDocuments(tool,{limit=2}={}){
   const home=vendorHost(tool?.sourceUrl),review=tool?.editorialReview||{},docs=[],seen=new Set();
   if(!home)return[];
+  // Some original vendor brands use a different corporate documentation
+  // hostname (for example ChatGPT and OpenAI). Trust only exact URLs already
+  // recorded as first-party evidence by ToolScout's independent editorial review.
+  const attested=new Set((Array.isArray(tool?.evidence)?tool.evidence:[])
+    .filter(x=>x?.claimScope==='toolscout_editorial_review'&&/^\d{4}-\d{2}-\d{2}$/.test(String(x?.verifiedAt||''))&&x?.sourceUrl)
+    .map(x=>x.sourceUrl));
   function add(url){
     if(typeof url!=='string'||seen.has(url))return;
     let u;try{u=new URL(url)}catch{return}
     const host=vendorHost(url);
     const atlassian=tool?.slug==='trello'&&(host==='atlassian.com'||host.endsWith('.atlassian.com'));
-    if(!host||!(host===home||host.endsWith('.'+home)||atlassian)||u.pathname==='/'||!u.pathname)return;
+    if(!host||!(host===home||host.endsWith('.'+home)||atlassian||attested.has(url))||u.pathname==='/'||!u.pathname)return;
     seen.add(url);docs.push(url);
   }
   // Priority 1: direct pricing and plan entitlement evidence.
@@ -38,8 +44,8 @@ export async function verifyManufacturerDocuments(env,tool,{fetchDocument,hash,w
   const observations=await Promise.all(sources.map(async url=>{
     let response;
     try{response=await fetchDocument(url)}catch{return{url,status:'network_warning'}}
-    const final=vendorHost(response?.finalUrl||url),home=vendorHost(tool?.sourceUrl);
-    const redirectAllowed=final===home||final.endsWith('.'+home)||(tool?.slug==='trello'&&(final==='atlassian.com'||final.endsWith('.atlassian.com')));
+    const final=vendorHost(response?.finalUrl||url),home=vendorHost(tool?.sourceUrl),documentHost=vendorHost(url);
+    const redirectAllowed=final===documentHost||final.endsWith('.'+documentHost)||final===home||final.endsWith('.'+home)||(tool?.slug==='trello'&&(final==='atlassian.com'||final.endsWith('.atlassian.com')));
     return{url,status:response?.status==='ok'&&!redirectAllowed?'untrusted_redirect':response?.status||'network_warning',fingerprint:response?.fingerprint||null};
   }));
   if(observations.some(x=>x.status!=='ok'||!x.fingerprint))return{status:'documentation_warning',checked:observations.length,changed:false,
