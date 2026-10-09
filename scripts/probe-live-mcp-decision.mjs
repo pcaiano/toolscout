@@ -20,7 +20,8 @@ for(let attempt=1;attempt<=15;attempt++){
     const rows=await response.json();
     const web=rows.find(x=>x.slug==='webflow'),hub=rows.find(x=>x.slug==='hubspot');
     ready=Boolean(web?.decisionClaims?.some(x=>x.type==='price_quote'&&x.plan==='Site Premium'&&x.amount===25)
-      &&hub?.decisionClaims?.some(x=>x.type==='price_quote'&&x.currency==='EUR'&&x.plan==='Starter'&&x.amount===20));
+      &&hub?.decisionClaims?.some(x=>x.type==='price_quote'&&x.currency==='EUR'&&x.plan==='Starter'&&x.amount===20)
+      &&web?.decisionClaims?.some(x=>x.type==='price_quote'&&x.plan==='Site Premium'&&x.billingCycle==='monthly'&&x.amount===39));
     if(ready){current=attempt;break}
   }catch(error){if(attempt===15)throw Error('live catalog not queryable after deployment: '+String(error?.message||error))}
   if(attempt<15)await sleep(5000);
@@ -42,6 +43,7 @@ const decider=list.tools?.find(t=>t.name==='decide_software');
 assert(Boolean(decider?.inputSchema?.properties?.seat_count),'live decide_software schema missing latest seat_count feature');
 assert(decider.inputSchema.properties.country,'country-local price verification guard is missing');
 const cases=[
+ {label:'website CMS monthly $39 current Premium Site',args:{job:'website builder',constraints:['under $40/month billed monthly'],must_have:['content management system'],limit:5},slug:'webflow',plan:'Site Premium',currency:'USD',amount:39,invoice:39},
  {label:'website CMS under 26 USD annual',args:{job:'website builder',constraints:['under $26/month billed annually'],must_have:['content management system'],limit:5},slug:'webflow',plan:'Site Premium',currency:'USD',amount:25,invoice:300},
  {label:'CRM EUR standard list under 25',args:{job:'crm',constraints:['under €25/month per user'],limit:5},slug:'hubspot',plan:'Starter',currency:'EUR',amount:20,invoice:20}
 ];
@@ -59,4 +61,4 @@ for(const c of cases){
 }
 const denied=await rpc('tools/call',{name:'decide_software',arguments:{job:'website builder',constraints:['under $16/month billed annually'],must_have:['content management system'],limit:5}});
 assert(denied.isError===true||!denied.structuredContent?.shortlist?.some(x=>x.slug==='webflow'),'live buyer budget incorrectly qualifies Premium at Basic pricing');
-console.log(JSON.stringify({ok:true,liveNetworkMcpPost:true,base:BASE,method:'tools/call',canaryAfterAttempts:current,positiveDecisions:2,blockedInvalidTier:1,currency:['USD','EUR'],manufacturerSourcesExposed:false},null,2));
+console.log(JSON.stringify({ok:true,liveNetworkMcpPost:true,base:BASE,method:'tools/call',canaryAfterAttempts:current,positiveDecisions:3,blockedInvalidTier:1,currency:['USD','EUR'],manufacturerSourcesExposed:false},null,2));
