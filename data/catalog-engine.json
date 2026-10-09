@@ -104,7 +104,11 @@
     "rejectGenericSyntheticEditorialProfiles": true,
     "maximumFactualReviewAgeDays": 45,
     "aiInteroperabilityProfileRequiredOnAdmission": true,
-    "aiInteroperabilityCanBeUnknown": true
+    "aiInteroperabilityCanBeUnknown": true,
+    "requireDecisionGradeManufacturerDocumentation": true,
+    "minimumIndependentDocumentPages": 2,
+    "requireExplicitStrengthsLimitationsTradeoffs": true,
+    "rejectEditorialScoreWithoutProvenance": true
   },
   "coverageAdmission": {
     "autoPromoteVerifiedCompetitiveGapProfiles": true,
@@ -114,11 +118,11 @@
     "minimumDescriptionLength": 60,
     "requireReachableOfficialSource": true,
     "requireKnownCategory": true,
-    "rankingEligibleOnAdmission": true,
-    "comparisonEligibleOnAdmission": true,
+    "rankingEligibleOnAdmission": false,
+    "comparisonEligibleOnAdmission": false,
     "requirePricingForCatalogEntry": false,
     "requireToolSpecificScoresForCatalogEntry": false,
-    "upgradeToEditorialRequiresSeparateEvidence": false,
+    "upgradeToEditorialRequiresSeparateEvidence": true,
     "requireVisualAssetForCatalogEntry": true
   },
   "qualityControl": {
@@ -178,7 +182,7 @@
     "minimumIndependentMarketSignals": 2,
     "maxCompetitiveGapProfilesPerCycle": 3,
     "minimumVerifiedCapabilitiesForGapProfile": 2,
-    "competitiveGapProfilesAreNonRanking": false,
+    "competitiveGapProfilesAreNonRanking": true,
     "competitiveGapEditorialFactsRequireFirstPartySource": true,
     "aiInteroperability": {
       "useAsCatalogResearchSignal": true,
