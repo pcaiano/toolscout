@@ -68,8 +68,8 @@ test('50 decision benchmarks: documented capabilities, missing proof, forged sou
 
 test('monthly EUR ceilings require a dated price, not a price score',async()=>{
  const standard=base('documented-eur',['crm'],[
-   {type:'price_eur_month',value:'starter monthly',status:'verified',sourceUrl:SOURCE,verifiedAt:'2026-10-08',
-     plan:'Starter',amount:18.5,billingCycle:'monthly'}
+   {type:'price_quote',value:'starter monthly EUR',status:'verified',sourceUrl:SOURCE,verifiedAt:'2026-10-08',
+     plan:'Starter',amount:18.5,chargeAmount:18.5,currency:'EUR',billingCycle:'monthly',market:'unspecified',taxStatus:'unknown',unit:'subscription',unitQuantity:1}
  ]);
  const affordable=await decide([standard],{constraints:['must cost less than €20 per month']});
  assert.equal(affordable.isError,false);

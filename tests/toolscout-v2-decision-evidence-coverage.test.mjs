@@ -25,7 +25,7 @@ test('all 127 current profiles have at least one dated decision-specific first-p
     const reviewed=new Set([t.editorialReview?.sourceUrl,...(t.editorialReview?.sourceUrls||[]),t.pricingDetails?.sourceUrl].filter(Boolean));
     for(const claim of t.decisionClaims){
       assert.equal(claim.status,'verified',t.slug);
-      assert.ok(['capability','integration','plan_limit','price_eur_month'].includes(claim.type),t.slug);
+      assert.ok(['capability','integration','plan_limit','price_eur_month','price_quote'].includes(claim.type),t.slug);
       assert.ok(claim.value&&claim.sourceUrl&&/^\d{4}-\d{2}-\d{2}$/.test(claim.verifiedAt),t.slug);
       const host=new URL(claim.sourceUrl).hostname.replace(/^www\./,'');
       assert.ok(host===vendor||host.endsWith('.'+vendor)||reviewed.has(claim.sourceUrl),t.slug+' claim has no recorded manufacturer provenance');

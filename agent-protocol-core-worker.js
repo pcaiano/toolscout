@@ -52,6 +52,7 @@ function toolDefinitions(){
           must_have:{type:'array',maxItems:12,items:{type:'string',minLength:1,maxLength:100}},
           avoid:{type:'array',maxItems:12,items:{type:'string',minLength:1,maxLength:100}},
           budget:{type:'string',enum:['free','low','mid','high']},
+          country:{type:'string',pattern:'^[A-Z]{2}$',description:'ISO 3166-1 alpha-2 country for geographically verified quotes; unknown locale must not qualify.'},
           team:{type:'string',enum:['solo','small','team','large','agency']},
           priorities:{type:'array',maxItems:6,uniqueItems:true,items:{type:'string',enum:['price','ease','automation','integrations','sales','ai','marketing','seo','research','content','agency']}},
           existing_tools:{type:'array',maxItems:12,items:{type:'string',minLength:1,maxLength:100}},
@@ -206,6 +207,7 @@ function validToolArguments(name,a){
     if(typeof a.job!=='string'||a.job.trim().length<3||a.job.length>500)return 'job must be a string between 3 and 500 characters';
     if(!validStrings(a.constraints,12,160)||!validStrings(a.must_have,12,100)||!validStrings(a.avoid,12,100)||!validStrings(a.existing_tools,12,100))return 'constraints, must_have, avoid and existing_tools must be valid string arrays';
     if(!validBudget(a.budget)||!validTeam(a.team)||!validPriorities(a.priorities))return 'budget, team or priorities is invalid';
+    if(a.country!==undefined&&(typeof a.country!=='string'||!/^[A-Z]{2}$/.test(a.country)))return 'country must be an ISO 3166-1 alpha-2 code';
     if(a.limit!==undefined&&(!Number.isInteger(a.limit)||a.limit<2||a.limit>5))return 'limit must be an integer from 2 to 5';
     return null;
   }
@@ -465,21 +467,58 @@ function explicitTextMatch(tool,value){
   ].map(catalogNormalize).filter(Boolean);
   return fields.some(field=>field===needle||field.includes(' '+needle+' ')||field.startsWith(needle+' ')||field.endsWith(' '+needle));
 }
-function constraintEvidence(tool,constraints=[],budget=null){
+function priceCeiling(raw){
+  const value=String(raw||''),currency=(/[€]|\bEUR\b/i.test(value)?'EUR':null)||(/[$]|\bUSD\b/i.test(value)?'USD':null)||(/[£]|\bGBP\b/i.test(value)?'GBP':null);
+  if(!currency)return null;
+  const tokens=value.match(/(?:[€$£]|\b(?:EUR|USD|GBP)\b)\s*(\d+(?:[.,]\d{1,2})?)|(\d+(?:[.,]\d{1,2})?)\s*(?:[€$£]|\b(?:EUR|USD|GBP)\b)/i);
+  if(!tokens)return {invalid:true,reason:'Price and currency amount must be explicit; no numeric budget can be inferred.'};
+  if([/[€]|\bEUR\b/i.test(value),/[$]|\bUSD\b/i.test(value),/[£]|\bGBP\b/i.test(value)].filter(Boolean).length>1)return {invalid:true,reason:'Mixed EUR and USD price limits are not comparable without an explicit FX rate.'};
+  const amount=Number((tokens[1]||tokens[2]).replace(',','.'));
+  if(!Number.isFinite(amount)||amount<0)return {invalid:true,reason:'Unsupported price number.'};
+  const normalized=value.toLowerCase();
+  if(/\b(?:in|for)\s+(?:portugal|spain|france|germany|united states|united kingdom|usa|uk|canada|europe|european union)\b/.test(normalized))return {invalid:true,reason:'Country-specific checkout prices need verified local-currency manufacturer quotes; a global price cannot prove a local payable total.'};
+  const annual=/\b(?:billed annually|annual billing|paid annually|annual prepay|yearly billing|per year|a year|yearly|annual commitment)\b/.test(normalized)||/\/year\b/.test(normalized);
+  const monthly=/\b(?:billed monthly|monthly billing|monthly payment|monthly commitment)\b/.test(normalized);
+  const annualPeriod=/\b(?:per year|a year)\b/.test(normalized)||/\/year\b/.test(normalized);
+  const monthlyPeriod=/\b(?:per month|a month|monthly)\b/.test(normalized)||/\/(?:month|mo)\b/.test(normalized);
+  if(annual&&monthly)return {invalid:true,reason:'The buyer request conflicts between annual and monthly commitments.'};
+  if(!annualPeriod&&!monthlyPeriod&&!monthly)return {invalid:true,reason:'Specify whether the price ceiling is per month or per year.'};
+  if(annualPeriod&&monthlyPeriod)return {invalid:true,reason:'Conflicting annual and monthly price ceiling periods.'};
+  const unit=/\b(?:per channel|for (?:one|1) channel)\b/.test(normalized)||/\/channel\b/.test(normalized)?'channel':null;
+  const taxInclusive=/\b(?:incl(?:uding)?\.? (?:vat|tax)|tax included|vat included|with vat|ttc)\b/.test(normalized);
+  return {currency,amount,period:annualPeriod?'year':'month',billingCycle:annual?'annual':monthly?'monthly':null,unit,unitQuantity:unit?1:null,taxInclusive};
+}
+function constraintEvidence(tool,constraints=[],budget=null,country=null){
   return (constraints||[]).map(raw=>{
     const constraint=String(raw||'').trim(),norm=catalogNormalize(constraint);
     if(!norm)return {constraint,status:'not_verified',evidence:'Empty constraint cannot be evaluated.'};
     // A numerical price ceiling cannot be established from a 0-10 affordability
     // score, and a free plan never implies access to a requested paid feature.
-    const money=constraint.match(/(?:[€]|\bEUR\b)\s*(\d+(?:[.,]\d+)?)|(\d+(?:[.,]\d+)?)\s*(?:[€]|\bEUR\b)/i);
-    if(money){
-      const ceiling=Number((money[1]||money[2]).replace(',','.'));
-      const prices=(tool?.decisionClaims||[]).filter(c=>c?.type==='price_eur_month'&&manufacturerClaim(tool,'price_eur_month',c.value)===c&&Number.isFinite(Number(c.amount))&&c.plan&&c.billingCycle==='monthly'&&(budget!=='free'||catalogNormalize(c.plan)==='free'));
-      if(!prices.length)return {constraint,status:'not_verified',evidence:'No dated manufacturer evidence for a comparable monthly EUR price and plan entitlement.'};
-      const affordable=prices.filter(c=>Number(c.amount)<=ceiling).sort((a,b)=>Number(a.amount)-Number(b.amount))[0];
-      return affordable
-        ?{constraint,status:'verified',evidence:'Documented monthly EUR price for the named plan is within the requested ceiling.',plan:affordable.plan,amount_eur_month:Number(affordable.amount),verified_at:affordable.verifiedAt}
-        :{constraint,status:'not_verified',evidence:'No documented plan currently proves that the monthly EUR ceiling can be met; other rates are unknown.'};
+    const price=priceCeiling(constraint);
+    if(price){
+      if(price.invalid)return {constraint,status:'not_verified',evidence:price.reason};
+      const candidates=(tool?.decisionClaims||[]).filter(c=>{
+        if(c?.type!=='price_quote'||manufacturerClaim(tool,'price_quote',c.value)!==c)return false;
+        if(c.currency!==price.currency||!Number.isFinite(c.amount)||c.amount<0||!c.plan)return false;
+        if(c.billingCycle!=='monthly'&&c.billingCycle!=='annual')return false;
+        if(price.billingCycle&&c.billingCycle!==price.billingCycle)return false;
+        if(!price.billingCycle&&c.billingCycle!=='monthly')return false;
+        if(c.market!==String(country||'unspecified').toUpperCase()&&!(c.market==='unspecified'&&!country))return false;
+        if(price.taxInclusive&&c.taxStatus!=='included')return false;
+        if(c.unit==='channel'&&!(price.unit==='channel'&&price.unitQuantity===1))return false;
+        if(c.unit!=='channel'&&price.unit==='channel')return false;
+        if(budget==='free'&&!freeTierMatches(tool,c.plan))return false;
+        if(!Number.isFinite(c.chargeAmount)||c.chargeAmount<0)return false;
+        if(c.billingCycle==='monthly'&&Math.abs(c.chargeAmount-c.amount)>0.00001)return false;
+        if(c.billingCycle==='annual'&&Math.abs(c.chargeAmount/12-c.amount)>0.011)return false;
+        return true;
+      });
+      if(!candidates.length)return {constraint,status:'not_verified',evidence:'No matching first-party price for the requested currency, territory, tax treatment, billing commitment and unit. FX and annual prepayment are never assumed.'};
+      const affordable=candidates.filter(c=>price.period==='year'
+        ?c.billingCycle==='annual'&&c.chargeAmount<=price.amount
+        :c.amount<=price.amount).sort((a,b)=>a.amount-b.amount)[0];
+      if(!affordable)return {constraint,status:'not_verified',evidence:'No published quote meets the ceiling in this billing and currency scenario; unrecorded prices are unknown.'};
+      return {constraint,status:'verified',evidence:'Manufacturer-published price for this exact currency, plan, billing commitment and unit. Applicable taxes and regional checkout totals may differ.',plan:affordable.plan,currency:affordable.currency,monthly_equivalent:affordable.amount,charge_amount:affordable.chargeAmount,billing_cycle:affordable.billingCycle,market:affordable.market,tax_status:affordable.taxStatus,unit:affordable.unit,verified_at:affordable.verifiedAt};
     }
     // Numerical requirements need matching unit, billing/usage period, scope,
     // manufacturer source and tier. "300/day" is not proof of "300/month".
@@ -541,8 +580,9 @@ function constraintEvidence(tool,constraints=[],budget=null){
 // Soft preferences remain ranked trade-offs. Requirements marked "must",
 // "required", "only", "no" or "without" are exclusionary when not evidenced.
 function hardBuyerConstraint(value){
+  if(priceCeiling(value))return true;
   const normalized=catalogNormalize(value);
-  if(/(?:[€]|\bEUR\b)\s*\d|\d\s*(?:[€]|\bEUR\b)/i.test(String(value||'')))return true;
+  if(/(?:[€$£]|\b(?:EUR|USD|GBP)\b)\s*\d|\d\s*(?:[€$£]|\b(?:EUR|USD|GBP)\b)/i.test(String(value||'')))return true;
   if(/\b(?:at least|minimum)\s+\d+\s+(?:stored\s+|automation\s+|active\s+|open\s+|monthly\s+|daily\s+)?(?:tasks|users|seats|channels|accounts|emails|contacts|responses|submissions|collaborators|records|spaces|funnels|workflows|credits|events|automations|teams|urls|forms|pipelines|deals|calendars|inboxes)\b/.test(normalized))return true;
   return /^(?:must\b|mandatory\b|required\b|require\b|requires\b|only\b|no\b|without\b|cannot\b|need\s+to\b|needs\s+to\b|has\s+to\b|have\s+to\b)/.test(normalized);
 }
@@ -656,7 +696,7 @@ function decisionEvaluation(tool,args){
   const budget=budgetSignal(tool,args.budget),team=teamSignal(tool,args.team);
   const must=(args.must_have||[]).map(x=>({requirement:x,...requirementMatch(tool,x,{budget:args.budget})}));
   const avoids=(args.avoid||[]).map(x=>({requirement:x,...requirementMatch(tool,x,{exclude:true})}));
-  const constraints=constraintEvidence(tool,args.constraints||[],args.budget);
+  const constraints=constraintEvidence(tool,args.constraints||[],args.budget,args.country||null);
   const mustMatched=must.filter(x=>x.matched).length;
   const avoidHits=avoids.filter(x=>x.matched).length;
   const constraintVerified=constraints.filter(x=>x.status==='verified').length;
@@ -777,7 +817,7 @@ async function callCatalogTool(name,args,request,env){
         budget:args.budget||null,
         team:args.team||null,
         existing_tools:args.existing_tools||[],
-        methodology:'Deterministic ToolScout catalog fit. Candidates must first match the requested job/category and satisfy all evidence-backed must-haves to appear in a qualified shortlist. Manufacturer-level editorial sourcing does not automatically prove an individual requirement; a documented profile needs claim-level first-party evidence. Missing evidence is not a confirmed capability. A free-only budget excludes products without verified free plans. Scores then combine explicit priorities, budget/team signals, must-have evidence, free-form constraint evidence and known stack evidence. Every free-form constraint is returned as verified, not_verified or conflict. Numerical EUR ceilings and plan quantities are hard gates and cannot be inferred from generic price scores; missing product-specific integration evidence is never upgraded from a generic text match.',
+        methodology:'Deterministic ToolScout catalog fit. Candidates must first match the requested job/category and satisfy all evidence-backed must-haves to appear in a qualified shortlist. Manufacturer-level editorial sourcing does not automatically prove an individual requirement; a documented profile needs claim-level first-party evidence. Missing evidence is not a confirmed capability. A free-only budget excludes products without verified free plans. Scores then combine explicit priorities, budget/team signals, must-have evidence, free-form constraint evidence and known stack evidence. Every free-form constraint is returned as verified, not_verified or conflict. Currency, country, taxes, per-channel units and billing-cycle commitments are strict price gates, never inferred from generic price scores or FX conversions; missing product-specific integration evidence is never upgraded from a generic text match.',
         no_pay_to_rank:true
       },
       affiliate_disclosure:disclosure

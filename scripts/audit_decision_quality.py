@@ -110,7 +110,7 @@ def inspect(path=DATA):
                 first_party = bool(host) and (not vendor or host == vendor or host.endswith("." + vendor) or url in sources)
                 ok = (date_ok and url.startswith("https://") and first_party
                       and claim.get("status") == "verified"
-                      and claim.get("type") in ("capability", "integration", "plan_limit", "price_eur_month")
+                      and claim.get("type") in ("capability", "integration", "plan_limit", "price_eur_month", "price_quote")
                       and bool(claim.get("value")))
             except (TypeError, ValueError, AttributeError):
                 ok = False
@@ -135,6 +135,35 @@ def inspect(path=DATA):
                         counters["plan_limits_" + claim["period"]] += 1
                         if claim.get("scope"):
                             counters["scoped_plan_limits"] += 1
+                elif claim.get("type") == "price_quote":
+                    currency = claim.get("currency")
+                    amount = claim.get("amount")
+                    charge = claim.get("chargeAmount")
+                    cycle = claim.get("billingCycle")
+                    unit = claim.get("unit")
+                    market = claim.get("market")
+                    tax = claim.get("taxStatus")
+                    valid = (
+                        currency in ("USD", "EUR", "GBP")
+                        and isinstance(amount, (int, float)) and not isinstance(amount, bool) and amount >= 0
+                        and isinstance(charge, (int, float)) and not isinstance(charge, bool) and charge >= 0
+                        and bool(claim.get("plan")) and cycle in ("monthly", "annual")
+                        and market in ("unspecified", "US", "PT", "GB", "DE", "FR", "ES")
+                        and tax in ("unknown", "included", "excluded")
+                        and unit in ("subscription", "channel")
+                        and claim.get("unitQuantity") == 1
+                        and claim.get("promotion") is False
+                        and abs((charge / 12 if cycle == "annual" else charge) - amount) < 0.011
+                    )
+                    if not valid:
+                        counters["invalid_decision_claims"] += 1
+                        issues.append(f"{slug}: price quote lacks a comparable invoice, country, currency, tax, commitment or unit")
+                    else:
+                        counters["verified_price_quotes"] += 1
+                        counters["price_quotes_" + currency] += 1
+                        counters["price_quotes_" + cycle] += 1
+                        if unit == "channel":
+                            counters["price_quotes_per_channel"] += 1
                 elif claim.get("type") == "price_eur_month":
                     if (not isinstance(claim.get("amount"), (int, float)) or claim.get("amount") < 0
                             or not claim.get("plan") or claim.get("billingCycle") != "monthly"):
