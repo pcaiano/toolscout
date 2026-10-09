@@ -44,8 +44,8 @@ test('Finder motion exposes three visible decision stages',()=>{
 });
 
 test('Search Engine shows an explained editorial fit indicator, not a fabricated probability',()=>{
-  assert.match(app,/Fit score<\\/span><strong>\\$\\{t.score\\}\\/100/);
-  assert.doesNotMatch(app,/Match<\\/span><strong>\\$\\{t.score\\}%/);
+  assert.ok(app.includes('Fit score</span><strong>${t.score}/100'));
+  assert.ok(!app.includes('Match</span><strong>${t.score}%'));
   assert.match(app,/Scores are editorial fit indicators, not probabilities/);
-  assert.match(app,/if\\(!signal.recognized\\)/);
+  assert.ok(app.includes('if(!signal.recognized)'));
 });
