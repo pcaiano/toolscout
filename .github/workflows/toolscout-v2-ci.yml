@@ -207,6 +207,7 @@ jobs:
           node --check growth-runtime-closed-loop-worker.js
           node --check authority-health-runtime.js
           node --check agent-protocol-core-worker.js
+          node --check scripts/probe-live-mcp-decision.mjs
           node --check agent-protocol-worker.js
           node --check machine-discovery-catalog-runtime.js
           node --check analytics-chairman-runtime.js
