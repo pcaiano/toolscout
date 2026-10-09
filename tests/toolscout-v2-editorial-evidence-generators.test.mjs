@@ -28,6 +28,26 @@ test('comparisons keep vendor source URLs internal while preserving monetized CT
   assert.match(src,/href="\/go\/\${encodeURIComponent\(t\.slug\)\}/);
 });
 
+test('current manufacturer sources replace stale product concepts and redirecting legacy URLs',()=>{
+ const catalog=JSON.parse(read('data/tools.json'));
+ const config=JSON.parse(read('data/organic-growth-engine.json')).editorialQuality;
+ const tests=[
+  ['perplexity','https://www.perplexity.ai/hub/products/projects','Spaces as collaborative topic hubs'],
+  ['cursor','https://cursor.com/docs/rules','https://docs.cursor.com/context/rules-for-ai']
+ ];
+ for(const [slug,expected,obsolete] of tests){
+  const tool=catalog.find(t=>t.slug===slug);
+  assert.equal(tool.editorialReview.sourceUrl,expected);
+  assert.ok(tool.editorialReview.sourceUrls.length>=2,'Multiple source documents expected for '+slug);
+  assert.ok(tool.evidence.some(x=>x.sourceUrl===expected&&x.verifiedAt==='2026-10-09'));
+  assert.equal(config.profileDecisionEvidence[slug].sourceUrl,expected);
+  const html=read('tools/'+slug+'.html');
+  assert.ok(html.includes(config.profileOverrides[slug].slice(0,36).replaceAll("'",'&#39;')));
+  assert.ok(!html.includes(obsolete),'Stale or redirected evidence in public output '+slug);
+  assert.ok(html.includes('href="/go/'+slug+'"'));
+ }
+});
+
 test('decision editorial catalog has 127 individual assessments with transparent provenance',()=>{
   const cfg=JSON.parse(read('data/organic-growth-engine.json')).editorialQuality;
   const catalog=JSON.parse(read('data/tools.json'));
