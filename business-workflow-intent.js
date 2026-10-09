@@ -92,8 +92,15 @@ export function businessWorkflowGuidance(query,profile={},tools=[]){
   const workflows=sector.roles.map(key=>{
     const [title,job,scope]=JOBS[key];
     const category=key==='tasks'?'business':key;
-    const covered=eligible.filter(t=>t.category===category).length;
-    return{title,job,scope,category,catalog_coverage:covered,availability:covered?'category_available':'catalog_gap',
+    const candidates=eligible.filter(t=>t.category===category);
+    const covered=candidates.length;
+    // Evidence depth is a discovery-order signal, not an inferred win for the
+    // buyer's industry. These are first-party profile examples, not /go/ CTAs.
+    const examples=[...candidates].sort((a,b)=>{
+      const depth=t=>(t.decisionClaims||[]).filter(c=>c.status==='verified'&&c.sourceUrl&&c.verifiedAt).length;
+      return depth(b)-depth(a)||String(a.name).localeCompare(String(b.name));
+    }).slice(0,2).map(t=>({name:t.name,slug:t.slug,profile_url:'https://trytoolscout.org/tools/'+encodeURIComponent(t.slug),status:'category_example_not_industry_qualified'}));
+    return{title,job,scope,category,catalog_coverage:covered,category_examples:examples,availability:covered?'category_available':'catalog_gap',
       finder_url:'https://trytoolscout.org/?q='+encodeURIComponent(job)+'&source=ai-agent#finder',
       evidence_scope:'Category coverage, not documented suitability for this specific industry.'};
   });
