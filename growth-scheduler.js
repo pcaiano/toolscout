@@ -1,7 +1,7 @@
 import {runDistributionNetworkCycle} from './distribution-network-worker.js';
 import {runWithLedger,reapStaleEngineRuns,missionCycleContext} from './engine-run-ledger.js';
 import {runAuditedAffiliateCoverageCycle} from './affiliate-coverage-entry-worker.js';
-import {verifyBatch as verifyCatalogBatch,admitTrustedCandidates,verifyNewsSources} from './catalog-autonomy-worker.js';
+import {verifyBatch as verifyCatalogBatch,admitTrustedCandidates,verifyNewsSources,seedBaselineCatalog} from './catalog-autonomy-worker.js';
 import {runContentSocialIntelligenceCycle} from './content-engine-intelligence-worker.js';
 import {rebalanceDistributionPriorities} from './distribution-priority-worker.js';
 import {growthSupervisorDirective,runGrowthSupervisorAudit} from './growth-supervisor.js';
@@ -72,6 +72,10 @@ export async function runGrowthScheduler(event,env,ctx,{delegate=null}={}){
   }
 
   if(hourly){
+    // A non-destructive, bounded backfill into the existing Catalog Autonomy
+    // D1 table. Reuses Growth Brain's mission ledger; no shadow queue.
+    scheduleTask(ctx,runWithLedger(env,{engine:'catalog',mission:'baseline_catalog_migration',triggerName:trigger,singleFlightMinutes:20},
+      ()=>seedBaselineCatalog(env)));
     const prioritiesRecovery=await missionNeedsRecovery(env,'distribution','operating_priorities',150);
     const contentRecovery=await missionNeedsRecovery(env,'content','social_intelligence',7*60);
     if(twoHourly){
