@@ -678,7 +678,9 @@ function jobIntentProfile(tools,job){
     {category:'ai-assistant',pattern:/\b(ai assistant|general ai assistant|chatbot)\b/}
   ];
   const familyMatches=families.filter(x=>x.pattern.test(normalized)).map(x=>x.category);
-  return {normalized,explicitCategories:familyMatches.includes('vacation rental')?['vacation rental']:(explicitCategories.length?explicitCategories:familyMatches),intentTerms};
+  const dedicatedJob=explicitCategories.some(cat=>cat!=='business'&&cat!=='vacation rental')||familyMatches.some(cat=>cat!=='vacation rental');
+  const primaryIndustry=familyMatches.includes('vacation rental')&&!dedicatedJob;
+  return {normalized,explicitCategories:primaryIndustry?['vacation rental']:(explicitCategories.length?explicitCategories:familyMatches),intentTerms};
 }
 function matchesJobIntent(tool,profile){
   const category=catalogNormalize(tool?.category),hay=' '+toolHay(tool)+' ';
