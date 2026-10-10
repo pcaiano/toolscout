@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-09T08:06:23.955Z",
+  "generatedAt": "2026-10-10T16:53:07.028Z",
   "target": "trytoolscout.org",
   "policy": {
     "mode": "machine_observed_only",
@@ -10,7 +10,7 @@
     "ahrefs": {
       "provider": "Ahrefs",
       "status": "unavailable",
-      "lastAttemptAt": "2026-10-09T08:06:23.955Z",
+      "lastAttemptAt": "2026-10-10T16:53:07.028Z",
       "reason": "insufficient_plan",
       "measurement": "connected Ahrefs API",
       "metrics": {
@@ -30,7 +30,7 @@
     "seRanking": {
       "provider": "SE Ranking",
       "status": "available",
-      "observedAt": "2026-10-09T08:06:23.955Z",
+      "observedAt": "2026-10-10T16:53:07.028Z",
       "measurement": "SE Ranking Data API",
       "metrics": {
         "backlinks": 97,
@@ -50,7 +50,7 @@
     "primaryAvailableSource": "SE Ranking Data API",
     "ahrefsStatus": "unavailable",
     "ahrefsReason": "insufficient_plan",
-    "seRankingObservedAt": "2026-10-09T08:06:23.955Z",
+    "seRankingObservedAt": "2026-10-10T16:53:07.028Z",
     "note": "No Ahrefs numeric value is retained while the connected API cannot measure the domain. Provider metrics remain separate."
   }
 }
