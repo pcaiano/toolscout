@@ -824,7 +824,7 @@ export function candidatePage(tool,{monetized=false}={}){
   // homepage; non-affiliate clicks must never count as monetized.
   const visitable=Boolean(publicHttps(tool?.sourceUrl))&&trustedManufacturerEvidence(tool,{decisionGrade:true});
   const outbound=visitable
-    ?'<a class="cta" data-commercial-status="'+(monetized?'affiliate':'non-affiliate')+'" href="/go/'+encodeURIComponent(tool.slug)+'" target="_blank" rel="nofollow noopener'+(monetized?' sponsored':'')+'">Visit '+esc(tool.name)+'</a>'
+    ?'<a class="cta" data-commercial-status="'+(monetized?'affiliate':'non-affiliate')+'" href="/go/'+encodeURIComponent(tool.slug)+'" target="_blank" rel="nofollow'+(monetized?' sponsored':'')+' noopener">Visit '+esc(tool.name)+'</a>'
     :'';
   const review=runtimeEditorialView(tool);
   const buyerCheck=String(tool?.editorialReview?.buyerCheck||'').trim();
