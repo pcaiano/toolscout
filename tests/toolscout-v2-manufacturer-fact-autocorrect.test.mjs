@@ -21,6 +21,8 @@ test('two independent first-party observations update exact plan allowances with
  assert.equal(second.status,'corrected');
  assert.equal(second.updatedTool.decisionClaims.find(x=>x.value===capacity.value).quantity,2500);
  assert.equal(second.updatedTool.decisionClaims.find(x=>x.value===capacity.value).verifiedAt,'2026-10-10');
+ assert.ok(second.updatedTool.editorialReview.summary.includes('2,500 contacts'),'buyer-facing editorial fact must update with confirmed capacity');
+ assert.ok(second.updatedTool.pricingDetails.freePlanSummary.includes('2,500 contacts'),'public plan summary must not contradict corrected D1 limit');
  assert.equal(sample.decisionClaims.find(x=>x.value===capacity.value).quantity,2000,'original must remain a recoverable snapshot');
  assert.equal(second.updatedTool.lastVerified,sample.lastVerified,'single numeric confirmation must not falsely refresh entire product');
  assert.equal(reconcileManufacturerFacts(sample,changes,{token:'other'}).status,'needs_second_observation');
