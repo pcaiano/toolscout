@@ -70,7 +70,7 @@ test('Codex P2: specialist proof must describe the specialist job, not any unrel
 });
 
 test('Codex P2: veterinarian, vet practice and animal hospital route to healthcare specialist guidance',()=>{
- for(const job of ['best software for my veterinarian','best software for my vet practice','best software for my animal hospital']){
+ for(const job of ['best software for my veterinarian','best software for my veterinarians','best software for my vet practice','best software for vet practices','best software for my vet clinics','best software for my animal hospital','best software for animal hospitals']){
   const g=businessWorkflowGuidance(job,{},catalog);
   assert.equal(g.industry,'healthcare',job);
   assert.deepEqual(g.specialist_workflows.map(w=>w.category),['veterinary'],job);
