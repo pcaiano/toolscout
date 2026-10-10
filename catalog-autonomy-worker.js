@@ -548,8 +548,18 @@ export async function verifyBatch(env){
     await logEvent(env,null,'catalog_research_supply_failed','failed','Bounded discovery intake failed without blocking ongoing official document verification.',{error:reason});
     return{ok:false,reason,staged:0};
   });
+  // Opportunistic manufacturer research reuses the existing hourly quality
+  // cycle after published-tool checks; no competing scheduler, no fake facts.
+  const manufacturerDossiers=Date.now()+8000>=deadlineAt
+    ?{ok:true,checked:0,documented:0,deferred:true,reason:'quality_cycle_budget_reserved'}
+    :await researchCatalogManufacturerDossiers(env,{deadlineAt}).catch(async error=>{
+      await logEvent(env,null,'catalog_manufacturer_research_failed','failed',
+        'Private first-party research failed; no candidate was published.',
+        {error:safeText(error?.message||error,180)});
+      return{ok:false,checked:0,documented:0,reason:'manufacturer_research_failed'};
+    });
   if(Date.now()>=deadlineAt)cycleBudgetExhausted=true;
-  return{ok:true,checked,healthy,changed,suppressed,warnings,documentation_checked:documentationChecked,documentation_baselined:documentationBaselined,documentation_changed:documentationChanged,documentation_warnings:documentationWarnings,verified_facts_corrected:factsCorrected,verified_fact_proposals:factsProposed,batch_limit:MAX_VERIFY_PER_CYCLE,warning_retry_hours:WARNING_RETRY_HOURS,max_warning_retries_per_cycle:MAX_WARNING_RETRIES_PER_CYCLE,evidence:'official_homepage_and_first_party_documentation',write_policy:'due_check_only',research_supply:researchSupply,cycle_budget_exhausted:cycleBudgetExhausted,cycle_wall_budget_ms:MAX_VERIFY_CYCLE_WALL_MS,cycle_elapsed_ms:Date.now()-startedAt};
+  return{ok:true,checked,healthy,changed,suppressed,warnings,manufacturer_dossiers:manufacturerDossiers,documentation_checked:documentationChecked,documentation_baselined:documentationBaselined,documentation_changed:documentationChanged,documentation_warnings:documentationWarnings,verified_facts_corrected:factsCorrected,verified_fact_proposals:factsProposed,batch_limit:MAX_VERIFY_PER_CYCLE,warning_retry_hours:WARNING_RETRY_HOURS,max_warning_retries_per_cycle:MAX_WARNING_RETRIES_PER_CYCLE,evidence:'official_homepage_and_first_party_documentation',write_policy:'due_check_only',research_supply:researchSupply,cycle_budget_exhausted:cycleBudgetExhausted,cycle_wall_budget_ms:MAX_VERIFY_CYCLE_WALL_MS,cycle_elapsed_ms:Date.now()-startedAt};
 }
 function validCandidate(candidate,config){
   const allowed=new Set(config?.admission?.allowedCatalogCategories||[]);
