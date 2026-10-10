@@ -274,7 +274,7 @@ test('decision benchmark: unverified free-plan flags are never considered verifi
 
 test('decision benchmark: only sourced verified Gmail pairs meet Gmail must-haves',async()=>{
   const catalog=[
-    {slug:'crm-verified',name:'CRM Verified',category:'crm',description:'CRM',features:['crm'],bestFor:['teams'],integrations:[{product:'Gmail',status:'verified',sourceUrl:'https://docs.example.com/gmail',verifiedAt:'2026-10-08'}],scores:{integrations:7,ease:8}},
+    {slug:'crm-verified',name:'CRM Verified',category:'crm',description:'CRM',sourceUrl:'https://example.com/',features:['crm'],bestFor:['teams'],integrations:[{product:'Gmail',status:'verified',sourceUrl:'https://docs.example.com/gmail',verifiedAt:'2026-10-08'}],scores:{integrations:7,ease:8}},
     {slug:'crm-unsourced',name:'CRM Unsourced',category:'crm',description:'CRM',features:['crm','integrations'],bestFor:['teams'],integrations:[{product:'Gmail',status:'verified',verifiedAt:'2026-10-08'}],scores:{integrations:10,ease:10}}
   ];
   const out=await benchmarkDecision(catalog,{must_have:['Gmail'],existing_tools:['Gmail'],priorities:['integrations']});
