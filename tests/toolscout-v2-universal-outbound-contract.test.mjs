@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {catalogFallbackRedirect} from '../affiliate-workflow-worker.js';
+import {enforceExternalProductDestination} from '../affiliate-redirect-runtime.js';
 import {candidatePage} from '../catalog-autonomy-worker.js';
 import {transformPublicOutboundPolicyResponse} from '../public-redesign-runtime.js';
 
@@ -95,4 +96,27 @@ test('official documentation root belongs to the manufacturer, but external revi
  assert.match(candidatePage(n8n),/AI compatibility:<\/strong> Manufacturer-confirmed, verified 2026-10-05/);
  const external={...n8n,aiIntegration:{...n8n.aiIntegration,sources:['https://reviewer.example.com/']}};
  assert.doesNotMatch(candidatePage(external),/Manufacturer-confirmed/);
+});
+
+test('DECLARED production /go owner repairs every static and published D1 redirect that points back to Tools',async()=>{
+ const tools=[...staticTools,...dynamic];
+ assert.equal(tools.length,134);
+ for(const tool of tools){
+  const {env,batches}=fixture({tools:staticTools,candidate:staticTools.some(t=>t.slug===tool.slug)?null:tool});
+  const req=healthyProbe(tool.slug),url=new URL(req.url);
+  const legacy=Response.redirect('https://trytoolscout.org/tools.html',302);
+  const corrected=await enforceExternalProductDestination(req,env,url,legacy);
+  assertExternal(corrected,tool.slug);
+  assert.equal(batches.length,0);
+ }
+ const unknown=healthyProbe('unlisted-nonexistent-program');
+ const fail=await enforceExternalProductDestination(unknown,fixture().env,new URL(unknown.url),
+   Response.redirect('https://trytoolscout.org/tools',302));
+ assert.equal(fail.status,404,'unknown product must not route to internal Tools');
+ const affiliateReq=healthyProbe('systeme-io');
+ const approved=Response.redirect('https://partner.example.com/legitimate?ref=123',302);
+ const passthrough=await enforceExternalProductDestination(affiliateReq,fixture().env,new URL(affiliateReq.url),approved);
+ assert.equal(passthrough,approved,'valid external affiliate redirect must remain untouched');
+ const embed=healthyProbe('embed'),embedResponse=new Response('widget',{status:200});
+ assert.equal(await enforceExternalProductDestination(embed,fixture().env,new URL(embed.url),embedResponse),embedResponse);
 });
