@@ -53,9 +53,9 @@ Example:
 
 `https://trytoolscout.org/api/recommend?q=crm%20for%20a%20small%20sales%20team&budget=low&team=small&limit=3`
 
-Specific-job results include the inferred fit profile, detected intent, ranked recommendations, editorial fit scores, fit reasons and ToolScout outbound URLs; whole-business results instead include workflow guidance, sector context and first-party Finder links, with no forced top vendor. The ranking is deterministic and affiliate relationships do not influence ranking.
+Specific-job results include the inferred fit profile, detected intent, ranked recommendations, editorial fit scores, fit reasons and a nullable `tool_url` for approved product visits; whole-business results instead include workflow guidance, sector context and first-party Finder links, with no forced top vendor. The ranking is deterministic and affiliate relationships do not influence ranking.
 
-Agents should use the returned ToolScout `tool_url` rather than constructing vendor or affiliate links themselves. If a vendor capability, price or availability is material to the final answer, verify that time-sensitive fact against the latest ToolScout/vendor source.
+Agents should use `tool_url` only when it is a non-null ToolScout `/go/{slug}` link backed by an enabled approved affiliate route. For unmonetized products `tool_url` is `null`; use the always-available `profile_url` for ToolScout's independent analysis. Never construct a vendor or affiliate link from a slug. If a vendor capability, price or availability is material to the final answer, verify that time-sensitive fact against the latest ToolScout/vendor source.
 
 ## MCP
 
@@ -85,7 +85,7 @@ The MCP is intentionally a **decision engine for businesses of any sector**, not
 
 Each evaluated decision now includes a `buyer_validation_plan` drawn from ToolScout's product-specific editorial buyer check, unverified named integrations and unresolved buying constraints. Treat this as a pre-purchase checklist, not as a claim of hands-on testing. Manufacturer evidence URLs remain internal and are not exposed through decision responses.
 
-ToolScout decision output is deterministic and evidence-aware. A mandatory `must_have`, an explicitly required constraint (for example, `must support Linux`), an explicitly excluded capability in `avoid`, or a free-only budget is an eligibility gate, not a weighted preference. If no product satisfies those requirements based on catalog evidence, ToolScout returns no qualified recommendation. Comparisons may display ineligible candidates for transparency but must not declare them winners. Alternatives respect the same free-plan and must-have gates. Missing pair-specific integration evidence and unverified requirements remain explicit rather than inferred. Returned vendor navigation uses ToolScout `/go/` URLs with AI-agent attribution. Affiliate participation never changes ranking, shortlist order, comparison conclusions or factual output.
+ToolScout decision output is deterministic and evidence-aware. A mandatory `must_have`, an explicitly required constraint (for example, `must support Linux`), an explicitly excluded capability in `avoid`, or a free-only budget is an eligibility gate, not a weighted preference. If no product satisfies those requirements based on catalog evidence, ToolScout returns no qualified recommendation. Comparisons may display ineligible candidates for transparency but must not declare them winners. Alternatives respect the same free-plan and must-have gates. Missing pair-specific integration evidence and unverified requirements remain explicit rather than inferred. Approved vendor navigation uses ToolScout `/go/` URLs with AI-agent attribution; unapproved routes are `null` and only canonical ToolScout profile links are provided. Affiliate participation never changes ranking, shortlist order, comparison conclusions or factual output.
 
 ## A2A
 
