@@ -444,10 +444,13 @@ function manufacturerClaim(tool,kind,value){
     const checked=new Date(date+'T00:00:00Z');
     if(!Number.isFinite(checked.valueOf())||checked.toISOString().slice(0,10)!==date||checked.valueOf()>Date.now()||Date.now()-checked.valueOf()>180*86400000)continue;
     try{
-      const host=new URL(source).hostname.replace(/^www\./,'');
-      const vendor=tool?.sourceUrl?new URL(tool.sourceUrl).hostname.replace(/^www\./,''):null;
+      const documented=new URL(source),origin=new URL(String(tool?.sourceUrl||''));
+      if(documented.protocol!=='https:'||origin.protocol!=='https:'||documented.username||documented.password)continue;
+      const host=documented.hostname.toLowerCase().replace(/^www\./,'');
+      const vendor=origin.hostname.toLowerCase().replace(/^www\./,'');
+      if(!vendor)continue;
       const registered=Array.isArray(tool?.editorialReview?.sourceUrls)&&tool.editorialReview.sourceUrls.includes(source);
-      if(vendor&&host!==vendor&&!host.endsWith('.'+vendor)&&!registered)continue;
+      if(host!==vendor&&!host.endsWith('.'+vendor)&&!registered)continue;
     }catch{continue}
     return claim;
   }
@@ -487,11 +490,11 @@ function requirementMatch(tool,requirement,{exclude=false,budget=null}={}){
   // Be conservative about explicit exclusions even if a catalog-level claim has
   // not yet been validated feature by feature.
   if(exclude)return {matched:true,strength:0,status:'catalog_declared',evidence:'Catalog describes this unwanted property; exclude until checked.'};
-  if(tool?.editorialReview?.verificationStatus==='vendor_documented')
-    return {matched:false,strength:0,status:'not_verified',catalog_signal:true,evidence:'Catalog-listed feature lacks a dated manufacturer claim for this exact requirement.'};
-  // Legacy unsourced fixtures remain inspectable, but publishable catalog records
-  // must first pass the manufacturer-documentation admission contract.
-  return {matched:true,strength:0.5,status:'catalog_declared',evidence:'Legacy catalog-declared capability, not independently claim-verified.'};
+  // Manufacturer evidence is required for *every* mandatory capability,
+  // including legacy catalog entries. A textual match remains a useful lead,
+  // never a satisfied must-have or qualified shortlist eligibility.
+  return {matched:false,strength:0,status:'not_verified',catalog_signal:true,
+    evidence:'Catalog mentions this capability but lacks a dated manufacturer claim for the exact requirement.'};
 }
 function budgetSignal(tool,budget){
   const price=scoreOf(tool,'price');

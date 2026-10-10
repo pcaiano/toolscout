@@ -55,7 +55,11 @@ test('contextual comparisons cannot crown a candidate failing mandatory criteria
     use_case:'CRM for a small business',must_have:['SOC2 certified']
   },[
     crm('high-score-unqualified',['crm','SOC2 dashboard','certified templates'],10),
-    crm('documented-choice',['crm','SOC2 certified'],4)
+    crm('documented-choice',['crm','SOC2 certified'],4,{
+      sourceUrl:'https://documented-choice.example/',
+      decisionClaims:[{type:'capability',value:'SOC2 certified',status:'verified',
+        verifiedAt:'2026-10-08',sourceUrl:'https://docs.documented-choice.example/security',plan:'Pro'}]
+    })
   ]);
   assert.equal(out.isError,false);
   assert.equal(out.structuredContent.verdict.type,'best_fit');
