@@ -26,7 +26,9 @@ test('research supply contains new, real first-party manufacturer leads, not pub
 test('fully documented future admissions retain review object and preflight before manufacturer HTTP calls',()=>{
  const s=fs.readFileSync(new URL('../catalog-autonomy-worker.js',import.meta.url),'utf8');
  const preflight=s.indexOf("if(!trustedManufacturerEvidence(raw,{decisionGrade:true}))");
- const firstFetch=s.indexOf("const source=await fetchOfficial(raw.sourceUrl)",preflight);
+ const firstFetch=s.indexOf("const source=await fetchTrustedCandidateOfficialSource(raw)",preflight);
+ assert.match(s,/fetchTrustedCandidateOfficialSource\(candidate\)/);
+ assert.match(s,/trustedCandidateOfficialFallbackUrls\(candidate\)/);
  assert.ok(preflight>0&&firstFetch>preflight,'manufacturer evidence preflight must precede external fetch');
  assert.match(s,/profile\.editorialReview=\{\.\.\.raw\.editorialReview\}/);
  assert.doesNotMatch(s,/profile\.editorialReview=raw\.editorialReview\.summary/);
