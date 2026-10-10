@@ -700,9 +700,18 @@ function jobIntentProfile(tools,job){
     {category:'ai-assistant',pattern:/\b(ai assistant|general ai assistant|chatbot)\b/}
   ];
   const familyMatches=families.filter(x=>x.pattern.test(normalized)).map(x=>x.category);
-  const dedicatedJob=explicitCategories.some(cat=>cat!=='business'&&cat!=='vacation rental')||familyMatches.some(cat=>cat!=='vacation rental');
-  const primaryIndustry=familyMatches.includes('vacation rental')&&!dedicatedJob;
-  return {normalized,explicitCategories:primaryIndustry?['vacation rental']:(explicitCategories.length?explicitCategories:familyMatches),intentTerms};
+  // A specialist's industry context is more specific than incidental
+  // "business software" or other generic catalog labels. But an explicitly
+  // requested DIFFERENT job (for example, CRM for a veterinary clinic)
+  // must stay in its own job category.
+  const specialistFamilies=['vacation rental','restaurant pos','veterinary'];
+  const specialist=familyMatches.find(cat=>specialistFamilies.includes(cat));
+  const otherJob=familyMatches.filter(cat=>!specialistFamilies.includes(cat));
+  const explicitJobCategory=explicitCategories.filter(cat=>cat!=='business'&&!specialistFamilies.includes(cat));
+  const qualifiedCategories=otherJob.length
+    ? (explicitJobCategory.length?explicitJobCategory:otherJob)
+    : specialist?[specialist]:(explicitCategories.length?explicitCategories:familyMatches);
+  return {normalized,explicitCategories:qualifiedCategories,intentTerms};
 }
 function matchesJobIntent(tool,profile){
   const category=catalogNormalize(tool?.category),hay=' '+toolHay(tool)+' ';
