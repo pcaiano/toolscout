@@ -70,7 +70,7 @@ test('MCP get_tool returns ToolScout URLs without exposing raw affiliate program
   assert.equal(response.status,200);
   const payload=await response.json();
   assert.equal(payload.result.structuredContent.tool.slug,'hubspot');
-  assert.match(payload.result.structuredContent.tool.tool_url,/\/go\/hubspot\?source=ai-agent$/);
+  assert.equal(payload.result.structuredContent.tool.tool_url,null,'HubSpot is not an approved affiliate route');
   assert.equal('affiliateUrl' in payload.result.structuredContent.tool,false);
   assert.equal('commission' in payload.result.structuredContent.tool,false);
 });
@@ -358,7 +358,7 @@ test('decision engine MCP returns the same sourced editorial conclusion as the c
   assert.equal(content.editorial_review.hands_on_tested,false);
   assert.equal(content.editorial_review.evidence_basis,'manufacturer_documentation_verified_internally');
   assert.match(content.profile_url,/^https:\/\/trytoolscout\.org\/tools\/zapier$/);
-  assert.match(content.tool_url,/^https:\/\/trytoolscout\.org\/go\/zapier/);
+  assert.equal(content.tool_url,null,'Zapier has no approved affiliate URL');
   assert.equal('commission' in content,false);
 });
 
