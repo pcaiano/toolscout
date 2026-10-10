@@ -695,7 +695,11 @@ export async function hasNewDecisionGradeCatalogSupply(env){
       assetJson(env,'/'+String(file).replace(new RegExp('^/'),''),[])))
   ]);
   const known=[...(Array.isArray(staticTools)?staticTools:[]),...runtimeTools].map(t=>t?.slug);
-  return unpublishedReadyCatalogSlugs(candidates,known).length>0;
+  if(unpublishedReadyCatalogSlugs(candidates,known).length>0)return true;
+  // A newly staged D1 candidate is already preflighted for manufacturer
+  // evidence, and should wake existing incident-recovery ownership.
+  const staged=await env.DB.prepare("SELECT tool_slug FROM catalog_runtime_candidates WHERE status='research_ready' LIMIT 1").first();
+  return Boolean(staged?.tool_slug);
 }
 export async function admitTrustedCandidates(env){
   // The bounded supplier must include D1/schema, registry, seed and candidate-file
