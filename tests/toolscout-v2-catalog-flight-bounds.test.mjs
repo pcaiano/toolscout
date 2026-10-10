@@ -10,7 +10,7 @@ const ledger=read('engine-run-ledger.js');
 test('every scheduled catalog admission and verification has an expiring mission lease',()=>{
  for(const mission of ['runtime_coverage','runtime_quality']){
   const scheduled=scheduler.split('\n').filter(line=>line.includes("mission:'"+mission+"'")&&line.includes('runWithLedger('));
-  assert.equal(scheduled.length,2,mission+' needs normal and recovery entrypoints');
+  assert.equal(scheduled.length,mission==='runtime_coverage'?3:2,mission+' needs normal, hourly recovery and (for coverage) incident recovery entrypoints');
   for(const line of scheduled)assert.match(line,/singleFlightMinutes:8/,mission+' must not leave unbounded running rows');
   const manual=catalog.split('\n').filter(line=>line.includes("mission:'"+mission+"'")&&line.includes("triggerName:'manual_api'"));
   assert.equal(manual.length,2,mission+' needs a lease for both authorized APIs');
@@ -95,4 +95,11 @@ test('Catalog coverage recovery is independent from potentially slow quality ver
  assert.match(hourly,/singleFlightMinutes:8/);
  assert.doesNotMatch(hourly,/if\(recoverQuality\|\|recoverWarnings\)\{try\{await runWithLedger/,'quality must not be awaited before coverage');
  assert.doesNotMatch(hourly,/scheduleTask\(ctx,\(async\(\)=>\{/,'recovery tasks must not share a sequential async wrapper');
+});
+
+test('Failed catalog coverage recovers on existing 15-minute Growth Brain tick',()=>{
+ assert.match(scheduler,/if\(trigger===TOOLSCOUT_CRONS\.primaryGrowth\)\{\s*const failedCoverage=await missionNeedsRecovery\(env,'catalog','runtime_coverage'\)/);
+ assert.match(scheduler,/if\(failedCoverage\)\{\s*scheduleTask\(ctx,runWithLedger\(env,\{engine:'catalog',mission:'runtime_coverage',triggerName:trigger\+':incident_recovery',singleFlightMinutes:8\}/);
+ assert.match(scheduler,/\(\)=>admitTrustedCandidates\(env\)/);
+ assert.doesNotMatch(scheduler,/primaryGrowth\s*=\s*['"]/,'reuse declared cron, never redefine schedule');
 });

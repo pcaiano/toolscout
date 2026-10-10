@@ -76,6 +76,16 @@ export async function runGrowthScheduler(event,env,ctx,{delegate=null}={}){
     scheduleTask(ctx,runWithLedger(env,{engine:'growth',mission:'self_audit',triggerName:trigger,singleFlightMinutes:20},()=>runGrowthSupervisorAudit(env)));
   }
 
+  // Reuse the existing 15-minute Growth Brain control tick only to recover a
+  // failed catalog coverage mission. Normal supplier admission remains hourly;
+  // no extra cron or permanently competing admission executor is introduced.
+  if(trigger===TOOLSCOUT_CRONS.primaryGrowth){
+    const failedCoverage=await missionNeedsRecovery(env,'catalog','runtime_coverage');
+    if(failedCoverage){
+      scheduleTask(ctx,runWithLedger(env,{engine:'catalog',mission:'runtime_coverage',triggerName:trigger+':incident_recovery',singleFlightMinutes:8},()=>admitTrustedCandidates(env)));
+    }
+  }
+
   if(hourly){
     // A non-destructive, bounded backfill into the existing Catalog Autonomy
     // D1 table. Reuses Growth Brain's mission ledger; no shadow queue.
