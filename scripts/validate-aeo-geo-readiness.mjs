@@ -66,7 +66,11 @@ for(const required of ['llms.txt','robots.txt','sitemap.xml']){
 if(exists('robots.txt'))check(/Sitemap:\s*https:\/\/trytoolscout\.org\/sitemap\.xml/i.test(read('robots.txt')),'robots.txt: missing canonical sitemap declaration');
 if(exists('llms.txt')){
   const llms=read('llms.txt');
-  for(const term of ['recommendation engine','guides.html','tools.html','compare.html','sitemap.xml'])check(llms.includes(term),`llms.txt: missing ${term}`);
+  // The public identity evolved from recommendation engine to decision engine.
+  // Accept either established term, but never weaken canonical discovery checks.
+  check(/\b(?:decision|recommendation) engine\b/i.test(llms),'llms.txt: missing decision/recommendation engine identity');
+  for(const term of ['guides.html','tools.html','compare.html','sitemap.xml'])check(llms.includes(term),`llms.txt: missing ${term}`);
+  check(/decide_software|compare_for_use_case|find_alternatives/.test(llms),'llms.txt: missing usable decision operation');
 }
 
 const checked=counts.guides+counts.profiles+counts.comparisons+counts.news;

@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { indexRecoveryPriority } from './gsc-index-priority.mjs';
 import crypto from 'node:crypto';
 import path from 'node:path';
 
@@ -339,7 +340,7 @@ for(const item of indexRecoveryCandidates){
   const canonicalUrl=canonicalPublicUrl(item.url),page=pageByUrl.get(canonicalUrl);
   const coverage=String(item.coverageState||'');
   const action=coverage==='URL is unknown to Google'?'improve_discovery_and_internal_links':coverage==='Discovered - currently not indexed'?'strengthen_internal_links_and_index_worthiness':coverage==='Crawled - currently not indexed'?'review_quality_and_duplication':'repair_indexing';
-  opportunityRows.push({kind:'index_issue',queue:'index_recovery',url:canonicalUrl||item.url,page:new URL(canonicalUrl||item.url).pathname,score:page?.impressions?96:78,impressions:Number(page?.impressions||0),clicks:Number(page?.clicks||0),ctr:Number(page?.ctr||0),position:Number(page?.position||0),action,coverageState:item.coverageState,verdict:item.verdict});
+  opportunityRows.push({kind:'index_issue',queue:'index_recovery',url:canonicalUrl||item.url,page:new URL(canonicalUrl||item.url).pathname,score:indexRecoveryPriority(new URL(canonicalUrl||item.url).pathname,{impressions:Number(page?.impressions||0)}),impressions:Number(page?.impressions||0),clicks:Number(page?.clicks||0),ctr:Number(page?.ctr||0),position:Number(page?.position||0),action,coverageState:item.coverageState,verdict:item.verdict});
 }
 for(const item of redirectedInspections){
   const canonicalUrl=canonicalPublicUrl(item.url),page=pageByUrl.get(canonicalUrl);
