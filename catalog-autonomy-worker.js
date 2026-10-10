@@ -5,6 +5,7 @@ import { renderRuntimeRanking } from './catalog-runtime-ranking.js';
 import {auditCatalogTool,mapLimit,hasManufacturerDecisionClaim} from './catalog-quality-runtime.js';
 import {hydrateLegacyCatalogProfile} from './catalog-profile-hydration.js';
 import {verifyManufacturerDocuments,monitoredManufacturerDocuments} from './catalog-manufacturer-document-watch.js';
+import {manufacturerFactProposals,reconcileManufacturerFacts} from './catalog-manufacturer-fact-reconcile.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
 const MAX_VERIFY_PER_CYCLE=4; // every two hours: 48 tools/day, target full catalog scan <= 72 hours
@@ -82,7 +83,7 @@ async function fetchOfficial(url){
     if(!r.ok)return{status:[403,429].includes(r.status)?'blocked_or_limited':'warning',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:null};
     const type=(r.headers.get('content-type')||'').toLowerCase();if(!type.includes('text/html')&&!type.includes('text/plain'))return{status:'warning',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:null};
     const html=(await r.text()).slice(0,500000),title=(html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]||'').replace(/\s+/g,' ').trim(),description=meta(html,'description')||meta(html,'og:description'),text=stripHtml(html).slice(0,14000);
-    return{status:'ok',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:await sha(`${title}\n${description}\n${text}`),title,description,releaseLinks:releaseLinks(html,r.url||u.href)};
+    return{status:'ok',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:await sha(`${title}\n${description}\n${text}`),title,description,documentText:text,releaseLinks:releaseLinks(html,r.url||u.href)};
   }catch(e){lastError=e?.name==='AbortError'?'timeout':'network_error'}
   finally{clearTimeout(timer)}
   if(attempt<2)await new Promise(resolve=>setTimeout(resolve,150));
