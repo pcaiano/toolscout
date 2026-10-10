@@ -1,0 +1,783 @@
+[
+  {
+    "slug": "toast-pos",
+    "name": "Toast POS",
+    "category": "business",
+    "description": "Restaurant point of sale software connecting counter ordering, online orders and kitchen display workflows for busy service teams.",
+    "pricing": "The commercial setup combines software, equipment and payment services; obtain a location-specific quote covering all required devices.",
+    "freePlan": false,
+    "freePlanKnown": false,
+    "features": [
+      "restaurant point of sale",
+      "online ordering",
+      "kitchen display system",
+      "menu management",
+      "order routing"
+    ],
+    "bestFor": [
+      "restaurant teams coordinating counter and kitchen",
+      "operators accepting in-store and direct online orders"
+    ],
+    "sourceUrl": "https://pos.toasttab.com/",
+    "lastVerified": "2026-10-10",
+    "scores": {
+      "price": 4,
+      "ease": 7,
+      "automation": 8,
+      "integrations": 6,
+      "sales": 8,
+      "ai": 3,
+      "marketing": 5,
+      "seo": 2,
+      "research": 5,
+      "content": 3,
+      "agency": 6
+    },
+    "scoreProvenance": {
+      "method": "ToolScout independent editorial judgment, not a manufacturer-verified performance measurement",
+      "reviewedAt": "2026-10-10"
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "No named assistant or agent connection has been substantiated by the reviewed manufacturer documents.",
+      "verifiedAt": null,
+      "sources": []
+    },
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "affiliateUrl": "",
+    "editorialReview": {
+      "angle": "Restaurant order flow from the counter to kitchen",
+      "summary": "Toast POS is worth considering when restaurant service depends on fast, accurate order handoffs. Its POS, online ordering and kitchen display can help staff coordinate in-person and digital orders without separate kitchen tablets. That is more useful than a generic payment terminal for restaurants with modifiers, takeaway and peak periods. The trade-off is setup: hardware, payment processing and staff training are all part of the decision. Test a busy shift with changed orders and check the full commercial terms before choosing a configuration.",
+      "buyerCheck": "Simulate a busy service with online and in-person orders, kitchen routing, item changes, hardware and payment costs.",
+      "reviewedAt": "2026-10-10",
+      "sourceUrl": "https://pos.toasttab.com/products/point-of-sale/",
+      "sourceUrls": [
+        "https://pos.toasttab.com/products/point-of-sale/",
+        "https://pos.toasttab.com/hardware/kitchen-display-system",
+        "https://pos.toasttab.com/products/online-ordering"
+      ],
+      "method": "first_party_documentation_and_independent_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false
+    },
+    "strengths": [
+      "Connected ordering and kitchen ticket workflows.",
+      "Online orders can enter the restaurant POS and kitchen workflow."
+    ],
+    "limitations": [
+      "Hardware deployment adds operational complexity.",
+      "Exact commercial terms and availability depend on location and configuration."
+    ],
+    "tradeoffs": [
+      "Restaurant-specific order operations versus implementation and payment complexity."
+    ],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://pos.toasttab.com/products/point-of-sale/",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://pos.toasttab.com/hardware/kitchen-display-system",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://pos.toasttab.com/products/online-ordering",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      }
+    ],
+    "pricingDetails": {
+      "freePlanStatus": "unknown",
+      "verifiedAt": "2026-10-10",
+      "freePlanSummary": "The examined manufacturer pages do not establish a permanent free-plan entitlement for this purchasing context."
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "restaurant point of sale",
+        "status": "verified",
+        "sourceUrl": "https://pos.toasttab.com/products/point-of-sale/",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "kitchen display system",
+        "status": "verified",
+        "sourceUrl": "https://pos.toasttab.com/hardware/kitchen-display-system",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "online ordering",
+        "status": "verified",
+        "sourceUrl": "https://pos.toasttab.com/products/online-ordering",
+        "verifiedAt": "2026-10-10"
+      }
+    ]
+  },
+  {
+    "slug": "square-for-restaurants",
+    "name": "Square for Restaurants",
+    "category": "business",
+    "description": "Restaurant point of sale with connected payment processing, menus, online orders, kitchen screens and staff workflows.",
+    "pricing": "Plans, per-device kitchen display costs, hardware and payment processing differ by market; price the intended setup, not only the base tier.",
+    "freePlan": false,
+    "freePlanKnown": false,
+    "features": [
+      "restaurant point of sale",
+      "menu management",
+      "kitchen display system",
+      "online ordering",
+      "table management"
+    ],
+    "bestFor": [
+      "restaurant and café operators",
+      "teams coordinating payment and kitchen orders"
+    ],
+    "sourceUrl": "https://squareup.com/",
+    "lastVerified": "2026-10-10",
+    "scores": {
+      "price": 6,
+      "ease": 8,
+      "automation": 7,
+      "integrations": 7,
+      "sales": 7,
+      "ai": 3,
+      "marketing": 6,
+      "seo": 2,
+      "research": 4,
+      "content": 3,
+      "agency": 6
+    },
+    "scoreProvenance": {
+      "method": "ToolScout independent editorial judgment, not a manufacturer-verified performance measurement",
+      "reviewedAt": "2026-10-10"
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "No named assistant or agent connection has been substantiated by the reviewed manufacturer documents.",
+      "verifiedAt": null,
+      "sources": []
+    },
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "affiliateUrl": "",
+    "editorialReview": {
+      "angle": "Menus and payments coordinated with restaurant service",
+      "summary": "Square for Restaurants brings menus, order entry and payments into a restaurant-focused setup. Its menu management and kitchen display options support cafés and quick-service operators, while table handling also matters for seated service. The appeal is reducing the number of separate systems the team has to learn. The compromise is that useful restaurant functionality can depend on particular subscriptions, terminals or kitchen devices. Compare a full setup rather than one headline subscription price, and confirm availability for the country and payment methods your business needs.",
+      "buyerCheck": "Test menu modifiers, staff permissions, order routing and card payments on your planned hardware before reviewing the complete quote.",
+      "reviewedAt": "2026-10-10",
+      "sourceUrl": "https://squareup.com/us/en/point-of-sale/restaurants",
+      "sourceUrls": [
+        "https://squareup.com/us/en/point-of-sale/restaurants",
+        "https://squareup.com/help/us/en/article/6424-create-menus-with-square-for-restaurants",
+        "https://squareup.com/us/en/point-of-sale/restaurants/kitchen-display-system"
+      ],
+      "method": "first_party_documentation_and_independent_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false
+    },
+    "strengths": [
+      "Menus can be managed across restaurant ordering channels.",
+      "Kitchen display and table workflows support real service operations."
+    ],
+    "limitations": [
+      "Hardware and kitchen display charges can be additional.",
+      "Payments and plan entitlements may vary by region."
+    ],
+    "tradeoffs": [
+      "Connected ordering and checkout versus regional eligibility, hardware and plan costs."
+    ],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://squareup.com/us/en/point-of-sale/restaurants",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://squareup.com/help/us/en/article/6424-create-menus-with-square-for-restaurants",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://squareup.com/us/en/point-of-sale/restaurants/kitchen-display-system",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      }
+    ],
+    "pricingDetails": {
+      "freePlanStatus": "unknown",
+      "verifiedAt": "2026-10-10",
+      "freePlanSummary": "The examined manufacturer pages do not establish a permanent free-plan entitlement for this purchasing context."
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "restaurant point of sale",
+        "status": "verified",
+        "sourceUrl": "https://squareup.com/us/en/point-of-sale/restaurants",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "menu management",
+        "status": "verified",
+        "sourceUrl": "https://squareup.com/help/us/en/article/6424-create-menus-with-square-for-restaurants",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "kitchen display system",
+        "status": "verified",
+        "sourceUrl": "https://squareup.com/us/en/point-of-sale/restaurants/kitchen-display-system",
+        "verifiedAt": "2026-10-10"
+      }
+    ]
+  },
+  {
+    "slug": "ezyvet",
+    "name": "ezyVet",
+    "category": "business",
+    "description": "Veterinary practice management software connecting patient records, scheduling, diagnostics, inventory and invoicing.",
+    "pricing": "Obtain a veterinary practice quote covering clinical modules, migration and integrations; no perpetual free subscription is established.",
+    "freePlan": false,
+    "freePlanKnown": false,
+    "features": [
+      "veterinary medical records",
+      "appointment scheduling",
+      "diagnostic workflows",
+      "inventory management",
+      "automated billing"
+    ],
+    "bestFor": [
+      "veterinary practices and hospitals",
+      "clinics needing treatment-to-invoice continuity"
+    ],
+    "sourceUrl": "https://www.ezyvet.com/",
+    "lastVerified": "2026-10-10",
+    "scores": {
+      "price": 4,
+      "ease": 5,
+      "automation": 8,
+      "integrations": 7,
+      "sales": 3,
+      "ai": 3,
+      "marketing": 3,
+      "seo": 1,
+      "research": 7,
+      "content": 3,
+      "agency": 8
+    },
+    "scoreProvenance": {
+      "method": "ToolScout independent editorial judgment, not a manufacturer-verified performance measurement",
+      "reviewedAt": "2026-10-10"
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "No named assistant or agent connection has been substantiated by the reviewed manufacturer documents.",
+      "verifiedAt": null,
+      "sources": []
+    },
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "affiliateUrl": "",
+    "editorialReview": {
+      "angle": "Clinical records and billing working as one patient journey",
+      "summary": "ezyVet suits veterinary practices where scheduling alone cannot support clinical work. It connects patient records, diagnostic workflows, client communications and invoicing so teams can follow a visit from booking through treatment and payment. That level of clinical detail distinguishes it from a general-purpose appointment tool. The trade-off is implementation effort: transferring patient histories, setting up templates and managing access permissions requires care. Before buying, test how your own clinic handles a complete case, including prescriptions or stock use and the final invoice.",
+      "buyerCheck": "Follow a realistic patient visit through appointment, lab results, clinical notes, inventory and billing; confirm migration scope and integrations.",
+      "reviewedAt": "2026-10-10",
+      "sourceUrl": "https://www.ezyvet.com/features",
+      "sourceUrls": [
+        "https://www.ezyvet.com/features",
+        "https://www.ezyvet.com/veterinary-practice-management-software",
+        "https://www.ezyvet.com/overview"
+      ],
+      "method": "first_party_documentation_and_independent_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false
+    },
+    "strengths": [
+      "Clinical notes and diagnostics link to patient records.",
+      "Appointments and automatic billing support both reception and clinical teams."
+    ],
+    "limitations": [
+      "Migrating medical records and workflows can be demanding.",
+      "Exact diagnostic integrations and module costs require practice-specific verification."
+    ],
+    "tradeoffs": [
+      "Veterinary workflow depth versus migration and operational setup."
+    ],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.ezyvet.com/features",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.ezyvet.com/veterinary-practice-management-software",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.ezyvet.com/overview",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      }
+    ],
+    "pricingDetails": {
+      "freePlanStatus": "unknown",
+      "verifiedAt": "2026-10-10",
+      "freePlanSummary": "The examined manufacturer pages do not establish a permanent free-plan entitlement for this purchasing context."
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "veterinary medical records",
+        "status": "verified",
+        "sourceUrl": "https://www.ezyvet.com/features",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "appointment scheduling",
+        "status": "verified",
+        "sourceUrl": "https://www.ezyvet.com/veterinary-practice-management-software",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "inventory management",
+        "status": "verified",
+        "sourceUrl": "https://www.ezyvet.com/veterinary-practice-management-software",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "automated billing",
+        "status": "verified",
+        "sourceUrl": "https://www.ezyvet.com/features",
+        "verifiedAt": "2026-10-10"
+      }
+    ]
+  },
+  {
+    "slug": "guesty",
+    "name": "Guesty",
+    "category": "business",
+    "description": "Vacation-rental property management software for channel distribution, reservations, calendars, guest messaging and portfolio operations.",
+    "pricing": "Portfolio size and optional functions affect total cost; require an itemized offer for channels, user access and operational modules.",
+    "freePlan": false,
+    "freePlanKnown": false,
+    "features": [
+      "vacation rental channel manager",
+      "reservation synchronization",
+      "unified guest inbox",
+      "multi-calendar",
+      "guest communication"
+    ],
+    "bestFor": [
+      "multi-property vacation-rental managers",
+      "short-term rental teams coordinating reservations and messages"
+    ],
+    "sourceUrl": "https://www.guesty.com/",
+    "lastVerified": "2026-10-10",
+    "scores": {
+      "price": 4,
+      "ease": 6,
+      "automation": 8,
+      "integrations": 8,
+      "sales": 6,
+      "ai": 4,
+      "marketing": 6,
+      "seo": 2,
+      "research": 6,
+      "content": 4,
+      "agency": 8
+    },
+    "scoreProvenance": {
+      "method": "ToolScout independent editorial judgment, not a manufacturer-verified performance measurement",
+      "reviewedAt": "2026-10-10"
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "No named assistant or agent connection has been substantiated by the reviewed manufacturer documents.",
+      "verifiedAt": null,
+      "sources": []
+    },
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "affiliateUrl": "",
+    "editorialReview": {
+      "angle": "Distribution and guest communication for growing rental portfolios",
+      "summary": "Guesty is designed for vacation-rental managers handling listings and guest communications across several platforms. The channel manager can coordinate inventory and rates while a unified inbox reduces switching between booking sites and messaging channels. That is most valuable for a team managing multiple properties rather than one occasional listing. The trade-off is operational setup: listing mapping, staff access, automation rules and accounting responsibilities still need a clear owner. Evaluate the product with real bookings from two channels and check the features included in your proposed package.",
+      "buyerCheck": "Test the same property's availability across channels, a booking modification and guest messages, then check team permissions and full fees.",
+      "reviewedAt": "2026-10-10",
+      "sourceUrl": "https://www.guesty.com/features/channel-manager/",
+      "sourceUrls": [
+        "https://www.guesty.com/features/channel-manager/",
+        "https://www.guesty.com/features/unified-inbox/",
+        "https://www.guesty.com/solutions/vacation-rental/"
+      ],
+      "method": "first_party_documentation_and_independent_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false
+    },
+    "strengths": [
+      "Channel manager keeps rates, bookings and availability aligned across booking sites.",
+      "Unified inbox centralizes guest conversations across supported services."
+    ],
+    "limitations": [
+      "Mapping listings and assigning guest-message ownership requires setup.",
+      "Channel, accounting and module access depend on commercial configuration."
+    ],
+    "tradeoffs": [
+      "Centralized rental operations versus portfolio setup and package complexity."
+    ],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.guesty.com/features/channel-manager/",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.guesty.com/features/unified-inbox/",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.guesty.com/solutions/vacation-rental/",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      }
+    ],
+    "pricingDetails": {
+      "freePlanStatus": "unknown",
+      "verifiedAt": "2026-10-10",
+      "freePlanSummary": "The examined manufacturer pages do not establish a permanent free-plan entitlement for this purchasing context."
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "vacation rental channel manager",
+        "status": "verified",
+        "sourceUrl": "https://www.guesty.com/features/channel-manager/",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "reservation synchronization",
+        "status": "verified",
+        "sourceUrl": "https://www.guesty.com/features/channel-manager/",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "unified guest inbox",
+        "status": "verified",
+        "sourceUrl": "https://www.guesty.com/features/unified-inbox/",
+        "verifiedAt": "2026-10-10"
+      }
+    ]
+  },
+  {
+    "slug": "hostaway",
+    "name": "Hostaway",
+    "category": "business",
+    "description": "Short-term rental property management platform joining channel reservations, unified guest communications and automated operational tasks.",
+    "pricing": "Pricing should be quoted for the actual managed listing count and package, including any operational or messaging add-ons.",
+    "freePlan": false,
+    "freePlanKnown": false,
+    "features": [
+      "vacation rental channel manager",
+      "unified guest inbox",
+      "automated guest messaging",
+      "cleaning task automation",
+      "reservation synchronization"
+    ],
+    "bestFor": [
+      "property managers listing on multiple OTAs",
+      "short-term rental teams coordinating guest communication and housekeeping"
+    ],
+    "sourceUrl": "https://www.hostaway.com/",
+    "lastVerified": "2026-10-10",
+    "scores": {
+      "price": 4,
+      "ease": 6,
+      "automation": 9,
+      "integrations": 8,
+      "sales": 6,
+      "ai": 4,
+      "marketing": 5,
+      "seo": 2,
+      "research": 6,
+      "content": 4,
+      "agency": 8
+    },
+    "scoreProvenance": {
+      "method": "ToolScout independent editorial judgment, not a manufacturer-verified performance measurement",
+      "reviewedAt": "2026-10-10"
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "No named assistant or agent connection has been substantiated by the reviewed manufacturer documents.",
+      "verifiedAt": null,
+      "sources": []
+    },
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "affiliateUrl": "",
+    "editorialReview": {
+      "angle": "Channel control combined with guest and cleaning automations",
+      "summary": "Hostaway is a fit for rental operators who need more than a synchronized booking calendar. Its channel manager handles reservations across distribution channels while guest communication and task automations can reduce repetitive check-in and cleaning coordination. These workflows become especially useful as the number of properties and staff grows. The trade-off is supervision: automated rules need accurate listing information, clear responsibility and checks for exceptions. Test a booking change, an automated message and a housekeeping handoff before comparing quotes across portfolio sizes.",
+      "buyerCheck": "Run a booking change across two channels, trigger a guest message and cleaning task, then check user access and commercial terms.",
+      "reviewedAt": "2026-10-10",
+      "sourceUrl": "https://www.hostaway.com/features/channel-manager/",
+      "sourceUrls": [
+        "https://www.hostaway.com/features/channel-manager/",
+        "https://www.hostaway.com/features/communication/",
+        "https://www.hostaway.com/features/automation-tools/"
+      ],
+      "method": "first_party_documentation_and_independent_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false
+    },
+    "strengths": [
+      "Channel manager coordinates listing availability and reservations.",
+      "Reservation-based messaging and tasks can reduce repeated manual work."
+    ],
+    "limitations": [
+      "Connection coverage and synchronization vary across booking channels.",
+      "Automated operational rules require exception handling and oversight."
+    ],
+    "tradeoffs": [
+      "More operational automation versus more setup and exception management."
+    ],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.hostaway.com/features/channel-manager/",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.hostaway.com/features/communication/",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.hostaway.com/features/automation-tools/",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      }
+    ],
+    "pricingDetails": {
+      "freePlanStatus": "unknown",
+      "verifiedAt": "2026-10-10",
+      "freePlanSummary": "The examined manufacturer pages do not establish a permanent free-plan entitlement for this purchasing context."
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "vacation rental channel manager",
+        "status": "verified",
+        "sourceUrl": "https://www.hostaway.com/features/channel-manager/",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "automated guest messaging",
+        "status": "verified",
+        "sourceUrl": "https://www.hostaway.com/features/communication/",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "cleaning task automation",
+        "status": "verified",
+        "sourceUrl": "https://www.hostaway.com/features/automation-tools/",
+        "verifiedAt": "2026-10-10"
+      }
+    ]
+  },
+  {
+    "slug": "lodgify",
+    "name": "Lodgify",
+    "category": "business",
+    "description": "Vacation-rental software connecting channel calendars with a direct-booking website, reservation engine and payment acceptance.",
+    "pricing": "Subscriptions vary with property count and features; compare payment costs and direct-booking setup alongside the chosen plan.",
+    "freePlan": false,
+    "freePlanKnown": false,
+    "features": [
+      "vacation rental channel manager",
+      "direct booking website",
+      "booking widget",
+      "reservation synchronization",
+      "online payments"
+    ],
+    "bestFor": [
+      "independent holiday rental owners",
+      "small rental operators seeking direct reservations"
+    ],
+    "sourceUrl": "https://www.lodgify.com/",
+    "lastVerified": "2026-10-10",
+    "scores": {
+      "price": 6,
+      "ease": 8,
+      "automation": 7,
+      "integrations": 7,
+      "sales": 7,
+      "ai": 3,
+      "marketing": 7,
+      "seo": 6,
+      "research": 5,
+      "content": 5,
+      "agency": 7
+    },
+    "scoreProvenance": {
+      "method": "ToolScout independent editorial judgment, not a manufacturer-verified performance measurement",
+      "reviewedAt": "2026-10-10"
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "No named assistant or agent connection has been substantiated by the reviewed manufacturer documents.",
+      "verifiedAt": null,
+      "sources": []
+    },
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "affiliateUrl": "",
+    "editorialReview": {
+      "angle": "Direct guest bookings supported by synchronized calendars",
+      "summary": "Lodgify is particularly relevant to short-term rental hosts who want their own booking website alongside major travel marketplaces. Its channel manager coordinates calendars and availability, while the website builder and booking widget create a path for direct reservations. This can reduce dependence on individual OTA listing pages and help the host control the guest relationship. The trade-off is that direct bookings bring responsibility for website content, payment handling and guest support. Test a booking from your own website against an OTA reservation and check the total subscription and transaction terms.",
+      "buyerCheck": "Create a sample property website, test direct booking against an OTA calendar and compare property-based pricing and payment fees.",
+      "reviewedAt": "2026-10-10",
+      "sourceUrl": "https://www.lodgify.com/vacation-rental-channel-manager/",
+      "sourceUrls": [
+        "https://www.lodgify.com/vacation-rental-channel-manager/",
+        "https://www.lodgify.com/vacation-rental-website-builder/",
+        "https://www.lodgify.com/vacation-rental-booking-widget/"
+      ],
+      "method": "first_party_documentation_and_independent_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false
+    },
+    "strengths": [
+      "Channel management keeps reservations and availability synchronized.",
+      "Website building and booking widgets enable direct reservations."
+    ],
+    "limitations": [
+      "Running a direct booking website requires marketing and payment oversight.",
+      "Property counts, plan boundaries and payment charges need separate checks."
+    ],
+    "tradeoffs": [
+      "Greater control of guest bookings versus maintaining the direct channel."
+    ],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.lodgify.com/vacation-rental-channel-manager/",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.lodgify.com/vacation-rental-website-builder/",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.lodgify.com/vacation-rental-booking-widget/",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      }
+    ],
+    "pricingDetails": {
+      "freePlanStatus": "unknown",
+      "verifiedAt": "2026-10-10",
+      "freePlanSummary": "The examined manufacturer pages do not establish a permanent free-plan entitlement for this purchasing context."
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "vacation rental channel manager",
+        "status": "verified",
+        "sourceUrl": "https://www.lodgify.com/vacation-rental-channel-manager/",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "direct booking website",
+        "status": "verified",
+        "sourceUrl": "https://www.lodgify.com/vacation-rental-website-builder/",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "booking widget",
+        "status": "verified",
+        "sourceUrl": "https://www.lodgify.com/vacation-rental-booking-widget/",
+        "verifiedAt": "2026-10-10"
+      }
+    ]
+  }
+]
