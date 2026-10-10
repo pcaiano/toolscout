@@ -5,6 +5,7 @@ import { renderRuntimeRanking } from './catalog-runtime-ranking.js';
 import {auditCatalogTool,mapLimit,hasManufacturerDecisionClaim} from './catalog-quality-runtime.js';
 import {hydrateLegacyCatalogProfile} from './catalog-profile-hydration.js';
 import {verifyManufacturerDocuments,monitoredManufacturerDocuments} from './catalog-manufacturer-document-watch.js';
+import {holdUnreverifiedCatalogClaims} from './catalog-evidence-freshness-guard.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
 const MAX_VERIFY_PER_CYCLE=4; // every two hours: 48 tools/day, target full catalog scan <= 72 hours
@@ -210,12 +211,12 @@ async function mergedTools(env){
   for(const fileTool of Array.isArray(staticTools)?staticTools:[]){
     const slug=String(fileTool?.slug||'').toLowerCase();if(!slug||seen.has(slug)||suppressed.has(slug))continue;
     const canonical=stored.get(slug);
-    out.push(canonical&&canonical.slug===slug?canonical:fileTool);seen.add(slug);
+    out.push(holdUnreverifiedCatalogClaims(canonical&&canonical.slug===slug?canonical:fileTool,snapshot.stateMap?.get(slug)));seen.add(slug);
   }
   for(const candidate of snapshot.candidates||[]){
     const slug=String(candidate?.slug||'').toLowerCase();
     if(!slug||seen.has(slug)||suppressed.has(slug))continue;
-    out.push(candidate);seen.add(slug);
+    out.push(holdUnreverifiedCatalogClaims(candidate,snapshot.stateMap?.get(slug)));seen.add(slug);
   }
   return out;
 }
@@ -671,7 +672,8 @@ export async function publicRuntimeToolResponse(env,slug){
   // changed its source_status away from baseline_snapshot.
   const [snapshot,staticTools]=await Promise.all([runtimeSnapshot(env),assetJson(env,'/data/tools.json',[])]);
   if(snapshot.baselineMirrors?.has(key)||(Array.isArray(staticTools)&&staticTools.some(tool=>String(tool?.slug||'').toLowerCase()===key)))return null;
-  return new Response(injectPendingReview(candidatePage(candidate),state),{status:200,headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'public, max-age=60'}});
+  const display=holdUnreverifiedCatalogClaims(candidate,state);
+  return new Response(injectPendingReview(candidatePage(display),state),{status:200,headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'public, max-age=60'}});
 }
 export async function publicMergedSitemap(response,env){return mergedSitemap(response,env)}
 export async function publicRuntimeRankingResponse(env,path){return renderRuntimeRanking(env,path,await mergedTools(env))}
