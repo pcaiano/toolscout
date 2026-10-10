@@ -46,3 +46,41 @@ test('manufacturer-researched candidate seeds with no verified claims remain int
  assert.equal(config.admission.requireDecisionGradeManufacturerDocumentation,true);
  assert.equal(config.admission.minimumIndependentDocumentPages,2);
 });
+
+test('admission cannot be based on expired, future or impossible-dated evidence',()=>{
+ const sample=structuredClone(documented);
+ const claim=sample.decisionClaims.find(c=>c.status==='verified');
+ assert.ok(claim);
+ for(const date of ['2024-01-01','2099-01-01','2026-02-30','not-a-date']){
+   const invalid={...sample,decisionClaims:[{...claim,verifiedAt:date}]};
+   assert.equal(hasManufacturerDecisionClaim(invalid),false,date);
+   assert.equal(trustedManufacturerEvidence(invalid,{decisionGrade:true}),false,date);
+ }
+});
+test('admission accepts only fields actually usable by the decision qualifier',()=>{
+ const sample=structuredClone(documented);
+ const claim=sample.decisionClaims.find(c=>c.type==='plan_limit');
+ assert.ok(claim);
+ const invalids=[
+   {...claim,type:'made_up_product_claim'},
+   {...claim,unit:'contacts',scope:undefined},
+   {...claim,period:undefined},
+   {...claim,plan:undefined},
+   {...claim,quantity:0},
+   {...claim,quantity:-7},
+   {...claim,quantity:'100'},
+   {...claim,type:'price_quote',amount:10,chargeAmount:10,currency:'EUR',
+     billingCycle:'monthly',unit:'seat',unitQuantity:5,market:'unspecified',
+     taxStatus:'unknown'}
+ ];
+ for(const candidate of invalids){
+   const item={...sample,decisionClaims:[candidate]};
+   assert.equal(hasManufacturerDecisionClaim(item),false,JSON.stringify(candidate));
+   assert.equal(trustedManufacturerEvidence(item,{decisionGrade:true}),false);
+ }
+});
+test('catalog growth cannot short-circuit source review with scores alone',()=>{
+ const source=fs.readFileSync(new URL('../catalog-gap-runtime-worker.js',import.meta.url),'utf8');
+ assert.ok(source.includes('function isFullParityProfile(p)'));
+ assert.ok(source.includes("p.editorialReview?.verificationStatus==='vendor_documented'&&hasManufacturerDecisionClaim(p)"));
+});
