@@ -33,6 +33,61 @@ test('generated Figma profile includes AI interoperability evidence',async({page
   await expect(page.locator('[data-ai-interoperability="1"]')).toContainText('MCP');
 });
 
+test('Fresha and BQE CORE use the same actual 2.0 profile design as indexed Figma on desktop',async({page})=>{
+  const appearance=async path=>{
+    await page.goto(base+path,{waitUntil:'load'});
+    await expect(page.locator('link[data-toolscout-native-v2="1"]')).toHaveCount(1);
+    await expect(page.locator('.ts2-global-nav')).toHaveCount(1);
+    await expect(page.locator('.editorialIntro')).toBeVisible();
+    await expect(page.locator('.editorialBuyerCheck')).toBeVisible();
+    await expect(page.locator('.grid>.panel')).toHaveCount(2);
+    return page.evaluate(()=>{
+      const style=sel=>getComputedStyle(document.querySelector(sel));
+      return{
+        bodyBg:style('body').backgroundColor,
+        navBg:style('.ts2-global-nav').backgroundColor,
+        heroBg:style('.hero').backgroundColor,
+        heroText:style('.hero h1').color,
+        editorialBg:style('.editorialIntro').backgroundColor,
+        panelBg:style('.panel').backgroundColor,
+        panelText:style('.panel').color,
+        chipBg:style('.chips span').backgroundColor,
+        gridColumns:style('.grid').gridTemplateColumns.split(' ').length
+      };
+    });
+  };
+  const indexed=await appearance('/.browser-fixtures/figma-public.html');
+  expect(indexed.gridColumns).toBe(2);
+  for(const slug of ['fresha','bqe-core']){
+    const appearanceNow=await appearance('/.browser-fixtures/'+slug+'-public.html');
+    expect(appearanceNow,slug+' must match indexed page colours, layout and reusable components').toEqual(indexed);
+    await expect(page.getByRole('heading',{level:1})).toHaveText(slug==='fresha'?'Fresha':'BQE CORE');
+    await expect(page.locator('.ts2-back-tools')).toHaveCount(1);
+    await expect(page.getByRole('link',{name:'Add to comparator'})).toBeVisible();
+    await expect(page.locator('.editorialIntro')).toContainText('Before you choose');
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2)).toBe(true);
+  }
+});
+
+test.describe('runtime profile mobile design parity',()=>{
+  test.use({viewport:{width:390,height:844}});
+  test('Fresha and BQE CORE avoid overflow, stacked panels, or duplicate headers',async({page})=>{
+    for(const slug of ['fresha','bqe-core']){
+      await page.goto(base+'/.browser-fixtures/'+slug+'-public.html',{waitUntil:'load'});
+      await expect(page.locator('.ts2-global-nav')).toHaveCount(1);
+      await expect(page.locator('.hero h1')).toBeVisible();
+      await expect(page.locator('.editorialIntro')).toBeVisible();
+      await expect(page.locator('.panel')).toHaveCount(2);
+      const layout=await page.evaluate(()=>{
+        const a=document.querySelectorAll('.grid>.panel'),x=a[0].getBoundingClientRect(),y=a[1].getBoundingClientRect();
+        return{width:innerWidth,doc:document.documentElement.scrollWidth,stacked:y.top>=x.bottom-2};
+      });
+      expect(layout.doc,slug+' viewport overflow').toBeLessThanOrEqual(layout.width+2);
+      expect(layout.stacked,slug+' panels must stack at mobile widths').toBe(true);
+    }
+  });
+});
+
 test('public redesign transform gives internal pages the shared ToolScout 2.0 shell',async({page})=>{
   await page.goto(base+'/.browser-fixtures/figma-public.html',{waitUntil:'domcontentloaded'});
   await expect(page.locator('style[data-toolscout-public-redesign="2"]')).toHaveCount(1);
