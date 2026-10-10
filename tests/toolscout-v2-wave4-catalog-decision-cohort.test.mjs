@@ -39,7 +39,7 @@ test('dynamic profiles reuse the original profile content shell, and the global 
    assert.match(raw,/data-toolscout-surface="tool-profile"/);
    assert.equal(raw.match(/<style>([\s\S]*?)<\/style>/)?.[1],staticCss,tool.slug+' must have the same base CSS as indexed Figma');
    for(const className of ['editorialIntro','editorialBuyerCheck','heroHead','panel','secondaryCta','backTools'])
-     assert.ok(raw.includes('class="'+className+'"')||raw.includes('class="'+className+' '),tool.slug+' missing '+className);
+     assert.match(raw,new RegExp('class="[^"]*\\b'+className+'\\b[^"]*"'),tool.slug+' missing '+className);
    assert.doesNotMatch(raw,/class="editorial"/);
    assert.doesNotMatch(raw,/class="back"/);
    assert.doesNotMatch(raw,/background:#0b0d0c|class="cta secondary"/i);
