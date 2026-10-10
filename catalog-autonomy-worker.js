@@ -814,7 +814,7 @@ export async function admitTrustedCandidates(env){
       ).map(result=>{
         const url=new URL(result.finalUrl);
         // Tracking parameters and fragments do not create a second page.
-        return url.origin+url.pathname.replace(/\\/+$/,'');
+        return url.origin+url.pathname.replace(/\/+$/,'');
       }));
       if(accessible.size<2){
         held++;
