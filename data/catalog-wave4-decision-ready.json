@@ -1,0 +1,410 @@
+[
+  {
+    "slug": "clio-manage",
+    "name": "Clio Manage",
+    "category": "business",
+    "description": "Law practice management software linking legal cases, calendars, documents, client records, time tracking and client billing for legal practitioners.",
+    "pricing": "Paid subscription software with region-specific plans. A product trial is not evidence of a permanent free tier; evaluate licensing and add-ons for your practice.",
+    "freePlan": false,
+    "freePlanKnown": false,
+    "features": [
+      "case management",
+      "matter records",
+      "document management",
+      "legal billing",
+      "time tracking",
+      "calendaring",
+      "client contacts"
+    ],
+    "bestFor": [
+      "law firms managing active client matters",
+      "legal teams coordinating time and invoices",
+      "practices handling matter-related documents"
+    ],
+    "sourceUrl": "https://www.clio.com/",
+    "lastVerified": "2026-10-10",
+    "scores": {
+      "price": 5,
+      "ease": 7,
+      "automation": 7,
+      "integrations": 6,
+      "sales": 5,
+      "ai": 3,
+      "marketing": 2,
+      "seo": 1,
+      "research": 5,
+      "content": 4,
+      "agency": 8
+    },
+    "scoreProvenance": {
+      "method": "ToolScout independent editorial judgment, not a manufacturer-verified performance measurement",
+      "reviewedAt": "2026-10-10"
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "No named assistant or agent integration verified by these manufacturer documents.",
+      "verifiedAt": null,
+      "sources": []
+    },
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "affiliateUrl": "",
+    "editorialReview": {
+      "angle": "Matter-centred law-firm work, not generic sales CRM",
+      "summary": "Clio Manage is a credible law-firm choice when the central job is to connect case records, contacts, document handling, deadlines, billable time and invoices. The manufacturer's case-management documentation ties these records to a matter, while its separate billing guidance describes time and expense capture, split bills and alternative fees. That is a different operating problem from tracking prospecting leads in a conventional CRM. However, a feature being described does not establish access on every subscription tier or suitability for every legal jurisdiction. A buyer should validate the path from opening a matter to issuing a reviewed invoice, including staff permissions and the firm's own confidentiality and accounting obligations. A generic CRM may still be preferable for marketing intake; the specialist value comes from matter continuity.",
+      "buyerCheck": "Map the full lifecycle of a representative matter, including case deadlines, document permissions, time capture, billing review, jurisdictional obligations and the exact chosen plan before migration.",
+      "reviewedAt": "2026-10-10",
+      "sourceUrl": "https://www.clio.com/features/case-management/",
+      "sourceUrls": [
+        "https://www.clio.com/features/case-management/",
+        "https://www.clio.com/features/legal-billing-software/"
+      ],
+      "method": "first_party_documentation_and_independent_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false
+    },
+    "strengths": [
+      "Vendor documentation describes matter-linked contacts, documents, calendars and time entries.",
+      "First-party billing documentation describes time and expense tracking, split bills and alternative fees."
+    ],
+    "limitations": [
+      "Matter management is not the same as prospecting CRM; assess lead capture separately.",
+      "Public feature descriptions do not prove specific plan entitlements or national legal compliance."
+    ],
+    "tradeoffs": [
+      "Specialized matter-to-invoice continuity versus plan complexity, staff migration and profession-specific compliance checks."
+    ],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.clio.com/features/case-management/",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.clio.com/features/legal-billing-software/",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      }
+    ],
+    "pricingDetails": {
+      "freePlanStatus": "unknown",
+      "verifiedAt": "2026-10-10",
+      "freePlanSummary": "No perpetual free-plan entitlement is asserted from these documents."
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "case management",
+        "status": "verified",
+        "sourceUrl": "https://www.clio.com/features/case-management/",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "document management",
+        "status": "verified",
+        "sourceUrl": "https://www.clio.com/features/case-management/",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "legal billing",
+        "status": "verified",
+        "sourceUrl": "https://www.clio.com/features/legal-billing-software/",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "time tracking",
+        "status": "verified",
+        "sourceUrl": "https://www.clio.com/features/legal-billing-software/",
+        "verifiedAt": "2026-10-10"
+      }
+    ]
+  },
+  {
+    "slug": "fresha",
+    "name": "Fresha",
+    "category": "business",
+    "description": "Salon and wellness business system connecting appointment scheduling, online booking, staff calendars, client records, automated reminders and checkout.",
+    "pricing": "Manufacturer lists Independent and Team paid subscriptions and trial terms; booking acquisition, card processing and other costs may be additional and differ by market.",
+    "freePlan": false,
+    "freePlanKnown": false,
+    "features": [
+      "appointment scheduling",
+      "online bookings",
+      "client profiles",
+      "automated reminders",
+      "deposits",
+      "retail inventory",
+      "checkout"
+    ],
+    "bestFor": [
+      "appointment-led beauty businesses",
+      "independent salon practitioners",
+      "multi-staff wellness and barbershop teams"
+    ],
+    "sourceUrl": "https://www.fresha.com/",
+    "lastVerified": "2026-10-10",
+    "scores": {
+      "price": 6,
+      "ease": 8,
+      "automation": 7,
+      "integrations": 6,
+      "sales": 5,
+      "ai": 3,
+      "marketing": 4,
+      "seo": 2,
+      "research": 5,
+      "content": 4,
+      "agency": 5
+    },
+    "scoreProvenance": {
+      "method": "ToolScout independent editorial judgment, not a manufacturer-verified performance measurement",
+      "reviewedAt": "2026-10-10"
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "No named assistant or agent integration verified by these manufacturer documents.",
+      "verifiedAt": null,
+      "sources": []
+    },
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "affiliateUrl": "",
+    "editorialReview": {
+      "angle": "Staff calendar and repeat-booking fit with real acquisition cost",
+      "summary": "Fresha fits appointment-led services whose daily workflow depends on staff availability, booking confirmations, client history and payments. The vendor's detailed scheduling page covers blocked time, group appointments, shifts and cancellation deposits, and its wider feature information describes online booking, stock and point of sale. That breadth is useful only if it actually simplifies the buyer's service journey. Financial evaluation is essential: subscriptions, card processing, marketplace-acquired customers and direct repeat bookings can have very different economics. Do not transfer published US-dollar charges into another country's business case without a market-specific quote. Fresha is not a general retail ERP or a replacement for unrelated professional service project accounting. Test the exact calendar, cancellation and retail workflows before selecting a tier.",
+      "buyerCheck": "Calculate a month of bookable staff, direct versus marketplace first-time clients, card turnover, reminders and retail orders, using the fees applicable to the buyer's country.",
+      "reviewedAt": "2026-10-10",
+      "sourceUrl": "https://www.fresha.com/for-business/features",
+      "sourceUrls": [
+        "https://www.fresha.com/for-business/features",
+        "https://www.fresha.com/for-business/features/scheduling",
+        "https://www.fresha.com/pricing"
+      ],
+      "method": "first_party_documentation_and_independent_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false
+    },
+    "strengths": [
+      "Manufacturer scheduling material covers staff calendars, deposits, reminders and client profiles.",
+      "First-party feature documentation describes checkout, stock tracking and online booking in one platform."
+    ],
+    "limitations": [
+      "Marketplace bookings and payments can incur fees beyond subscription charges.",
+      "Country-specific availability, transaction terms and staff entitlements must be verified for the actual buyer."
+    ],
+    "tradeoffs": [
+      "A unified booking and payment workflow versus potentially material variable acquisition and processing costs."
+    ],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.fresha.com/for-business/features",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.fresha.com/for-business/features/scheduling",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.fresha.com/pricing",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      }
+    ],
+    "pricingDetails": {
+      "freePlanStatus": "unknown",
+      "verifiedAt": "2026-10-10",
+      "freePlanSummary": "No perpetual free-plan entitlement is asserted from these documents."
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "appointment scheduling",
+        "status": "verified",
+        "sourceUrl": "https://www.fresha.com/for-business/features/scheduling",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "online bookings",
+        "status": "verified",
+        "sourceUrl": "https://www.fresha.com/for-business/features",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "client profiles",
+        "status": "verified",
+        "sourceUrl": "https://www.fresha.com/for-business/features/scheduling",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "retail inventory",
+        "status": "verified",
+        "sourceUrl": "https://www.fresha.com/for-business/features",
+        "verifiedAt": "2026-10-10"
+      }
+    ]
+  },
+  {
+    "slug": "bqe-core",
+    "name": "BQE CORE",
+    "category": "business",
+    "description": "Project-centred management software for architecture and engineering firms handling project budgets, staffing allocation, time and expenses and billing.",
+    "pricing": "BQE documents subscription packages and licence-specific or per-user fees. Exact total requires a package and licence quote.",
+    "freePlan": false,
+    "freePlanKnown": false,
+    "features": [
+      "project management",
+      "project budgeting",
+      "resource allocation",
+      "forecasting",
+      "time and expense tracking",
+      "client invoicing"
+    ],
+    "bestFor": [
+      "architecture and engineering firms",
+      "project-based professional services teams",
+      "managers tracking billable projects and staffing"
+    ],
+    "sourceUrl": "https://www.bqe.com/",
+    "lastVerified": "2026-10-10",
+    "scores": {
+      "price": 4,
+      "ease": 5,
+      "automation": 8,
+      "integrations": 6,
+      "sales": 5,
+      "ai": 3,
+      "marketing": 4,
+      "seo": 2,
+      "research": 7,
+      "content": 4,
+      "agency": 9
+    },
+    "scoreProvenance": {
+      "method": "ToolScout independent editorial judgment, not a manufacturer-verified performance measurement",
+      "reviewedAt": "2026-10-10"
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "No named assistant or agent integration verified by these manufacturer documents.",
+      "verifiedAt": null,
+      "sources": []
+    },
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "affiliateUrl": "",
+    "editorialReview": {
+      "angle": "Project profitability from planning through invoice approvals",
+      "summary": "BQE CORE addresses a deeper operational question than task coordination: how billable project work moves through budgets, resource allocation, time entry and client invoices. Manufacturer help articles describe project management, budgeting and forecasting as well as invoice generation based on contract type and approved expenses. That breadth can fit architecture and engineering practices seeking better visibility into client projects. The trade-off is implementation discipline: job hierarchies, bill rates, staff permissions and approval routines determine whether reports are meaningful. BQE also says that subscription pricing depends on selected packages and licences, potentially per user, so a generic price score is insufficient to compare ownership cost. Require a workflow demonstration using a live-style project and a buyer-specific licence proposal rather than relying on marketing claims.",
+      "buyerCheck": "Pilot a fixed-fee and hourly project with phase budgets, staff allocation, approvals, expenses and invoices, then obtain a plan and licence quote covering the full team.",
+      "reviewedAt": "2026-10-10",
+      "sourceUrl": "https://corehelpcenter.bqe.com/hc/en-us/articles/4402832133911-BQE-CORE-Features-and-Benefits",
+      "sourceUrls": [
+        "https://corehelpcenter.bqe.com/hc/en-us/articles/4402832133911-BQE-CORE-Features-and-Benefits",
+        "https://corehelpcenter.bqe.com/hc/en-us/articles/360009049914-Billing-in-BQE-CORE",
+        "https://corehelpcenter.bqe.com/hc/en-us/articles/115002613334-What-does-BQE-CORE-cost-and-how-do-I-purchase-it"
+      ],
+      "method": "first_party_documentation_and_independent_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false
+    },
+    "strengths": [
+      "First-party CORE documentation includes project budgeting, resource allocation and forecasting.",
+      "BQE's billing help material describes manual and batch invoices linked to contract terms and time entries."
+    ],
+    "limitations": [
+      "Subscription price depends on modules, licence mix and potentially user quantities.",
+      "Financial reporting depends on accurate project setup and approved staff time capture."
+    ],
+    "tradeoffs": [
+      "Integrated project profitability tracking versus the configuration and timesheet discipline required to achieve it."
+    ],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://corehelpcenter.bqe.com/hc/en-us/articles/4402832133911-BQE-CORE-Features-and-Benefits",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://corehelpcenter.bqe.com/hc/en-us/articles/360009049914-Billing-in-BQE-CORE",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://corehelpcenter.bqe.com/hc/en-us/articles/115002613334-What-does-BQE-CORE-cost-and-how-do-I-purchase-it",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      }
+    ],
+    "pricingDetails": {
+      "freePlanStatus": "unknown",
+      "verifiedAt": "2026-10-10",
+      "freePlanSummary": "No perpetual free-plan entitlement is asserted from these documents."
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "project management",
+        "status": "verified",
+        "sourceUrl": "https://corehelpcenter.bqe.com/hc/en-us/articles/4402832133911-BQE-CORE-Features-and-Benefits",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "project budgeting",
+        "status": "verified",
+        "sourceUrl": "https://corehelpcenter.bqe.com/hc/en-us/articles/4402832133911-BQE-CORE-Features-and-Benefits",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "resource allocation",
+        "status": "verified",
+        "sourceUrl": "https://corehelpcenter.bqe.com/hc/en-us/articles/4402832133911-BQE-CORE-Features-and-Benefits",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "client invoicing",
+        "status": "verified",
+        "sourceUrl": "https://corehelpcenter.bqe.com/hc/en-us/articles/360009049914-Billing-in-BQE-CORE",
+        "verifiedAt": "2026-10-10"
+      }
+    ]
+  }
+]
