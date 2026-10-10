@@ -97,6 +97,10 @@ function toolDefinitions(){
         properties:{
           tool:{type:'string',minLength:1,maxLength:120},
           dislike:{type:'string',minLength:2,maxLength:300},
+          use_case:{type:'string',minLength:3,maxLength:500},
+          team:{type:'string',enum:['solo','small','team','large','agency']},
+          country:{type:'string',pattern:'^[A-Z]{2}$'},
+          seat_count:{type:'integer',minimum:1,maximum:100},
           must_have:{type:'array',maxItems:12,items:{type:'string',minLength:1,maxLength:100}},
           budget:{type:'string',enum:['free','low','mid','high']},
           existing_tools:{type:'array',maxItems:12,items:{type:'string',minLength:1,maxLength:100}},
@@ -240,6 +244,10 @@ function validToolArguments(name,a){
     if(!validStrings(a.must_have,12,100)||!validStrings(a.existing_tools,12,100)||!validBudget(a.budget))return 'alternative constraints are invalid';
     if(a.require_stack_fit!==undefined&&typeof a.require_stack_fit!=='boolean')return 'require_stack_fit must be boolean';
     if(a.require_stack_fit===true&&(!Array.isArray(a.existing_tools)||!a.existing_tools.length))return 'require_stack_fit requires at least one existing tool';
+    if(a.use_case!==undefined&&(typeof a.use_case!=='string'||a.use_case.trim().length<3||a.use_case.length>500))return 'use_case must be a string between 3 and 500 characters';
+    if(!validTeam(a.team))return 'team is invalid';
+    if(a.country!==undefined&&(typeof a.country!=='string'||!/^[A-Z]{2}$/.test(a.country)))return 'country must be an ISO 3166-1 alpha-2 code';
+    if(a.seat_count!==undefined&&(!Number.isInteger(a.seat_count)||a.seat_count<1||a.seat_count>100))return 'seat_count must be an integer from 1 to 100';
     if(a.limit!==undefined&&(!Number.isInteger(a.limit)||a.limit<1||a.limit>5))return 'limit must be an integer from 1 to 5';
     return null;
   }
@@ -1052,21 +1060,71 @@ async function callCatalogTool(name,args,request,env){
   if(name==='find_alternatives'){
     const source=findCatalogTool(tools,args.tool);
     if(!source)return {error:'Source tool not found in the ToolScout catalog.',status:404,data:{tool:args.tool}};
-    const dims=requestedDimensions({dislike:args.dislike});
-    const sourceEval=decisionEvaluation(source,{job:source.category,priorities:dims,must_have:args.must_have||[],budget:args.budget,existing_tools:args.existing_tools||[]});
-    const candidates=tools.filter(t=>t.slug!==source.slug&&catalogNormalize(t.category)===catalogNormalize(source.category)).map(t=>{
-      const altArgs={job:source.category,priorities:dims,must_have:args.must_have||[],budget:args.budget,existing_tools:args.existing_tools||[],require_stack_fit:args.require_stack_fit===true};
-      const ev=qualifyDecision(decisionEvaluation(t,altArgs),altArgs);
+    const dims=requestedDimensions({dislike:args.dislike}),priceReason=dims.includes('price'),job=args.use_case||source.category;
+    const decisionArgs={
+      job,priorities:dims,must_have:args.must_have||[],budget:args.budget,team:args.team,
+      existing_tools:args.existing_tools||[],require_stack_fit:args.require_stack_fit===true,
+      country:args.country||null,seat_count:args.seat_count||null
+    };
+    // Unlike editorial price scores, manufacturer quotes can prove per-unit savings.
+    // The original's paid price can be compared even when a buyer wants a free alternative.
+    const reference=priceReason?comparableMonthlyPrice(
+      source,decisionEvaluation(source,{...decisionArgs,budget:null}),{...decisionArgs,budget:null}):null;
+    const candidates=tools.filter(t=>
+      t.slug!==source.slug&&catalogNormalize(t.category)===catalogNormalize(source.category)&&
+      t.rankingEligible!==false&&!t.categoryReviewRequired
+    ).map(t=>{
+      const ev=qualifyDecision(decisionEvaluation(t,decisionArgs),decisionArgs);
       const improvements=[],sacrifices=[];
-      for(const d of [...new Set([...dims,'price','ease','automation','integrations'])]){
+      for(const d of [...new Set([...dims,'ease','automation','integrations'])].filter(d=>d!=='price')){
         const ss=scoreOf(source,d),cs=scoreOf(t,d);if(ss==null||cs==null)continue;
-        if(cs-ss>=1)improvements.push({dimension:d,from:ss,to:cs});
-        if(ss-cs>=1)sacrifices.push({dimension:d,from:ss,to:cs});
+        const measure={dimension:d,from:ss,to:cs,evidence_type:'ToolScout editorial score, not proof of feature entitlement'};
+        if(cs-ss>=1)improvements.push(measure);
+        if(ss-cs>=1)sacrifices.push(measure);
       }
-      const reasonLift=improvements.filter(x=>dims.includes(x.dimension)).reduce((s,x)=>s+x.to-x.from,0);
-      return {...ev,improvements_over_source:improvements,tradeoffs_vs_source:sacrifices,alternative_score:ev.fit_score+reasonLift*4};
-    }).filter(x=>x.qualified_for_use_case&&(x.improvements_over_source.some(y=>dims.includes(y.dimension))||!dims.length)).sort((a,b)=>b.alternative_score-a.alternative_score).slice(0,Math.max(1,Math.min(5,args.limit||3)));
-    return {data:{source:publicTool(source),reason:args.dislike,decision_dimensions:dims,alternatives:candidates,affiliate_disclosure:disclosure}};
+      let priceComparison=null;
+      if(priceReason){
+        const alt=comparableMonthlyPrice(t,ev,decisionArgs);
+        const matched=Boolean(reference&&alt&&['currency','market','tax_status','unit','billing_cycle']
+          .every(k=>reference[k]===alt[k]));
+        if(matched)priceComparison={
+          status:alt.amount<reference.amount-0.005?'documented_lower_unit_price':'not_lower',
+          source_monthly_unit_price:reference.amount,alternative_monthly_unit_price:alt.amount,
+          savings_per_month_per_quoted_unit:Number((reference.amount-alt.amount).toFixed(2)),
+          currency:alt.currency,unit:alt.unit,market:alt.market,tax_status:alt.tax_status,
+          verified_at:alt.verified_at,
+          note:'Matching first-party monthly list prices per quoted unit, excluding taxes, add-ons, and unverified total invoices.'
+        };
+        else if(args.budget==='free'&&source.freePlanKnown===true&&source.freePlan===false&&
+          t.freePlanKnown===true&&t.freePlan===true)priceComparison={
+          status:'verified_free_plan_option',
+          note:'The alternative has a verified catalog free plan, unlike the original. Paid-tier price and Free-tier capability parity are not inferred.'
+        };
+        else priceComparison={
+          status:'not_comparable',
+          note:'Missing or incompatible manufacturer price quotes for the same unit, currency, territory, tax treatment, tier and billing period. Editorial price scores cannot prove savings.'
+        };
+      }
+      const priceLift=Boolean(priceComparison&&['documented_lower_unit_price','verified_free_plan_option'].includes(priceComparison.status));
+      const reasonLift=improvements.filter(x=>dims.includes(x.dimension)).reduce((total,x)=>total+x.to-x.from,0);
+      const otherLift=dims.some(d=>d!=='price'&&improvements.some(x=>x.dimension===d));
+      return {...ev,improvements_over_source:improvements,tradeoffs_vs_source:sacrifices,
+        price_comparison:priceComparison,reason_addressed_by:priceLift?'documented_price_or_free_plan_evidence':otherLift?'editorial_dimension_only':'not_established',
+        alternative_score:ev.fit_score+reasonLift*4+(priceLift?15:0),reason_established:Boolean(priceLift||otherLift)};
+    }).filter(x=>x.qualified_for_use_case&&x.reason_established)
+      .sort((a,b)=>b.alternative_score-a.alternative_score||a.name.localeCompare(b.name))
+      .slice(0,Math.max(1,Math.min(5,args.limit||3)));
+    return {data:{
+      source:publicTool(source),reason:args.dislike,use_case:job,decision_dimensions:dims,
+      decision_status:candidates.length?'qualified_alternatives':'no_verified_alternative',
+      alternatives:candidates,
+      price_evidence_note:priceReason
+        ?'Only matching, dated manufacturer quotes establish a lower per-unit price, or a separately labelled verified free-plan option. A price score is not price evidence.':null,
+      evidence_note:candidates.length
+        ?'Non-price improvements and losses are editorial score differences, not proof of product feature availability.'
+        :'No alternative qualifies for this reason on currently recorded evidence and must-have requirements. This does not prove no alternative exists.',
+      affiliate_disclosure:disclosure
+    }};
   }
   if(name==='check_stack_fit'){
     const found=[],missing=[];
