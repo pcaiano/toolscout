@@ -240,3 +240,48 @@ test('autonomous manufacturer research shares catalog quality mission without cr
  assert.match(src,/status='source_researched'/);
  assert.match(src,/documented_dossiers_are_not_published:true/);
 });
+
+
+test('Codex P2: SPA soft-404 pages with the same HTML cannot supply two first-party documents',async()=>{
+ const originalFetch=globalThis.fetch,writes=[];
+ const seed={schemaVersion:1,status:'research_only_not_catalog',candidates:[
+   {slug:'same-page-vendor',name:'Same Page Vendor',candidateUrl:'https://samepage.example/',discoveryCategory:'Automation'}
+ ]};
+ const fallback='<html><head><title>Vendor SPA</title></head><body><h1>Vendor page</h1><p>'+
+   'This generic app shell is returned on all routes without separate manufacturer documentation. '.repeat(7)+
+   '</p></body></html>';
+ const homepage='<html><head><title>Vendor SPA</title></head><body>'+
+   '<a href="/docs/features">Features</a><a href="/docs/pricing">Pricing</a>'+
+   '<a href="/docs/integrations">Integrations</a></body></html>';
+ globalThis.fetch=async url=>{
+   const u=new URL(url);assert.equal(u.hostname,'samepage.example');
+   return new Response(u.pathname==='/'?homepage:fallback,
+     {status:200,headers:{'Content-Type':'text/html'}});
+ };
+ const env={
+   ASSETS:{fetch:async()=>Response.json(seed)},
+   DB:{prepare(sql){return {bind(...args){return{
+     all:async()=>({results:[{tool_slug:'same-page-vendor'}]}),
+     run:async()=>{writes.push({sql,args});return{success:true,meta:{changes:1}}}
+   }}}}}
+ };
+ try{
+   const result=await researchCatalogManufacturerDossiers(env,{deadlineAt:Date.now()+60000});
+   assert.equal(result.checked,1);
+   assert.equal(result.documented,0);
+   assert.ok(writes.some(x=>x.args?.[2]==='catalog_manufacturer_dossier_deferred'));
+   assert.ok(!writes.some(x=>x.args?.[2]==='catalog_manufacturer_dossier_documented'));
+   assert.ok(!writes.some(x=>/status='source_researched'/.test(x.sql)),
+     'soft-404 document aliases must never change the canonical research state');
+ }finally{globalThis.fetch=originalFetch}
+});
+
+test('Codex P2: manufacturer dossier proof checks both page identity and content fingerprint',()=>{
+ const src=fs.readFileSync(new URL('../catalog-autonomy-worker.js',import.meta.url),'utf8');
+ const section=src.slice(src.indexOf('export async function researchCatalogManufacturerDossiers'),
+   src.indexOf('async function syncMarketGaps('));
+ assert.match(section,/fingerprints=new Set\(\)/);
+ assert.match(section,/fingerprints\.has\(page\.fingerprint\)/);
+ assert.match(section,/page\.fingerprint===source\.fingerprint/);
+ assert.match(section,/identity===homepageIdentity/);
+});
