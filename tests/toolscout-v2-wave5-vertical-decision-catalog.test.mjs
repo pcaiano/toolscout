@@ -56,6 +56,25 @@ test('a documented rental PMS is eligible only with channel AND reservation mana
  assert.ok(shortlist.every(x=>rental.some(y=>y.slug===x.slug)),'cross-category tools cannot become rental PMS');
  assert.ok(shortlist.every(x=>x.profile_url.startsWith('https://trytoolscout.org/tools/')));
 });
+test('restaurants and veterinary clinics are not ranked or compared as generic project management',()=>{
+ const restaurant=tools.filter(t=>t.category==='restaurant-pos');
+ const vets=tools.filter(t=>t.category==='veterinary');
+ assert.deepEqual(restaurant.map(x=>x.slug).sort(),['square-for-restaurants','toast-pos']);
+ assert.deepEqual(vets.map(x=>x.slug),['ezyvet']);
+ for(const cat of ['restaurant-pos','veterinary'])assert.ok(engine.admission.allowedCatalogCategories.includes(cat));
+ const all=[...baseline,...tools];
+ const pos=qualifiedSoftwareDecisionShortlist(all,{job:'restaurant point of sale software',limit:5});
+ assert.ok(pos.some(x=>x.slug==='toast-pos'),'Restaurant POS should be eligible for its actual job');
+ assert.ok(pos.some(x=>x.slug==='square-for-restaurants'),'Competing restaurant POS should be eligible');
+ assert.ok(pos.every(x=>x.category==='restaurant-pos'),'No unrelated business tools as restaurant POS');
+ const vet=qualifiedSoftwareDecisionShortlist(all,{job:'veterinary practice management software',limit:5});
+ assert.ok(vet.some(x=>x.slug==='ezyvet'),'Vets need the documented veterinary record system');
+ assert.ok(vet.every(x=>x.category==='veterinary'),'Do not substitute generic booking or project tools for veterinary clinical management');
+ const projects=qualifiedSoftwareDecisionShortlist(all,{job:'project management software',limit:5});
+ assert.ok(projects.every(x=>!['restaurant-pos','veterinary','vacation-rental'].includes(x.category)),'Vertical software cannot leak into generic project workflow recommendations');
+ const misc=qualifiedSoftwareDecisionShortlist(all,{job:'CRM software',limit:5});
+ assert.ok(misc.every(x=>!['restaurant-pos','veterinary','vacation-rental'].includes(x.category)));
+});
 test('wave5 dynamic profiles use ToolScout 2.0 visual contract without any manufacturer-source outbound links',async()=>{
  for(const tool of tools){
   const raw=candidatePage(tool,{monetized:false});

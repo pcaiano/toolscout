@@ -682,6 +682,8 @@ function jobIntentProfile(tools,job){
   // Specific job families outrank incidental mentions of generic words.
   const families=[
     {category:'vacation rental',pattern:/\b(airbnb|vacation rental|short term rental|holiday rental|alojamento local)\b/},
+    {category:'restaurant pos',pattern:/\b(restaurant pos|restaurant point of sale|restaurant ordering|restaurant kitchen display|kitchen display system|cafe pos|café pos|pizzeria pos|food service pos)\b/},
+    {category:'veterinary',pattern:/\b(veterinary|veterinarian|veterinary clinic|vet clinic|animal hospital|vet practice|veterinari[oa])\b/},
     {category:'crm',pattern:/\b(crm|customer relationship management|sales pipeline|manage leads)\b/},
     {category:'seo',pattern:/\b(seo|keyword research|backlink|search engine optimization|organic search)\b/},
     {category:'developer',pattern:/\b(coding|code editor|software development|devops|continuous deployment)\b/},

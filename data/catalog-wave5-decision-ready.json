@@ -2,7 +2,7 @@
   {
     "slug": "toast-pos",
     "name": "Toast POS",
-    "category": "business",
+    "category": "restaurant-pos",
     "description": "Restaurant point of sale software connecting counter ordering, online orders and kitchen display workflows for busy service teams.",
     "pricing": "The commercial setup combines software, equipment and payment services; obtain a location-specific quote covering all required devices.",
     "freePlan": false,
@@ -131,7 +131,7 @@
   {
     "slug": "square-for-restaurants",
     "name": "Square for Restaurants",
-    "category": "business",
+    "category": "restaurant-pos",
     "description": "Restaurant point of sale with connected payment processing, menus, online orders, kitchen screens and staff workflows.",
     "pricing": "Plans, per-device kitchen display costs, hardware and payment processing differ by market; price the intended setup, not only the base tier.",
     "freePlan": false,
@@ -260,7 +260,7 @@
   {
     "slug": "ezyvet",
     "name": "ezyVet",
-    "category": "business",
+    "category": "veterinary",
     "description": "Veterinary practice management software connecting patient records, scheduling, diagnostics, inventory and invoicing.",
     "pricing": "Obtain a veterinary practice quote covering clinical modules, migration and integrations; no perpetual free subscription is established.",
     "freePlan": false,

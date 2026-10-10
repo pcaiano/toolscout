@@ -97,7 +97,9 @@
       "design",
       "content",
       "business",
-      "vacation-rental"
+      "vacation-rental",
+      "restaurant-pos",
+      "veterinary"
     ],
     "allowTrustedEnrichmentFiles": true,
     "autoAdmitTrustedCandidates": true,
