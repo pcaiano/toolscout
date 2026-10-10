@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {selectCatalogResearchLeads,syncCatalogResearchSupply,classifyMarketGapEvidence,candidatePage}
+import {selectCatalogResearchLeads,syncCatalogResearchSupply,classifyMarketGapEvidence,candidatePage,
+  linkedManufacturerDocumentation,researchCatalogManufacturerDossiers}
   from '../catalog-autonomy-worker.js';
 import {executeCatalogGrowthTask} from '../catalog-gap-runtime-worker.js';
 
@@ -142,4 +143,100 @@ test('Codex: a stale execution contract cannot promote a demoted taxonomy market
  assert.match(src,/reason:'market_gap_demoted_during_research'/,
   'long-running manufacturer fetches must recheck the original product identity before publishing');
  assert.match(src,/WHERE tool_slug=\? AND status='research_required'/);
+});
+
+
+test('manufacturer research extracts only on-site canonical product documentation links',()=>{
+ const html='<a href="/docs/features?utm_campaign=1">Features</a>'+
+   '<a href="/docs/features?utm_campaign=2">Features again</a>'+
+   '<a href="https://evil.example/pricing">Pricing imitation</a>'+
+   '<a href="/privacy">Privacy</a>'+
+   '<a href="/pricing">Pricing</a>'+
+   '<a href="/blog/updates">News</a>';
+ const urls=linkedManufacturerDocumentation(html,'https://vendor.example/');
+ assert.equal(urls.length,2);
+ assert.equal(new URL(urls[0]).pathname,'/docs/features');
+ assert.equal(new URL(urls[1]).pathname,'/pricing');
+ assert.ok(urls.every(x=>new URL(x).hostname==='vendor.example'));
+});
+
+test('hourly catalog quality mission saves manufacturer research dossier in private D1 without claiming publication',async()=>{
+ const originalFetch=globalThis.fetch;
+ const privateWrites=[];
+ const seed={schemaVersion:1,status:'research_only_not_catalog',
+   candidates:[{slug:'vendor-example',name:'Vendor Example',candidateUrl:'https://vendor.example/',discoveryCategory:'Automation'}]};
+ const markup={
+  '/':'<html><head><title>Vendor Example Official</title></head><body>'+
+    '<a href="/docs/features">Product features</a><a href="/docs/pricing">Pricing</a>'+
+    '<a href="https://other.example/docs">Unrelated publisher</a></body></html>',
+  '/docs/features':'<html><head><title>Features</title></head><body><h1>Features</h1>'+
+    '<p>'+('Official feature documentation explains the product operations. '.repeat(5))+'</p></body></html>',
+  '/docs/pricing':'<html><head><title>Pricing</title></head><body><h1>Plan details</h1>'+
+    '<p>'+('Official plan documentation describes the available purchase options. '.repeat(5))+'</p></body></html>'
+ };
+ globalThis.fetch=async url=>{
+   const u=new URL(url);
+   assert.equal(u.hostname,'vendor.example','manufacturer crawl must remain first party');
+   const html=markup[u.pathname];
+   return new Response(html||'missing',{status:html?200:404,headers:{'Content-Type':'text/html'}});
+ };
+ const env={
+   ASSETS:{fetch:async()=>Response.json(seed)},
+   DB:{prepare(sql){
+     return {bind(...args){return {
+       all:async()=>({results:[{tool_slug:'vendor-example'}]}),
+       run:async()=>{privateWrites.push({sql,args});return{success:true,meta:{changes:1}}}
+     }}};
+   }}
+ };
+ try{
+   const result=await researchCatalogManufacturerDossiers(env,{deadlineAt:Date.now()+60000});
+   assert.equal(result.documented,1);
+   assert.equal(result.checked,1);
+   const dossier=privateWrites.find(x=>x.args?.[2]==='catalog_manufacturer_dossier_documented');
+   assert.ok(dossier,'manufacturer document evidence must be durable in canonical D1 event ledger');
+   const proof=JSON.parse(dossier.args[5]);
+   assert.equal(proof.documents.length,2);
+   assert.ok(proof.documents.every(x=>x.fingerprint&&x.url.startsWith('https://vendor.example/')));
+   assert.equal(proof.editorial_complete,false);
+   assert.equal(proof.decision_claims_complete,false);
+   assert.equal(proof.admission_ready,false);
+   assert.ok(privateWrites.some(x=>/UPDATE catalog_market_gaps SET status='source_researched'/.test(x.sql)));
+   assert.ok(!privateWrites.some(x=>/INSERT INTO catalog_runtime_candidates/.test(x.sql)));
+   assert.ok(!privateWrites.some(x=>/status='published'/.test(x.sql)));
+ }finally{globalThis.fetch=originalFetch}
+});
+
+test('manufacturer research budget defers safely before network and a directory link cannot stage software',async()=>{
+ let used=false;
+ const result=await researchCatalogManufacturerDossiers({},{
+   deadlineAt:Date.now()-1
+ });
+ assert.equal(result.deferred,true);
+ assert.equal(result.checked,0);
+ const env={
+   ASSETS:{fetch:async()=>Response.json({schemaVersion:1,status:'research_only_not_catalog',
+     candidates:[{slug:'git-project',name:'Git Project',candidateUrl:'https://github.com/example/git-project'}]})},
+   DB:{prepare(sql){return{bind(){return{
+     all:async()=>({results:[{tool_slug:'git-project'}]}),
+     run:async()=>{used=true;return{success:true,meta:{changes:1}}}
+   }}}}}
+ };
+ const originalFetch=globalThis.fetch;
+ globalThis.fetch=async()=>{throw Error('directory site must never be treated as manufacturer evidence')};
+ try{
+   const out=await researchCatalogManufacturerDossiers(env,{deadlineAt:Date.now()+60000});
+   assert.equal(out.checked,1);
+   assert.equal(out.documented,0);
+   assert.equal(used,true,'deferred evidence is recorded');
+ }finally{globalThis.fetch=originalFetch}
+});
+
+test('autonomous manufacturer research shares catalog quality mission without creating another cron',()=>{
+ const src=fs.readFileSync(new URL('../catalog-autonomy-worker.js',import.meta.url),'utf8');
+ assert.match(src,/manufacturer_dossiers:manufacturerDossiers/);
+ assert.match(src,/researchCatalogManufacturerDossiers\(env,\{deadlineAt\}\)/);
+ assert.match(src,/MAX_MANUFACTURER_DOSSIERS_PER_CYCLE=2/);
+ assert.match(src,/status='source_researched'/);
+ assert.match(src,/documented_dossiers_are_not_published:true/);
 });
