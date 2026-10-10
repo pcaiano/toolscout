@@ -124,3 +124,32 @@ test('manufacturer monthly Buffer channel prices retain exact billable channel s
  const changes=manufacturerFactProposals(buffer,watch('Essentials plan costs $7 per channel per month.'));
  assert.equal(changes.find(x=>x.claimKey.includes('Essentials'))?.newValue,7);
 });
+
+test('price must directly bind its monetary amount to the quoted unit, not a nearby unrelated unit',()=>{
+ const buffer=catalog.find(x=>x.slug==='buffer');
+ const channel=buffer.decisionClaims.find(x=>x.type==='price_quote'&&x.plan==='Essentials'&&x.billingCycle==='monthly'&&x.unit==='channel');
+ const obs=text=>[{url:channel.sourceUrl,status:'ok',documentText:text}];
+ for(const sentence of [
+  'Essentials plan costs $99 per seat per month and supports management per channel.',
+  'Essentials plan costs $99 per account per month; extra channels are managed per channel.',
+  'Essentials plan costs $99 per channel per month but also mentions $7 per channel.',
+  'Essentials plan costs $99 per subscription per month with a per channel limit.'
+ ])assert.deepEqual(manufacturerFactProposals(buffer,obs(sentence)),[],sentence);
+ assert.equal(manufacturerFactProposals(buffer,obs('Essentials plan costs $7 per channel per month.')).find(x=>x.type==='price_quote')?.newValue,7);
+ const hubspot=catalog.find(x=>x.slug==='hubspot');
+ const seat=hubspot.decisionClaims.find(x=>x.type==='price_quote'&&x.plan==='Starter'&&x.billingCycle==='monthly'&&x.unit==='seat'&&x.currency==='EUR');
+ const h=text=>[{url:seat.sourceUrl,status:'ok',documentText:text}];
+ assert.deepEqual(manufacturerFactProposals(hubspot,h('Starter plan costs €99 per channel per month and includes billing per seat.')),[]);
+ assert.equal(manufacturerFactProposals(hubspot,h('Starter plan costs €25 per seat per month.')).find(x=>x.type==='price_quote')?.newValue,25);
+});
+
+test('separate account and workspace facts do not suppress a correctly scoped monetary quote',()=>{
+ const hubspot=catalog.find(x=>x.slug==='hubspot');
+ const starter=hubspot.decisionClaims.find(x=>x.type==='price_quote'&&x.plan==='Starter'&&x.billingCycle==='monthly'&&x.currency==='EUR');
+ const seat=manufacturerFactProposals(hubspot,[{url:starter.sourceUrl,status:'ok',documentText:'Starter plan costs €25 per seat per month and includes 1000 contacts per account.'}]);
+ assert.equal(seat.find(x=>x.type==='price_quote')?.newValue,25);
+ const buffer=catalog.find(x=>x.slug==='buffer');
+ const channel=buffer.decisionClaims.find(x=>x.type==='price_quote'&&x.plan==='Essentials'&&x.billingCycle==='monthly'&&x.unit==='channel');
+ const quoted=manufacturerFactProposals(buffer,[{url:channel.sourceUrl,status:'ok',documentText:'Essentials plan costs $7 per channel per month and includes one workspace per account.'}]);
+ assert.equal(quoted.find(x=>x.type==='price_quote')?.newValue,7);
+});

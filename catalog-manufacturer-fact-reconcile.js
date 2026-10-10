@@ -34,14 +34,23 @@ function eligibleSentence(s,plan,period,scope){
 function verifiedQuoteScope(sentence,claim){
   if(claim.market&&!['unspecified','global'].includes(claim.market))return false; // No inferred regional eligibility.
   const unit=String(claim.unit||'').toLowerCase();
+  const symbol={USD:'$',EUR:'€',GBP:'£'}[claim.currency];
+  if(!symbol)return false;
+  const amounts=[...sentence.matchAll(new RegExp(escRe(symbol)+'\\s*\\d+(?:[,.]\\d{1,2})?','g'))];
+  if(amounts.length!==1)return false;
+  // Only the price phrase determines the billed unit. Later plan facts may
+  // describe accounts or workspaces without changing the meaning of the quote.
+  // Bind the billing unit directly to the quoted amount. A separate mention
+  // of "per channel" in the same sentence is not proof of channel pricing.
+  const pricedTail=sentence.slice(amounts[0].index+amounts[0][0].length);
+  const seat=/^\s*per\s+(?:(?:paid|core|billable)\s+)?(?:seat|user|collaborator)\b/i;
+  const channel=/^\s*per\s+channel\b/i;
   if(unit==='seat'){
-    if(!/\bper\s+(?:(?:paid|core|billable)\s+)?(?:seat|user|collaborator)\b/i.test(sentence))return false;
+    if(!seat.test(pricedTail))return false;
   }else if(unit==='channel'){
-    // Channel-priced subscriptions such as Buffer must not inherit seat or
-    // entire-account prices; the vendor sentence must say "per channel".
-    if(!/\bper\s+channel\b/i.test(sentence))return false;
+    if(!channel.test(pricedTail))return false;
   }else if(unit==='subscription'){
-    if(/\bper\s+(?:(?:paid|core|billable)\s+)?(?:seat|user|collaborator|channel)\b/i.test(sentence))return false;
+    if(!/^\s*(?:per\s+month|monthly\b)/i.test(pricedTail))return false;
   }else return false; // Unknown quote units need editorial proof, not auto edits.
   if(claim.unitQuantity!==undefined&&claim.unitQuantity!==1)return false;
   if(claim.usageTier){
@@ -50,8 +59,11 @@ function verifiedQuoteScope(sentence,claim){
     const singular=String(tier.unit).replace(/s$/i,'');
     const pat=new RegExp('\\b(\\d{1,3}(?:[, ]\\d{3})*|\\d+)\\s+'+escRe(singular)+'s?\\b','gi');
     const matches=[...sentence.matchAll(pat)];
-    // An unqualified or differently sized package may not replace a priced tier.
     if(matches.length!==1||validAmount(matches[0][1])!==tier.quantity)return false;
+    // The paid package must be tied to the quote, not described as a
+    // separate capability elsewhere in the sentence.
+    const tailTier=new RegExp('\\b(?:for|includes?|with)\\s+'+escRe(matches[0][1])+'\\s+'+escRe(singular)+'s?\\b','i');
+    if(!tailTier.test(pricedTail))return false;
     if(tier.period==='day'&&!/\b(?:per|each)\s+day\b|\bdaily\b/i.test(sentence))return false;
     if(tier.period==='year'&&!/\b(?:per|each)\s+year\b|\byearly\b/i.test(sentence))return false;
   }
