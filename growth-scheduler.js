@@ -80,9 +80,15 @@ export async function runGrowthScheduler(event,env,ctx,{delegate=null}={}){
   // failed catalog coverage mission. Normal supplier admission remains hourly;
   // no extra cron or permanently competing admission executor is introduced.
   if(trigger===TOOLSCOUT_CRONS.primaryGrowth){
-    const failedCoverage=await missionNeedsRecovery(env,'catalog','runtime_coverage');
+    const [failedCoverage,failedQuality]=await Promise.all([
+      missionNeedsRecovery(env,'catalog','runtime_coverage'),
+      missionNeedsRecovery(env,'catalog','runtime_quality')
+    ]);
     if(failedCoverage){
       scheduleTask(ctx,runWithLedger(env,{engine:'catalog',mission:'runtime_coverage',triggerName:trigger+':incident_recovery',singleFlightMinutes:8},()=>admitTrustedCandidates(env)));
+    }
+    if(failedQuality){
+      scheduleTask(ctx,runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:trigger+':incident_recovery',singleFlightMinutes:8},()=>verifyCatalogBatch(env)));
     }
   }
 
