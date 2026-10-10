@@ -53,7 +53,7 @@ const SPECIALIST_WORKFLOW_TYPES=[
   {sector:'restaurants',category:'restaurant-pos',proofCapabilities:['restaurant point of sale','restaurant pos','restaurant ordering','kitchen display system'],title:'Restaurant POS and ordering',
     job:'restaurant point of sale software',
     scope:'Restaurant point of sale, ordering and kitchen operations. Check local payments, hardware and required integrations before choosing.'},
-  {sector:'healthcare',context:/\b(veterinary|veterinarian|veterinari[ao]|vet clinic|vet practice|animal hospital)\b/,
+  {sector:'healthcare',context:/\b(veterinary|veterinarians?|veterinari[ao]|vet clinics?|vet practices?|animal hospitals?)\b/,
     category:'veterinary',proofCapabilities:['veterinary medical records','veterinary practice management','veterinary patient records'],title:'Veterinary practice management',
     job:'veterinary practice management software',
     scope:'Clinical records and veterinary practice operations. Check medical workflows, data handling and regional compliance before choosing.'}
