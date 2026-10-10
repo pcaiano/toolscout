@@ -1,4 +1,5 @@
 import http from "node:http";
+import { startPrSheetAutopilot } from "./sheet-autopilot.mjs";
 import { Worker, isMainThread, parentPort, workerData } from "node:worker_threads";
 
 const PORT = Number(process.env.PORT || 10000);
@@ -668,6 +669,8 @@ const server = http.createServer(async (req, res) => {
 
 if (isMainThread) server.listen(PORT, "0.0.0.0", () => {
   console.log(`ToolScout PR Media Crawler listening on ${PORT}`);
+  console.log("PR_AUTOPILOT_CONFIG "+JSON.stringify({enabled:process.env.PR_AUTOPILOT_ENABLED==="1",hasGoogleSheetsCredential:Boolean(process.env.PR_SHEETS_SERVICE_ACCOUNT_JSON)}));
+  startPrSheetAutopilot(crawlMany);
 
   const startupDomains = [...new Set(
     String(process.env.BATCH_DOMAINS || "")
@@ -734,7 +737,7 @@ if (isMainThread) server.listen(PORT, "0.0.0.0", () => {
       .filter(Boolean)
   )].slice(0, 400);
 
-  if (seriesDomains.length) {
+  if (seriesDomains.length && process.env.PR_AUTOPILOT_ENABLED !== "1") {
     (async () => {
       const seriesId = process.env.SERIES_ID || new Date().toISOString();
       console.log("PR_CRAWL_SERIES_START " + JSON.stringify({series_id: seriesId, domains: seriesDomains.length}));
