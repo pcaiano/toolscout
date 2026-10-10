@@ -223,8 +223,7 @@ jobs:
           -- never from the 1,241 discovery leads or new source files.
           SELECT COUNT(*) live_runtime_published
           FROM catalog_runtime_candidates
-          WHERE status IN ('published','admitted_coverage') AND source_status='ok'
-            AND tool_slug NOT IN (SELECT value FROM json_each('[]'));
+          WHERE status IN ('published','admitted_coverage') AND source_status='ok';
           SELECT tool_slug,status,source_status,verified_at
           FROM catalog_runtime_candidates
           WHERE tool_slug IN ('clio-manage','fresha','bqe-core','toast-pos','square-for-restaurants','ezyvet','guesty','hostaway','lodgify','activepieces','appwrite','supabase','metabase','nocodb','baserow','directus','bookstack')
