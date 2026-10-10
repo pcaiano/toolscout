@@ -318,6 +318,7 @@ jobs:
           node --test tests/toolscout-v2-fresha-go-fallback.test.mjs
           node --test tests/toolscout-v2-universal-outbound-contract.test.mjs
           node --test tests/toolscout-v2-wave5-vertical-decision-catalog.test.mjs
+          node --test tests/toolscout-v2-admission-throughput.test.mjs
           node --test tests/toolscout-v2-wave6-documented-catalog.test.mjs
           node --test tests/toolscout-v2-catalog-editorial-buyer-first.test.mjs
           node --test tests/toolscout-v2-openapi-approved-url-contract.test.mjs
