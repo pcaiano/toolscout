@@ -396,7 +396,7 @@
   {
     "slug": "guesty",
     "name": "Guesty",
-    "category": "business",
+    "category": "vacation-rental",
     "description": "Vacation-rental property management software for channel distribution, reservations, calendars, guest messaging and portfolio operations.",
     "pricing": "Portfolio size and optional functions affect total cost; require an itemized offer for channels, user access and operational modules.",
     "freePlan": false,
@@ -406,7 +406,9 @@
       "reservation synchronization",
       "unified guest inbox",
       "multi-calendar",
-      "guest communication"
+      "guest communication",
+      "channel management",
+      "reservation management"
     ],
     "bestFor": [
       "multi-property vacation-rental managers",
@@ -519,13 +521,27 @@
         "status": "verified",
         "sourceUrl": "https://www.guesty.com/features/unified-inbox/",
         "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "channel management",
+        "status": "verified",
+        "sourceUrl": "https://www.guesty.com/features/channel-manager/",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "reservation management",
+        "status": "verified",
+        "sourceUrl": "https://www.guesty.com/features/channel-manager/",
+        "verifiedAt": "2026-10-10"
       }
     ]
   },
   {
     "slug": "hostaway",
     "name": "Hostaway",
-    "category": "business",
+    "category": "vacation-rental",
     "description": "Short-term rental property management platform joining channel reservations, unified guest communications and automated operational tasks.",
     "pricing": "Pricing should be quoted for the actual managed listing count and package, including any operational or messaging add-ons.",
     "freePlan": false,
@@ -535,7 +551,9 @@
       "unified guest inbox",
       "automated guest messaging",
       "cleaning task automation",
-      "reservation synchronization"
+      "reservation synchronization",
+      "channel management",
+      "reservation management"
     ],
     "bestFor": [
       "property managers listing on multiple OTAs",
@@ -648,13 +666,27 @@
         "status": "verified",
         "sourceUrl": "https://www.hostaway.com/features/automation-tools/",
         "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "channel management",
+        "status": "verified",
+        "sourceUrl": "https://www.hostaway.com/features/channel-manager/",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "reservation management",
+        "status": "verified",
+        "sourceUrl": "https://www.hostaway.com/features/channel-manager/",
+        "verifiedAt": "2026-10-10"
       }
     ]
   },
   {
     "slug": "lodgify",
     "name": "Lodgify",
-    "category": "business",
+    "category": "vacation-rental",
     "description": "Vacation-rental software connecting channel calendars with a direct-booking website, reservation engine and payment acceptance.",
     "pricing": "Subscriptions vary with property count and features; compare payment costs and direct-booking setup alongside the chosen plan.",
     "freePlan": false,
@@ -664,7 +696,9 @@
       "direct booking website",
       "booking widget",
       "reservation synchronization",
-      "online payments"
+      "online payments",
+      "channel management",
+      "reservation management"
     ],
     "bestFor": [
       "independent holiday rental owners",
@@ -776,6 +810,20 @@
         "value": "booking widget",
         "status": "verified",
         "sourceUrl": "https://www.lodgify.com/vacation-rental-booking-widget/",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "channel management",
+        "status": "verified",
+        "sourceUrl": "https://www.lodgify.com/vacation-rental-channel-manager/",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "reservation management",
+        "status": "verified",
+        "sourceUrl": "https://www.lodgify.com/vacation-rental-channel-manager/",
         "verifiedAt": "2026-10-10"
       }
     ]
