@@ -251,7 +251,12 @@ function compileRuntimeSnapshot(stateRows=[],candidateRows=[],meta={}){
   const stateMap=new Map((stateRows||[]).map(row=>[String(row.tool_slug),row])),parsed=[];
   const baselineMirrors=new Set((candidateRows||[]).filter(row=>row.source_status==='baseline_snapshot').map(row=>String(row.tool_slug||'').toLowerCase()));
   const verifiedRevisions=new Set((candidateRows||[]).filter(row=>row.source_status==='ok').map(row=>String(row.tool_slug||'').toLowerCase()));
-  for(const row of candidateRows||[]){try{const p=JSON.parse(row.profile_json);if(p)parsed.push(p)}catch{}}
+  for(const row of candidateRows||[]){
+    // A quality hold is a research record, never a published product. This
+    // snapshot powers the public directory, Finder, MCP and individual routes.
+    if(!['published','admitted_coverage'].includes(String(row.status||'')))continue;
+    try{const p=JSON.parse(row.profile_json);if(p)parsed.push(p)}catch{}
+  }
   return{at:Date.now(),candidates:parsed,candidateMap:new Map(parsed.map(x=>[String(x.slug||'').toLowerCase(),x])),stateMap,suppressed:new Set([...stateMap.entries()].filter(([,v])=>v.quality_status==='confirmed_broken').map(([k])=>k)),degraded:Boolean(meta.degraded),lastError:meta.lastError||null,source:meta.source||'d1',baselineMirrors,verifiedRevisions};
 }
 async function writeRuntimeEdgeSnapshot(stateRows,candidateRows){
