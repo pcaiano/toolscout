@@ -1234,7 +1234,7 @@ function recommendationText(data){
     return 'ToolScout has no evidence-qualified recommendation for this request. The catalog may lack a relevant product, a requested requirement may be unverified, or documented product constraints may exclude candidates. No product is shortlisted. Try a narrower workflow, revise the constraints, or compare named tools to see their individual evidence and blockers.';
   if(data?.decision_status==='needs_workflow_selection'&&data.workflow_guidance){
     const g=data.workflow_guidance;
-    const list=(g.workflows||[]).map((w,i)=>String(i+1)+'. '+w.title+': '+w.scope+' ('+w.finder_url+')').join('\n');
+    const list=[...(g.specialist_workflows||[]),...(g.workflows||[])].map((w,i)=>String(i+1)+'. '+w.title+': '+w.scope+' ('+w.finder_url+')').join('\n');
     return 'ToolScout business software analysis for '+data.job+'\n'+g.explanation+'\n'+list+'\n\nSelect a workflow to compare evidence-backed software options. Specialist systems require separate manufacturer proof; affiliate relationships never change rankings.';
   }
   const names=(data?.shortlist||[]).map((r,i)=>`${i+1}. ${r.name} (${r.fit_score}/95 fit, ${r.evidence_confidence} evidence confidence)`).join('\n');
