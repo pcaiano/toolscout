@@ -83,7 +83,14 @@ async function fetchOfficial(url){
     if(!r.ok)return{status:[403,429].includes(r.status)?'blocked_or_limited':'warning',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:null};
     const type=(r.headers.get('content-type')||'').toLowerCase();if(!type.includes('text/html')&&!type.includes('text/plain'))return{status:'warning',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:null};
     const html=(await r.text()).slice(0,500000),title=(html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]||'').replace(/\s+/g,' ').trim(),description=meta(html,'description')||meta(html,'og:description'),text=stripHtml(html).slice(0,14000);
-    return{status:'ok',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:await sha(`${title}\n${description}\n${text}`),title,description,documentText:text,releaseLinks:releaseLinks(html,r.url||u.href)};
+    return{status:'ok',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:await sha(`${title}\n${description}\n${text}`),title,description,documentText:html
+      .replace(/<script[\s\S]*?<\/script>/gi,' ')
+      .replace(/<style[\s\S]*?<\/style>/gi,' ')
+      .replace(/<\/(?:p|li|tr|td|th|h[1-6]|section|div)>/gi,'\n')
+      .replace(/<[^>]+>/g,' ')
+      .replace(/&(?:nbsp|amp|quot|#39);/gi,' ')
+      .replace(/[^\S\n]+/g,' ')
+      .split('\n').map(x=>x.trim()).filter(Boolean).join('\n').slice(0,16000),releaseLinks:releaseLinks(html,r.url||u.href)};
   }catch(e){lastError=e?.name==='AbortError'?'timeout':'network_error'}
   finally{clearTimeout(timer)}
   if(attempt<2)await new Promise(resolve=>setTimeout(resolve,150));
