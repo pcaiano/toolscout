@@ -11,7 +11,7 @@ const {safeJson}=await import('../engine-run-ledger.js');
 test('every scheduled catalog admission and verification has an expiring mission lease',()=>{
  for(const mission of ['runtime_coverage','runtime_quality']){
   const scheduled=scheduler.split('\n').filter(line=>line.includes("mission:'"+mission+"'")&&line.includes('runWithLedger('));
-  assert.equal(scheduled.length,mission==='runtime_coverage'?3:2,mission+' needs normal, hourly recovery and (for coverage) incident recovery entrypoints');
+  assert.equal(scheduled.length,3,mission+' needs normal, hourly recovery and incident recovery entrypoints');
   for(const line of scheduled)assert.match(line,/singleFlightMinutes:8/,mission+' must not leave unbounded running rows');
   const manual=catalog.split('\n').filter(line=>line.includes("mission:'"+mission+"'")&&line.includes("triggerName:'manual_api'"));
   assert.equal(manual.length,2,mission+' needs a lease for both authorized APIs');
@@ -135,4 +135,11 @@ test('Quality verification is budgeted and research intake cannot outlive the mi
  assert.match(intake,/if\(Date\.now\(\)>=deadlineAt\)\{deferred=true;break;\}/);
  assert.match(verify,/cycle_budget_exhausted:cycleBudgetExhausted/);
  assert.match(verify,/verifyManufacturerDocuments\(env,tool/,'first-party document checks still required');
+});
+
+test('Failed quality mission recovers independently on the existing 15-minute control tick',()=>{
+ assert.match(scheduler,/missionNeedsRecovery\(env,'catalog','runtime_quality'\)/);
+ assert.match(scheduler,/if\(failedQuality\)\{\s*scheduleTask\(ctx,runWithLedger\(env,\{engine:'catalog',mission:'runtime_quality',triggerName:trigger\+':incident_recovery',singleFlightMinutes:8\}/);
+ assert.match(scheduler,/\(\)=>verifyCatalogBatch\(env\)/);
+ assert.doesNotMatch(scheduler,/if\(failedCoverage\)[\s\S]{0,200}await runWithLedger\(env,\{engine:'catalog',mission:'runtime_quality'/);
 });
