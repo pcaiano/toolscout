@@ -236,7 +236,9 @@ test('tools directory keeps the intro concise, shows catalog count and spaces AI
   assert.match(html,/Use the directory to narrow the decision\./);
   assert.doesNotMatch(html,/A larger feature list is not automatically better/);
   assert.match(html,/id="catalogCount"/);
-  assert.match(html,/catalogTotal=catalog\.length/);
+  assert.match(html,/catalogTotal=tools\.length/);
+  assert.match(html,/loadJson\('\/api\/catalog-inventory'/);
+  assert.match(html,/rows\.slice\(0,visible\)/);
   assert.match(html,/catalogTotal===1\?'tool':'tools'/);
   assert.match(html,/in catalog/);
   assert.match(html,/\.ai-badge\+\.tool-view\{margin-top:16px\}/);
