@@ -281,8 +281,8 @@ test('Codex P2: manufacturer dossier proof checks both page identity and content
  const section=src.slice(src.indexOf('export async function researchCatalogManufacturerDossiers'),
    src.indexOf('async function syncMarketGaps('));
  assert.match(section,/fingerprints=new Set\(\)/);
- assert.match(section,/fingerprints\.has\(page\.fingerprint\)/);
- assert.match(section,/page\.fingerprint===source\.fingerprint/);
+ assert.match(section,/fingerprints\.has\(page\.researchBodyFingerprint\)/);
+ assert.match(section,/page\.researchBodyFingerprint===source\.researchBodyFingerprint/);
  assert.match(section,/identity===homepageIdentity/);
 });
 
