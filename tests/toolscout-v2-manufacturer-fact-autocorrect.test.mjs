@@ -113,3 +113,14 @@ test('real legacy response cleans reinserted unknown AI sections after injection
  const injected='<section class="section aiInterop" data-ai-interoperability="1"><p>ToolScout has not yet verified this tool integration.</p></section>';
  assert.doesNotMatch(cleanPublicCatalogProfileCopy(injected),/not yet verified|aiInterop/);
 });
+
+test('manufacturer monthly Buffer channel prices retain exact billable channel scope',()=>{
+ const buffer=catalog.find(x=>x.slug==='buffer');
+ const claim=buffer.decisionClaims.find(x=>x.type==='price_quote'&&x.plan==='Essentials'&&x.billingCycle==='monthly'&&x.unit==='channel');
+ assert.ok(claim);
+ const watch=text=>[{url:claim.sourceUrl,status:'ok',documentText:text}];
+ assert.deepEqual(manufacturerFactProposals(buffer,watch('Essentials plan costs $7 per seat per month.')),[]);
+ assert.deepEqual(manufacturerFactProposals(buffer,watch('Essentials plan costs $7 per month per subscription.')),[]);
+ const changes=manufacturerFactProposals(buffer,watch('Essentials plan costs $7 per channel per month.'));
+ assert.equal(changes.find(x=>x.claimKey.includes('Essentials'))?.newValue,7);
+});
