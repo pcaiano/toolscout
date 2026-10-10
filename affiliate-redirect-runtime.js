@@ -84,5 +84,6 @@ export async function handleAffiliateRedirectRoute(request,env,ctx){
 
   const headers=new Headers(response.headers);
   headers.set('X-ToolScout-Commercial-Core','bounded-compat-v1');
+  headers.set('X-ToolScout-Outbound-Release','live-external-only-v2-20261010');
   return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
 }

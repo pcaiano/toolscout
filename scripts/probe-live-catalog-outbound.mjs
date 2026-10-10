@@ -23,7 +23,8 @@ for(let i=1;i<=30;i++){
   const external=target&&target.protocol==='https:'&&
    !/(^|\.)trytoolscout\.org$/i.test(target.hostname);
   const routed=probe.headers.get('X-ToolScout-Route-Owner')==='affiliate_redirect'&&
-   probe.headers.get('X-ToolScout-Commercial-Core')==='bounded-compat-v1';
+   probe.headers.get('X-ToolScout-Commercial-Core')==='bounded-compat-v1'&&
+   probe.headers.get('X-ToolScout-Outbound-Release')==='live-external-only-v2-20261010';
   if(probe.status>=300&&probe.status<400&&external&&routed){
    deploymentReady=true;break;
   }

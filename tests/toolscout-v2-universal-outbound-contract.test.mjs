@@ -120,3 +120,11 @@ test('DECLARED production /go owner repairs every static and published D1 redire
  const embed=healthyProbe('embed'),embedResponse=new Response('widget',{status:200});
  assert.equal(await enforceExternalProductDestination(embed,fixture().env,new URL(embed.url),embedResponse),embedResponse);
 });
+
+test('live /go readiness uses a release marker absent from earlier deployments',()=>{
+ const owner=fs.readFileSync(new URL('../affiliate-redirect-runtime.js',import.meta.url),'utf8');
+ const probe=fs.readFileSync(new URL('../scripts/probe-live-catalog-outbound.mjs',import.meta.url),'utf8');
+ assert.match(owner,/X-ToolScout-Outbound-Release','live-external-only-v2-20261010/);
+ assert.match(probe,/probe\.headers\.get\('X-ToolScout-Outbound-Release'\)==='live-external-only-v2-20261010'/);
+ assert.match(probe,/for\(let i=1;i<=30;i\+\+\)/);
+});
