@@ -124,7 +124,8 @@ function retireExactCapabilitySentence(value,capability){
   for(const original of sentences){
     if(!mention.test(original)){rewritten.push(original);continue}
     // When a sentence is *about* the retired feature, drop that claim only.
-    if(new RegExp('^\\s*'+escaped+'\\b','i').test(original))continue;
+    if(new RegExp('^\\s*'+escaped+'\\b','i').test(original)||
+      new RegExp('^\\s*(?:test|check|verify|validate|review|evaluate|confirm|compare)\\s+'+escaped+'\\b','i').test(original))continue;
     let rest=original;
     const patterns=[
       [new RegExp(',\\s*'+escaped+'\\s*,','gi'),','],
