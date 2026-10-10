@@ -14,6 +14,7 @@ const MAX_NEWS_SOURCE_CHECKS_PER_CYCLE=4;
 const MAX_ADMIT_PER_DAY=6;
 const MAX_BASELINE_SEED_PER_CYCLE=40; // bounded migration inside the existing catalog autonomy engine
 const MAX_CANDIDATE_CHECKS_PER_CYCLE=12;
+const MAX_RESEARCH_SEEDS_PER_CYCLE=80; // hourly discovery intake; never bypasses manufacturer/editorial admission
 const WARNING_RETRY_HOURS=6;
 const MAX_WARNING_RETRIES_PER_CYCLE=2;
 const FETCH_TIMEOUT_MS=6000;
@@ -466,7 +467,12 @@ export async function verifyBatch(env){
       .bind(slug,verifyUrl,result.status,result.httpStatus,result.finalUrl,canonicalFingerprint,pendingFingerprint,confirmations,contentChanged,broken,quality,staticVerified,lastChange).run();
   });
   runtimeCache.at=0;
-  return{ok:true,checked,healthy,changed,suppressed,warnings,documentation_checked:documentationChecked,documentation_baselined:documentationBaselined,documentation_changed:documentationChanged,documentation_warnings:documentationWarnings,verified_facts_corrected:factsCorrected,verified_fact_proposals:factsProposed,batch_limit:MAX_VERIFY_PER_CYCLE,warning_retry_hours:WARNING_RETRY_HOURS,max_warning_retries_per_cycle:MAX_WARNING_RETRIES_PER_CYCLE,evidence:'official_homepage_and_first_party_documentation',write_policy:'due_check_only'};
+  const researchSupply=await syncCatalogResearchSupply(env,{knownTools:all}).catch(async error=>{
+    const reason=safeText(error?.message||error,250);
+    await logEvent(env,null,'catalog_research_supply_failed','failed','Bounded discovery intake failed without blocking ongoing official document verification.',{error:reason});
+    return{ok:false,reason,staged:0};
+  });
+  return{ok:true,checked,healthy,changed,suppressed,warnings,documentation_checked:documentationChecked,documentation_baselined:documentationBaselined,documentation_changed:documentationChanged,documentation_warnings:documentationWarnings,verified_facts_corrected:factsCorrected,verified_fact_proposals:factsProposed,batch_limit:MAX_VERIFY_PER_CYCLE,warning_retry_hours:WARNING_RETRY_HOURS,max_warning_retries_per_cycle:MAX_WARNING_RETRIES_PER_CYCLE,evidence:'official_homepage_and_first_party_documentation',write_policy:'due_check_only',research_supply:researchSupply};
 }
 function validCandidate(candidate,config){
   const allowed=new Set(config?.admission?.allowedCatalogCategories||[]);
@@ -533,6 +539,48 @@ export function catalogCandidateResearchPriority(candidate,affiliateStatus=null,
     if(raw&&!/pending|unknown|none|not available|no program/.test(raw)){affiliate=knownAffiliate;affiliateSignal='candidate_program_evidence'}
   }
   return{score:ai+affiliate+(ai>0&&affiliate>0?combo:0),ai,affiliate,aiSignal,affiliateSignal};
+}
+// Directory discovery is a supply signal, not proof of manufacturer features,
+// commercial terms, two independent demand signals or decision-grade editorial.
+// Stage leads in the existing D1 market-gap queue without publishing any tool.
+export function selectCatalogResearchLeads(leads,existingGapSlugs=[],knownToolSlugs=[],limit=MAX_RESEARCH_SEEDS_PER_CYCLE){
+  const excluded=new Set([...existingGapSlugs,...knownToolSlugs].map(x=>String(x||'').toLowerCase()));
+  const seen=new Set(),selected=[];
+  for(const lead of Array.isArray(leads)?leads:[]){
+    const slug=String(lead?.slug||'').toLowerCase(),candidateUrl=String(lead?.candidateUrl||'');
+    if(!/^[a-z0-9][a-z0-9-]*$/.test(slug)||seen.has(slug)||excluded.has(slug))continue;
+    const u=publicHttps(candidateUrl);
+    if(!u||!u.hostname||/\s/.test(candidateUrl))continue;
+    seen.add(slug);
+    selected.push({slug,candidateUrl:u.href});
+    if(selected.length>=Math.max(1,Math.min(200,Number(limit)||MAX_RESEARCH_SEEDS_PER_CYCLE)))break;
+  }
+  return selected;
+}
+export async function syncCatalogResearchSupply(env,{knownTools=null,limit=MAX_RESEARCH_SEEDS_PER_CYCLE}={}){
+  await ensureSchema(env);
+  const directory=await assetJson(env,'/data/catalog-research-seeds-scale.json',null);
+  if(directory?.schemaVersion!==1||directory?.status!=='research_only_not_catalog'||!Array.isArray(directory.candidates))
+    return{ok:false,reason:'research_supply_asset_unavailable_or_invalid',staged:0};
+  const gaps=await env.DB.prepare('SELECT tool_slug FROM catalog_market_gaps').all();
+  const known=Array.isArray(knownTools)?knownTools:await mergedTools(env);
+  const existing=(gaps.results||[]).map(x=>x.tool_slug);
+  const selected=selectCatalogResearchLeads(directory.candidates,existing,known.map(x=>x.slug),limit);
+  let staged=0;
+  for(const lead of selected){
+    const result=await env.DB.prepare(`INSERT OR IGNORE INTO catalog_market_gaps
+      (tool_slug,signals,sources_json,examples_json,status,updated_at)
+      VALUES(?,1,?,?,'research_required',datetime('now'))`)
+      .bind(lead.slug,JSON.stringify(['awesome-selfhosted-directory']),JSON.stringify([lead.candidateUrl])).run();
+    staged+=Number(result?.meta?.changes||result?.changes||0);
+  }
+  if(staged>0)await logEvent(env,null,'catalog_research_supply_staged','completed',
+    'Research-only directory leads were queued without manufacturer proof, editorial admission, public profiles or monetized links.',
+    {staged,source:'awesome-selfhosted-directory',directory_leads:directory.candidates.length,
+      existing_before:existing.length,max_per_cycle:MAX_RESEARCH_SEEDS_PER_CYCLE});
+  return{ok:true,staged,source:'awesome-selfhosted-directory',
+    directory_leads:directory.candidates.length,queued_before:existing.length,
+    admission:'blocked_until_decision_grade_first_party_evidence',max_per_cycle:MAX_RESEARCH_SEEDS_PER_CYCLE};
 }
 async function syncMarketGaps(env){
   const report=await assetJson(env,'/reports/competitive-gap-signals.json',{gaps:[]});
