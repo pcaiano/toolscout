@@ -56,17 +56,18 @@ export function trustedManufacturerEvidence(tool,{decisionGrade=false}={}) {
     (tool.tradeoffs||[]).length>=1&&Boolean(tool.pricingDetails?.freePlanStatus)&&hasManufacturerDecisionClaim(tool);
 }
 
+
 function sameManufacturerHost(url,home){
   try{
     const link=new URL(String(url||'')),manufacturer=new URL(String(home||''));
     if(link.protocol!=='https:'||manufacturer.protocol!=='https:')return false;
-    const a=link.hostname.toLowerCase().replace(new RegExp('^www[.]'),'');
-    const b=manufacturer.hostname.toLowerCase().replace(new RegExp('^www[.]'),'');
+    const a=link.hostname.toLowerCase().replace(/^www[.]/,'');
+    const b=manufacturer.hostname.toLowerCase().replace(/^www[.]/,'');
     return a===b||a.endsWith('.'+b);
   }catch{return false}
 }
-// Every URL below has already been part of the candidate's dated internal
-// manufacturer evidence. This fallback cannot broaden to arbitrary websites.
+// Fallbacks must be dated internal first-party manufacturer evidence and
+// must not include an arbitrary promotional homepage or outside review site.
 export function trustedCandidateOfficialFallbackUrls(candidate){
   if(!trustedManufacturerEvidence(candidate,{decisionGrade:true}))return [];
   const home=candidate.sourceUrl,review=candidate.editorialReview||{};
@@ -78,7 +79,7 @@ export function trustedCandidateOfficialFallbackUrls(candidate){
     try{u=new URL(url)}catch{continue}
     if(u.pathname==='/'||!sameManufacturerHost(url,home))continue;
     if(!evidence.some(row=>row?.claimScope==='toolscout_editorial_review'&&
-      row?.sourceUrl===url&&new RegExp('^[0-9]{4}-[0-9]{2}-[0-9]{2}
+      row?.sourceUrl===url&&/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(String(row.verifiedAt||''))))continue;
     if(!result.includes(url))result.push(url);
     if(result.length>=2)break;
   }
@@ -89,7 +90,8 @@ export async function fetchTrustedCandidateOfficialSource(candidate){
   const original=await fetchOfficial(home);
   if(original.status==='ok'&&sameManufacturerHost(original.finalUrl,home))
     return {...original,selectedSource:'manufacturer_home'};
-  for(const url of trustedCandidateOfficialFallbackUrls(candidate)){
+  const docs=trustedCandidateOfficialFallbackUrls(candidate);
+  for(const url of docs){
     const proof=await fetchOfficial(url);
     if(proof.status==='ok'&&sameManufacturerHost(proof.finalUrl,home)){
       try{
@@ -99,30 +101,7 @@ export async function fetchTrustedCandidateOfficialSource(candidate){
     }
   }
   return {...original,status:original.status==='ok'?'untrusted_redirect':original.status,
-    selectedSource:'none',fallbackDocumentsAttempted:trustedCandidateOfficialFallbackUrls(candidate).length};
-}
-).test(String(row.verifiedAt||''))))continue;
-    if(!result.includes(url))result.push(url);
-    if(result.length>=2)break;
-  }
-  return result;
-}
-export async function fetchTrustedCandidateOfficialSource(candidate){
-  const home=candidate?.sourceUrl;
-  const original=await fetchOfficial(home);
-  if(original.status==='ok'&&sameManufacturerHost(original.finalUrl,home))
-    return {...original,selectedSource:'manufacturer_home'};
-  for(const url of trustedCandidateOfficialFallbackUrls(candidate)){
-    const proof=await fetchOfficial(url);
-    if(proof.status==='ok'&&sameManufacturerHost(proof.finalUrl,home)){
-      try{
-        if(new URL(proof.finalUrl).pathname!=='/')
-          return {...proof,selectedSource:'manufacturer_document'};
-      }catch{}
-    }
-  }
-  return {...original,status:original.status==='ok'?'untrusted_redirect':original.status,
-    selectedSource:'none',fallbackDocumentsAttempted:trustedCandidateOfficialFallbackUrls(candidate).length};
+    selectedSource:'none',fallbackDocumentsAttempted:docs.length};
 }
 function stripHtml(html){return String(html||'').replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/&[a-z#0-9]+;/gi,' ').replace(/\s+/g,' ').trim()}
 function meta(html,name){const a=new RegExp(`<meta[^>]+(?:name|property)=["']${name}["'][^>]+content=["']([^"']+)["']`,'i'),b=new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]+(?:name|property)=["']${name}["']`,'i');return (String(html).match(a)?.[1]||String(html).match(b)?.[1]||'').trim()}
