@@ -96,7 +96,8 @@
       "ecommerce",
       "design",
       "content",
-      "business"
+      "business",
+      "vacation-rental"
     ],
     "allowTrustedEnrichmentFiles": true,
     "autoAdmitTrustedCandidates": true,
@@ -174,7 +175,8 @@
     "data/catalog-wave1-enrichment-final.json",
     "data/catalog-wave2-enrichment.json",
     "data/catalog-wave3-enrichment.json",
-    "data/catalog-wave4-decision-ready.json"
+    "data/catalog-wave4-decision-ready.json",
+    "data/catalog-wave5-decision-ready.json"
   ],
   "discovery": {
     "useCompetitiveGapSignals": true,
