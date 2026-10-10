@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {TOOLSCOUT_CRONS,SCHEDULED_MISSIONS,missionOwner,scheduleContract} from '../runtime-schedule-contract.js';
+import {TOOLSCOUT_CRONS,SCHEDULED_MISSIONS,missionOwner,cronMatches,scheduleContract} from '../runtime-schedule-contract.js';
 
 const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
@@ -138,4 +138,14 @@ test('runtime schedule contract is observable from the entrypoint',()=>{
   const compute=read('compute-router-worker.js');
   assert.match(compute,/\/api\/runtime\/schedule-contract/);
   assert.match(compute,/scheduleContract\(\)/);
+});
+
+test('catalog recovery cadence is owned by existing growth scheduler on all declared crons',()=>{
+ const coverage=SCHEDULED_MISSIONS.catalog_runtime_coverage;
+ assert.equal(coverage.owner,'growth_scheduler');
+ assert.equal(coverage.plane,'executor');
+ assert.deepEqual(coverage.cron,[TOOLSCOUT_CRONS.daily,TOOLSCOUT_CRONS.hourly,TOOLSCOUT_CRONS.primaryGrowth]);
+ for(const cron of coverage.cron)assert.equal(cronMatches('catalog_runtime_coverage',cron),true);
+ assert.equal(cronMatches('catalog_runtime_coverage',TOOLSCOUT_CRONS.renderKeepalive),false);
+ assert.match(coverage.subcadence,/15m_failed_incident_only/);
 });
