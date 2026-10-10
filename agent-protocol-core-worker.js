@@ -57,7 +57,7 @@ function toolDefinitions(){
           country:{type:'string',pattern:'^[A-Z]{2}$',description:'ISO 3166-1 alpha-2 country for a geographically verified price; missing regional evidence cannot qualify.'},
           seat_count:{type:'integer',minimum:1,maximum:100,description:'Exact paid seat count used only for explicitly labelled before-tax subscription subtotals.'},
           team:{type:'string',enum:['solo','small','team','large','agency']},
-          priorities:{type:'array',maxItems:6,uniqueItems:true,items:{type:'string',enum:['price','ease','automation','integrations','sales','ai','marketing','seo','research','content','agency']}},
+          priorities:{type:'array',maxItems:6,uniqueItems:true,items:{type:'string',enum:['price','ease','automation','integrations','sales','ai','marketing','seo','research','content','agency','features']}},
           existing_tools:{type:'array',maxItems:12,items:{type:'string',minLength:1,maxLength:100}},
           require_stack_fit:{type:'boolean',description:'When true, every existing tool must have a documented, plan-compatible named integration; otherwise fail closed.'},
           limit:{type:'integer',minimum:2,maximum:5,default:3}
@@ -78,7 +78,7 @@ function toolDefinitions(){
           must_have:{type:'array',maxItems:12,items:{type:'string',minLength:1,maxLength:100}},
           budget:{type:'string',enum:['free','low','mid','high']},
           team:{type:'string',enum:['solo','small','team','large','agency']},
-          priorities:{type:'array',maxItems:6,uniqueItems:true,items:{type:'string',enum:['price','ease','automation','integrations','sales','ai','marketing','seo','research','content','agency']}},
+          priorities:{type:'array',maxItems:6,uniqueItems:true,items:{type:'string',enum:['price','ease','automation','integrations','sales','ai','marketing','seo','research','content','agency','features']}},
           existing_tools:{type:'array',maxItems:12,items:{type:'string',minLength:1,maxLength:100}},
           require_stack_fit:{type:'boolean',description:'Require evidence for every named existing-stack integration to award a winner.'}
         }
@@ -207,7 +207,7 @@ function validToolArguments(name,a){
   if(!a||typeof a!=='object'||Array.isArray(a))return 'arguments must be an object';
   const validBudget=v=>v===undefined||['free','low','mid','high'].includes(v);
   const validTeam=v=>v===undefined||['solo','small','team','large','agency'].includes(v);
-  const validPriorities=v=>v===undefined||(Array.isArray(v)&&v.length<=6&&new Set(v).size===v.length&&v.every(x=>['price','ease','automation','integrations','sales','ai','marketing','seo','research','content','agency'].includes(x)));
+  const validPriorities=v=>v===undefined||(Array.isArray(v)&&v.length<=6&&new Set(v).size===v.length&&v.every(x=>['price','ease','automation','integrations','sales','ai','marketing','seo','research','content','agency','features'].includes(x)));
   const validStrings=(v,maxItems,maxLen)=>v===undefined||(Array.isArray(v)&&v.length<=maxItems&&v.every(x=>typeof x==='string'&&x.trim()&&x.length<=maxLen));
   if(name==='recommend_tools')return validRecommendArguments(a);
   if(name==='decide_software'){
@@ -367,7 +367,8 @@ const DECISION_DIMENSIONS=Object.freeze({
   seo:['seo','search engine','keyword','keywords','organic'],
   research:['research','analysis','analytics','insight','insights'],
   content:['content','writing','newsletter','publishing','creative'],
-  agency:['agency','agencies','client','clients']
+  agency:['agency','agencies','client','clients'],
+  features:['features','feature depth','functionality','functional depth']
 });
 const STOP_WORDS=new Set(['the','and','for','with','that','this','from','into','our','your','you','my','we','software','tool','tools','app','apps','need','want','best','right','which','use','using','to','of','a','an','in','on','or','is','are']);
 function clamp(n,min,max){return Math.max(min,Math.min(max,n))}
@@ -821,10 +822,14 @@ function decisionEvaluation(tool,args){
 }
 function decisionCandidates(tools,args){
   const evaluated=tools.map(t=>qualifyDecision(decisionEvaluation(t,args),args));
-  const profile=jobIntentProfile(tools,args.job||args.use_case||'');
+  // Only an explicitly selected Finder goal is a hard category gate.
+  // Do not force heuristic categories inferred from the free-form job.
+  const selectedGoal=catalogNormalize(args.goal||'');
+  const profile=jobIntentProfile(tools,selectedGoal||args.job||args.use_case||'');
   const relevant=evaluated.filter(x=>{
     const source=tools.find(t=>t.slug===x.slug);
-    return source&&source.rankingEligible!==false&&!source.categoryReviewRequired&&(source.category!=='vacation-rental'||verifiedPmsCandidates([source]).length>0)?matchesJobIntent(source,profile):false;
+    return source&&source.rankingEligible!==false&&!source.categoryReviewRequired&&(source.category!=='vacation-rental'||verifiedPmsCandidates([source]).length>0)
+      ?(selectedGoal?catalogNormalize(source.category)===selectedGoal:matchesJobIntent(source,profile)):false;
   });
   // 'must_have' is a hard gate. A product with unverified requirements can be
   // compared explicitly but must not appear as a qualified recommendation.
