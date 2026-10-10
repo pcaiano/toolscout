@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {selectCatalogResearchLeads,syncCatalogResearchSupply,classifyMarketGapEvidence,candidatePage}
   from '../catalog-autonomy-worker.js';
+import {executeCatalogGrowthTask} from '../catalog-gap-runtime-worker.js';
 
 const directory=JSON.parse(fs.readFileSync(new URL('../data/catalog-research-seeds-scale.json',import.meta.url),'utf8'));
 const baseline=JSON.parse(fs.readFileSync(new URL('../data/tools.json',import.meta.url),'utf8'));
@@ -99,4 +100,46 @@ test('catalog market-gap intake persists taxonomy as discovery only and cannot d
   assert.match(block,/ELSE excluded\.status END/);
   assert.match(block,/catalog_market_gaps\.status IN \('published','admitted_coverage','covered','covered_existing'\)/);
   assert.doesNotMatch(block,/ELSE 'research_required' END/,'unqualified taxonomy must not be re-promoted on each sync');
+});
+
+
+test('Codex: two subdomains of a single publisher cannot impersonate independent product demand',()=>{
+ const mirrored={slug:'sample-app',sources:['Directory A','Directory B'],exampleUrls:[
+   'https://www.directorya.example/tools/sample-app',
+   'https://de.directorya.example/tools/sample-app'
+ ]};
+ const outcome=classifyMarketGapEvidence(mirrored);
+ assert.equal(outcome.status,'discovery_only');
+ assert.ok(outcome.independent_product_hosts<2);
+ const mismatched={slug:'sample-app',sources:['Directory A','Directory B'],exampleUrls:[
+   'https://unrelated-one.example/tools/sample-app',
+   'https://unrelated-two.example/tools/sample-app'
+ ]};
+ assert.equal(classifyMarketGapEvidence(mismatched).status,'discovery_only');
+});
+
+test('Codex: a stale execution contract cannot promote a demoted taxonomy market gap',async()=>{
+ const calls=[];
+ const env={
+   ASSETS:{fetch:async()=>Response.json([])},
+   DB:{prepare(sql){
+     calls.push(sql);
+     return{
+       bind(){return{
+         first:async()=>sql.includes('SELECT signals,sources_json,examples_json,status')?
+           {signals:2,sources_json:'["Source A","Source B"]',examples_json:'[]',status:'discovery_only'}:null,
+         run:async()=>{throw Error('stale demoted gap must never be mutated')}
+       }}
+     };
+   }}
+ };
+ const result=await executeCatalogGrowthTask(env,{subject_type:'catalog_gap',subject_key:'audio-editor'});
+ assert.equal(result.ok,true);
+ assert.equal(result.admitted,false);
+ assert.equal(result.reason,'market_gap_not_product_qualified');
+ assert.ok(!calls.some(sql=>/UPDATE catalog_market_gaps/.test(sql)));
+ const src=fs.readFileSync(new URL('../catalog-gap-runtime-worker.js',import.meta.url),'utf8');
+ assert.match(src,/reason:'market_gap_demoted_during_research'/,
+  'long-running manufacturer fetches must recheck the original product identity before publishing');
+ assert.match(src,/WHERE tool_slug=\? AND status='research_required'/);
 });
