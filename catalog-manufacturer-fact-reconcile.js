@@ -115,7 +115,7 @@ export function reconcileManufacturerFacts(tool,changes,previous,{today=new Date
     if(!claim)continue;
     if(item.type==='capability_retired'&&claim.value===item.oldValue&&!claim.plan){
       const remaining=(updated.features||[]).filter(value=>String(value).toLowerCase()!==String(item.oldValue).toLowerCase());
-      if(remaining.length<3)continue; // Retain minimum public profile depth.
+      if(remaining.length<3||(updated.decisionClaims||[]).filter(other=>other!==claim&&other.status==='verified').length===0)continue; // Retain minimum public profile depth.
       claim.status='retired';claim.verifiedAt=today;
       updated.features=remaining;
       updated.description=retireExactCapabilitySentence(updated.description,item.oldValue);
