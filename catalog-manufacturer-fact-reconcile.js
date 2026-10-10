@@ -38,20 +38,30 @@ function verifiedQuoteScope(sentence,claim){
   if(!symbol)return false;
   const amounts=[...sentence.matchAll(new RegExp(escRe(symbol)+'\\s*\\d+(?:[,.]\\d{1,2})?','g'))];
   if(amounts.length!==1)return false;
-  // Only the price phrase determines the billed unit. Later plan facts may
-  // describe accounts or workspaces without changing the meaning of the quote.
-  // Bind the billing unit directly to the quoted amount. A separate mention
-  // of "per channel" in the same sentence is not proof of channel pricing.
-  const pricedTail=sentence.slice(amounts[0].index+amounts[0][0].length);
-  const seat=/^\s*per\s+(?:(?:paid|core|billable)\s+)?(?:seat|user|collaborator)\b/i;
-  const channel=/^\s*per\s+channel\b/i;
+  // Read only the quoted price phrase. Follow-on statements about account,
+  // workspace or channel features must never change its billing unit.
+  const before=sentence.slice(0,amounts[0].index);
+  const after=sentence.slice(amounts[0].index+amounts[0][0].length);
+  const pricePhrase=after.split(/\s+(?:and|but|while|whereas|which|plus)\b|[;,]/i,1)[0].trim();
+  const monthly='(?:per\\s+month|each\\s+month|monthly)';
+  const seat='per\\s+(?:(?:paid|core|billable)\\s+)?(?:seat|user|collaborator)';
+  const channel='per\\s+channel';
+  // Support either order: "$7 per channel per month" and "$7 per month per
+  // channel". Require both within the price phrase, not elsewhere in the copy.
+  function scoped(unitPattern){
+    const first=new RegExp('^'+unitPattern+'\\b(?:\\s+'+monthly+'\\b)?(?:\\s|$)','i');
+    const second=new RegExp('^'+monthly+'\\b\\s+'+unitPattern+'\\b(?:\\s|$)','i');
+    return first.test(pricePhrase)||second.test(pricePhrase);
+  }
   if(unit==='seat'){
-    if(!seat.test(pricedTail))return false;
+    if(!scoped(seat))return false;
   }else if(unit==='channel'){
-    if(!channel.test(pricedTail))return false;
+    if(!scoped(channel))return false;
   }else if(unit==='subscription'){
-    if(!/^\s*(?:per\s+month|monthly\b)/i.test(pricedTail))return false;
-  }else return false; // Unknown quote units need editorial proof, not auto edits.
+    // Subscription quotes must not silently borrow a priced seat or channel.
+    if(!new RegExp('^'+monthly+'\\b','i').test(pricePhrase))return false;
+    if(new RegExp('^'+monthly+'\\b\\s+per\\s+(?:(?:paid|core|billable)\\s+)?(?:seat|user|collaborator|channel|account)\\b','i').test(pricePhrase))return false;
+  }else return false;
   if(claim.unitQuantity!==undefined&&claim.unitQuantity!==1)return false;
   if(claim.usageTier){
     const tier=claim.usageTier;
@@ -60,10 +70,13 @@ function verifiedQuoteScope(sentence,claim){
     const pat=new RegExp('\\b(\\d{1,3}(?:[, ]\\d{3})*|\\d+)\\s+'+escRe(singular)+'s?\\b','gi');
     const matches=[...sentence.matchAll(pat)];
     if(matches.length!==1||validAmount(matches[0][1])!==tier.quantity)return false;
-    // The paid package must be tied to the quote, not described as a
-    // separate capability elsewhere in the sentence.
-    const tailTier=new RegExp('\\b(?:for|includes?|with)\\s+'+escRe(matches[0][1])+'\\s+'+escRe(singular)+'s?\\b','i');
-    if(!tailTier.test(pricedTail))return false;
+    // An exact package is valid before or after the amount, provided it is
+    // linked by "for" in that very price clause. A stray unrelated quota
+    // elsewhere in the sentence is not sufficient.
+    const tierText=escRe(matches[0][1])+'\\s+'+escRe(singular)+'s?';
+    const beforeQuote=new RegExp('\\b'+tierText+'\\s+for\\s*$','i').test(before);
+    const afterQuote=new RegExp('\\bfor\\s+'+tierText+'\\b','i').test(pricePhrase);
+    if(!beforeQuote&&!afterQuote)return false;
     if(tier.period==='day'&&!/\b(?:per|each)\s+day\b|\bdaily\b/i.test(sentence))return false;
     if(tier.period==='year'&&!/\b(?:per|each)\s+year\b|\byearly\b/i.test(sentence))return false;
   }

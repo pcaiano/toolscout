@@ -153,3 +153,39 @@ test('separate account and workspace facts do not suppress a correctly scoped mo
  const quoted=manufacturerFactProposals(buffer,[{url:channel.sourceUrl,status:'ok',documentText:'Essentials plan costs $7 per channel per month and includes one workspace per account.'}]);
  assert.equal(quoted.find(x=>x.type==='price_quote')?.newValue,7);
 });
+
+test('price quotes accept monthly-before-unit order without accepting an unrelated billing unit',()=>{
+ const buffer=catalog.find(x=>x.slug==='buffer');
+ const b=buffer.decisionClaims.find(x=>x.type==='price_quote'&&x.plan==='Essentials'&&x.billingCycle==='monthly'&&x.unit==='channel');
+ const watch=(source,text)=>[{url:source,status:'ok',documentText:text}];
+ for(const phrase of [
+  'Essentials plan costs $7 per month per channel.',
+  'Essentials plan costs $7 monthly per channel.',
+  'Essentials plan costs $7 per channel per month and includes one workspace per account.'
+ ])assert.equal(manufacturerFactProposals(buffer,watch(b.sourceUrl,phrase)).find(x=>x.type==='price_quote'&&x.claimKey.includes('Essentials'))?.newValue,7,phrase);
+ for(const phrase of [
+  'Essentials plan costs $99 per month per seat and supports management per channel.',
+  'Essentials plan costs $7 per month per subscription and enables per channel scheduling.',
+  'Essentials plan costs $7 per month but supports an independent price per channel.'
+ ])assert.deepEqual(manufacturerFactProposals(buffer,watch(b.sourceUrl,phrase)),[],phrase);
+ const hubspot=catalog.find(x=>x.slug==='hubspot');
+ const seat=hubspot.decisionClaims.find(x=>x.type==='price_quote'&&x.plan==='Starter'&&x.billingCycle==='monthly'&&x.currency==='EUR');
+ assert.equal(manufacturerFactProposals(hubspot,watch(seat.sourceUrl,'Starter plan costs €25 monthly per seat and includes 1000 contacts per account.')).find(x=>x.type==='price_quote')?.newValue,25);
+ assert.deepEqual(manufacturerFactProposals(hubspot,watch(seat.sourceUrl,'Starter plan costs €25 monthly per channel and includes per-seat user reports.')),[]);
+});
+test('usage tier is coupled to price whether manufacturer states exact credits before or after it',()=>{
+ const make=catalog.find(x=>x.slug==='make');
+ const core=make.decisionClaims.find(x=>x.type==='price_quote'&&x.plan==='Core'&&x.billingCycle==='monthly');
+ const watch=text=>[{url:core.sourceUrl,status:'ok',documentText:text}];
+ for(const phrase of [
+  'Core: 10000 credits for $14 per month.',
+  'Core plan: 10,000 credits for $14 monthly.',
+  'Core plan costs $14 per month for 10000 credits.'
+ ])assert.equal(manufacturerFactProposals(make,watch(phrase)).find(x=>x.type==='price_quote'&&x.claimKey.includes('Core'))?.newValue,14,phrase);
+ for(const phrase of [
+  'Core plan: 100 credits for $5 per month.',
+  'Core plan: 10000 credits with $14 per month.',
+  'Core plan costs $5 per month and includes 10000 credits.',
+  'Core plan: 10000 credits for $14 per seat per month.'
+ ])assert.deepEqual(manufacturerFactProposals(make,watch(phrase)),[],phrase);
+});
