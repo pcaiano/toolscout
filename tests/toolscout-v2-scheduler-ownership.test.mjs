@@ -160,3 +160,29 @@ test('quality recovery uses existing quarter-hour cron and the one growth schedu
  for(const cron of entry.cron)assert.equal(cronMatches('catalog_runtime_quality',cron),true);
  assert.match(entry.subcadence,/15m_failed_incident_only/);
 });
+
+
+test('authority hourly chain is not starved by unrelated newsletter, SEO, or linkable work',()=>{
+  const compute=read('compute-router-worker.js');
+  const chain=compute.slice(compute.indexOf('const authorityChain=(async()=>{'),compute.indexOf('const combined=Promise.allSettled([growth,authority,primary,seo,newsletterSync,linkableResearch,authorityChain])'));
+  assert.ok(chain.startsWith('const authorityChain=(async()=>{'));
+  assert.doesNotMatch(chain,/await Promise\.allSettled\(\[growth,authority,primary,seo,newsletterSync,linkableResearch\]\)/);
+  assert.match(chain,/Promise\.allSettled\(\[authority,primary\]\)\.then/);
+  assert.match(chain,/preparationTimer=setTimeout\(\(\)=>resolve\('deadline'\),30000\)/);
+  assert.match(compute,/const combined=Promise\.allSettled\(\[growth,authority,primary,seo,newsletterSync,linkableResearch,authorityChain\]\)/);
+});
+
+test('authority sender work precedes the closed-loop check and has a bounded observation window',()=>{
+  const compute=read('compute-router-worker.js');
+  const chain=compute.slice(compute.indexOf('const authorityChain=(async()=>{'),compute.indexOf('const combined=Promise.allSettled([growth,authority,primary,seo,newsletterSync,linkableResearch,authorityChain])'));
+  const drain=chain.indexOf('const drain=runAuthorityDrainScheduled(');
+  const closedLoop=chain.indexOf('await runGrowthClosedLoopScheduled(');
+  assert.ok(drain>0&&closedLoop>drain);
+  assert.match(chain,/if\(ctx\?\.waitUntil\)ctx\.waitUntil\(drain\)/);
+  assert.match(chain,/drainTimer=setTimeout\(\(\)=>resolve\('deadline'\),45000\)/);
+  assert.match(chain,/authority_hourly_preparation_deferred/);
+  assert.match(chain,/authority_drain_window_exhausted/);
+  assert.match(chain,/authority_closed_loop_scheduler_failed/);
+  assert.equal(SCHEDULED_MISSIONS.authority_closed_loop.owner,'growth_runtime_closed_loop');
+  assert.equal(SCHEDULED_MISSIONS.authority_closed_loop.cron,TOOLSCOUT_CRONS.hourly);
+});
