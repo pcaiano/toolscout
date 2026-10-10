@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {trustedManufacturerEvidence,candidatePage,unpublishedReadyCatalogSlugs} from '../catalog-autonomy-worker.js';
 import {hasManufacturerDecisionClaim,structuralCatalogIssues} from '../catalog-quality-runtime.js';
+import {transformPublicRedesignResponse} from '../public-redesign-runtime.js';
 const tools=JSON.parse(fs.readFileSync(new URL('../data/catalog-wave4-decision-ready.json',import.meta.url),'utf8'));
 const original=JSON.parse(fs.readFileSync(new URL('../data/tools.json',import.meta.url),'utf8'));
 const engine=JSON.parse(fs.readFileSync(new URL('../data/catalog-engine.json',import.meta.url),'utf8'));
@@ -26,23 +27,39 @@ test('catalog cohort supplies distinct new vendor-documented tools for canonical
    assert.equal(tool.comparisonEligible,true);
  }
 });
-test('dynamic catalog profiles use one dark ToolScout 2.0 navigation shell and never publish manufacturer sources',()=>{
+test('dynamic profiles reuse the original profile content shell, and the global transform owns the one 2.0 header',async()=>{
+ const staticHtml=fs.readFileSync(new URL('../tools/figma.html',import.meta.url),'utf8');
+ const staticCss=staticHtml.match(/<style>([\s\S]*?)<\/style>/)?.[1];
+ assert.ok(staticCss?.length>2500);
  for(const tool of tools){
-   const html=candidatePage(tool);
-   assert.equal((html.match(/class="ts2-global-nav"/g)||[]).length,1,tool.slug);
+   const raw=candidatePage(tool);
+   assert.equal((raw.match(/class="ts2-global-nav"/g)||[]).length,0,tool.slug+' no standalone nav');
+   assert.doesNotMatch(raw,/data-toolscout-public-redesign="2"/,tool.slug+' global design stylesheet must be injected by the shared transform');
+   assert.match(raw,/data-toolscout-redesign="2"/);
+   assert.match(raw,/data-toolscout-surface="tool-profile"/);
+   assert.equal(raw.match(/<style>([\s\S]*?)<\/style>/)?.[1],staticCss,tool.slug+' must have the same base CSS as indexed Figma');
+   for(const className of ['editorialIntro','editorialBuyerCheck','heroHead','panel','secondaryCta','backTools'])
+     assert.match(raw,new RegExp('class="[^"]*\\b'+className+'\\b[^"]*"'),tool.slug+' missing '+className);
+   assert.doesNotMatch(raw,/class="editorial"/);
+   assert.doesNotMatch(raw,/class="back"/);
+   assert.doesNotMatch(raw,/background:#0b0d0c|class="cta secondary"/i);
+   assert.match(raw,/href="\/compare\.html\?a=/);
+   assert.match(raw,new RegExp('<h1>'+tool.name+'</h1>'));
+   assert.doesNotMatch(raw,/Free plan recorded: Unknown|not yet verified the current free-plan position/i);
+   assert.doesNotMatch(raw,/href="https:\/\/[^"]*\/features\//i);
+   for(const document of tool.editorialReview.sourceUrls)assert.ok(!raw.includes(document),tool.slug+' vendor URL leaked');
+   const req=new Request('https://trytoolscout.org/tools/'+tool.slug);
+   const resp=await transformPublicRedesignResponse(req,new Response(raw,{headers:{'Content-Type':'text/html; charset=UTF-8'}}));
+   const html=await resp.text();
+   assert.equal((html.match(/class="ts2-global-nav"/g)||[]).length,1,tool.slug+' one global navigation');
    assert.match(html,/data-toolscout-public-redesign="2"/);
-   assert.match(html,/data-toolscout-redesign="2"/);
-   assert.match(html,/data-toolscout-surface="tool-profile"/);
    assert.match(html,/class="ts2-brand"/);
-   assert.equal((html.match(/aria-label="Site navigation"/g)||[]).length,1);
-   assert.match(html,/background:#0b0d0c/);
-   assert.match(html,/href="\/compare\.html\?a=/);
-   assert.match(html,/href="\/tools"/);
-   assert.match(html,new RegExp('<h1>'+tool.name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'</h1>'));
-   assert.doesNotMatch(html,/<h1>[^<]*profile/i);
-   assert.doesNotMatch(html,/Free plan recorded: Unknown|not yet verified the current free-plan position/i);
-   assert.doesNotMatch(html,/href="https:\/\/[^"]*\/features\//i);
-   for(const document of tool.editorialReview.sourceUrls)assert.ok(!html.includes(document),tool.slug+' vendor research URL leaked');
+   assert.match(html,/href="\/distribution\/publisher-kit"/);
+   assert.match(html,/href="\/software-trends-index"/);
+   assert.match(html,/href="\/toolscout-v2-native\.css/);
+   assert.match(html,/class="ts2-back-tools"/);
+   assert.equal((html.match(/class="ts2-back-tools"/g)||[]).length,1);
+   assert.doesNotMatch(html,/class="backTools"/);
  }
 });
 test('new profiles never advertise an unmonetized product visit; eligible routes remain internal /go links',()=>{

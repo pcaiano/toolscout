@@ -98,6 +98,26 @@ need(/AI interoperability/i.test(profile.text),'figma_ai_interoperability_missin
 need(/data-toolscout-surface=["']tool-profile["']/.test(profile.text),'figma_tool_profile_surface_missing');
 need(!/<a\b[^>]*class=["'][^"']*\bbrand\b[^"']*["'][^>]*>\s*ToolScout\s*<\/a>/i.test(profile.text),'figma_legacy_tool_profile_brand_present');
 
+// A newer D1-published profile must use the same actual editorial and
+// layout CSS as an indexed 2.0 profile. A header marker alone is insufficient.
+const profileCss=profile.text.match(/<style>([\s\S]*?)<\/style>/i)?.[1]||'';
+for(const slug of ['fresha','bqe-core']){
+  const r=await get('/tools/'+slug);
+  need(r.ok,slug+'_runtime_profile_unavailable',r.status);
+  if(!r.ok)continue;
+  need(/data-toolscout-surface=["']tool-profile["']/.test(r.text),slug+'_profile_surface_missing');
+  need((r.text.match(/class=["']ts2-global-nav["']/g)||[]).length===1,slug+'_multiple_or_missing_global_nav');
+  need(/data-toolscout-public-redesign=["']2["']/.test(r.text),slug+'_shared_2_design_missing');
+  need(/class=["']editorialIntro["']/.test(r.text),slug+'_indexed_editorial_design_missing');
+  need(/class=["']editorialBuyerCheck["']/.test(r.text),slug+'_buyer_check_design_missing');
+  need(/class=["']secondaryCta["']/.test(r.text),slug+'_comparator_design_missing');
+  need(/class=["']ts2-back-tools["']/.test(r.text),slug+'_hero_back_link_missing');
+  need(!/class=["']editorial["']/.test(r.text),slug+'_legacy_dark_editorial_card');
+  need(!/class=["']cta secondary["']/.test(r.text),slug+'_legacy_cta_style');
+  const newCss=r.text.match(/<style>([\s\S]*?)<\/style>/i)?.[1]||'';
+  need(Boolean(profileCss)&&newCss===profileCss,slug+'_css_drift_from_indexed_figma');
+}
+
 const comparison=await get('/make-vs-zapier');
 need(/AI interoperability/i.test(comparison.text),'comparison_ai_interoperability_missing');
 need(/<link[^>]+rel=["']canonical["'][^>]+href=["']https:\/\/trytoolscout\.org\/make-vs-zapier["']/i.test(comparison.text)
