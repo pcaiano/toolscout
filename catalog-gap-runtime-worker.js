@@ -240,7 +240,7 @@ function editorialReview(profile){
   return clean(fit+strong+trade+commercial+' Check current vendor limits, integrations and pricing before purchase.');
 }
 function isFullParityProfile(p){
-  return Boolean(p&&p.rankingEligible!==false&&p.comparisonEligible!==false&&Array.isArray(p.bestFor)&&p.bestFor.length&&p.scores&&SCORE_KEYS.every(k=>Number.isFinite(Number(p.scores[k])))&&p.editorialReview);
+  return Boolean(p&&p.rankingEligible!==false&&p.comparisonEligible!==false&&Array.isArray(p.bestFor)&&p.bestFor.length&&p.scores&&SCORE_KEYS.every(k=>Number.isFinite(Number(p.scores[k])))&&p.editorialReview?.verificationStatus==='vendor_documented'&&hasManufacturerDecisionClaim(p));
 }
 async function staticTools(env){try{const r=await env.ASSETS.fetch(new Request(BASE+'/data/tools.json'));return r.ok?await r.json():[]}catch{return[]}}
 function normalizedName(v){return String(v||'').toLowerCase().replace(/\b(ai|app|software|platform)\b/g,'').replace(/[^a-z0-9]/g,'')}
