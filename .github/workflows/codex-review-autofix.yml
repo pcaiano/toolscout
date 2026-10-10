@@ -1,4 +1,4 @@
-name: Codex Review Auto-Fix Handoff
+name: ToolScout Codex Review Auto-Fix
 
 # No scheduled ChatGPT task and no OpenAI API key. This workflow uses the
 # repository's existing Codex GitHub integration through an @codex mention.
@@ -8,6 +8,11 @@ on:
     types: [submitted]
   pull_request_review_comment:
     types: [created]
+  # One-time capability probe after installing/updating this workflow.
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/codex-review-autofix.yml'
 
 permissions:
   contents: read
@@ -19,6 +24,26 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  copilot_capability:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: read
+      copilot-requests: write
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install GitHub Copilot CLI
+        run: npm install -g @github/copilot
+      - name: Verify keyless Copilot inference is available to this repository
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          copilot -p 'Reply only CAPABILITY_OK. Do not call tools, edit files or access the network.' -s --no-ask-user
+          echo 'copilot_authenticated=true'
   handoff:
     if: >-
       ${{ github.repository == 'pcaiano/toolscout' &&
