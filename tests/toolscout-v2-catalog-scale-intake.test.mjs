@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {selectCatalogResearchLeads,syncCatalogResearchSupply,candidatePage}
+import {selectCatalogResearchLeads,syncCatalogResearchSupply,classifyMarketGapEvidence,candidatePage}
   from '../catalog-autonomy-worker.js';
 
 const directory=JSON.parse(fs.readFileSync(new URL('../data/catalog-research-seeds-scale.json',import.meta.url),'utf8'));
@@ -65,4 +65,38 @@ test('Fresha has manufacturer-homepage outbound without counterfeit affiliate tr
   assert.doesNotMatch(candidatePage(counterfeit),/data-commercial-status="non-affiliate"/);
   assert.match(candidatePage(fresha,{monetized:true}),/href="\/go\/fresha"/);
   assert.doesNotMatch(candidatePage(fresha,{monetized:true}),/data-commercial-status="non-affiliate"/);
+});
+
+
+test('competitive market-gap classification keeps directories and category pages out of product admission',()=>{
+  const gaps=JSON.parse(fs.readFileSync(new URL('../reports/competitive-gap-signals.json',import.meta.url),'utf8')).gaps;
+  const bySlug=Object.fromEntries(gaps.map(g=>[g.slug,g]));
+  for(const slug of ['audio-editor','no-code','faq','video-editing','ai-background-remover','content-creation']){
+    const result=classifyMarketGapEvidence(bySlug[slug]);
+    assert.equal(result.status,'discovery_only',slug+' is a taxonomy or help page, not an individual verified product');
+  }
+  for(const slug of ['claude-code','coool-ai','makiverse','postwizard-ai']){
+    const result=classifyMarketGapEvidence(bySlug[slug]);
+    assert.equal(result.status,'research_required',slug+' has two independently sourced product-specific references');
+    assert.ok(result.independent_product_hosts>=2);
+  }
+  // Language mirror URLs and two subdomains are not independent evidence.
+  const mirrors={slug:'sample',sources:['Directory'],exampleUrls:[
+    'https://www.directory.example/tools/sample',
+    'https://fr.directory.example/tools/sample'
+  ]};
+  assert.equal(classifyMarketGapEvidence(mirrors).status,'discovery_only');
+  assert.equal(classifyMarketGapEvidence({slug:'any',sources:['A','B'],exampleUrls:[
+    'https://a.example/category/any','https://b.example/faq/any'
+  ]}).status,'discovery_only');
+});
+
+test('catalog market-gap intake persists taxonomy as discovery only and cannot demote already published tools',()=>{
+  const src=fs.readFileSync(new URL('../catalog-autonomy-worker.js',import.meta.url),'utf8');
+  const block=src.slice(src.indexOf('async function syncMarketGaps('),src.indexOf('export function unpublishedReadyCatalogSlugs('));
+  assert.match(block,/const signal=classifyMarketGapEvidence\(gap\)/);
+  assert.match(block,/signal\.status\)\.run\(\)/);
+  assert.match(block,/ELSE excluded\.status END/);
+  assert.match(block,/catalog_market_gaps\.status IN \('published','admitted_coverage','covered','covered_existing'\)/);
+  assert.doesNotMatch(block,/ELSE 'research_required' END/,'unqualified taxonomy must not be re-promoted on each sync');
 });
