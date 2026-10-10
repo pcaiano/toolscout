@@ -87,14 +87,15 @@ export function trustedCandidateOfficialFallbackUrls(candidate){
   }
   return result;
 }
-export async function fetchTrustedCandidateOfficialSource(candidate){
+export async function fetchTrustedCandidateOfficialSource(candidate,{deadline=Infinity}={}){
   const home=candidate?.sourceUrl;
-  const original=await fetchOfficial(home);
+  const original=await fetchOfficial(home,{deadline});
   if(original.status==='ok'&&sameManufacturerHost(original.finalUrl,home))
     return {...original,selectedSource:'manufacturer_home'};
   const docs=trustedCandidateOfficialFallbackUrls(candidate);
   for(const url of docs){
-    const proof=await fetchOfficial(url);
+    if(Date.now()>=deadline)return{...original,status:'cycle_budget_exhausted'};
+    const proof=await fetchOfficial(url,{deadline});
     if(proof.status==='ok'&&sameManufacturerHost(proof.finalUrl,home)){
       try{
         if(new URL(proof.finalUrl).pathname!=='/')
@@ -123,11 +124,14 @@ function releaseLinks(html,base){
   return [...new Set(out)].slice(0,4);
 }
 async function sha(value){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(value)));return [...new Uint8Array(buf)].map(x=>x.toString(16).padStart(2,'0')).join('').slice(0,24)}
-async function fetchOfficial(url){
+async function fetchOfficial(url,{deadline=Infinity}={}){
+  if(Date.now()>=deadline)return{status:'cycle_budget_exhausted',httpStatus:null,finalUrl:null,fingerprint:null};
   const u=publicHttps(url);if(!u)return{status:'invalid',httpStatus:null,finalUrl:null,fingerprint:null};
   let lastError=null;
   for(let attempt=1;attempt<=2;attempt++){
-  const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),FETCH_TIMEOUT_MS);
+  const remaining=deadline-Date.now();
+  if(remaining<=0)return{status:'cycle_budget_exhausted',httpStatus:null,finalUrl:u.href,fingerprint:null};
+  const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),Math.min(FETCH_TIMEOUT_MS,remaining));
   try{
     const r=await fetch(u.href,{method:'GET',redirect:'follow',headers:{'User-Agent':attempt===1?'ToolScout-Catalog-Autonomy/1.1 (+https://trytoolscout.org/)':'Mozilla/5.0 (compatible; ToolScoutCatalogVerifier/1.1; +https://trytoolscout.org/)','Accept':'text/html,application/xhtml+xml,text/plain;q=0.9,*/*;q=0.5'},signal:ctl.signal});
     if(r.status===404||r.status===410)return{status:'broken',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:null};
@@ -144,7 +148,7 @@ async function fetchOfficial(url){
       .split('\n').map(x=>x.trim()).filter(Boolean).join('\n').slice(0,16000),releaseLinks:releaseLinks(html,r.url||u.href)};
   }catch(e){lastError=e?.name==='AbortError'?'timeout':'network_error'}
   finally{clearTimeout(timer)}
-  if(attempt<2)await new Promise(resolve=>setTimeout(resolve,150));
+  if(attempt<2&&Date.now()<deadline)await new Promise(resolve=>setTimeout(resolve,Math.min(150,deadline-Date.now())));
   }
   return{status:'network_warning',httpStatus:null,finalUrl:u.href,fingerprint:null,error:lastError||'network_error'};
 }
@@ -634,6 +638,9 @@ export async function hasNewDecisionGradeCatalogSupply(env){
   const known=[...(Array.isArray(staticTools)?staticTools:[]),...runtimeTools].map(t=>t?.slug);
   return unpublishedReadyCatalogSlugs(candidates,known).length>0;
 }
+export function catalogAdmissionBudgetExpired(deadline,now=Date.now()){
+  return now>=deadline;
+}
 export async function admitTrustedCandidates(env){
   await ensureSchema(env);
   const config=await assetJson(env,'/data/catalog-engine.json',{});
@@ -660,16 +667,18 @@ export async function admitTrustedCandidates(env){
     Math.max(0,target-(categoryCounts.get(b.raw.category)||0))-Math.max(0,target-(categoryCounts.get(a.raw.category)||0))||
     b.priority.score-a.priority.score||a.sequence-b.sequence||a.slug.localeCompare(b.slug));
   let admitted=0,held=0,considered=0,missingManufacturerEvidence=0,cycleBudgetExhausted=false;
-  const startedAt=Date.now();
+  const deadline=Date.now()+MAX_ADMISSION_WALL_MS;
+  const exhausted=()=>catalogAdmissionBudgetExpired(deadline);
   for(const item of pool){
     if(admitted>=MAX_ADMIT_PER_DAY||considered>=MAX_CANDIDATE_CHECKS_PER_CYCLE)break;
-    if(Date.now()-startedAt>MAX_ADMISSION_WALL_MS){cycleBudgetExhausted=true;break;}
+    if(exhausted()){cycleBudgetExhausted=true;break;}
     const {raw,slug,priority}=item;considered++;
     const errors=validCandidate(raw,config);if(errors.length){held++;await logEvent(env,slug,'catalog_candidate_structure_hold','completed','Catalog record failed admission field completeness before publication.',{issues:errors});continue}
     // Pure preflight before any network fetch. Undocumented research seeds
     // cannot become published software merely through a reachable homepage.
     if(!trustedManufacturerEvidence(raw,{decisionGrade:true})){held++;missingManufacturerEvidence++;await logEvent(env,slug,'catalog_candidate_manufacturer_evidence_hold','completed','Vendor documentation or claim-level decision evidence is insufficient for publication.',{required:'decision_grade_manufacturer_evidence'});continue}
-    const source=await fetchTrustedCandidateOfficialSource(raw);
+    const source=await fetchTrustedCandidateOfficialSource(raw,{deadline});
+    if(exhausted()||source.status==='cycle_budget_exhausted'){cycleBudgetExhausted=true;break;}
     if(config?.admission?.requireReachableOfficialSource!==false&&source.status!=='ok'){
       held++;
       await logEvent(env,slug,'catalog_candidate_official_source_hold','completed',
@@ -685,18 +694,24 @@ export async function admitTrustedCandidates(env){
     profile.editorialReview={...raw.editorialReview};
     profile.provenance.sourceAvailabilityVerifiedVia=source.selectedSource;
     profile.editorialEvidence={sourceUrl:raw.editorialReview.sourceUrl,verifiedAt:new Date().toISOString().slice(0,10),verificationStatus:'vendor_documented'};
-    const quality=await auditCatalogTool(env,profile);
+    const quality=await auditCatalogTool(env,profile,{deadline});
+    if(exhausted()||quality.budgetExhausted){cycleBudgetExhausted=true;break;}
     if(!quality.publishable){held++;await logEvent(env,slug,'catalog_candidate_quality_hold','completed','Trusted candidate failed full catalog quality gate before publication.',{issues:quality.issues,warnings:quality.warnings,research_priority:priority});continue}
     profile=quality.repairedTool;
+    if(exhausted()){cycleBudgetExhausted=true;break;}
     await env.DB.prepare(`INSERT INTO catalog_runtime_candidates(tool_slug,profile_json,status,source_status,verified_at,updated_at) VALUES(?,?,'published','ok',datetime('now'),datetime('now'))
       ON CONFLICT(tool_slug) DO UPDATE SET profile_json=excluded.profile_json,status='published',source_status='ok',verified_at=datetime('now'),updated_at=datetime('now')`)
       .bind(slug,JSON.stringify(profile)).run();
     await logEvent(env,slug,'catalog_candidate_admitted','completed','Trusted candidate admitted as a full ToolScout catalog peer after official-source and deterministic quality gates.',{source_url:profile.sourceUrl,category:profile.category,research_priority:priority});
     existing.add(slug);admitted++;
   }
-  const market_gaps=await syncMarketGaps(env);
+  // Trailing sync and snapshot are optional work, never extend an exhausted admission cycle.
+  if(exhausted())cycleBudgetExhausted=true;
+  const market_gaps=cycleBudgetExhausted?null:await syncMarketGaps(env);
+  if(exhausted())cycleBudgetExhausted=true;
   runtimeCache.at=0;
-  if(admitted>0)await runtimeSnapshot(env,{force:true}).catch(()=>null);
+  if(admitted>0&&!cycleBudgetExhausted)await runtimeSnapshot(env,{force:true}).catch(()=>null);
+  if(exhausted())cycleBudgetExhausted=true;
   return{ok:true,considered,admitted,held,missing_manufacturer_evidence:missingManufacturerEvidence,
     trusted_sources_total:seen.size,ready_trusted_sources:pool.filter(x=>x.ready).length,
     cycle_budget_exhausted:cycleBudgetExhausted,cycle_wall_budget_ms:MAX_ADMISSION_WALL_MS,
