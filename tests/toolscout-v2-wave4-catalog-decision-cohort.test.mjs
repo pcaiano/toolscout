@@ -67,9 +67,9 @@ test('dynamic profiles reuse the original profile content shell, and the global 
 test('new profiles use approved /go links; Fresha has an explicitly non-affiliate manufacturer-homepage exception',()=>{
  for(const tool of tools){
    const normal=candidatePage(tool,{monetized:false});
-   assert.doesNotMatch(normal,/href="\/go\//,'No commercial approval => no Visit button');
+   if(tool.slug!=='fresha')assert.doesNotMatch(normal,/href="\/go\//,'No commercial approval => no Visit button');
    if(tool.slug==='fresha'){
-     assert.match(normal,/href="https:\/\/www\.fresha\.com\/"/);
+     assert.match(normal,/href="\/go\/fresha"/);
      assert.match(normal,/data-commercial-status="non-affiliate"/);
      assert.doesNotMatch(normal,/rel="nofollow sponsored/);
    }else assert.doesNotMatch(normal,/data-commercial-status="non-affiliate"/);

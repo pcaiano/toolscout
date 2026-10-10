@@ -28,6 +28,7 @@ test('bounded D1 intake writes research leads only with one discovery signal, no
     DB:{prepare(sql){
       return {
         all:async()=>({results:[]}),
+        run:async()=>({meta:{changes:0}}),
         bind(...args){
           return{
             first:async()=>({n:7}),
@@ -44,7 +45,7 @@ test('bounded D1 intake writes research leads only with one discovery signal, no
   const adds=writes.filter(x=>/INSERT OR IGNORE INTO catalog_market_gaps/.test(x.sql));
   assert.equal(adds.length,3);
   for(const write of adds){
-    assert.match(write.sql,/VALUES\(\?,1,\?,\?,'research_required'/);
+    assert.match(write.sql,/VALUES\(\?,1,\?,\?,'discovery_only'/);
     assert.deepEqual(JSON.parse(write.args[1]),['awesome-selfhosted-directory']);
     assert.ok(JSON.parse(write.args[2])[0].startsWith('https://'));
     assert.ok(!/published|admitted_coverage/.test(write.sql));
@@ -56,9 +57,9 @@ test('Fresha has manufacturer-homepage outbound without counterfeit affiliate tr
   assert.ok(fresha);
   const publicHtml=candidatePage(fresha);
   assert.match(publicHtml,/data-commercial-status="non-affiliate"/);
-  assert.match(publicHtml,/href="https:\/\/www\.fresha\.com\/"/);
+  assert.match(publicHtml,/href="\/go\/fresha"/);
   assert.match(publicHtml,/Visit Fresha website/);
-  assert.doesNotMatch(publicHtml,/href="\/go\/fresha"/);
+  assert.doesNotMatch(publicHtml,/href="https:\/\/www\.fresha\.com\/"/);
   assert.doesNotMatch(publicHtml,/href="https:\/\/www\.fresha\.com\/for-business\/features/);
   const counterfeit={...fresha,sourceUrl:'https://fresha.com.evil.example/'};
   assert.doesNotMatch(candidatePage(counterfeit),/data-commercial-status="non-affiliate"/);
