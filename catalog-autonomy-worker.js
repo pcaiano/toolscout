@@ -757,12 +757,17 @@ export async function researchCatalogManufacturerDossiers(env,{deadlineAt=Infini
     const urls=(source.manufacturerLinks||[]).slice(0,4);
     const pages=await mapLimit(urls,2,url=>fetchOfficial(url,{deadlineAt}));
     if(pages.some(x=>x.error==='quality_cycle_budget_deferred')){deferred=true;break}
-    const seen=new Set(),proof=[];
+    const seen=new Set(),fingerprints=new Set(),proof=[];
+    const homepageIdentity=canonicalManufacturerDocumentIdentity(source.finalUrl);
     for(let i=0;i<pages.length;i++){
       const page=pages[i],identity=canonicalManufacturerDocumentIdentity(page?.finalUrl);
-      if(page?.status!=='ok'||!identity||seen.has(identity)||!sameManufacturerHost(page.finalUrl,home.href)||
+      // SPAs and soft-404 routes often return the same marketing HTML under
+      // several links. Two distinct URL paths alone are not two documents.
+      if(page?.status!=='ok'||!identity||identity===homepageIdentity||seen.has(identity)||
+         !page.fingerprint||page.fingerprint===source.fingerprint||fingerprints.has(page.fingerprint)||
+         !sameManufacturerHost(page.finalUrl,home.href)||
          String(page.documentText||'').length<120)continue;
-      seen.add(identity);
+      seen.add(identity);fingerprints.add(page.fingerprint);
       proof.push({url:page.finalUrl,fingerprint:page.fingerprint,title:safeText(page.title,160),
         summary:safeText(page.description,280),verified_at:new Date().toISOString().slice(0,10)});
       if(proof.length>=2)break;
