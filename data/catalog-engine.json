@@ -96,7 +96,8 @@
       "ecommerce",
       "design",
       "content",
-      "business"
+      "business",
+      "vacation-rental"
     ],
     "allowTrustedEnrichmentFiles": true,
     "autoAdmitTrustedCandidates": true,
