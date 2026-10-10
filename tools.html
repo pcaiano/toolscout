@@ -58,7 +58,7 @@ function listPhrase(items){
   if(xs.length===2)return `${xs[0]} and ${xs[1]}`;
   return `${xs.slice(0,-1).join(', ')}, and ${xs[xs.length-1]}`;
 }
-function aiBadge(t){const p=t?.aiIntegration||{};if(p.status!=='verified')return'';const named=(p.assistants||[]).slice(0,2);const detail=named.length?named.join(' + '):(p.mcp==='official'?'Official MCP':'Verified AI integration');return '<span class="ai-badge">AI connected · '+detail+'</span>'}
+function aiBadge(t){const p=t?.aiIntegration||{};if(p.status!=='verified')return'';const named=(p.assistants||[]).slice(0,2);const detail=named.length?named.join(' + '):(p.mcp==='official'?'Official MCP':'Verified AI integration');return '<span class="ai-badge">AI connected · '+escapeHtml(detail)+'</span>'}
 function editorialView(t){
   const audience=(t.bestFor||[]).slice(0,2);
   const capabilities=(t.features||[]).slice(0,2);
