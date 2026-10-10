@@ -153,7 +153,9 @@ async function tick(api,crawlMany){
   console.log("PR_AUTOPILOT_WRITE_CONFIRMED "+JSON.stringify({batch,added:n,total:check.emails.size,processed:targets.length}));
 }
 export function startPrSheetAutopilot(crawlMany){
-  if(process.env.PR_AUTOPILOT_ENABLED!=="1")return false;
+  // A one-time Render secret deployment is sufficient to activate the built-in scheduler.
+  // Explicit PR_AUTOPILOT_ENABLED=0 remains a safe kill switch.
+  if(process.env.PR_AUTOPILOT_ENABLED==="0"||!process.env.PR_SHEETS_SERVICE_ACCOUNT_JSON)return false;
   let config;
   try{config=JSON.parse(process.env.PR_SHEETS_SERVICE_ACCOUNT_JSON||"")}catch{console.error("PR_AUTOPILOT_BLOCKED missing_or_invalid_credentials");return false}
   if(!config.client_email||!config.private_key){console.error("PR_AUTOPILOT_BLOCKED missing_service_account_credentials");return false;}
