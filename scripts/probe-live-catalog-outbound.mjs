@@ -9,6 +9,33 @@ async function get(url){
   headers:{'X-ToolScout-Health-Check':'affiliate-route','User-Agent':'ToolScout-Integrity-Audit/1.0'}})}
  finally{clearTimeout(timer)}
 }
+// A main-branch push triggers the Integrity Audit before Cloudflare Workers
+// Builds finishes. Require the *new deployed owner* to prove a non-affiliate
+// static catalog visit actually exits ToolScout before scanning the inventory.
+const releaseCanary='calendly';
+let deploymentReady=false,releaseAttempts=0,lastCanary=null;
+for(let i=1;i<=30;i++){
+ releaseAttempts=i;
+ try{
+  const probe=await get(BASE+'/go/'+releaseCanary+'?source=integrity-deploy-canary&t='+Date.now());
+  const location=probe.headers.get('Location');
+  const target=location?new URL(location,BASE):null;
+  const external=target&&target.protocol==='https:'&&
+   !/(^|\.)trytoolscout\.org$/i.test(target.hostname);
+  const routed=probe.headers.get('X-ToolScout-Route-Owner')==='affiliate_redirect'&&
+   probe.headers.get('X-ToolScout-Commercial-Core')==='bounded-compat-v1';
+  if(probe.status>=300&&probe.status<400&&external&&routed){
+   deploymentReady=true;break;
+  }
+  lastCanary={status:probe.status,location:location?.slice(0,130)||null,routed,
+   owner:probe.headers.get('X-ToolScout-Route-Owner')};
+ }catch(error){lastCanary={error:String(error?.message||error).slice(0,120)}}
+ if(i<30)await sleep(5000);
+}
+console.log(JSON.stringify({live_outbound_deployment_ready:deploymentReady,
+ release_canary:releaseCanary,attempts:releaseAttempts,lastCanary},null,2));
+if(!deploymentReady)throw Error('Cloudflare production has not activated the new canonical /go owner; catalog scan is not valid until deployment.');
+
 const inventoryResp=await get(BASE+'/api/catalog-inventory?audit='+Date.now());
 if(!inventoryResp.ok)throw Error('Canonical live catalog inventory unavailable: HTTP '+inventoryResp.status);
 const inventory=await inventoryResp.json();

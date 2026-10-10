@@ -10,6 +10,7 @@ on:
       - 'toolscout-v2-closure-runtime.js'
       - 'traffic-integrity-live-worker.js'
       - 'affiliate-redirect-runtime.js'
+      - 'scripts/probe-live-catalog-outbound.mjs'
       - 'public-editorial-runtime.js'
       - 'public-redesign-runtime.js'
       - 'public-canonical-contract.js'
@@ -170,6 +171,7 @@ jobs:
           node-version: 22
       - name: Syntax check ToolScout 2.0 runtime
         run: |
+          node --check scripts/probe-live-catalog-outbound.mjs
           node --check acquisition-value-model.js
           node --check distribution-priority-worker.js
           node --check distribution-throughput-worker.js
