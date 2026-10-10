@@ -17,7 +17,7 @@ function eligibleSentence(s,plan,period,scope){
   if(period==='month'&&!/\b(monthly|per month|each month)\b/i.test(s))return false;
   if(period==='day'&&!/\b(daily|per day|each day)\b/i.test(s))return false;
   if(period==='total'&&/\b(per month|monthly|per day|daily)\b/i.test(s))return false;
-  if(/\b(save|discount|was|previously|promotion|introductory|starting at|as low as|compared to)\b/i.test(s))return false;
+  if(/\b(save|discount|was|previously|promotion|promotional|introductory|starting at|as low as|compared to)\b/i.test(s))return false;
   return true;
 }
 function claimKey(claim){
