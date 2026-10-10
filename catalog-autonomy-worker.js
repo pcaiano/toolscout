@@ -521,7 +521,7 @@ export async function hasNewDecisionGradeCatalogSupply(env){
     assetJson(env,'/data/tools.json',[]),
     runtimeCandidates(env),
     Promise.all((config.trustedCandidateFiles||[]).map(file=>
-      assetJson(env,'/'+String(file).replace(/^\\//,''),[])))
+      assetJson(env,'/'+String(file).replace(new RegExp('^/'),''),[])))
   ]);
   const known=[...(Array.isArray(staticTools)?staticTools:[]),...runtimeTools].map(t=>t?.slug);
   return unpublishedReadyCatalogSlugs(candidates,known).length>0;
