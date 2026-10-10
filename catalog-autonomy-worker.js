@@ -769,6 +769,19 @@ async function mergedSitemap(response,env){
   const h=new Headers(response.headers);h.delete('Content-Length');h.set('Content-Type','application/xml; charset=UTF-8');return new Response(xml,{status:response.status,headers:h});
 }
 export async function publicMergedTools(env){return mergedTools(env)}
+
+// This is a read-only commercial URL projection over the same canonical D1
+// catalog. It must never affect product eligibility, fit score or ordering.
+// Missing/disabled/non-HTTPS affiliate approvals must not become /go/ links.
+export async function publicDecisionCatalogTools(env){
+  const [tools,registry]=await Promise.all([mergedTools(env),assetJson(env,'/data/affiliate.json',{})]);
+  return tools.map(tool=>{
+    const slug=String(tool.slug||'').toLowerCase(),approved=registry?.[slug];
+    return {...tool,toolscoutApprovedVisit:approved?.enabled===true&&Boolean(publicHttps(approved.url))&&/^[a-z0-9][a-z0-9-]*$/.test(slug)
+      ?'https://trytoolscout.org/go/'+encodeURIComponent(slug):null};
+  });
+}
+
 export async function publicQualityEnhancedToolResponse(response,env,slug){
   if(!response?.ok||!(response.headers.get('Content-Type')||'').includes('text/html'))return response;
   await ensureSchema(env);
