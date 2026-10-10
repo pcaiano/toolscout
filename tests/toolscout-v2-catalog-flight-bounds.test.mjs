@@ -42,3 +42,27 @@ test('Codex P2: deadline is rechecked after awaited supplier phases and bounds t
  assert.match(catalog,/if\(Date\.now\(\)>deadlineAt\)\{deferred=true;break;\}/,'market gap writes stop at deadline');
  assert.match(admission,/cycle_elapsed_ms:Date\.now\(\)-startedAt,market_gaps_deferred,snapshot_deferred/,'ledger must expose bounded and deferred work');
 });
+
+test('Codex #606: bounded supplier checks the 90-second deadline after each awaited setup phase',()=>{
+ const setup=catalog.slice(catalog.indexOf('export async function admitTrustedCandidates(env)'),catalog.indexOf('  const categoryCounts=new Map();',catalog.indexOf('export async function admitTrustedCandidates(env)')));
+ assert.match(setup,/const startedAt=Date\.now\(\);/);
+ assert.match(setup,/const setupDeadline=phase=>Date\.now\(\)-startedAt>MAX_ADMISSION_WALL_MS/);
+ for(const [phase,call] of [
+   ['schema','await ensureSchema(env);'],
+   ['config',"await assetJson(env,'/data/catalog-engine.json',{});"],
+   ['baseline',"await assetJson(env,'/data/tools.json',[]);"],
+   ['runtime_candidates','await runtimeCandidates(env);'],
+   ['affiliate_registry','await affiliateResearchRegistry(env);'],
+   ['research_seeds',"await assetJson(env,'/data/catalog-research-seeds.json',{candidates:[]});"]
+ ]){
+   const position=setup.indexOf(call),guard=setup.indexOf("if(setupDeadline('"+phase+"'))return setupDeadline('"+phase+"');");
+   assert.ok(position>=0,phase+' network/D1 phase must be present');
+   assert.ok(guard>position,phase+' must check deadline following its awaited operation');
+   assert.ok(guard-position<200,phase+' deadline check must immediately follow its awaited operation');
+ }
+ assert.match(setup,/if\(setupDeadline\('before_candidate_file'\)\)return setupDeadline\('before_candidate_file'\)/);
+ assert.match(setup,/if\(setupDeadline\('candidate_file'\)\)return setupDeadline\('candidate_file'\)/);
+ assert.match(setup,/prepared%64===0&&setupDeadline\('candidate_pool'\)/);
+ assert.match(setup,/ok:false,reason:'catalog_admission_setup_budget_exhausted'/,'setup exhaustion must remain recoverable by hourly scheduler');
+ assert.match(scheduler,/if\(row.status==='failed'\|\|row.status==='degraded'\)return true/,'failed admission must be retried');
+});
