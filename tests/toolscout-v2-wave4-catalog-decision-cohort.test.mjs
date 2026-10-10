@@ -64,10 +64,15 @@ test('dynamic profiles reuse the original profile content shell, and the global 
    assert.doesNotMatch(html,/class="backTools"/);
  }
 });
-test('new profiles never advertise an unmonetized product visit; eligible routes remain internal /go links',()=>{
+test('new profiles use approved /go links; Fresha has an explicitly non-affiliate manufacturer-homepage exception',()=>{
  for(const tool of tools){
    const normal=candidatePage(tool,{monetized:false});
    assert.doesNotMatch(normal,/href="\/go\//,'No commercial approval => no Visit button');
+   if(tool.slug==='fresha'){
+     assert.match(normal,/href="https:\/\/www\.fresha\.com\/"/);
+     assert.match(normal,/data-commercial-status="non-affiliate"/);
+     assert.doesNotMatch(normal,/rel="nofollow sponsored/);
+   }else assert.doesNotMatch(normal,/data-commercial-status="non-affiliate"/);
    assert.match(normal,/Add to comparator/);
    const approved=candidatePage(tool,{monetized:true});
    assert.match(approved,new RegExp('href="/go/'+tool.slug+'"'));
