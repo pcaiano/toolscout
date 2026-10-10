@@ -132,7 +132,8 @@ export async function fetchOfficial(url,{deadlineAt=Infinity}={}){
   for(let attempt=1;attempt<=2;attempt++){
   const available=deadlineAt-Date.now()-QUALITY_NETWORK_SETTLE_MS;
   if(available<=0)return{status:'network_warning',httpStatus:null,finalUrl:u.href,fingerprint:null,error:'quality_cycle_budget_deferred'};
-  const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),Math.min(FETCH_TIMEOUT_MS,available));
+  const timeoutMs=Math.min(FETCH_TIMEOUT_MS,available),deadlineLimited=timeoutMs<FETCH_TIMEOUT_MS;
+  const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),timeoutMs);
   try{
     const r=await fetch(u.href,{method:'GET',redirect:'follow',headers:{'User-Agent':attempt===1?'ToolScout-Catalog-Autonomy/1.1 (+https://trytoolscout.org/)':'Mozilla/5.0 (compatible; ToolScoutCatalogVerifier/1.1; +https://trytoolscout.org/)','Accept':'text/html,application/xhtml+xml,text/plain;q=0.9,*/*;q=0.5'},signal:ctl.signal});
     if(r.status===404||r.status===410)return{status:'broken',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:null};
@@ -147,7 +148,13 @@ export async function fetchOfficial(url,{deadlineAt=Infinity}={}){
       .replace(/&(?:nbsp|amp|quot|#39);/gi,' ')
       .replace(/[^\S\n]+/g,' ')
       .split('\n').map(x=>x.trim()).filter(Boolean).join('\n').slice(0,16000),releaseLinks:releaseLinks(html,r.url||u.href)};
-  }catch(e){lastError=e?.name==='AbortError'?'timeout':'network_error'}
+  }catch(e){
+    // A deadline-shortened retry is unfinished work, not evidence that the
+    // manufacturer's source is unreachable or a product fact has changed.
+    if(e?.name==='AbortError'&&deadlineLimited)
+      return{status:'network_warning',httpStatus:null,finalUrl:u.href,fingerprint:null,error:'quality_cycle_budget_deferred'};
+    lastError=e?.name==='AbortError'?'timeout':'network_error';
+  }
   finally{clearTimeout(timer)}
   if(attempt<2)await new Promise(resolve=>setTimeout(resolve,150));
   }
