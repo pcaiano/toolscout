@@ -11,7 +11,7 @@ function vendorOwned(url,tool){
 }
 function eligibleSentence(s,plan,period,scope){
   if(!new RegExp('\\b'+escRe(plan)+'\\b(?:\\s+(?:plan|tier))?','i').test(s))return false;
-  if(!/\b(includes?|offers?|supports?|allows?|provides?|up to|limited to|comes with)\b|:\s/i.test(s))return false;
+  if(!/\b(includes?|offers?|supports?|allows?|provides?|costs?|priced at|up to|limited to|comes with)\b|:\s/i.test(s))return false;
   if(scope==='automation'&&!/automation/i.test(s))return false;
   if(scope==='stored'&&/automation/i.test(s)&&!/stored/i.test(s))return false;
   if(period==='month'&&!/\b(monthly|per month|each month)\b/i.test(s))return false;
