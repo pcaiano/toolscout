@@ -5,6 +5,7 @@ import fs from 'node:fs';
 const read=path=>fs.readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const scheduler=read('growth-scheduler.js');
 const catalog=read('catalog-autonomy-worker.js');
+const ledger=read('engine-run-ledger.js');
 
 test('every scheduled catalog admission and verification has an expiring mission lease',()=>{
  for(const mission of ['runtime_coverage','runtime_quality']){
@@ -65,4 +66,12 @@ test('Codex #606: bounded supplier checks the 90-second deadline after each awai
  assert.match(setup,/prepared%64===0&&setupDeadline\('candidate_pool'\)/);
  assert.match(setup,/ok:false,reason:'catalog_admission_setup_budget_exhausted'/,'setup exhaustion must remain recoverable by hourly scheduler');
  assert.match(scheduler,/if\(row.status==='failed'\|\|row.status==='degraded'\)return true/,'failed admission must be retried');
+});
+
+test('Codex #607: failed mission records retain structured setup-timeout evidence',()=>{
+ assert.match(ledger,/const explicitResult=error\?\.engineResult&&typeof error\.engineResult==='object'\?error\.engineResult:null/);
+ assert.match(ledger,/failed_result:explicitResult/);
+ assert.match(ledger,/status:'failed'/);
+ assert.match(catalog,/preparation_deferred:true/);
+ assert.match(catalog,/cycle_elapsed_ms:Date\.now\(\)-startedAt/);
 });
