@@ -257,7 +257,10 @@ export async function runWithLedger(env,{engine,mission,triggerName=null,singleF
     await completeMissionCycleClaim(env,cycleClaim,runId);
     return result;
   }catch(error){
-    await recordEngineRun(env,{runId,engine:e,mission:m,triggerName,status:'failed',startedAt,completedAt:new Date().toISOString().replace('T',' ').slice(0,19),detail:String(error?.message||error),evidence:{name:error?.name||'Error',message:String(error?.message||error),_cycle:{key:cycleClaim?.cycle?.key||null,owner:cycleClaim?.owner||null,recovered:Boolean(cycleClaim?.recovered)}}}).catch(()=>{});
+    // Preserve structured explicit-failure evidence (including catalog setup
+    // phase and elapsed budget) instead of overwriting it with a generic error.
+    const explicitResult=error?.engineResult&&typeof error.engineResult==='object'?error.engineResult:null;
+    await recordEngineRun(env,{runId,engine:e,mission:m,triggerName,status:'failed',startedAt,completedAt:new Date().toISOString().replace('T',' ').slice(0,19),detail:String(error?.message||error),evidence:{name:error?.name||'Error',message:String(error?.message||error),...(explicitResult?{failed_result:explicitResult}:{}),_cycle:{key:cycleClaim?.cycle?.key||null,owner:cycleClaim?.owner||null,recovered:Boolean(cycleClaim?.recovered)}}}).catch(()=>{});
     await failMissionCycleClaim(env,cycleClaim,runId);
     throw error;
   }finally{
