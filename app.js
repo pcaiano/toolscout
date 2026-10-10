@@ -41,15 +41,15 @@ async function renderResults(q,profile={},run=recommendationRun){
     o.innerHTML='<div class="empty-state" role="status"><strong>The Finder is temporarily unavailable.</strong><span>Try again shortly.</span></div>';return;
   }
   if(data.recommendation_type==='workflow_guidance'){
-    const guidance=data.guidance||{},workflows=Array.isArray(guidance.workflows)?guidance.workflows:[];
+    const guidance=data.guidance||{},specialist=Array.isArray(guidance.specialist_workflows)?guidance.specialist_workflows:[],workflows=[...specialist,...(Array.isArray(guidance.workflows)?guidance.workflows:[])];
     trackSearch(null,p,'business-workflow-guidance');
     trackFunnel('business_workflow_viewed',{intent_slug:(guidance.industry||'general_business').replace(/_/g,'-').slice(0,95)});
     const intro='<div class="profile-card"><div><span class="eyebrow">Understand your business need</span><h2>'+finderEsc(guidance.title||'Choose your main task')+'</h2><p class="broad-note">'+finderEsc(guidance.explanation||'')+'</p>'+(guidance.specialist_requirements?.length?'<p class="broad-note"><strong>Specialist systems to assess separately:</strong> '+guidance.specialist_requirements.map(finderEsc).join('; ')+'</p>':'')+'</div></div>';
     const cards=workflows.map(w=>{
       const examples=(w.category_examples||[]).slice(0,2).map(t=>'<a href="/tools/'+encodeURIComponent(t.slug)+'" class="textLink">'+finderEsc(t.name)+'</a>').join(' · ');
       return '<article class="result-card workflow-option"><div class="meta">'+finderEsc(w.category)+'</div><h3>'+finderEsc(w.title)+'</h3>'
-        +'<p>'+finderEsc(w.scope)+'</p><p class="buyer-guidance">'+finderEsc(w.catalog_coverage>0?w.catalog_coverage+' documented general-category products; sector fit remains unverified.':'Coverage gap: no documented catalog option in this category.')+'</p>'
-        +(examples?'<p class="buyer-guidance"><strong>Catalog examples, not specialist winners:</strong> '+examples+'</p>':'')
+        +'<p>'+finderEsc(w.scope)+'</p><p class="buyer-guidance">'+finderEsc(w.specialist?'Manufacturer-documented specialist category; confirm your operational and regional requirements before deciding.':w.catalog_coverage>0?w.catalog_coverage+' documented general-category products; sector fit remains unverified.':'Coverage gap: no documented catalog option in this category.')+'</p>'
+        +(examples?'<p class="buyer-guidance"><strong>'+(w.specialist?'Documented specialist options, not an automatic winner:':'Catalog examples, not specialist winners:')+'</strong> '+examples+'</p>':'')
         +'<button class="btn workflow-select" type="button" data-job="'+finderEsc(w.job)+'">Compare tools for this task →</button></article>';
     }).join('');
         o.innerHTML=intro+cards;
