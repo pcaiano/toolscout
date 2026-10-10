@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {catalogFallbackRedirect} from '../affiliate-workflow-worker.js';
+import {candidatePage} from '../catalog-autonomy-worker.js';
+import {transformPublicOutboundPolicyResponse} from '../public-redesign-runtime.js';
 
 const fresha=JSON.parse(fs.readFileSync(new URL('../data/catalog-wave4-decision-ready.json',import.meta.url),'utf8')).find(x=>x.slug==='fresha');
 
@@ -51,4 +53,17 @@ test('unverified Fresha and other dynamic tools cannot use the explicit exceptio
   assert.equal(await catalogFallbackRedirect(new Request('https://trytoolscout.org/go/other'),other,'other'),null);
   const monetized=envWithProfile(fresha,{affiliate:{fresha:{enabled:true,url:'https://affiliate.example.com/approved'}}});
   assert.equal(await catalogFallbackRedirect(req,monetized,'fresha'),null,'approved commercial routes remain primary');
+});
+
+test('canonical public outbound policy retains the tracked Fresha CTA and never exposes documentary sources',async()=>{
+  const request=new Request('https://trytoolscout.org/tools/fresha');
+  const before=candidatePage(fresha,{monetized:false});
+  const response=await transformPublicOutboundPolicyResponse(request,new Response(before,{
+    headers:{'Content-Type':'text/html; charset=UTF-8'}
+  }));
+  const html=await response.text();
+  assert.match(html,/href="\/go\/fresha"/);
+  assert.match(html,/data-commercial-status="non-affiliate"/);
+  assert.doesNotMatch(html,/href="https:\/\/www\.fresha\.com\/for-business/);
+  assert.doesNotMatch(html,/href="https:\/\/www\.fresha\.com\/" target=/);
 });
