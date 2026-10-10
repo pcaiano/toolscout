@@ -636,7 +636,7 @@ const server = http.createServer(async (req, res) => {
   const u = new URL(req.url, `http://${req.headers.host || "localhost"}`);
 
   if (u.pathname === "/health") {
-    return json(res, 200, { ok: true, service: "toolscout-pr-media-crawler", version: 1 });
+    return json(res, 200, { ok: true, service: "toolscout-pr-media-crawler", version: 1, autonomous_launch_ready: Boolean(process.env.PR_SHEETS_SERVICE_ACCOUNT_JSON && process.env.PR_AUTOPILOT_ENABLED !== "0"), autonomous_launch_blocker: process.env.PR_SHEETS_SERVICE_ACCOUNT_JSON ? (process.env.PR_AUTOPILOT_ENABLED === "0" ? "autopilot_disabled" : null) : "sheets_credentials_unavailable_in_render", legacy_series_configuration_present: Boolean(process.env.SERIES_DOMAINS) });
   }
 
   if (u.pathname === "/crawl") {
