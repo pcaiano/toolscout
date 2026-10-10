@@ -19,6 +19,7 @@ const MAX_CANDIDATE_CHECKS_PER_CYCLE=32; // bounded source fetches, preserve fir
 const MAX_ADMISSION_WALL_MS=90000; // time-bound hourly supplier without reducing the 24-tool admission cap
 const OFFICIAL_SOURCE_HOLD_COOLDOWN_HOURS=3; // avoid re-fetching verified vendor failures every hourly admission run
 const MAX_RESEARCH_SEEDS_PER_CYCLE=80; // hourly discovery intake; never bypasses manufacturer/editorial admission
+const MAX_MANUFACTURER_DOSSIERS_PER_CYCLE=2; // bounded manufacturer research on existing quality mission
 const RESEARCH_HOLD_RETRY_HOURS=6; // move blocked staged products behind the next valid cohort
 // Both hourly admission and fast recovery ignore recently held staged revisions.
 // Re-staging a newer revision makes it eligible as soon as that updatedAt wins.
@@ -147,6 +148,25 @@ function releaseLinks(html,base){
   }catch{}
   return [...new Set(out)].slice(0,4);
 }
+export function linkedManufacturerDocumentation(html,base,{limit=12}={}){
+  const out=[],seen=new Set(),root=publicHttps(base);
+  if(!root)return out;
+  const re=/<a\b[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+  let hit;
+  while((hit=re.exec(String(html||'')))&&out.length<Math.min(16,Math.max(1,Number(limit)||12))){
+    let url;
+    try{url=new URL(hit[1],root)}catch{continue}
+    if(url.protocol!=='https:'||url.username||url.password||!sameManufacturerHost(url.href,root.href))continue;
+    const label=stripHtml(hit[2]).slice(0,140).toLowerCase(),path=url.pathname.toLowerCase();
+    if(path==='/'||!/(?:\/|^)(docs?|documentation|features?|integrations?|pricing|product|solutions?|developer|api|help|support)(?:\/|$|-)/.test(path)&&
+      !/\b(documentation|developer docs|product features|features|integrations|pricing|api reference)\b/.test(label))continue;
+    if(/\/(privacy|terms|careers|login|register|sign-?up|news|blog|contact)(?:\/|$)/.test(path))continue;
+    const identity=canonicalManufacturerDocumentIdentity(url.href);
+    if(!identity||seen.has(identity))continue;
+    seen.add(identity);out.push(url.href);
+  }
+  return out;
+}
 async function sha(value){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(value)));return [...new Uint8Array(buf)].map(x=>x.toString(16).padStart(2,'0')).join('').slice(0,24)}
 export async function fetchOfficial(url,{deadlineAt=Infinity}={}){
   const u=publicHttps(url);if(!u)return{status:'invalid',httpStatus:null,finalUrl:null,fingerprint:null};
@@ -169,7 +189,7 @@ export async function fetchOfficial(url,{deadlineAt=Infinity}={}){
       .replace(/<[^>]+>/g,' ')
       .replace(/&(?:nbsp|amp|quot|#39);/gi,' ')
       .replace(/[^\S\n]+/g,' ')
-      .split('\n').map(x=>x.trim()).filter(Boolean).join('\n').slice(0,16000),releaseLinks:releaseLinks(html,r.url||u.href)};
+      .split('\n').map(x=>x.trim()).filter(Boolean).join('\n').slice(0,16000),releaseLinks:releaseLinks(html,r.url||u.href),manufacturerLinks:linkedManufacturerDocumentation(html,r.url||u.href)};
   }catch(e){
     // A deadline-shortened retry is unfinished work, not evidence that the
     // manufacturer's source is unreachable or a product fact has changed.
@@ -528,8 +548,18 @@ export async function verifyBatch(env){
     await logEvent(env,null,'catalog_research_supply_failed','failed','Bounded discovery intake failed without blocking ongoing official document verification.',{error:reason});
     return{ok:false,reason,staged:0};
   });
+  // Opportunistic manufacturer research reuses the existing hourly quality
+  // cycle after published-tool checks; no competing scheduler, no fake facts.
+  const manufacturerDossiers=Date.now()+8000>=deadlineAt
+    ?{ok:true,checked:0,documented:0,deferred:true,reason:'quality_cycle_budget_reserved'}
+    :await researchCatalogManufacturerDossiers(env,{deadlineAt}).catch(async error=>{
+      await logEvent(env,null,'catalog_manufacturer_research_failed','failed',
+        'Private first-party research failed; no candidate was published.',
+        {error:safeText(error?.message||error,180)});
+      return{ok:false,checked:0,documented:0,reason:'manufacturer_research_failed'};
+    });
   if(Date.now()>=deadlineAt)cycleBudgetExhausted=true;
-  return{ok:true,checked,healthy,changed,suppressed,warnings,documentation_checked:documentationChecked,documentation_baselined:documentationBaselined,documentation_changed:documentationChanged,documentation_warnings:documentationWarnings,verified_facts_corrected:factsCorrected,verified_fact_proposals:factsProposed,batch_limit:MAX_VERIFY_PER_CYCLE,warning_retry_hours:WARNING_RETRY_HOURS,max_warning_retries_per_cycle:MAX_WARNING_RETRIES_PER_CYCLE,evidence:'official_homepage_and_first_party_documentation',write_policy:'due_check_only',research_supply:researchSupply,cycle_budget_exhausted:cycleBudgetExhausted,cycle_wall_budget_ms:MAX_VERIFY_CYCLE_WALL_MS,cycle_elapsed_ms:Date.now()-startedAt};
+  return{ok:true,checked,healthy,changed,suppressed,warnings,manufacturer_dossiers:manufacturerDossiers,documentation_checked:documentationChecked,documentation_baselined:documentationBaselined,documentation_changed:documentationChanged,documentation_warnings:documentationWarnings,verified_facts_corrected:factsCorrected,verified_fact_proposals:factsProposed,batch_limit:MAX_VERIFY_PER_CYCLE,warning_retry_hours:WARNING_RETRY_HOURS,max_warning_retries_per_cycle:MAX_WARNING_RETRIES_PER_CYCLE,evidence:'official_homepage_and_first_party_documentation',write_policy:'due_check_only',research_supply:researchSupply,cycle_budget_exhausted:cycleBudgetExhausted,cycle_wall_budget_ms:MAX_VERIFY_CYCLE_WALL_MS,cycle_elapsed_ms:Date.now()-startedAt};
 }
 function validCandidate(candidate,config){
   const allowed=new Set(config?.admission?.allowedCatalogCategories||[]);
@@ -682,6 +712,80 @@ export function classifyMarketGapEvidence(gap){
   return independent>=2
     ?{status:'research_required',reason:'independent_product_page_signals',independent_product_hosts:independent,taxonomy_hosts:taxonomyHosts.size}
     :{status:'discovery_only',reason:'insufficient_product_identity_signals',independent_product_hosts:independent,taxonomy_hosts:taxonomyHosts.size};
+}
+
+// First-party documentary discovery is an extension of the existing catalog
+// quality mission, not a new engine or public profile generator. Dossiers
+// never become research_ready until a full original editorial analysis and
+// supported structured decision claims exist.
+export async function researchCatalogManufacturerDossiers(env,{deadlineAt=Infinity,limit=MAX_MANUFACTURER_DOSSIERS_PER_CYCLE}={}){
+  if(Date.now()+8000>=deadlineAt)
+    return{ok:true,checked:0,documented:0,deferred:true,reason:'quality_cycle_budget_reserved'};
+  const asset=await assetJson(env,'/data/catalog-research-seeds-scale.json',null);
+  if(asset?.schemaVersion!==1||asset?.status!=='research_only_not_catalog'||!Array.isArray(asset.candidates))
+    return{ok:false,reason:'research_source_unavailable',checked:0};
+  const vendorBySlug=new Map(asset.candidates.map(x=>[String(x.slug||'').toLowerCase(),x]));
+  const rows=await env.DB.prepare("SELECT g.tool_slug FROM catalog_market_gaps g "+
+    "WHERE g.status='discovery_only' AND g.sources_json LIKE '%awesome-selfhosted-directory%' "+
+    "AND NOT EXISTS(SELECT 1 FROM catalog_runtime_events e WHERE e.tool_slug=g.tool_slug "+
+    "AND e.event_type IN ('catalog_manufacturer_dossier_documented','catalog_manufacturer_dossier_deferred') "+
+    "AND e.created_at>=datetime('now','-12 hours')) "+
+    "ORDER BY g.updated_at ASC,g.tool_slug ASC LIMIT ?")
+    .bind(Math.max(1,Math.min(8,Number(limit)||2))).all();
+  let checked=0,documented=0,deferred=false;
+  for(const row of rows.results||[]){
+    if(Date.now()+8000>=deadlineAt){deferred=true;break}
+    const slug=String(row.tool_slug||'').toLowerCase(),lead=vendorBySlug.get(slug);
+    const home=publicHttps(lead?.candidateUrl);
+    const host=String(home?.hostname||'').toLowerCase().replace(/^www\./,'');
+    if(!home||!lead?.name||!host||/(?:^|\.)(?:localhost|local)$/.test(host)||
+       /^(?:github\.com|gitlab\.com|sourceforge\.net|g2\.com|capterra\.com|npmjs\.com)$/.test(host)){
+      await persistManufacturerWatchEvent(env,slug,'catalog_manufacturer_dossier_deferred','deferred',
+        'Directory lead is not a verified manufacturer product website. Research only.',
+        {reason:'publisher_or_ambiguous_homepage'});
+      checked++;continue;
+    }
+    const source=await fetchOfficial(home.href,{deadlineAt});
+    if(source.error==='quality_cycle_budget_deferred'){deferred=true;break}
+    checked++;
+    if(source.status!=='ok'||!sameManufacturerHost(source.finalUrl,home.href)){
+      await persistManufacturerWatchEvent(env,slug,'catalog_manufacturer_dossier_deferred','deferred',
+        'Manufacturer home could not be verified. No public facts or catalog admission.',
+        {reason:'official_home_unverified',http_status:source.httpStatus||null});
+      continue;
+    }
+    const urls=(source.manufacturerLinks||[]).slice(0,4);
+    const pages=await mapLimit(urls,2,url=>fetchOfficial(url,{deadlineAt}));
+    if(pages.some(x=>x.error==='quality_cycle_budget_deferred')){deferred=true;break}
+    const seen=new Set(),proof=[];
+    for(let i=0;i<pages.length;i++){
+      const page=pages[i],identity=canonicalManufacturerDocumentIdentity(page?.finalUrl);
+      if(page?.status!=='ok'||!identity||seen.has(identity)||!sameManufacturerHost(page.finalUrl,home.href)||
+         String(page.documentText||'').length<120)continue;
+      seen.add(identity);
+      proof.push({url:page.finalUrl,fingerprint:page.fingerprint,title:safeText(page.title,160),
+        summary:safeText(page.description,280),verified_at:new Date().toISOString().slice(0,10)});
+      if(proof.length>=2)break;
+    }
+    if(proof.length<2){
+      await persistManufacturerWatchEvent(env,slug,'catalog_manufacturer_dossier_deferred','deferred',
+        'Two distinct reachable first-party product documents not established. Research only.',
+        {reason:'insufficient_distinct_first_party_docs',checked:pages.length,valid_docs:proof.length});
+      continue;
+    }
+    await persistManufacturerWatchEvent(env,slug,'catalog_manufacturer_dossier_documented','completed',
+      'Two first-party manufacturer pages recorded privately; editorial analysis and claims still required.',
+      {source:'manufacturer_first_party',home_url:source.finalUrl,home_fingerprint:source.fingerprint,
+       product_name:lead.name,discovery_category:lead.discoveryCategory||null,documents:proof,
+       editorial_complete:false,decision_claims_complete:false,admission_ready:false});
+    const result=await env.DB.prepare("UPDATE catalog_market_gaps SET status='source_researched',"+
+      "updated_at=datetime('now') WHERE tool_slug=? AND status='discovery_only' "+
+      "AND sources_json LIKE '%awesome-selfhosted-directory%'").bind(slug).run();
+    documented+=Number(result?.meta?.changes??result?.changes??0);
+  }
+  return{ok:true,checked,documented,deferred,
+    publication:'research_only_no_editorial_or_claim_promotion',
+    max_per_cycle:MAX_MANUFACTURER_DOSSIERS_PER_CYCLE};
 }
 
 async function syncMarketGaps(env,{deadlineAt=Infinity}={}){
@@ -1134,11 +1238,12 @@ export async function publicRuntimeRankingResponse(env,path){return renderRuntim
 
 async function status(env){
   await ensureSchema(env);
-  const [states,candidates,staged,gaps,events,newsSources,newsCandidates,documents]=await Promise.all([
+  const [states,candidates,staged,gaps,manufacturerResearch,events,newsSources,newsCandidates,documents]=await Promise.all([
     env.DB.prepare(`SELECT COUNT(*) total,SUM(CASE WHEN quality_status='healthy' THEN 1 ELSE 0 END) healthy,SUM(CASE WHEN quality_status='change_detected' THEN 1 ELSE 0 END) changed,SUM(CASE WHEN quality_status='confirmed_broken' THEN 1 ELSE 0 END) suppressed,SUM(CASE WHEN source_status NOT IN ('ok','broken') THEN 1 ELSE 0 END) warnings,MAX(last_checked_at) last_checked_at FROM catalog_runtime_state`).first(),
     env.DB.prepare(`SELECT COUNT(*) total, SUM(CASE WHEN source_status='baseline_snapshot' THEN 1 ELSE 0 END) baseline_seeded, MAX(CASE WHEN source_status IS NULL OR source_status!='baseline_snapshot' THEN verified_at END) last_admitted_at FROM catalog_runtime_candidates WHERE status IN ('published','admitted_coverage','quality_hold')`).first(),
     env.DB.prepare(`SELECT COUNT(*) total FROM catalog_runtime_candidates WHERE status='research_ready'`).first(),
     env.DB.prepare(`SELECT COUNT(*) total FROM catalog_market_gaps WHERE status='research_required'`).first(),
+    env.DB.prepare(`SELECT COUNT(*) total FROM catalog_market_gaps WHERE status='source_researched'`).first(),
     env.DB.prepare(`SELECT COUNT(*) n FROM catalog_runtime_events WHERE created_at>=datetime('now','-7 days')`).first(),
     env.DB.prepare(`SELECT COUNT(*) total,MAX(last_checked_at) last_checked_at FROM software_news_sources WHERE status='active'`).first(),
     env.DB.prepare(`SELECT COUNT(*) total,MAX(updated_at) last_candidate_at FROM software_news_candidates WHERE status IN ('candidate','verified','published')`).first(),
@@ -1155,7 +1260,7 @@ async function status(env){
   const baselinePresent=[...originalSlugs].filter(slug=>snapshot.candidateMap?.has(slug)).length;
   return{ok:true,version:'1.3',storage:{mode:'d1_primary_static_fallback',baseline_total:baselineTotal,baseline_seeded:baselineSeeded,
     baseline_present:baselinePresent,baseline_revised:Math.max(0,baselinePresent-baselineSeeded),
-    baseline_remaining:Math.max(0,baselineTotal-baselinePresent),migration_phase:snapshot.degraded?'runtime_degraded':baselinePresent>=baselineTotal&&baselineTotal>0?'all_baseline_records_in_d1':'baseline_seeding',legacy_html_preserved:true},state:{total:Number(states?.total||0),healthy:Number(states?.healthy||0),changed:Number(states?.changed||0),suppressed:Number(states?.suppressed||0),warnings:Number(states?.warnings||0),last_checked_at:states?.last_checked_at||null},runtime_candidates:Math.max(0,Number(candidates?.total||0)-baselineSeeded),last_admitted_at:candidates?.last_admitted_at||null,research_intake:{ready_private:Number(staged?.total||0),publication_owner:'existing_runtime_coverage',requires_live_first_party_documentation:true},document_watch:{product_coverage:watchable,two_source_coverage:multiSource,products_baselined:Number(documents?.baselined||0),confirmed_changes_7d:Number(documents?.changes_7d||0),last_baseline_at:documents?.last_baseline_at||null,rule:'First-party documentation is monitored; conservative prices, explicit plan limits and documented global capability retirements can update D1 after two identical observations. Other changes are not asserted.'},market_gaps:Number(gaps?.total||0),events_7d:Number(events?.n||0),whats_new:{official_sources:Number(newsSources?.total||0),last_source_check:newsSources?.last_checked_at||null,candidates:Number(newsCandidates?.total||0),last_candidate_at:newsCandidates?.last_candidate_at||null},rule:'Once admitted, runtime tools remain full catalog peers during recoverable quality holds, matching static-tool behavior. Only confirmed broken sources are suppressed. Official-source verification is required, and affiliate economics never affect catalog admission or ranking.'};
+    baseline_remaining:Math.max(0,baselineTotal-baselinePresent),migration_phase:snapshot.degraded?'runtime_degraded':baselinePresent>=baselineTotal&&baselineTotal>0?'all_baseline_records_in_d1':'baseline_seeding',legacy_html_preserved:true},state:{total:Number(states?.total||0),healthy:Number(states?.healthy||0),changed:Number(states?.changed||0),suppressed:Number(states?.suppressed||0),warnings:Number(states?.warnings||0),last_checked_at:states?.last_checked_at||null},runtime_candidates:Math.max(0,Number(candidates?.total||0)-baselineSeeded),last_admitted_at:candidates?.last_admitted_at||null,research_intake:{ready_private:Number(staged?.total||0),manufacturer_dossiers_private:Number(manufacturerResearch?.total||0),publication_owner:'existing_runtime_coverage',requires_live_first_party_documentation:true,documented_dossiers_are_not_published:true},document_watch:{product_coverage:watchable,two_source_coverage:multiSource,products_baselined:Number(documents?.baselined||0),confirmed_changes_7d:Number(documents?.changes_7d||0),last_baseline_at:documents?.last_baseline_at||null,rule:'First-party documentation is monitored; conservative prices, explicit plan limits and documented global capability retirements can update D1 after two identical observations. Other changes are not asserted.'},market_gaps:Number(gaps?.total||0),events_7d:Number(events?.n||0),whats_new:{official_sources:Number(newsSources?.total||0),last_source_check:newsSources?.last_checked_at||null,candidates:Number(newsCandidates?.total||0),last_candidate_at:newsCandidates?.last_candidate_at||null},rule:'Once admitted, runtime tools remain full catalog peers during recoverable quality holds, matching static-tool behavior. Only confirmed broken sources are suppressed. Official-source verification is required, and affiliate economics never affect catalog admission or ranking.'};
 }
 
 // Accept verified *research* records through the existing internal admin plane.
