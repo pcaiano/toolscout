@@ -27,6 +27,30 @@ for(let attempt=1;attempt<=15;attempt++){
   if(attempt<15)await sleep(5000);
 }
 assert(ready,'Worker assets do not contain the expected new decision price cohort after 15 checks; no live MCP test is claimed');
+// OpenAPI is an independently published machine-discovery contract. Schema
+// compatibility must be observed at the public edge, not inferred from CI.
+let openapiReady=false,openapiAttempts=0;
+for(let i=1;i<=15;i++){
+  openapiAttempts=i;
+  try{
+    const response=await request('/openapi.json?decision_contract_probe='+Date.now());
+    if(response.ok){
+      const document=await response.json();
+      const root=document.paths?.['/api/recommend']?.get?.responses?.['200']?.content?.['application/json']?.schema?.properties;
+      const entry=root?.recommendations?.items?.properties;
+      openapiReady=document.openapi==='3.1.0'&&
+        JSON.stringify(entry?.tool_url?.type)===JSON.stringify(['string','null'])&&
+        entry?.profile_url?.format==='uri'&&
+        root?.recommendation_type?.enum?.includes('decision_shortlist')&&
+        entry?.match_type?.enum?.includes('decision_qualified');
+      if(openapiReady)break;
+    }
+  }catch(error){if(i===15)throw Error('Published OpenAPI decision contract cannot be read: '+String(error?.message||error))}
+  if(i<15)await sleep(5000);
+}
+assert(openapiReady,'Published OpenAPI still rejects approved-only nullable product URLs or qualified decisions');
+console.log(JSON.stringify({liveOpenApiDecisionContract:true,openapiAttempts,nullableApprovedCommercialVisit:true},null,2));
+
 async function rpc(method,params=null){
  const msg={jsonrpc:'2.0',id:Math.floor(Math.random()*1000000)+1,method,params:params?{...params,_meta:{'io.modelcontextprotocol/protocolVersion':VERSION,'io.modelcontextprotocol/clientInfo':{name:'ToolScout-post-deploy-smoke',version:'1.0'}}}:{_meta:{'io.modelcontextprotocol/protocolVersion':VERSION}}};
  const headers={'Content-Type':'application/json','Accept':'application/json','MCP-Protocol-Version':VERSION,'Mcp-Method':method};

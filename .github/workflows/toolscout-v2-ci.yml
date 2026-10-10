@@ -313,6 +313,7 @@ jobs:
           node tests/growth-scheduler-ownership.mjs
           node --test tests/toolscout-v2-wave4-catalog-decision-cohort.test.mjs
           node --test tests/toolscout-v2-catalog-editorial-buyer-first.test.mjs
+          node --test tests/toolscout-v2-openapi-approved-url-contract.test.mjs
           node scripts/build-catalog-editorial-revision.mjs /tmp/toolscout-catalog-editorial-test.sql
 
       - name: Audit structured decision evidence (Python regression suite)
