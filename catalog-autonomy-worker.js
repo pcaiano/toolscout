@@ -784,7 +784,15 @@ function aiInteroperabilitySection(tool){
   // public non-monetized outbound link on runtime software profiles.
   // Manufacturer evidence stays in the private catalog; no research-process prose is published.
   const hasManufacturerProof=verified&&(p.sources||[]).some(x=>{
-    try{return new URL(x).pathname!=='/'&&sameManufacturerHost(x,tool.sourceUrl)}catch{return false}
+    try{
+      if(!sameManufacturerHost(x,tool.sourceUrl))return false;
+      const u=new URL(x),host=u.hostname.toLowerCase().replace(/^www\./,'');
+      const originHost=new URL(tool.sourceUrl).hostname.toLowerCase().replace(/^www\./,'');
+      // A dedicated manufacturer help/docs host can be a valid evidence
+      // root (e.g. docs.n8n.io). A vendor marketing homepage cannot.
+      const officialDocsRoot=/^(?:docs?|help|support|developer|developers|documentation|kb)\./.test(host)&&host!==originHost;
+      return u.pathname!=='/'||officialDocsRoot;
+    }catch{return false}
   });
   const verificationDate=String(p.verifiedAt||'');
   const verifiedDateMs=Date.parse(verificationDate+'T00:00:00Z');
