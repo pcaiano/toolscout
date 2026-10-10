@@ -10,6 +10,10 @@ assert.ok(clio);
 test('only dated, first-party non-homepage manufacturer documents are usable for fallback',()=>{
   const docs=trustedCandidateOfficialFallbackUrls(clio);
   assert.equal(docs.length,2);
+  assert.deepEqual(docs, [
+    'https://help.clio.com/hc/en-us/articles/9285959663131-Create-Matters',
+    'https://help.clio.com/hc/en-us/articles/9289741706779-Time-Entries'
+  ]);
   assert.ok(docs.every(url=>url.startsWith('https://help.clio.com/hc/en-us/articles/')));
   const external='https://clio.com.evil.example/pricing';
   const tampered=structuredClone(clio);
@@ -28,7 +32,7 @@ test('homepage inaccessible but manufacturer case documentation reachable permit
     calls.push(String(url));
     if(String(url)==='https://www.clio.com/')
       return new Response('Forbidden',{status:403,headers:{'Content-Type':'text/html'}});
-    if(String(url)==='https://help.clio.com/hc/en-us/articles/9285920226075-Clio-Manage-Matters-Overview')
+    if(String(url)==='https://help.clio.com/hc/en-us/articles/9285959663131-Create-Matters')
       return new Response('<html><head><title>Clio Case Management</title></head><body><main>Clio Manage handles matters, legal documents and case calendars.</main></body></html>',{status:200,headers:{'Content-Type':'text/html'}});
     throw Error('unexpected source fetch '+String(url));
   };
@@ -37,7 +41,7 @@ test('homepage inaccessible but manufacturer case documentation reachable permit
     assert.equal(result.status,'ok');
     assert.equal(result.selectedSource,'manufacturer_document');
     assert.ok(result.finalUrl.startsWith('https://help.clio.com/hc/en-us/articles/'));
-    assert.deepEqual(calls,['https://www.clio.com/','https://help.clio.com/hc/en-us/articles/9285920226075-Clio-Manage-Matters-Overview']);
+    assert.deepEqual(calls,['https://www.clio.com/','https://help.clio.com/hc/en-us/articles/9285959663131-Create-Matters']);
   }finally{globalThis.fetch=native}
 });
 test('redirect to off-domain or no reachable documents never becomes a trusted admission signal',async()=>{
