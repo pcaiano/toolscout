@@ -142,3 +142,14 @@ test('price must directly bind its monetary amount to the quoted unit, not a nea
  assert.deepEqual(manufacturerFactProposals(hubspot,h('Starter plan costs €99 per channel per month and includes billing per seat.')),[]);
  assert.equal(manufacturerFactProposals(hubspot,h('Starter plan costs €25 per seat per month.')).find(x=>x.type==='price_quote')?.newValue,25);
 });
+
+test('separate account and workspace facts do not suppress a correctly scoped monetary quote',()=>{
+ const hubspot=catalog.find(x=>x.slug==='hubspot');
+ const starter=hubspot.decisionClaims.find(x=>x.type==='price_quote'&&x.plan==='Starter'&&x.billingCycle==='monthly'&&x.currency==='EUR');
+ const seat=manufacturerFactProposals(hubspot,[{url:starter.sourceUrl,status:'ok',documentText:'Starter plan costs €25 per seat per month and includes 1000 contacts per account.'}]);
+ assert.equal(seat.find(x=>x.type==='price_quote')?.newValue,25);
+ const buffer=catalog.find(x=>x.slug==='buffer');
+ const channel=buffer.decisionClaims.find(x=>x.type==='price_quote'&&x.plan==='Essentials'&&x.billingCycle==='monthly'&&x.unit==='channel');
+ const quoted=manufacturerFactProposals(buffer,[{url:channel.sourceUrl,status:'ok',documentText:'Essentials plan costs $7 per channel per month and includes one workspace per account.'}]);
+ assert.equal(quoted.find(x=>x.type==='price_quote')?.newValue,7);
+});
