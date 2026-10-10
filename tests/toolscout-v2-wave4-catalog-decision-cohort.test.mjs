@@ -86,9 +86,14 @@ test('verified AI integrations never disclose private manufacturer verification 
  const html=candidatePage(tool,{monetized:false});
  assert.match(html,/AI interoperability/);
  assert.match(html,/Vendor-supported AI workflow/);
+ assert.match(html,/AI compatibility:<\/strong> Manufacturer-confirmed, verified 2026-10-10\./);
+ assert.match(html,/data-ai-evidence-date="1"/);
  assert.match(html,/Official/);
  assert.doesNotMatch(html,/AI integration reviewed against manufacturer documentation internally|First-party documentation informed this assessment|Unknown is not treated as no integration/);
  assert.doesNotMatch(html,/https:\/\/www\.fresha\.com\/for-business\/features/);
+ const undocumented={...tool,aiIntegration:{...tool.aiIntegration,sources:[],verifiedAt:null}};
+ const noProof=candidatePage(undocumented);
+ assert.doesNotMatch(noProof,/Manufacturer-confirmed/,'unsubstantiated integrations cannot receive a manufacturer-confirmed badge');
 });
 test('hourly supply signal wakes only for first-party complete new vendor cohorts',()=>{
  const existing=original.map(t=>t.slug);
