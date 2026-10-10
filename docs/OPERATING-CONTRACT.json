@@ -148,6 +148,8 @@
     "scheduled_missions_must_use_registered_runtime_crons",
     "catalog_baseline_backfill_is_idempotent_d1_primary_with_static_fallback",
     "catalog_storage_migration_preserves_legacy_public_profile_html",
+    "public_catalog_profiles_never_display_generic_pending_vendor_verification_banners",
+    "automatic_numeric_catalog_changes_require_two_first_party_plan_specific_observations",
     "github_actions_never_own_primary_production_scheduler",
     "only_operating_contract_listed_github_workflows_may_exist_on_main",
     "render_postgres_runtime_is_not_canonical_business_state",
