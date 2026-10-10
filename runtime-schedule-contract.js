@@ -33,7 +33,7 @@ export const SCHEDULED_MISSIONS=Object.freeze({
   distribution_network:{owner:'growth_scheduler',cron:TOOLSCOUT_CRONS.hourly,subcadence:'2h',plane:'executor'},
   affiliate_coverage:{owner:'growth_scheduler',cron:TOOLSCOUT_CRONS.hourly,subcadence:'2h_active_12h_maintenance_or_recovery',plane:'executor'},
   distribution_priorities:{owner:'growth_scheduler',cron:TOOLSCOUT_CRONS.hourly,subcadence:'2h_or_recovery',plane:'growth_planner'},
-  catalog_runtime_quality:{owner:'growth_scheduler',cron:TOOLSCOUT_CRONS.hourly,subcadence:'2h_or_recovery',plane:'signals'},
+  catalog_runtime_quality:{owner:'growth_scheduler',cron:TOOLSCOUT_CRONS.hourly,subcadence:'hourly_bounded_six_official_products_or_recovery',plane:'signals'},
   baseline_catalog_migration:{owner:'growth_scheduler',cron:TOOLSCOUT_CRONS.hourly,subcadence:'bounded_idempotent_backfill',plane:'executor'},
   content_social_intelligence:{owner:'growth_scheduler',cron:TOOLSCOUT_CRONS.hourly,subcadence:'6h_or_recovery',plane:'growth_planner'},
   catalog_runtime_coverage:{owner:'growth_scheduler',cron:TOOLSCOUT_CRONS.daily,plane:'executor'},

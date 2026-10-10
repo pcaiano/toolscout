@@ -90,9 +90,9 @@ export async function runGrowthScheduler(event,env,ctx,{delegate=null}={}){
     if(twoHourly||prioritiesRecovery){
       scheduleTask(ctx,runWithLedger(env,{engine:'distribution',mission:'operating_priorities',triggerName:prioritiesRecovery?trigger+':recovery':trigger,singleFlightMinutes:20},()=>rebalanceDistributionPriorities(env)));
     }
-    if(twoHourly){
-      scheduleTask(ctx,runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:trigger,singleFlightMinutes:20},()=>verifyCatalogBatch(env)));
-    }
+    // A small hourly batch covers 127 existing vendors in about one day,
+    // without a separate update scheduler or unbounded vendor requests.
+    scheduleTask(ctx,runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:trigger,singleFlightMinutes:20},()=>verifyCatalogBatch(env)));
     if(sixHourly||contentRecovery){
       scheduleTask(ctx,runWithLedger(env,{engine:'content',mission:'social_intelligence',triggerName:contentRecovery?trigger+':recovery':trigger,singleFlightMinutes:15},()=>runContentSocialIntelligenceCycle(env)));
     }

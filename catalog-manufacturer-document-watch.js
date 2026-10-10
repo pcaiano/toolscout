@@ -46,7 +46,7 @@ export async function verifyManufacturerDocuments(env,tool,{fetchDocument,hash,w
     try{response=await fetchDocument(url)}catch{return{url,status:'network_warning'}}
     const final=vendorHost(response?.finalUrl||url),home=vendorHost(tool?.sourceUrl),documentHost=vendorHost(url);
     const redirectAllowed=final===documentHost||final.endsWith('.'+documentHost)||final===home||final.endsWith('.'+home)||(tool?.slug==='trello'&&(final==='atlassian.com'||final.endsWith('.atlassian.com')));
-    return{url,status:response?.status==='ok'&&!redirectAllowed?'untrusted_redirect':response?.status||'network_warning',fingerprint:response?.fingerprint||null};
+    return{url,status:response?.status==='ok'&&!redirectAllowed?'untrusted_redirect':response?.status||'network_warning',fingerprint:response?.fingerprint||null,documentText:response?.status==='ok'?String(response.documentText||'').slice(0,14000):''};
   }));
   if(observations.some(x=>x.status!=='ok'||!x.fingerprint))return{status:'documentation_warning',checked:observations.length,changed:false,
     warnings:observations.filter(x=>x.status!=='ok'||!x.fingerprint).map(x=>x.status)};
@@ -55,19 +55,22 @@ export async function verifyManufacturerDocuments(env,tool,{fetchDocument,hash,w
   const rows=await env.DB.prepare("SELECT event_type,evidence_json FROM catalog_runtime_events WHERE tool_slug=? AND event_type IN ('catalog_docs_snapshot','catalog_docs_pending','catalog_docs_reset') ORDER BY created_at DESC,event_id DESC LIMIT 40").bind(slug).all();
   const prior=previousEvidence(rows.results||[]);
   const proof={fingerprint:digest,source_count:observations.length};
+  // Full text stays only within this scheduled invocation. The durable ledger
+  // receives fingerprints and derived claim changes, never scraped documents.
+  const factualObservations=observations;
   if(!prior.baseline){
     await writeEvent(env,slug,'catalog_docs_snapshot','completed','Initial manufacturer-documentation fingerprint captured without modifying product claims.',proof);
-    return{status:'baselined',checked:observations.length,changed:false};
+    return{status:'baselined',checked:observations.length,changed:false,observations:factualObservations};
   }
   if(prior.baseline.fingerprint===digest){
     if(prior.pending)await writeEvent(env,slug,'catalog_docs_reset','completed','Provisional manufacturer-document change reverted on the next verification.',proof);
-    return{status:'unchanged',checked:observations.length,changed:false};
+    return{status:'unchanged',checked:observations.length,changed:false,observations:factualObservations};
   }
   if(prior.pending?.fingerprint===digest){
     await writeEvent(env,slug,'catalog_docs_snapshot','completed','Two repeated manufacturer-document observations confirm a new fingerprint; this does not establish which facts changed.',proof);
     await writeEvent(env,slug,'catalog_docs_change_confirmed','completed','Manufacturer documentation changed twice; price, plan and feature claims require fresh first-party review before facts can be revised.',{...proof,review_required:true});
-    return{status:'change_confirmed',checked:observations.length,changed:true};
+    return{status:'change_confirmed',checked:observations.length,changed:true,observations:factualObservations};
   }
   await writeEvent(env,slug,'catalog_docs_pending','deferred','A manufacturer document changed once; a second independent scheduled check is required.',proof);
-  return{status:'pending_confirmation',checked:observations.length,changed:false};
+  return{status:'pending_confirmation',checked:observations.length,changed:false,observations:factualObservations};
 }

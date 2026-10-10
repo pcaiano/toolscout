@@ -5,9 +5,11 @@ import { renderRuntimeRanking } from './catalog-runtime-ranking.js';
 import {auditCatalogTool,mapLimit,hasManufacturerDecisionClaim} from './catalog-quality-runtime.js';
 import {hydrateLegacyCatalogProfile} from './catalog-profile-hydration.js';
 import {verifyManufacturerDocuments,monitoredManufacturerDocuments} from './catalog-manufacturer-document-watch.js';
+import {manufacturerFactProposals,reconcileManufacturerFacts} from './catalog-manufacturer-fact-reconcile.js';
+import {cleanPublicCatalogProfileCopy} from './catalog-public-fact-copy.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
-const MAX_VERIFY_PER_CYCLE=4; // every two hours: 48 tools/day, target full catalog scan <= 72 hours
+const MAX_VERIFY_PER_CYCLE=6; // hourly: up to 144 tools/day, bounded official document verification
 const MAX_NEWS_SOURCE_CHECKS_PER_CYCLE=4;
 const MAX_ADMIT_PER_DAY=6;
 const MAX_BASELINE_SEED_PER_CYCLE=40; // bounded migration inside the existing catalog autonomy engine
@@ -82,7 +84,14 @@ async function fetchOfficial(url){
     if(!r.ok)return{status:[403,429].includes(r.status)?'blocked_or_limited':'warning',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:null};
     const type=(r.headers.get('content-type')||'').toLowerCase();if(!type.includes('text/html')&&!type.includes('text/plain'))return{status:'warning',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:null};
     const html=(await r.text()).slice(0,500000),title=(html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]||'').replace(/\s+/g,' ').trim(),description=meta(html,'description')||meta(html,'og:description'),text=stripHtml(html).slice(0,14000);
-    return{status:'ok',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:await sha(`${title}\n${description}\n${text}`),title,description,releaseLinks:releaseLinks(html,r.url||u.href)};
+    return{status:'ok',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:await sha(`${title}\n${description}\n${text}`),title,description,documentText:html
+      .replace(/<script[\s\S]*?<\/script>/gi,' ')
+      .replace(/<style[\s\S]*?<\/style>/gi,' ')
+      .replace(/<\/(?:p|li|tr|td|th|h[1-6]|section|div)>/gi,'\n')
+      .replace(/<[^>]+>/g,' ')
+      .replace(/&(?:nbsp|amp|quot|#39);/gi,' ')
+      .replace(/[^\S\n]+/g,' ')
+      .split('\n').map(x=>x.trim()).filter(Boolean).join('\n').slice(0,16000),releaseLinks:releaseLinks(html,r.url||u.href)};
   }catch(e){lastError=e?.name==='AbortError'?'timeout':'network_error'}
   finally{clearTimeout(timer)}
   if(attempt<2)await new Promise(resolve=>setTimeout(resolve,150));
@@ -158,6 +167,35 @@ async function persistManufacturerWatchEvent(env,slug,eventType,status,detail,ev
   const result=await env.DB.prepare(`INSERT INTO catalog_runtime_events(event_id,tool_slug,event_type,status,detail,evidence_json,created_at) VALUES(?,?,?,?,?,?,datetime('now'))`)
     .bind('cat_'+crypto.randomUUID(),slug,eventType,status,safeText(detail,2000),JSON.stringify(evidence||null).slice(0,8000)).run();
   if(result?.success===false)throw new Error('manufacturer_documentation_event_not_persisted');
+}
+
+
+async function correctManufacturerCatalogFacts(env,tool,observations){
+  const proposed=manufacturerFactProposals(tool,observations);
+  if(!proposed.length)return{status:'no_verified_numeric_difference'};
+  const slug=String(tool.slug||'').toLowerCase();
+  const prior=await env.DB.prepare("SELECT event_type,evidence_json FROM catalog_runtime_events WHERE tool_slug=? AND event_type IN ('catalog_fact_proposal','catalog_fact_corrected') ORDER BY created_at DESC,event_id DESC LIMIT 1")
+    .bind(slug).first();
+  let previous=null;
+  if(prior?.event_type==='catalog_fact_proposal')try{previous=JSON.parse(prior.evidence_json||'{}')}catch{}
+  const verdict=reconcileManufacturerFacts(tool,proposed,previous);
+  if(verdict.status==='needs_second_observation'){
+    await persistManufacturerWatchEvent(env,slug,'catalog_fact_proposal','deferred','Manufacturer-stated plan fact differs from canonical catalog. Awaiting a second independent observation.',verdict.proposal);
+    return{status:verdict.status};
+  }
+  if(verdict.status!=='corrected')return{status:verdict.status};
+  // Only replace the exact unchanged row that was evaluated; never clobber a
+  // concurrently reviewed profile, quality hold, logo or affiliate status.
+  const row=await env.DB.prepare('SELECT profile_json FROM catalog_runtime_candidates WHERE tool_slug=? LIMIT 1').bind(slug).first();
+  if(!row||row.profile_json!==JSON.stringify(tool))return{status:'concurrent_revision_or_missing'};
+  const updated=verdict.updatedTool;
+  const result=await env.DB.prepare("UPDATE catalog_runtime_candidates SET profile_json=?,source_status='ok',updated_at=datetime('now') WHERE tool_slug=? AND profile_json=?")
+    .bind(JSON.stringify(updated),slug,row.profile_json).run();
+  if(Number(result?.meta?.changes||result?.changes||0)!==1)return{status:'concurrent_revision_or_missing'};
+  await persistManufacturerWatchEvent(env,slug,'catalog_fact_corrected','completed','Specific vendor-stated price or plan capacity corrected after two identical independent document observations.',
+    {corrected_count:verdict.count,claims:proposed.map(x=>({type:x.type,claimKey:x.claimKey,oldValue:x.oldValue,newValue:x.newValue,sourceUrl:x.sourceUrl}))});
+  runtimeCache.at=0;
+  return{status:'corrected',count:verdict.count};
 }
 
 function compileRuntimeSnapshot(stateRows=[],candidateRows=[],meta={}){
@@ -323,7 +361,7 @@ export async function verifyBatch(env){
     ...retryWarning.slice(0,MAX_WARNING_RETRIES_PER_CYCLE).map(x=>x.tool),
     ...regular.map(x=>x.tool)
   ].slice(0,MAX_VERIFY_PER_CYCLE);
-  let checked=0,healthy=0,changed=0,suppressed=0,warnings=0,documentationChecked=0,documentationChanged=0,documentationWarnings=0,documentationBaselined=0;
+  let checked=0,healthy=0,changed=0,suppressed=0,warnings=0,documentationChecked=0,documentationChanged=0,documentationWarnings=0,documentationBaselined=0,factsCorrected=0,factsProposed=0;
   await mapLimit(chosen,2,async tool=>{
     const slug=String(tool.slug).toLowerCase(),prior=smap.get(slug)||{},verifyUrl=verificationUrl(tool),verificationSourceChanged=Boolean(prior.source_url&&prior.source_url!==verifyUrl),result=await fetchOfficial(verifyUrl),staticVerified=String(tool.lastVerified||tool.sourceCheckedOn||'');
     const staticVerifiedMs=staticVerified?Date.parse(/T/.test(staticVerified)?staticVerified:`${staticVerified}T00:00:00Z`):NaN;
@@ -339,6 +377,12 @@ export async function verifyBatch(env){
     if(documentation.status==='baselined')documentationBaselined++;
     if(documentation.status==='documentation_warning')documentationWarnings++;
     if(documentation.changed)documentationChanged++;
+    if(Array.isArray(documentation.observations)&&documentation.observations.length){
+      const correction=await correctManufacturerCatalogFacts(env,tool,documentation.observations).catch(error=>({status:'correction_error',error:safeText(error?.message||error,160)}));
+      if(correction.status==='corrected')factsCorrected+=Number(correction.count||0);
+      else if(correction.status==='needs_second_observation')factsProposed++;
+      else if(correction.status==='correction_error')await logEvent(env,slug,'catalog_fact_reconciliation_failed','failed','Manufacturer fact reconciliation error, original catalog facts left unchanged.',{error:correction.error});
+    }
     let quality=String(prior.quality_status||'unverified'),contentChanged=Number(prior.content_changed||0),lastChange=prior.last_change_at||null;
     let canonicalFingerprint=prior.fingerprint||result.fingerprint||null,pendingFingerprint=prior.pending_fingerprint||null,confirmations=Number(prior.change_confirmations||0);
     if(reviewedSinceChange){quality='healthy';contentChanged=0;lastChange=null;canonicalFingerprint=result.fingerprint||canonicalFingerprint;pendingFingerprint=null;confirmations=0}
@@ -374,7 +418,7 @@ export async function verifyBatch(env){
       .bind(slug,verifyUrl,result.status,result.httpStatus,result.finalUrl,canonicalFingerprint,pendingFingerprint,confirmations,contentChanged,broken,quality,staticVerified,lastChange).run();
   });
   runtimeCache.at=0;
-  return{ok:true,checked,healthy,changed,suppressed,warnings,documentation_checked:documentationChecked,documentation_baselined:documentationBaselined,documentation_changed:documentationChanged,documentation_warnings:documentationWarnings,batch_limit:MAX_VERIFY_PER_CYCLE,warning_retry_hours:WARNING_RETRY_HOURS,max_warning_retries_per_cycle:MAX_WARNING_RETRIES_PER_CYCLE,evidence:'official_homepage_and_first_party_documentation',write_policy:'due_check_only'};
+  return{ok:true,checked,healthy,changed,suppressed,warnings,documentation_checked:documentationChecked,documentation_baselined:documentationBaselined,documentation_changed:documentationChanged,documentation_warnings:documentationWarnings,verified_facts_corrected:factsCorrected,verified_fact_proposals:factsProposed,batch_limit:MAX_VERIFY_PER_CYCLE,warning_retry_hours:WARNING_RETRY_HOURS,max_warning_retries_per_cycle:MAX_WARNING_RETRIES_PER_CYCLE,evidence:'official_homepage_and_first_party_documentation',write_policy:'due_check_only'};
 }
 function validCandidate(candidate,config){
   const allowed=new Set(config?.admission?.allowedCatalogCategories||[]);
@@ -619,11 +663,6 @@ function candidatePage(tool){
   const faqBest=(tool.bestFor||[]).join(', ')||'the use cases shown on this page';
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="index,follow"><link rel="canonical" href="${url}"><title>${esc(tool.name)} Tool Profile: Features, Pricing and Best For | ToolScout</title><meta name="description" content="${esc(tool.description)}">${logo?`<meta property="og:image" content="${esc(logo)}">`:''}<style>body{font-family:Inter,system-ui,sans-serif;margin:0;background:#f6f7f9;color:#101828}.wrap{max-width:940px;margin:auto;padding:24px 22px 80px}a{color:#344054}.brand{font-size:22px;font-weight:850;text-decoration:none;color:#101828}.crumbs{margin-top:30px;font-size:13px;color:#667085}.hero{padding:46px 0 26px}.heroHead{display:grid;grid-template-columns:92px 1fr;gap:22px;align-items:center}.toolLogo,.logoFallback{width:88px;height:88px;border-radius:20px;background:#fff;border:1px solid #e4e7ec;box-shadow:0 8px 24px rgba(16,24,40,.08);box-sizing:border-box}.toolLogo{object-fit:contain;padding:14px}.logoFallback{display:grid;place-items:center;font-size:26px;font-weight:850}.logoFallback[hidden]{display:none!important}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.14em;font-weight:800;color:#667085}h1{font-size:clamp(42px,7vw,68px);line-height:1;letter-spacing:-.055em;margin:12px 0 18px}.lead{font-size:19px;line-height:1.65;color:#667085}.editorial{background:#fff;border:1px solid #e4e7ec;border-radius:18px;padding:22px;margin-bottom:14px}.editorial p,.panel p,.panel li,details p{color:#667085;line-height:1.65}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.panel,details{background:#fff;border:1px solid #e4e7ec;border-radius:18px;padding:22px}.chips{display:flex;flex-wrap:wrap;gap:7px}.cta{display:inline-block;background:#101828;color:#fff;padding:12px 17px;border-radius:11px;text-decoration:none;font-weight:750;margin-top:18px}.secondary{background:#eef2f6;color:#101828;margin-left:8px}.section{margin-top:42px;padding-top:28px;border-top:1px solid #e4e7ec}.small{font-size:12px;color:#667085;line-height:1.55}summary{font-weight:750;cursor:pointer}@media(max-width:700px){.grid{grid-template-columns:1fr}.heroHead{grid-template-columns:72px 1fr;gap:16px}.toolLogo,.logoFallback{width:68px;height:68px}.secondary{margin-left:0}}</style></head><body><div class="wrap"><a class="brand" href="/">ToolScout</a><nav class="crumbs"><a href="/">Home</a> / <a href="/tools">Tools</a> / ${esc(tool.name)}</nav><main class="hero"><div class="heroHead">${logo?`<img class="toolLogo" src="${esc(logo)}" alt="${esc(tool.name)} logo" width="88" height="88" loading="eager" referrerpolicy="no-referrer" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span class="logoFallback" hidden aria-hidden="true">${esc(initials)}</span>`:`<span class="logoFallback" aria-hidden="true">${esc(initials)}</span>`}<div><div class="eyebrow">Independent ${esc(tool.category)} software profile</div><h1>${esc(tool.name)}</h1></div></div><p class="lead">${esc(tool.description)}</p></main><section class="editorial"><div class="eyebrow">ToolScout view</div><p>${esc(review)}</p></section><section class="grid"><div class="panel"><h2>Best for</h2><ul>${best}</ul><h2>Key capabilities</h2><div class="chips">${features}</div></div><div class="panel"><h2>Pricing at a glance</h2><p>${esc(tool.pricing||'See vendor for current pricing.')}</p><p><strong>Free plan recorded:</strong> ${free}</p><p><strong>Category:</strong> ${esc(tool.category)}</p><a class="cta" href="/go/${encodeURIComponent(tool.slug)}" rel="nofollow sponsored">Explore ${esc(tool.name)}</a><a class="cta secondary" href="/compare.html?a=${encodeURIComponent(tool.slug)}&source=tool-profile">Add to comparator</a></div></section>${aiInteroperabilitySection(tool)}<section class="section"><h2>Frequently asked questions</h2><details><summary>What is ${esc(tool.name)} best for?</summary><p>${esc(tool.name)} is recorded in the ToolScout catalog for ${esc(faqBest)}.</p></details><details><summary>Does ${esc(tool.name)} have a free plan?</summary><p>${tool.freePlanKnown===false?'ToolScout has not yet verified the current free-plan position.':tool.freePlan?'The current ToolScout catalog records a free plan. Check the vendor for current limits and eligibility.':'The current ToolScout catalog does not record a free plan. Check the vendor for current offers.'}</p></details><details><summary>How current is this ${esc(tool.name)} profile?</summary><p>Source data last checked ${esc(tool.lastVerified||'recently')}. Vendor pricing and capabilities can change.</p></details></section><p class="small"><strong>Editorial evidence:</strong> manufacturer documentation retained in ToolScout's internal editorial evidence store. Source data last checked ${esc(tool.lastVerified||'recently')}. Vendor pricing and capabilities can change. ToolScout may earn affiliate compensation, but affiliate relationships do not influence ranking or fit.</p></div></body></html>`;
 }
-function injectPendingReview(html,state){
-  if(!state||state.quality_status!=='change_detected'||String(html).includes('data-catalog-runtime-warning'))return html;
-  const warning=`<div data-catalog-runtime-warning="1" style="background:#fff4e5;border-bottom:1px solid #fdb022;color:#7a2e0e;padding:10px 18px;font:600 13px/1.45 Inter,system-ui,sans-serif;text-align:center">ToolScout detected a change on this vendor's official source after the last factual review. Pricing, free-plan details or capabilities shown below may be pending re-verification.</div>`;
-  return html.includes('<body')?html.replace(/(<body[^>]*>)/i,'$1'+warning):warning+html;
-}
 async function toolState(env,slug){return (await runtimeSnapshot(env)).stateMap.get(slug)||null}
 async function runtimeCandidate(env,slug){return (await runtimeSnapshot(env)).candidateMap.get(slug)||null}
 function toolSlug(path){const m=String(path).match(/^\/tools\/([a-z0-9][a-z0-9-]*)(?:\.html)?\/?$/i);return m?m[1].toLowerCase():null}
@@ -648,7 +687,8 @@ export async function publicQualityEnhancedToolResponse(response,env,slug){
   const proof=snapshot.verifiedRevisions?.has(key)&&trustedManufacturerEvidence(revision,{decisionGrade:true})&&hasManufacturerDecisionClaim(revision);
   const hydrated=proof?hydrateLegacyCatalogProfile(html,revision):null;
   if(hydrated)html=hydrated;
-  html=injectPendingReview(html,snapshot.stateMap.get(key));
+  html=cleanPublicCatalogProfileCopy(html);
+  // Private change detection never becomes a public generic uncertainty banner.
   if(row?.logo_url){
     const logo=esc(row.logo_url);
     html=html.replace(/(<img class="toolLogo" src=")[^"]*(")/i,`$1${logo}$2`);
@@ -671,7 +711,7 @@ export async function publicRuntimeToolResponse(env,slug){
   // changed its source_status away from baseline_snapshot.
   const [snapshot,staticTools]=await Promise.all([runtimeSnapshot(env),assetJson(env,'/data/tools.json',[])]);
   if(snapshot.baselineMirrors?.has(key)||(Array.isArray(staticTools)&&staticTools.some(tool=>String(tool?.slug||'').toLowerCase()===key)))return null;
-  return new Response(injectPendingReview(candidatePage(candidate),state),{status:200,headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'public, max-age=60'}});
+  return new Response(cleanPublicCatalogProfileCopy(candidatePage(candidate)),{status:200,headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'public, max-age=60'}});
 }
 export async function publicMergedSitemap(response,env){return mergedSitemap(response,env)}
 export async function publicRuntimeRankingResponse(env,path){return renderRuntimeRanking(env,path,await mergedTools(env))}
@@ -737,10 +777,10 @@ export default {
     if(request.method==='GET'&&slug){
       const [state,candidate]=await Promise.all([toolState(env,slug),runtimeCandidate(env,slug)]);
       if(state?.quality_status==='confirmed_broken')return new Response('Tool profile temporarily unavailable while the official source is re-verified.',{status:404,headers:{'Content-Type':'text/plain; charset=UTF-8','Cache-Control':'no-store','X-Robots-Tag':'noindex'}});
-      if(candidate)return new Response(candidatePage(candidate),{status:200,headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'public, max-age=300'}});
+      if(candidate)return new Response(cleanPublicCatalogProfileCopy(candidatePage(candidate)),{status:200,headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'public, max-age=300'}});
       const response=await base.fetch(request,env,ctx);
       if(response.ok&&state?.quality_status==='change_detected'&&(response.headers.get('Content-Type')||'').includes('text/html')){
-        const html=injectPendingReview(await response.text(),state),h=new Headers(response.headers);h.delete('Content-Length');h.set('Cache-Control','public, max-age=60');return new Response(html,{status:response.status,headers:h});
+        const html=await response.text(),h=new Headers(response.headers);h.delete('Content-Length');h.set('Cache-Control','public, max-age=60');return new Response(html,{status:response.status,headers:h});
       }
       return response;
     }
