@@ -203,8 +203,21 @@ jobs:
             git status --short
             exit 1
           fi
-          git pull --rebase origin main
-          git push origin HEAD:main
+          # Other autonomous missions update main concurrently. Retry rejected
+          # non-fast-forward pushes without overwriting their work.
+          published=false
+          for attempt in 1 2 3 4 5 6 7 8; do
+            git pull --rebase origin main
+            if git push origin HEAD:main; then
+              published=true
+              break
+            fi
+            sleep "$((attempt * 2))"
+          done
+          if [ "$published" != true ]; then
+            echo "::error::SEO asset publication failed after bounded conflict retries."
+            exit 1
+          fi
           echo "changed=true" >> "$GITHUB_OUTPUT"
       - name: Deploy generated editorial and SEO assets
         if: github.ref == 'refs/heads/main' && steps.commit_assets.outputs.changed == 'true'
