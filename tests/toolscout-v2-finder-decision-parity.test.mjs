@@ -3,21 +3,24 @@ import assert from 'node:assert/strict';
 import {handleDistributionEmbedRoute} from '../distribution-embed-worker.js';
 import {handleAgentProtocolRoute} from '../agent-protocol-core-worker.js';
 
-const verifiedAt='2026-10-10';
-function crm(slug,{linux=false,tracking=false,free=true,freeKnown=true}={}){
+// Always within the 180-day manufacturer-evidence validation window.
+const verifiedAt=new Date().toISOString().slice(0,10);
+function crm(slug,{linux=false,tracking=false,free=true,freeKnown=true,scores={}}={}){
   const host='https://'+slug+'.example';
   return {
     slug,name:slug,category:'crm',description:'CRM for small sales teams',
     features:['crm',...(linux?['Linux']:[]),...(tracking?['tracking']:[])],
     bestFor:['sales teams'],sourceUrl:host,freePlan:free,freePlanKnown:freeKnown,
-    scores:{price:7,ease:8,integrations:7,automation:6},
+    scores:{price:7,ease:8,integrations:7,automation:6,features:7,...scores},
     editorialReview:{verificationStatus:'vendor_documented',sourceUrl:host+'/docs',summary:'Independent buyer assessment backed by vendor documentation.'},
     decisionClaims:linux?[{type:'capability',value:'Linux',status:'verified',plan:'Starter',
       sourceUrl:host+'/docs',verifiedAt}]:[]
   };
 }
 const rows=[crm('documented-crm',{linux:true}),crm('tracking-crm',{tracking:true}),
-  crm('not-evidenced-crm'),crm('unknown-free-crm',{freeKnown:false})];
+  crm('not-evidenced-crm'),crm('unknown-free-crm',{freeKnown:false}),
+  crm('automation-first-crm',{scores:{automation:10,ease:2,features:3}}),
+  crm('ease-first-crm',{scores:{automation:2,ease:10,features:9}})];
 const env={ASSETS:{async fetch(request){
   if(new URL(request.url).pathname==='/data/tools.json')return Response.json(rows);
   if(new URL(request.url).pathname==='/data/intents.json')return Response.json([]);
@@ -104,4 +107,60 @@ test('Malformed or ambiguous buyer inputs are rejected before decision scoring',
     assert.equal(web.status,400,JSON.stringify(query));
     assert.equal(web.data.error,'invalid_decision_constraints');
   }
+});
+
+test('Explicit category selection survives a generic query and a manufacturer must-have',async()=>{
+  const web=await finder({q:'software for our team',goal:'crm',must_have:'Linux'});
+  assert.equal(web.status,200);
+  assert.equal(web.data.recommendation_type,'decision_shortlist');
+  assert.deepEqual(web.data.recommendations.map(t=>t.slug),['documented-crm']);
+  assert.ok(web.data.recommendations.every(t=>t.category==='crm'));
+  const noGoal=await finder({q:'software for our team',must_have:'Linux'});
+  assert.equal(noGoal.status,422,'without a specified job/category we must not invent one');
+});
+
+test('User-selected Finder goal is a hard category gate, not a textual suggestion',async()=>{
+  const result=await finder({q:'SEO software for our team',goal:'crm',mode:'decision'});
+  assert.equal(result.status,200);
+  assert.ok(result.data.recommendations.length>0);
+  assert.ok(result.data.recommendations.every(t=>t.category==='crm'));
+});
+
+test('Legacy Finder priority changes decision ranking and matches explicit MCP priority',async()=>{
+  for(const priority of ['automation','ease','integrations','features']){
+    const [web,ai]=await Promise.all([
+      finder({q:'CRM',mode:'decision',priority}),
+      mcp({job:'CRM',priorities:[priority],limit:3})
+    ]);
+    assert.equal(web.status,200,priority);
+    assert.equal(ai.isError,false,priority);
+    assert.deepEqual(web.data.recommendations.map(x=>x.slug),
+      ai.structuredContent.shortlist.map(x=>x.slug),priority);
+    assert.deepEqual(web.data.recommendations.map(x=>x.match),
+      ai.structuredContent.shortlist.map(x=>x.fit_score),priority);
+  }
+  const automation=await finder({q:'CRM',mode:'decision',priority:'automation'});
+  const easy=await finder({q:'CRM',mode:'decision',priority:'ease'});
+  const features=await finder({q:'CRM',mode:'decision',priority:'features'});
+  assert.equal(automation.data.recommendations[0].slug,'automation-first-crm');
+  assert.equal(easy.data.recommendations[0].slug,'ease-first-crm');
+  assert.equal(features.data.recommendations[0].slug,'ease-first-crm');
+});
+
+test('Explicit multi-priorities override the legacy single priority selector',async()=>{
+  const [web,ai]=await Promise.all([
+    finder({q:'CRM',mode:'decision',priority:'automation',priorities:['ease','features']}),
+    mcp({job:'CRM',priorities:['ease','features'],limit:3})
+  ]);
+  assert.equal(web.status,200);
+  assert.equal(ai.isError,false);
+  assert.deepEqual(web.data.recommendations.map(x=>x.slug),ai.structuredContent.shortlist.map(x=>x.slug));
+  assert.deepEqual(web.data.recommendations.map(x=>x.match),ai.structuredContent.shortlist.map(x=>x.fit_score));
+});
+
+test('Non-decision Finder goal and priority still use the original recommendation path',async()=>{
+  const web=await finder({q:'CRM',goal:'crm',priority:'automation'});
+  assert.equal(web.status,200);
+  assert.notEqual(web.data.recommendation_type,'decision_shortlist');
+  assert.ok(web.data.recommendations.every(t=>t.category==='crm'));
 });
