@@ -105,7 +105,7 @@ test('Codex P1: recent failed research is deferred so 32 permanent holds cannot 
  assert.match(runtime,/const ACTIVE_RESEARCH_READY_WHERE=/);
  assert.match(runtime,/catalog_candidate_manufacturer_docs_hold/);
  assert.match(runtime,/catalog_candidate_quality_hold/);
- assert.match(runtime,/h\.created_at>=datetime\('now','-6 hours'\)/);
+ assert.match(runtime,/h\.created_at>=datetime\('now','-\$\{RESEARCH_HOLD_RETRY_HOURS\} hours'\)/);
  assert.match(runtime,/h\.created_at>=c\.updated_at/);
  const uses=runtime.match(/\$\{ACTIVE_RESEARCH_READY_WHERE\}/g)||[];
  assert.ok(uses.length>=2,'hourly selection and incident recovery both respect hold cooldown');
