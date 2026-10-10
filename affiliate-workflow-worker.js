@@ -43,7 +43,13 @@ if(!tool){
       const candidate=JSON.parse(row.profile_json||'{}');
       const source=approvedUrl(candidate.sourceUrl);
       const review=candidate.editorialReview||{};
-      const proof=Array.isArray(candidate.evidence)&&candidate.evidence.some(x=>
+      let owned=false;
+      try{
+        const home=new URL(source).hostname.toLowerCase().replace(/^www\./,'');
+        const doc=new URL(review.sourceUrl).hostname.toLowerCase().replace(/^www\./,'');
+        owned=doc===home||doc.endsWith('.'+home);
+      }catch{}
+      const proof=owned&&Array.isArray(candidate.evidence)&&candidate.evidence.some(x=>
         x?.claimScope==='toolscout_editorial_review'&&x?.sourceUrl===review.sourceUrl&&
         /^\d{4}-\d{2}-\d{2}$/.test(String(x?.verifiedAt||'')));
       if(candidate.slug===slug&&source&&review.verificationStatus==='vendor_documented'&&proof&&
