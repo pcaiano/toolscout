@@ -126,3 +126,27 @@ test('territory and incompatible units cannot be silently normalized',async()=>{
   assert.equal(unlicensed.cheaper_option_analysis.status,'not_comparable',
     'a single subscription is not evidence of the price for six seats');
 });
+
+test('matching manufacturer per-channel monthly quotes identify a cheaper one-channel price',async()=>{
+ const result=await compare([
+   crm('one-channel-lower',{priceScore:3,amount:6,unit:'channel'}),
+   crm('one-channel-higher',{priceScore:10,amount:12,unit:'channel'})
+ ]);
+ const price=result.cheaper_option_analysis;
+ assert.equal(price.status,'documented_price_comparison');
+ assert.equal(price.affordability_leader,'one-channel-lower');
+ assert.equal(price.unit,'channel');
+ assert.equal(price.monthly_list_price,6);
+ assert.equal(price.seat_count,null);
+ assert.equal(price.seat_monthly_subtotal_before_tax,null);
+ assert.match(price.note,/one channel only/i);
+});
+test('a per-channel rate is never an invented multi-seat or flat-subscription total',async()=>{
+ const channels=[
+   crm('cheap-channel',{priceScore:6,amount:6,unit:'channel'}),
+   crm('expensive-channel',{priceScore:8,amount:12,unit:'channel'})
+ ];
+ assert.equal((await compare(channels,[],{seat_count:3})).cheaper_option_analysis.status,'not_comparable');
+ const mixed=await compare([channels[0],crm('flat-subscription',{priceScore:7,amount:8,unit:'subscription'})]);
+ assert.equal(mixed.cheaper_option_analysis.status,'not_comparable');
+});
