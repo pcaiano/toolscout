@@ -32,7 +32,7 @@ test('catalog can admit 24 documented tools but never runs unbounded research wi
 
 test('Codex P2: deadline is rechecked after awaited supplier phases and bounds trailing sync',()=>{
  const admission=catalog.slice(catalog.indexOf('export async function admitTrustedCandidates(env)'),catalog.indexOf('export async function auditCatalogQualityBatch(env'));
- assert.match(admission,/const startedAt=Date\.now\(\);\s*await ensureSchema\(env\)/,'setup must count against wall time');
+ assert.match(admission,/const startedAt=Date\.now\(\);[\s\S]*?await ensureSchema\(env\);\s*if\(setupDeadline\('schema'\)\)return setupDeadline\('schema'\)/,'setup must count against wall time and recheck after schema');
  assert.match(admission,/const source=await fetchTrustedCandidateOfficialSource\(raw\);\s*if\(budgetStop\(\)\)break/,'slow source fallback cannot continue into quality gate');
  assert.match(admission,/const quality=await auditCatalogTool\(env,profile\);\s*if\(budgetStop\(\)\)break/,'slow quality/logo probe cannot continue to D1 admission');
  assert.match(admission,/existing\.add\(slug\);admitted\+\+;\s*if\(budgetStop\(\)\)break/,'committed admissions must report elapsed deadline');
