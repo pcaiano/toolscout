@@ -772,7 +772,7 @@ function runtimeEditorialView(tool){
   const fit=tool.name+' is a practical fit for '+runtimeListPhrase(aud.length?aud:['buyers whose workflow matches its core capabilities'])+', especially when '+runtimeListPhrase(caps.length?caps:['its core workflow'])+' matter most.';
   const strengths=strongest.length?' In ToolScout scoring, '+runtimeListPhrase(strongest)+' are its strongest recorded dimensions.':'';
   const trade=weak&&Number(entries[0]?.[1]||0)-Number(weak[1])>=3?' '+(RUNTIME_SCORE_LABELS[weak[0]]||weak[0])+' is the clearest recorded trade-off, so compare alternatives if that requirement is central.':'';
-  const commercial=tool?.freePlanKnown===false?' The current free-plan position is not verified.':tool?.freePlan?' A recorded free plan makes it easier to test before committing.':' Validate the use case and current pricing before committing.';
+  const commercial=tool?.freePlanKnown===false?' Compare the available purchasing models and operating cost for the intended workload.':tool?.freePlan?' A recorded free plan makes it easier to test before committing.':' Validate the use case and current pricing before committing.';
   return safeText((fit+strengths+trade+commercial+' Check current vendor limits, integrations and pricing before purchase.').replace(/[\u2013\u2014]/g,'-'),1800);
 }
 function runtimeLogo(tool){
@@ -805,12 +805,16 @@ function aiInteroperabilitySection(tool){
     Number.isFinite(verifiedDateMs)&&new Date(verifiedDateMs).toISOString().slice(0,10)===verificationDate&&
     verifiedDateMs<=Date.now();
   const datedManufacturerProof=hasManufacturerProof&&validVerificationDate;
+  // Unknown or unsupported AI claims are research state, not reader-facing
+  // content. Publish interoperability only with dated manufacturer proof.
+  if(!datedManufacturerProof)return '';
   const evidenceNote=datedManufacturerProof?'<p class="small" data-ai-evidence-date="1"><strong>AI compatibility:</strong> Manufacturer-confirmed, verified '+esc(p.verifiedAt)+'.</p>':'';
   return '<section class="section" data-ai-interoperability="1"><div class="eyebrow">AI interoperability</div><h2>How '+esc(tool.name)+' works with AI assistants and agents</h2><p style="color:#667085;line-height:1.65">'+esc(summary)+'</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0"><span style="font-size:12px;border:1px solid #e4e7ec;border-radius:10px;padding:8px 10px"><strong>AI fit:</strong> '+esc(tier)+'</span><span style="font-size:12px;border:1px solid #e4e7ec;border-radius:10px;padding:8px 10px"><strong>Assistants:</strong> '+esc(assistants.length?assistants.join(', '):'Not verified')+'</span><span style="font-size:12px;border:1px solid #e4e7ec;border-radius:10px;padding:8px 10px"><strong>MCP:</strong> '+esc(mcp)+'</span><span style="font-size:12px;border:1px solid #e4e7ec;border-radius:10px;padding:8px 10px"><strong>Public API:</strong> '+esc(api)+'</span></div>'+evidenceNote+'</section>';
 }
 function injectAiInteroperability(html,tool){
   if(!tool||String(html).includes('data-ai-interoperability="1"'))return html;
   const section=aiInteroperabilitySection(tool);
+  if(!section)return html;
   const faq='<section class="section"><h2>Frequently asked questions</h2>';
   if(String(html).includes(faq))return String(html).replace(faq,section+faq);
   return String(html).includes('</main>')?String(html).replace('</main>','</main>'+section):String(html).replace('</body>',section+'</body>');
