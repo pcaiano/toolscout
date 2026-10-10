@@ -81,14 +81,14 @@ test('temporary vendor document changes revert safely, and blocked or third-part
   assert.equal((await verifyManufacturerDocuments(f.env,tool,f.options)).status,'documentation_warning');
   assert.equal(f.events[0].event_type,'catalog_docs_pending');
 });
-test('Growth Brain itself owns bounded two-hourly documentary verification, no new engine',()=>{
+test('Growth Brain owns bounded hourly manufacturer documentary verification without adding an engine',()=>{
   assert.equal(missionOwner('catalog_runtime_quality'),'growth_scheduler');
   assert.equal(SCHEDULED_MISSIONS.catalog_runtime_quality.cron,TOOLSCOUT_CRONS.hourly);
   assert.equal(SCHEDULED_MISSIONS.catalog_runtime_quality.subcadence,'hourly_bounded_six_official_products_or_recovery');
   const scheduler=fs.readFileSync(new URL('../growth-scheduler.js',import.meta.url),'utf8');
-  assert.match(scheduler,/if\(twoHourly\)\{\s*scheduleTask\(ctx,runWithLedger\(env,\{engine:'catalog',mission:'runtime_quality'/);
+  assert.match(scheduler,/scheduleTask\(ctx,runWithLedger\(env,\{engine:'catalog',mission:'runtime_quality'/);
   const catalog=fs.readFileSync(new URL('../catalog-autonomy-worker.js',import.meta.url),'utf8');
   assert.match(catalog,/documentation_changed:documentationChanged/);
-  assert.match(catalog,/injectPendingReview\(html,snapshot.stateMap.get\(key\)\)/);
+  assert.match(catalog,/cleanPublicCatalogProfileCopy\(html\)/);
   assert.match(catalog,/WHERE status IN \('published','admitted_coverage','quality_hold'\)/);
 });
