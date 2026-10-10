@@ -87,3 +87,12 @@ test('Catalog source holds have a bounded cooldown, without admission or ranking
  assert.match(admission,/if\(!trustedManufacturerEvidence\(raw,\{decisionGrade:true\}\)\)/);
  assert.match(admission,/if\(!quality\.publishable\)/);
 });
+
+test('Catalog coverage recovery is independent from potentially slow quality verification',()=>{
+ const hourly=scheduler.slice(scheduler.indexOf('  }else if(hourly){'));
+ assert.match(hourly,/if\(recoverQuality\|\|recoverWarnings\)\{\s*scheduleTask\(ctx,runWithLedger\(env,\{engine:'catalog',mission:'runtime_quality'/);
+ assert.match(hourly,/if\(recoverCoverage\|\|newCandidateSupply\)\{\s*scheduleTask\(ctx,runWithLedger\(env,\{engine:'catalog',mission:'runtime_coverage'/);
+ assert.match(hourly,/singleFlightMinutes:8/);
+ assert.doesNotMatch(hourly,/if\(recoverQuality\|\|recoverWarnings\)\{try\{await runWithLedger/,'quality must not be awaited before coverage');
+ assert.doesNotMatch(hourly,/scheduleTask\(ctx,\(async\(\)=>\{/,'recovery tasks must not share a sequential async wrapper');
+});

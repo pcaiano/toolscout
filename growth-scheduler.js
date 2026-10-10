@@ -119,12 +119,17 @@ export async function runGrowthScheduler(event,env,ctx,{delegate=null}={}){
       catalogWarningsNeedRecovery(env,6),
       hasNewDecisionGradeCatalogSupply(env).catch(()=>false)
     ]);
-    if(recoverCoverage||recoverNews||recoverQuality||recoverWarnings||newCandidateSupply){
-      scheduleTask(ctx,(async()=>{
-        if(recoverQuality||recoverWarnings){try{await runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:trigger+':recovery',singleFlightMinutes:8},()=>verifyCatalogBatch(env))}catch{}}
-        if(recoverCoverage||newCandidateSupply){try{await runWithLedger(env,{engine:'catalog',mission:'runtime_coverage',triggerName:trigger+(newCandidateSupply?':new_documented_cohort':':recovery'),singleFlightMinutes:8},()=>admitTrustedCandidates(env))}catch{}}
-        if(recoverNews){try{await runWithLedger(env,{engine:'content',mission:'software_news_source_watch',triggerName:trigger+':recovery'},()=>verifyNewsSources(env))}catch{}}
-      })());
+    // Independent recovery tasks: one slow quality/source verifier must never
+    // delay admission or software-news recovery on this same hourly cron.
+    // Existing single-flight leases still prevent overlapping catalog missions.
+    if(recoverQuality||recoverWarnings){
+      scheduleTask(ctx,runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:trigger+':recovery',singleFlightMinutes:8},()=>verifyCatalogBatch(env)));
+    }
+    if(recoverCoverage||newCandidateSupply){
+      scheduleTask(ctx,runWithLedger(env,{engine:'catalog',mission:'runtime_coverage',triggerName:trigger+(newCandidateSupply?':new_documented_cohort':':recovery'),singleFlightMinutes:8},()=>admitTrustedCandidates(env)));
+    }
+    if(recoverNews){
+      scheduleTask(ctx,runWithLedger(env,{engine:'content',mission:'software_news_source_watch',triggerName:trigger+':recovery'},()=>verifyNewsSources(env)));
     }
   }
 
