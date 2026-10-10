@@ -19,6 +19,7 @@ function fullEnvironment({withDb=true}={}){
  const env={ASSETS:{async fetch(req){const p=new URL(req.url).pathname;
    if(p==='/data/tools.json')return Response.json(original);
    if(p==='/data/intents.json')return Response.json([]);
+   if(p==='/data/affiliate.json')return Response.json({[admitted.slug]:{enabled:true,url:'https://merchant.example/approved-referral'},[paused.slug]:{enabled:false,url:'https://merchant.example/disabled'}});
    return new Response('missing',{status:404});
  }}};
  if(withDb)env.DB={prepare(sql){
