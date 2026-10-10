@@ -167,7 +167,7 @@ function parseBuyerDecisionQuery(u,profile,limit,job){
   const args={job,limit,budget:profile.budget,team:profile.team};
   for(const [key,maxLen] of Object.entries(listSpecs)){
     const values=u.searchParams.getAll(key).map(x=>x.trim());
-    if(values.length>12||values.some(x=>!x||x.length>maxLen||/[\\x00-\\x1f]/.test(x)))
+    if(values.length>12||values.some(x=>!x||x.length>maxLen||[...x].some(c=>c.charCodeAt(0)<32)))
       return {error:'Invalid '+key+': provide up to 12 non-empty, length-bounded values.'};
     if(key==='priorities'&&(values.length>6||values.some(x=>!['price','ease','automation','integrations','sales','ai','marketing','seo','research','content','agency'].includes(x))||new Set(values).size!==values.length))
       return {error:'Invalid priorities: use up to six distinct supported decision dimensions.'};
@@ -187,7 +187,7 @@ function parseBuyerDecisionQuery(u,profile,limit,job){
   }
   if(u.searchParams.has('seat_count')){
     const raw=u.searchParams.get('seat_count'),number=Number(raw);
-    if(!/^\\d+$/.test(String(raw))||!Number.isInteger(number)||number<1||number>100)
+    if(!/^[0-9]+$/.test(String(raw))||!Number.isInteger(number)||number<1||number>100)
       return {error:'seat_count must be an integer from 1 to 100.'};
     args.seat_count=number;
   }
