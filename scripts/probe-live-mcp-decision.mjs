@@ -42,6 +42,26 @@ const list=await rpc('tools/list');
 const decider=list.tools?.find(t=>t.name==='decide_software');
 assert(Boolean(decider?.inputSchema?.properties?.seat_count),'live decide_software schema missing latest seat_count feature');
 assert(decider.inputSchema.properties.country,'country-local price verification guard is missing');
+// Prove both sides of commercial routing against the real production Worker.
+// These are product facts from the existing affiliate registry, not score inputs:
+// HubSpot disabled, Typeform explicitly enabled with an approved HTTPS target.
+// Poll for Cloudflare rollout rather than confusing stale edge code with a pass.
+let commercialRollout=false;
+for(let attempt=1;attempt<=15;attempt++){
+  try{
+    const unapproved=await rpc('tools/call',{name:'get_tool',arguments:{tool:'hubspot'}});
+    const approved=await rpc('tools/call',{name:'get_tool',arguments:{tool:'typeform'}});
+    const hub=unapproved.structuredContent?.tool,type=approved.structuredContent?.tool;
+    commercialRollout=hub?.tool_url===null&&
+      hub?.profile_url==='https://trytoolscout.org/tools/hubspot'&&
+      type?.tool_url==='https://trytoolscout.org/go/typeform?source=ai-agent'&&
+      type?.profile_url==='https://trytoolscout.org/tools/typeform';
+    if(commercialRollout)break;
+  }catch(error){if(attempt===15)throw Error('Live approved commerce verification unavailable: '+String(error?.message||error))}
+  if(attempt<15)await sleep(5000);
+}
+assert(commercialRollout,'MCP production still advertises unapproved vendor visits or hides a real approved visit');
+
 const cases=[
  {label:'website CMS monthly $39 current Premium Site',args:{job:'website builder',constraints:['under $40/month billed monthly'],must_have:['content management system'],limit:5},slug:'webflow',plan:'Site Premium',currency:'USD',amount:39,invoice:39},
  {label:'website CMS under 26 USD annual',args:{job:'website builder',constraints:['under $26/month billed annually'],must_have:['content management system'],limit:5},slug:'webflow',plan:'Site Premium',currency:'USD',amount:25,invoice:300},
@@ -56,7 +76,8 @@ for(const c of cases){
  assert(candidate.qualified_for_use_case===true,c.label+' not marked qualified');
  const evidence=candidate.constraint_evidence.find(x=>x.currency===c.currency);
  assert(evidence?.status==='verified'&&evidence.plan===c.plan&&evidence.monthly_equivalent===c.amount&&evidence.charge_amount===c.invoice,c.label+' quote/billing mismatch');
- assert(candidate.tool_url?.startsWith('https://trytoolscout.org/go/'),c.label+' missing monetizable ToolScout visit route');
+ assert(candidate.tool_url===null,c.label+' must not invent /go for an unapproved Webflow or HubSpot affiliate');
+ assert(candidate.profile_url==='https://trytoolscout.org/tools/'+c.slug,c.label+' must retain canonical ToolScout profile');
  assert(!JSON.stringify(candidate).includes('sourceUrl')&&!JSON.stringify(candidate).includes('webflow.com/pricing')&&!JSON.stringify(candidate).includes('hubspot.com/pricing'),c.label+' leaked manufacturer documentation');
 }
 const denied=await rpc('tools/call',{name:'decide_software',arguments:{job:'website builder',constraints:['under $16/month billed annually'],must_have:['content management system'],limit:5}});
