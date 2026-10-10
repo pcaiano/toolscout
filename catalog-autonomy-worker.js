@@ -698,7 +698,9 @@ export async function publicQualityEnhancedToolResponse(response,env,slug){
   if(tool)html=injectAiInteroperability(html,tool);
   const h=new Headers(response.headers);h.delete('Content-Length');h.delete('Content-Encoding');h.set('Cache-Control','public, max-age=60');
   if(hydrated)h.set('X-ToolScout-Catalog-Hydration','verified-d1-revision');
-  return new Response(html,{status:response.status,statusText:response.statusText,headers:h});
+  // AI enhancement runs after the first cleanup; clean the final response too
+  // so unknown/unsupported panels cannot be reintroduced on legacy profiles.
+  return new Response(cleanPublicCatalogProfileCopy(html),{status:response.status,statusText:response.statusText,headers:h});
 }
 export async function publicRuntimeToolResponse(env,slug){
   const key=String(slug||'').toLowerCase().replace(/[^a-z0-9-]/g,'');
