@@ -60,8 +60,8 @@ function sameManufacturerHost(url,home){
   try{
     const link=new URL(String(url||'')),manufacturer=new URL(String(home||''));
     if(link.protocol!=='https:'||manufacturer.protocol!=='https:')return false;
-    const a=link.hostname.toLowerCase().replace(/^www\\./,'');
-    const b=manufacturer.hostname.toLowerCase().replace(/^www\\./,'');
+    const a=link.hostname.toLowerCase().replace(new RegExp('^www[.]'),'');
+    const b=manufacturer.hostname.toLowerCase().replace(new RegExp('^www[.]'),'');
     return a===b||a.endsWith('.'+b);
   }catch{return false}
 }
@@ -78,7 +78,30 @@ export function trustedCandidateOfficialFallbackUrls(candidate){
     try{u=new URL(url)}catch{continue}
     if(u.pathname==='/'||!sameManufacturerHost(url,home))continue;
     if(!evidence.some(row=>row?.claimScope==='toolscout_editorial_review'&&
-      row?.sourceUrl===url&&/^\\d{4}-\\d{2}-\\d{2}$/.test(String(row.verifiedAt||''))))continue;
+      row?.sourceUrl===url&&new RegExp('^[0-9]{4}-[0-9]{2}-[0-9]{2}
+    if(!result.includes(url))result.push(url);
+    if(result.length>=2)break;
+  }
+  return result;
+}
+export async function fetchTrustedCandidateOfficialSource(candidate){
+  const home=candidate?.sourceUrl;
+  const original=await fetchOfficial(home);
+  if(original.status==='ok'&&sameManufacturerHost(original.finalUrl,home))
+    return {...original,selectedSource:'manufacturer_home'};
+  for(const url of trustedCandidateOfficialFallbackUrls(candidate)){
+    const proof=await fetchOfficial(url);
+    if(proof.status==='ok'&&sameManufacturerHost(proof.finalUrl,home)){
+      try{
+        if(new URL(proof.finalUrl).pathname!=='/')
+          return {...proof,selectedSource:'manufacturer_document'};
+      }catch{}
+    }
+  }
+  return {...original,status:original.status==='ok'?'untrusted_redirect':original.status,
+    selectedSource:'none',fallbackDocumentsAttempted:trustedCandidateOfficialFallbackUrls(candidate).length};
+}
+).test(String(row.verifiedAt||''))))continue;
     if(!result.includes(url))result.push(url);
     if(result.length>=2)break;
   }
