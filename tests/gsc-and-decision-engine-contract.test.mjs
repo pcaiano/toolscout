@@ -11,9 +11,9 @@ const script=path.join(ROOT,'scripts','validate-aeo-geo-readiness.mjs');
 const requiredLinks=['guides.html','tools.html','compare.html','sitemap.xml'];
 const fixture=(identity,operation='decide_software')=>{
   const cwd=fs.mkdtempSync(path.join(os.tmpdir(),'toolscout-decision-readiness-'));
-  fs.writeFileSync(path.join(cwd,'robots.txt'),'User-agent: *\\nAllow: /\\nSitemap: https://trytoolscout.org/sitemap.xml\\n');
-  fs.writeFileSync(path.join(cwd,'sitemap.xml'),'<urlset></urlset>\\n');
-  fs.writeFileSync(path.join(cwd,'llms.txt'),`${identity}\\n${operation}\\n${requiredLinks.join('\\n')}\\n`);
+  fs.writeFileSync(path.join(cwd,'robots.txt'),'User-agent: *\nAllow: /\nSitemap: https://trytoolscout.org/sitemap.xml\n');
+  fs.writeFileSync(path.join(cwd,'sitemap.xml'),'<urlset></urlset>\n');
+  fs.writeFileSync(path.join(cwd,'llms.txt'),`${identity}\n${operation}\n${requiredLinks.join('\n')}\n`);
   return cwd;
 };
 const validate=cwd=>{
@@ -25,12 +25,12 @@ const validate=cwd=>{
 
 test('decision-engine identity with an actual decision operation satisfies machine-readiness gate',()=>{
   const run=validate(fixture('ToolScout is an independent software decision engine'));
-  assert.equal(run.status,0,run.output+'\\n'+run.stderr);
+  assert.equal(run.status,0,run.output+'\n'+run.stderr);
 });
 
 test('legacy recommendation-engine identity remains backward compatible',()=>{
   const run=validate(fixture('ToolScout is a recommendation engine'));
-  assert.equal(run.status,0,run.output+'\\n'+run.stderr);
+  assert.equal(run.status,0,run.output+'\n'+run.stderr);
 });
 
 test('missing decision identity or missing operation fails explicitly',()=>{
