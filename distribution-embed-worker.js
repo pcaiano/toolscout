@@ -1,6 +1,6 @@
 import {businessWorkflowGuidance,verifiedPmsCandidates} from './business-workflow-intent.js';
 import {qualifiedSoftwareDecisionShortlist} from './agent-protocol-core-worker.js';
-import {publicMergedTools} from './catalog-autonomy-worker.js';
+import {publicDecisionCatalogTools} from './catalog-autonomy-worker.js';
 import base from './distribution-command-worker.js';
 import { prioritizedDistributionFeed } from './distribution-feed-priority.js';
 import {recentDistributionAssets,handleMachineDiscoveryCatalogRoute} from './machine-discovery-catalog-runtime.js';
@@ -210,7 +210,7 @@ async function recommend(request,env){
   };
   const limit=Math.max(1,Math.min(5,Number.parseInt(u.searchParams.get('limit')||'3',10)||3));
   try{
-    const [tools,intents]=await Promise.all([publicMergedTools(env),assetJson(request,env,'/data/intents.json')]);
+    const [tools,intents]=await Promise.all([publicDecisionCatalogTools(env),assetJson(request,env,'/data/intents.json')]);
     // Interpret the whole-business question BEFORE category hints inferred from
     // sector names such as marketing agency, software company or architecture firm.
     // Only a user-supplied goal is a hard category instruction at this stage.
@@ -242,7 +242,7 @@ async function recommend(request,env){
         pricing:item.pricing,free_plan:item.free_plan,match:item.fit_score,
         match_type:'decision_qualified',match_label:item.fit_score+'/100 editorial fit score',
         reasons:item.advantages.slice(0,3),best_for:item.best_for,features:item.features.slice(0,6),
-        profile_url:item.profile_url,tool_url:'https://trytoolscout.org/go/'+encodeURIComponent(item.slug),
+        profile_url:item.profile_url,tool_url:tools.find(t=>t.slug===item.slug)?.toolscoutApprovedVisit||null,
         qualified_for_use_case:true,evidence_confidence:item.evidence_confidence,
         requirement_evidence:item.requirement_evidence,avoid_evidence:item.avoid_evidence,
         constraint_evidence:item.constraint_evidence,stack_fit:item.stack_fit,
@@ -283,7 +283,7 @@ async function recommend(request,env){
       best_for:t.bestFor||[],
       features:(t.features||[]).slice(0,6),
       profile_url:`https://trytoolscout.org/tools/${encodeURIComponent(t.slug)}`,
-      tool_url:`https://trytoolscout.org/go/${encodeURIComponent(t.slug)}`
+      tool_url:t.toolscoutApprovedVisit||null
     }));
     return Response.json({
       query:q,
