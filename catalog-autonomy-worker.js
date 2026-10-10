@@ -15,6 +15,7 @@ const MAX_ADMIT_PER_DAY=24; // actually per-cycle cap: enable documented cohorts
 const MAX_BASELINE_SEED_PER_CYCLE=40; // bounded migration inside the existing catalog autonomy engine
 const MAX_CANDIDATE_CHECKS_PER_CYCLE=32; // bounded source fetches, preserve first-party and quality gates
 const MAX_ADMISSION_WALL_MS=90000; // time-bound hourly supplier without reducing the 24-tool admission cap
+const OFFICIAL_SOURCE_HOLD_COOLDOWN_HOURS=3; // avoid re-fetching verified vendor failures every hourly admission run
 const MAX_RESEARCH_SEEDS_PER_CYCLE=80; // hourly discovery intake; never bypasses manufacturer/editorial admission
 const WARNING_RETRY_HOURS=6;
 const MAX_WARNING_RETRIES_PER_CYCLE=2;
@@ -663,6 +664,14 @@ export async function admitTrustedCandidates(env){
   if(setupDeadline('affiliate_registry'))return setupDeadline('affiliate_registry');
   const seeds=await assetJson(env,'/data/catalog-research-seeds.json',{candidates:[]});
   if(setupDeadline('research_seeds'))return setupDeadline('research_seeds');
+  // Recent source failures remain unpublished. Defer repeated retries, never
+  // convert a blocked vendor into evidence or spend this cycle's network budget
+  // on the same failed manufacturer every hour.
+  const recentSourceHolds=await env.DB.prepare(`SELECT DISTINCT tool_slug FROM catalog_runtime_events
+    WHERE event_type='catalog_candidate_official_source_hold' AND created_at>=datetime('now', ?)`)
+    .bind(`-${OFFICIAL_SOURCE_HOLD_COOLDOWN_HOURS} hours`).all();
+  if(setupDeadline('source_hold_cooldown'))return setupDeadline('source_hold_cooldown');
+  const sourceHoldCooldown=new Set((recentSourceHolds.results||[]).map(row=>String(row.tool_slug||'').toLowerCase()));
   const researchSeeds=(Array.isArray(seeds?.candidates)?seeds.candidates:[]).filter(x=>x?.slug&&!existing.has(String(x.slug).toLowerCase()));
   const pool=[],seen=new Set();let sequence=0;
   for(const file of config?.trustedCandidateFiles||[]){
@@ -684,11 +693,12 @@ export async function admitTrustedCandidates(env){
   pool.sort((a,b)=>Number(b.ready)-Number(a.ready)||
     Math.max(0,target-(categoryCounts.get(b.raw.category)||0))-Math.max(0,target-(categoryCounts.get(a.raw.category)||0))||
     b.priority.score-a.priority.score||a.sequence-b.sequence||a.slug.localeCompare(b.slug));
-  let admitted=0,held=0,considered=0,missingManufacturerEvidence=0,cycleBudgetExhausted=false;
+  let admitted=0,held=0,considered=0,missingManufacturerEvidence=0,cycleBudgetExhausted=false,sourceRetriesDeferred=0;
   const budgetStop=()=>{if(Date.now()-startedAt>MAX_ADMISSION_WALL_MS){cycleBudgetExhausted=true;return true}return false};
   for(const item of pool){
     if(admitted>=MAX_ADMIT_PER_DAY||considered>=MAX_CANDIDATE_CHECKS_PER_CYCLE)break;
     if(budgetStop())break;
+    if(sourceHoldCooldown.has(item.slug)){sourceRetriesDeferred++;continue;}
     const {raw,slug,priority}=item;considered++;
     const errors=validCandidate(raw,config);if(errors.length){held++;await logEvent(env,slug,'catalog_candidate_structure_hold','completed','Catalog record failed admission field completeness before publication.',{issues:errors});continue}
     // Pure preflight before any network fetch. Undocumented research seeds
@@ -741,6 +751,7 @@ export async function admitTrustedCandidates(env){
     trusted_sources_total:seen.size,ready_trusted_sources:pool.filter(x=>x.ready).length,
     cycle_budget_exhausted:cycleBudgetExhausted,cycle_wall_budget_ms:MAX_ADMISSION_WALL_MS,
     cycle_elapsed_ms:Date.now()-startedAt,market_gaps_deferred,snapshot_deferred,
+    official_source_retries_deferred:sourceRetriesDeferred,official_source_retry_hours:OFFICIAL_SOURCE_HOLD_COOLDOWN_HOURS,
     research_seeds_total:researchSeeds.length,research_seeds_status:'first_party_documentation_research_only_not_admission_ready',
     candidate_supply_status:pool.some(x=>x.ready)?'documented_candidates_available':researchSeeds.length?'research_evidence_incomplete':'no_new_candidate_supply',
     market_gaps_synced:market_gaps,max_admissions:MAX_ADMIT_PER_DAY,candidate_check_limit:MAX_CANDIDATE_CHECKS_PER_CYCLE,
