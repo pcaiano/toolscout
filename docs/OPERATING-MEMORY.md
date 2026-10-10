@@ -34,7 +34,7 @@ A conflict between these layers is drift. Reconcile it instead of choosing the c
 - Public origin: `https://trytoolscout.org`.
 - Cloudflare Worker: `toolscout`, entrypoint `compute-router-worker.js`.
 - D1 binding: `DB`, database `toolscout`.
-- Catalog Autonomy is migrating the 127 existing documented product records into its existing D1 catalog table via an hourly, idempotent Growth Brain backfill. D1 becomes the shared product-data read source as records arrive; the existing static file remains a read-only recovery snapshot. Legacy public HTML is not replaced during the storage migration.
+- Catalog Autonomy now stores all 127 original profiles in canonical D1 while retaining the original read-only static fallback and audited public HTML templates. Its existing hourly runtime_quality mission checks up to six vendors each cycle for documented changes. Explicit first-party numeric plan limits and nonpromotional monthly list prices can be corrected in D1 automatically after two identical observations. Other factual changes remain internal evidence until source-proven; never fabricate product facts or surface public pending-review banners.
 - Cloudflare is the control and canonical state plane.
 - Render `toolscout-overflow` is bounded external research and machine-safe execution capacity. It does not own canonical business state.
 - Make remains the reputation-sensitive email delivery plane where configured.
