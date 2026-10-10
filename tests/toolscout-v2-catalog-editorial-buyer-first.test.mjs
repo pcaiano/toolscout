@@ -50,3 +50,13 @@ test('remote D1 verification rejects stale or partial editorial publication',()=
  const missing=structuredClone(rows);missing[0].results=missing[0].results.filter(x=>x.tool_slug!=='fresha');
  assert.throws(()=>verifyCatalogEditorialD1Result(missing,source),/published D1 row missing/);
 });
+
+test('integrity workflow cannot reapply dated buyer editorial snapshots to live D1 from any ref',()=>{
+ const workflow=fs.readFileSync(new URL('../.github/workflows/toolscout-v2-integrity-audit.yml',import.meta.url),'utf8');
+ assert.doesNotMatch(workflow,/Synchronize evidence-gated buyer editorial to canonical D1/);
+ assert.doesNotMatch(workflow,/build-catalog-editorial-revision\.mjs/);
+ assert.doesNotMatch(workflow,/verify-catalog-editorial-d1\.mjs/);
+ assert.doesNotMatch(workflow,/--file \/tmp\/toolscout-catalog-editorial-revision\.sql/);
+ assert.match(workflow,/name: Audit production closed-loop truth/);
+ assert.match(workflow,/name: Verify real production MCP buyer decisions after Cloudflare deployment/);
+});

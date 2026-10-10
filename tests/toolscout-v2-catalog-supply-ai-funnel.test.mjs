@@ -73,5 +73,5 @@ test('runtime software profiles never publish raw manufacturer AI documentation 
  assert.doesNotMatch(src,/Official AI source/);
  assert.doesNotMatch(src,/const links=\(p\.sources/);
  assert.match(src,/Manufacturer documentation is private editorial evidence/);
- assert.match(src,/AI integration reviewed against manufacturer documentation internally/);
+ assert.doesNotMatch(src,/AI integration reviewed against manufacturer documentation internally/);
 });

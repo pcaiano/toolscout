@@ -74,9 +74,22 @@ test('new profiles never advertise an unmonetized product visit; eligible routes
    assert.match(approved,/rel="nofollow sponsored noopener"/);
    assert.match(approved,/target="_blank"/);
    assert.doesNotMatch(approved,/href="https:\/\/www\.(clio|fresha|bqe)\.com/i);
+   assert.match(approved,/ToolScout may earn a commission on qualifying purchases through approved affiliate links\./);
+   assert.doesNotMatch(normal,/ToolScout may earn a commission/);
+   assert.match(approved,/Affiliate relationships do not influence ToolScout rankings or recommendations\./);
  }
 });
 
+
+test('verified AI integrations never disclose private manufacturer verification operations on the public profile',()=>{
+ const tool={...tools.find(x=>x.slug==='fresha'),aiIntegration:{status:'verified',tier:'moderate',mcp:'official',publicApi:true,assistants:['Claude'],summary:'Vendor-supported AI workflow has documented agent interoperability.',verifiedAt:'2026-10-10',sources:['https://www.fresha.com/for-business/features']}};
+ const html=candidatePage(tool,{monetized:false});
+ assert.match(html,/AI interoperability/);
+ assert.match(html,/Vendor-supported AI workflow/);
+ assert.match(html,/Official/);
+ assert.doesNotMatch(html,/AI integration reviewed against manufacturer documentation internally|First-party documentation informed this assessment|Unknown is not treated as no integration/);
+ assert.doesNotMatch(html,/https:\/\/www\.fresha\.com\/for-business\/features/);
+});
 test('hourly supply signal wakes only for first-party complete new vendor cohorts',()=>{
  const existing=original.map(t=>t.slug);
  const ready=unpublishedReadyCatalogSlugs([tools],existing);
