@@ -12,18 +12,55 @@ function vendorOwned(url,tool){
 function eligibleSentence(s,plan,period,scope){
   if(!new RegExp('\\b'+escRe(plan)+'\\b(?:\\s+(?:plan|tier))?','i').test(s))return false;
   if(!/\b(includes?|offers?|supports?|allows?|provides?|costs?|priced at|up to|limited to|comes with)\b|:\s/i.test(s))return false;
-  if(scope==='automation'&&!/automation/i.test(s))return false;
-  if(scope==='stored'&&/automation/i.test(s)&&!/stored/i.test(s))return false;
+  // Limits are not interchangeable across base, workspace, automation or
+  // stored-contact scopes, even when they share a plan and unit.
+  if(scope){
+    const normalized=String(scope).toLowerCase().replace(/[^a-z0-9]+/g,'_');
+    if(normalized==='per_base'&&!/\b(?:per|each)\s+base\b/i.test(s))return false;
+    else if(normalized==='per_workspace'&&!/\b(?:per|each)\s+workspace\b/i.test(s))return false;
+    else if(normalized==='automation'&&!/\bautomations?\b/i.test(s))return false;
+    else if(normalized==='stored'&&(/\bautomations?\b/i.test(s)||/\b(?:per|each)\s+(?:workspace|base)\b/i.test(s)))return false;
+    else if(!['per_base','per_workspace','automation','stored'].includes(normalized)&&
+      !new RegExp('\\b'+escRe(normalized.replace(/_/g,' '))+'\\b','i').test(s))return false;
+    if(normalized==='per_base'&&/\b(?:per|each)\s+workspace\b/i.test(s))return false;
+    if(normalized==='per_workspace'&&/\b(?:per|each)\s+base\b/i.test(s))return false;
+  }
   if(period==='month'&&!/\b(monthly|per month|each month)\b/i.test(s))return false;
   if(period==='day'&&!/\b(daily|per day|each day)\b/i.test(s))return false;
   if(period==='total'&&/\b(per month|monthly|per day|daily)\b/i.test(s))return false;
-  if(/\b(save|discount|was|previously|promotion|promotional|introductory|starting at|as low as|compared to)\b/i.test(s))return false;
+  if(/\b(save|discounts?|was|previously|promotions?|promotional|promos?|introductory|starting at|as low as|compared to|limited[ -]?time|temporary|temporarily|sale|coupon|trial)\b|\bspecial\s+offer\b/i.test(s))return false;
+  return true;
+}
+function verifiedQuoteScope(sentence,claim){
+  if(claim.market&&!['unspecified','global'].includes(claim.market))return false; // No inferred regional eligibility.
+  const unit=String(claim.unit||'').toLowerCase();
+  if(unit==='seat'){
+    if(!/\bper\s+(?:(?:paid|core|billable)\s+)?(?:seat|user|collaborator)\b/i.test(sentence))return false;
+  }else if(unit==='subscription'){
+    if(/\bper\s+(?:(?:paid|core|billable)\s+)?(?:seat|user|collaborator)\b/i.test(sentence))return false;
+  }else return false; // Unknown quote units need editorial proof, not auto edits.
+  if(claim.unitQuantity!==undefined&&claim.unitQuantity!==1)return false;
+  if(claim.usageTier){
+    const tier=claim.usageTier;
+    if(!Number.isFinite(tier.quantity)||!tier.unit)return false;
+    const singular=String(tier.unit).replace(/s$/i,'');
+    const pat=new RegExp('\\b(\\d{1,3}(?:[, ]\\d{3})*|\\d+)\\s+'+escRe(singular)+'s?\\b','gi');
+    const matches=[...sentence.matchAll(pat)];
+    // An unqualified or differently sized package may not replace a priced tier.
+    if(matches.length!==1||validAmount(matches[0][1])!==tier.quantity)return false;
+    if(tier.period==='day'&&!/\b(?:per|each)\s+day\b|\bdaily\b/i.test(sentence))return false;
+    if(tier.period==='year'&&!/\b(?:per|each)\s+year\b|\byearly\b/i.test(sentence))return false;
+  }
   return true;
 }
 function explicitGlobalRetirement(text,feature){
   const needle=escRe(feature.trim());
   if(!needle||feature.trim().length<5||feature.trim().length>85)return false;
-  const expression=new RegExp('^(?:we|our (?:product|platform|service)|the (?:product|platform|service))\\s+no longer (?:supports?|offers?|provides?|includes?)\\s+'+needle+'\\s*(?:[;:,]|$)|^'+needle+'\\s+(?:has been|is)\\s+(?:discontinued|retired|removed|no longer (?:available|supported))\\s*(?:[;:,]|$)','i');
+  // A colon, semicolon or comma can introduce "on Free" or "for one tier".
+  // Accept only an unqualified, complete product-wide statement.
+  const ending='\\s*$';
+  const expression=new RegExp('^(?:we|our (?:product|platform|service)|the (?:product|platform|service))\\s+no longer (?:supports?|offers?|provides?|includes?)\\s+'+needle+ending+
+    '|^'+needle+'\\s+(?:has been|is)\\s+(?:discontinued|retired|removed|no longer (?:available|supported))'+ending,'i');
   return String(text||'').replace(/\s+/g,' ').trim().split(/[.!?]/).some(sentence=>expression.test(sentence.trim()));
 }
 function claimKey(claim){
@@ -80,12 +117,76 @@ export function manufacturerFactProposals(tool,observations=[]){
 }
 function retireExactCapabilitySentence(value,capability){
   if(typeof value!=='string')return value;
-  // Remove obsolete feature assertions from buyer-facing prose. A fully
-  // confirmed retirement replaces a sentence, never a neighboring feature.
-  const needle=String(capability).toLowerCase();
-  return value.split(/(?<=[.!?])\s+/).map(sentence=>
-    sentence.toLowerCase().includes(needle)?'The manufacturer has discontinued '+capability+'.':sentence
-  ).join(' ');
+  const feature=String(capability).trim(),escaped=escRe(feature);
+  const mention=new RegExp('(?<![\\w])'+escaped+'(?![\\w])','i');
+  if(!mention.test(value))return value;
+  const sentences=value.split(/(?<=[.!?])\s+/),rewritten=[];
+  for(const original of sentences){
+    if(!mention.test(original)){rewritten.push(original);continue}
+    // When a sentence is *about* the retired feature, drop that claim only.
+    if(new RegExp('^\\s*'+escaped+'\\b','i').test(original))continue;
+    let rest=original;
+    const patterns=[
+      [new RegExp(',\\s*'+escaped+'\\s*,','gi'),','],
+      [new RegExp('\\s+(?:and|or)\\s+'+escaped+'(?=\\s|[,.!?;:]|$)','gi'),''],
+      [new RegExp(',\\s*'+escaped+'(?=\\s|[.!?;:]|$)','gi'),''],
+      [new RegExp('\\bwith\\s+'+escaped+'(?=\\s|[.!?;:]|$)','gi'),''],
+    ];
+    for(const [pattern,replacement] of patterns)rest=rest.replace(pattern,replacement);
+    rest=rest.replace(/\s{2,}/g,' ').replace(/,\s*,/g,',').replace(/,\s*([.!?])/g,'$1').trim();
+    // Complex assertions (e.g. "automations can queue work") cannot be
+    // safely rewritten by string deletion. Do not mutate any catalog fields.
+    if(mention.test(rest)||rest.length<14)return null;
+    rewritten.push(rest);
+  }
+  return rewritten.join(' ').trim();
+}
+function retireFieldsWithoutCollateralLoss(updated,feature){
+  const edit=value=>retireExactCapabilitySentence(value,feature);
+  const singleFields=['description','pricing'];
+  for(const key of singleFields){
+    if(typeof updated[key]!=='string')continue;
+    const next=edit(updated[key]);
+    if(next===null)return false;
+    updated[key]=next;
+  }
+  for(const key of ['bestFor','strengths','limitations','tradeoffs']){
+    if(!Array.isArray(updated[key]))continue;
+    const values=updated[key].map(edit);
+    if(values.includes(null))return false;
+    const kept=values.filter(x=>typeof x==='string'&&x.length>=12);
+    if(!kept.length)return false;
+    updated[key]=kept;
+  }
+  if(updated.pricingDetails&&typeof updated.pricingDetails==='object'){
+    for(const key of ['freePlanSummary']){
+      if(typeof updated.pricingDetails[key]!=='string')continue;
+      const next=edit(updated.pricingDetails[key]);
+      if(next===null)return false;
+      updated.pricingDetails[key]=next;
+    }
+    if(Array.isArray(updated.pricingDetails.limits)){
+      const values=updated.pricingDetails.limits.map(edit);
+      if(values.includes(null))return false;
+      updated.pricingDetails.limits=values.filter(x=>typeof x==='string'&&x.length>=12);
+    }
+  }
+  if(updated.editorialReview&&typeof updated.editorialReview==='object'){
+    for(const key of ['summary','buyerCheck','angle']){
+      if(typeof updated.editorialReview[key]!=='string')continue;
+      let next=edit(updated.editorialReview[key]);
+      if(next===null)return false;
+      if(!next&&key==='buyerCheck')next='Check the remaining verified capabilities and plan requirements before choosing.';
+      if(!next&&key==='angle')next='Evaluate the remaining documented capabilities';
+      if(!next)return false;
+      updated.editorialReview[key]=next;
+    }
+    // The reviewed analysis remains unique; append the exact confirmed change
+    // rather than replacing the original editorial assessment.
+    updated.editorialReview.summary=(updated.editorialReview.summary+' The manufacturer has discontinued '+feature+'.').trim();
+  }
+  updated.description=(updated.description+' The manufacturer has discontinued '+feature+'.').trim();
+  return updated.description.length>=60&&(!updated.editorialReview||updated.editorialReview.summary.length>=60);
 }
 function refreshExactNumericPhrase(value,claim,item){
   if(typeof value!=='string')return value;
@@ -116,13 +217,12 @@ export function reconcileManufacturerFacts(tool,changes,previous,{today=new Date
     if(item.type==='capability_retired'&&claim.value===item.oldValue&&!claim.plan){
       const remaining=(updated.features||[]).filter(value=>String(value).toLowerCase()!==String(item.oldValue).toLowerCase());
       if(remaining.length<3||(updated.decisionClaims||[]).filter(other=>other!==claim&&other.status==='verified').length===0)continue; // Retain minimum public profile depth.
+      // All exported editorial fields must be coherent before a D1 write.
+      // A complex mixed factual sentence blocks automation rather than
+      // silently erasing other manufacturer-backed product information.
+      if(!retireFieldsWithoutCollateralLoss(updated,item.oldValue))continue;
       claim.status='retired';claim.verifiedAt=today;
       updated.features=remaining;
-      updated.description=retireExactCapabilitySentence(updated.description,item.oldValue);
-      if(updated.editorialReview&&typeof updated.editorialReview==='object'){
-        updated.editorialReview.summary=retireExactCapabilitySentence(updated.editorialReview.summary,item.oldValue);
-        updated.editorialReview.buyerCheck=retireExactCapabilitySentence(updated.editorialReview.buyerCheck,item.oldValue);
-      }
       updated.provenance={...(updated.provenance||{}),manufacturerRetiredCapabilities:[...(updated.provenance?.manufacturerRetiredCapabilities||[]),{value:item.oldValue,sourceUrl:item.sourceUrl,verifiedAt:today}]};
       applied++;
     }else if(item.type==='plan_limit'&&claim.quantity===item.oldValue){
