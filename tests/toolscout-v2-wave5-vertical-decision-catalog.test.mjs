@@ -75,6 +75,34 @@ test('restaurants and veterinary clinics are not ranked or compared as generic p
  const misc=qualifiedSoftwareDecisionShortlist(all,{job:'CRM software',limit:5});
  assert.ok(misc.every(x=>!['restaurant-pos','veterinary','vacation-rental'].includes(x.category)));
 });
+test('Codex P1: an explicit veterinary management job bypasses generic healthcare guidance',()=>{
+ const corpus=[...baseline,...tools];
+ for(const job of ['veterinary practice management software','veterinary medical records for a clinic','vet practice management software']){
+  assert.equal(businessWorkflowGuidance(job,{},corpus),null,job+' must reach the decision shortlist');
+  const found=qualifiedSoftwareDecisionShortlist(corpus,{job,limit:5});
+  assert.ok(found.some(x=>x.slug==='ezyvet'),job+' must include evidence-backed ezyVet');
+  assert.ok(found.every(x=>x.category==='veterinary'),job+' must exclude generic CRM or appointment products');
+ }
+ assert.ok(businessWorkflowGuidance('best software for my veterinary clinic',{},corpus),
+   'ambiguous whole-business software requests still need workflow clarification');
+});
+
+test('Codex P2: specialist jobs outrank incidental business tokens without hijacking an explicit CRM job',()=>{
+ const corpus=[...baseline,...tools];
+ for(const job of ['restaurant point of sale business software','restaurant POS for my business','best restaurant point of sale software for cafes']){
+  const found=qualifiedSoftwareDecisionShortlist(corpus,{job,limit:5});
+  assert.ok(found.some(x=>x.slug==='toast-pos'),job+' must include Toast POS');
+  assert.ok(found.some(x=>x.slug==='square-for-restaurants'),job+' must include Square for Restaurants');
+  assert.ok(found.every(x=>x.category==='restaurant-pos'),job+' must not leak Calendly or Linear');
+ }
+ const crm=qualifiedSoftwareDecisionShortlist(corpus,{job:'CRM for a veterinary clinic',limit:5});
+ assert.ok(crm.length>0,'explicit CRM job remains actionable');
+ assert.ok(crm.every(x=>x.category==='crm'),'clinic context must not force vet practice-management category');
+ const generic=qualifiedSoftwareDecisionShortlist(corpus,{job:'project management for restaurant staff',limit:5});
+ assert.ok(generic.length>0);
+ assert.ok(generic.every(x=>x.category==='business'),'project management remains a task category');
+});
+
 test('wave5 dynamic profiles use ToolScout 2.0 visual contract without any manufacturer-source outbound links',async()=>{
  for(const tool of tools){
   const raw=candidatePage(tool,{monetized:false});
