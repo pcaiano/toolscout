@@ -594,17 +594,19 @@ export async function syncCatalogResearchSupply(env,{knownTools=null,limit=MAX_R
     source:'awesome-selfhosted-directory',directory_leads:directory.candidates.length,queued_before:existing.length,
     admission:'discovery_only_until_independent_signal_and_decision_grade_first_party_evidence',max_per_cycle:MAX_RESEARCH_SEEDS_PER_CYCLE};
 }
-async function syncMarketGaps(env){
+async function syncMarketGaps(env,{deadlineAt=Infinity}={}){
   const report=await assetJson(env,'/reports/competitive-gap-signals.json',{gaps:[]});
-  let synced=0;
-  for(const gap of Array.isArray(report?.gaps)?report.gaps:[]){
+  let synced=0,deferred=false;
+  const gaps=Array.isArray(report?.gaps)?report.gaps:[];
+  for(const gap of gaps){
+    if(Date.now()>deadlineAt){deferred=true;break;}
     const slug=String(gap?.slug||'').toLowerCase().replace(/[^a-z0-9-]/g,'');if(!slug)continue;
     await env.DB.prepare(`INSERT INTO catalog_market_gaps(tool_slug,signals,sources_json,examples_json,status,updated_at) VALUES(?,?,?,?,'research_required',datetime('now'))
       ON CONFLICT(tool_slug) DO UPDATE SET signals=excluded.signals,sources_json=excluded.sources_json,examples_json=excluded.examples_json,status=CASE WHEN catalog_market_gaps.status IN ('published','admitted_coverage','covered','covered_existing') THEN catalog_market_gaps.status ELSE 'research_required' END,updated_at=datetime('now')`)
       .bind(slug,Number(gap?.mentions||gap?.sources?.length||0),JSON.stringify(gap?.sources||[]),JSON.stringify(gap?.exampleUrls||[])).run();
     synced++;
   }
-  return synced;
+  return {synced,deferred};
 }
 // Signal existing Growth Brain scheduler when a reviewed cohort becomes
 // admission-ready. This is discovery only; the existing documented-source,
@@ -635,6 +637,9 @@ export async function hasNewDecisionGradeCatalogSupply(env){
   return unpublishedReadyCatalogSlugs(candidates,known).length>0;
 }
 export async function admitTrustedCandidates(env){
+  // Count preparation, source verification, quality checks and post-processing
+  // against the same mission budget; a per-candidate-only guard is insufficient.
+  const startedAt=Date.now();
   await ensureSchema(env);
   const config=await assetJson(env,'/data/catalog-engine.json',{});
   const staticTools=await assetJson(env,'/data/tools.json',[]);
@@ -660,16 +665,17 @@ export async function admitTrustedCandidates(env){
     Math.max(0,target-(categoryCounts.get(b.raw.category)||0))-Math.max(0,target-(categoryCounts.get(a.raw.category)||0))||
     b.priority.score-a.priority.score||a.sequence-b.sequence||a.slug.localeCompare(b.slug));
   let admitted=0,held=0,considered=0,missingManufacturerEvidence=0,cycleBudgetExhausted=false;
-  const startedAt=Date.now();
+  const budgetStop=()=>{if(Date.now()-startedAt>MAX_ADMISSION_WALL_MS){cycleBudgetExhausted=true;return true}return false};
   for(const item of pool){
     if(admitted>=MAX_ADMIT_PER_DAY||considered>=MAX_CANDIDATE_CHECKS_PER_CYCLE)break;
-    if(Date.now()-startedAt>MAX_ADMISSION_WALL_MS){cycleBudgetExhausted=true;break;}
+    if(budgetStop())break;
     const {raw,slug,priority}=item;considered++;
     const errors=validCandidate(raw,config);if(errors.length){held++;await logEvent(env,slug,'catalog_candidate_structure_hold','completed','Catalog record failed admission field completeness before publication.',{issues:errors});continue}
     // Pure preflight before any network fetch. Undocumented research seeds
     // cannot become published software merely through a reachable homepage.
     if(!trustedManufacturerEvidence(raw,{decisionGrade:true})){held++;missingManufacturerEvidence++;await logEvent(env,slug,'catalog_candidate_manufacturer_evidence_hold','completed','Vendor documentation or claim-level decision evidence is insufficient for publication.',{required:'decision_grade_manufacturer_evidence'});continue}
     const source=await fetchTrustedCandidateOfficialSource(raw);
+    if(budgetStop())break; // homepage and documentation fallbacks may consume several timeouts
     if(config?.admission?.requireReachableOfficialSource!==false&&source.status!=='ok'){
       held++;
       await logEvent(env,slug,'catalog_candidate_official_source_hold','completed',
@@ -686,6 +692,7 @@ export async function admitTrustedCandidates(env){
     profile.provenance.sourceAvailabilityVerifiedVia=source.selectedSource;
     profile.editorialEvidence={sourceUrl:raw.editorialReview.sourceUrl,verifiedAt:new Date().toISOString().slice(0,10),verificationStatus:'vendor_documented'};
     const quality=await auditCatalogTool(env,profile);
+    if(budgetStop())break; // quality pages and logo checks are awaited network phases
     if(!quality.publishable){held++;await logEvent(env,slug,'catalog_candidate_quality_hold','completed','Trusted candidate failed full catalog quality gate before publication.',{issues:quality.issues,warnings:quality.warnings,research_priority:priority});continue}
     profile=quality.repairedTool;
     await env.DB.prepare(`INSERT INTO catalog_runtime_candidates(tool_slug,profile_json,status,source_status,verified_at,updated_at) VALUES(?,?,'published','ok',datetime('now'),datetime('now'))
@@ -693,13 +700,27 @@ export async function admitTrustedCandidates(env){
       .bind(slug,JSON.stringify(profile)).run();
     await logEvent(env,slug,'catalog_candidate_admitted','completed','Trusted candidate admitted as a full ToolScout catalog peer after official-source and deterministic quality gates.',{source_url:profile.sourceUrl,category:profile.category,research_priority:priority});
     existing.add(slug);admitted++;
+    if(budgetStop())break; // include database writes and admission evidence in elapsed time
   }
-  const market_gaps=await syncMarketGaps(env);
+  // Never start unbounded trailing synchronization once the budget is exhausted.
+  // Resume any deferred gap synchronization during the next existing cycle.
+  let market_gaps=0,market_gaps_deferred=false,snapshot_deferred=false;
+  if(budgetStop())market_gaps_deferred=true;
+  else{
+    const sync=await syncMarketGaps(env,{deadlineAt:startedAt+MAX_ADMISSION_WALL_MS});
+    market_gaps=sync.synced;
+    market_gaps_deferred=sync.deferred;
+    budgetStop();
+  }
   runtimeCache.at=0;
-  if(admitted>0)await runtimeSnapshot(env,{force:true}).catch(()=>null);
+  if(admitted>0){
+    if(budgetStop())snapshot_deferred=true;
+    else{await runtimeSnapshot(env,{force:true}).catch(()=>null);budgetStop()}
+  }
   return{ok:true,considered,admitted,held,missing_manufacturer_evidence:missingManufacturerEvidence,
     trusted_sources_total:seen.size,ready_trusted_sources:pool.filter(x=>x.ready).length,
     cycle_budget_exhausted:cycleBudgetExhausted,cycle_wall_budget_ms:MAX_ADMISSION_WALL_MS,
+    cycle_elapsed_ms:Date.now()-startedAt,market_gaps_deferred,snapshot_deferred,
     research_seeds_total:researchSeeds.length,research_seeds_status:'first_party_documentation_research_only_not_admission_ready',
     candidate_supply_status:pool.some(x=>x.ready)?'documented_candidates_available':researchSeeds.length?'research_evidence_incomplete':'no_new_candidate_supply',
     market_gaps_synced:market_gaps,max_admissions:MAX_ADMIT_PER_DAY,candidate_check_limit:MAX_CANDIDATE_CHECKS_PER_CYCLE,
