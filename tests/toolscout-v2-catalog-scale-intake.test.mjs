@@ -26,13 +26,16 @@ test('bounded D1 intake writes research leads only with one discovery signal, no
   const env={
     ASSETS:{fetch:async()=>new Response(JSON.stringify(injected),{status:200,headers:{'Content-Type':'application/json'}})},
     DB:{prepare(sql){
-      return {bind(...args){
-        return{
-          first:async()=>({n:7}),
-          all:async()=>({results:[]}),
-          run:async()=>{writes.push({sql,args});return {meta:{changes:1}}}
-        };
-      }};
+      return {
+        all:async()=>({results:[]}),
+        bind(...args){
+          return{
+            first:async()=>({n:7}),
+            all:async()=>({results:[]}),
+            run:async()=>{writes.push({sql,args});return {meta:{changes:1}}}
+          };
+        }
+      };
     }}
   };
   const result=await syncCatalogResearchSupply(env,{knownTools:known,limit:3});
