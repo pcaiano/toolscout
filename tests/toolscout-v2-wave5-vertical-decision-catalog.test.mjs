@@ -108,7 +108,9 @@ test('wave5 dynamic profiles use ToolScout 2.0 visual contract without any manuf
   const raw=candidatePage(tool,{monetized:false});
   assert.match(raw,/<h1>/);
   assert.match(raw,/Add to comparator/);
-  assert.doesNotMatch(raw,/href="\/go\//,'not affiliated, no product CTA');
+  assert.match(raw,new RegExp('href="/go/'+tool.slug+'"'),'Every published tool must have a tracked vendor visit');
+  assert.match(raw,/data-commercial-status="non-affiliate"/);
+  assert.doesNotMatch(raw,/rel="nofollow sponsored/);
   for(const doc of tool.editorialReview.sourceUrls)assert.ok(!raw.includes(doc),tool.slug+' leaks private manufacturer docs');
   const rendered=await transformPublicRedesignResponse(new Request('https://trytoolscout.org/tools/'+tool.slug),
     new Response(raw,{headers:{'Content-Type':'text/html; charset=UTF-8'}}));
