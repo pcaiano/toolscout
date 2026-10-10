@@ -107,6 +107,19 @@ test('verified AI integrations never disclose private manufacturer verification 
  assert.doesNotMatch(candidatePage(impossible),/Manufacturer-confirmed/,'impossible date cannot be verified');
 
 });
+test('manufacturer documentation roots retain dated AI provenance without trusting vendor homepages',()=>{
+ const n8n=original.find(x=>x.slug==='n8n');
+ assert.ok(n8n);
+ assert.equal(n8n.aiIntegration.sources[0],'https://docs.n8n.io/');
+ const documented=candidatePage(n8n);
+ assert.match(documented,/AI compatibility:<\/strong> Manufacturer-confirmed, verified 2026-10-05/);
+ assert.doesNotMatch(documented,/href="https:\/\/docs\.n8n\.io\//,'evidence URLs must remain private');
+ const promotion={...n8n,aiIntegration:{...n8n.aiIntegration,sources:['https://n8n.io/']}};
+ assert.doesNotMatch(candidatePage(promotion),/Manufacturer-confirmed/,'vendor marketing homepage is insufficient');
+ const external={...n8n,aiIntegration:{...n8n.aiIntegration,sources:['https://docs.n8n.io.evil.example/']}};
+ assert.doesNotMatch(candidatePage(external),/Manufacturer-confirmed/,'lookalike third-party documentation must be rejected');
+});
+
 test('hourly supply signal wakes only for first-party complete new vendor cohorts',()=>{
  const existing=original.map(t=>t.slug);
  const ready=unpublishedReadyCatalogSlugs([tools],existing);
