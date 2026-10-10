@@ -10,7 +10,7 @@ assert.ok(clio);
 test('only dated, first-party non-homepage manufacturer documents are usable for fallback',()=>{
   const docs=trustedCandidateOfficialFallbackUrls(clio);
   assert.equal(docs.length,2);
-  assert.ok(docs.every(url=>url.startsWith('https://www.clio.com/features/')));
+  assert.ok(docs.every(url=>url.startsWith('https://help.clio.com/hc/en-us/articles/')));
   const external='https://clio.com.evil.example/pricing';
   const tampered=structuredClone(clio);
   tampered.editorialReview.sourceUrls.unshift(external,'https://www.clio.com/');
@@ -28,7 +28,7 @@ test('homepage inaccessible but manufacturer case documentation reachable permit
     calls.push(String(url));
     if(String(url)==='https://www.clio.com/')
       return new Response('Forbidden',{status:403,headers:{'Content-Type':'text/html'}});
-    if(String(url)==='https://www.clio.com/features/case-management/')
+    if(String(url)==='https://help.clio.com/hc/en-us/articles/9285920226075-Clio-Manage-Matters-Overview')
       return new Response('<html><head><title>Clio Case Management</title></head><body><main>Clio Manage handles matters, legal documents and case calendars.</main></body></html>',{status:200,headers:{'Content-Type':'text/html'}});
     throw Error('unexpected source fetch '+String(url));
   };
@@ -36,8 +36,8 @@ test('homepage inaccessible but manufacturer case documentation reachable permit
     const result=await fetchTrustedCandidateOfficialSource(clio);
     assert.equal(result.status,'ok');
     assert.equal(result.selectedSource,'manufacturer_document');
-    assert.ok(result.finalUrl.startsWith('https://www.clio.com/features/'));
-    assert.deepEqual(calls,['https://www.clio.com/','https://www.clio.com/features/case-management/']);
+    assert.ok(result.finalUrl.startsWith('https://help.clio.com/hc/en-us/articles/'));
+    assert.deepEqual(calls,['https://www.clio.com/','https://help.clio.com/hc/en-us/articles/9285920226075-Clio-Manage-Matters-Overview']);
   }finally{globalThis.fetch=native}
 });
 test('redirect to off-domain or no reachable documents never becomes a trusted admission signal',async()=>{
