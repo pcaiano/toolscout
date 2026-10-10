@@ -177,3 +177,28 @@ test('Codex P2: same-second restaging and holds have subsecond UTC ordering',()=
  assert.match(runtime,/h\.created_at>=c\.updated_at/);
  assert.ok('2026-10-10 21:20:01.001' < '2026-10-10 21:20:01.005');
 });
+
+
+test('Codex: fallback cap counts independent pages after deduplicating eight tracking aliases',()=>{
+ const original=cohort[0];
+ const first=original.editorialReview.sourceUrls[0];
+ const second=original.editorialReview.sourceUrls[1];
+ const aliases=Array.from({length:8},(_,i)=>first+'?utm_campaign=variant'+i);
+ const revised={
+   ...original,
+   editorialReview:{...original.editorialReview,sourceUrls:[...aliases,second]},
+   evidence:[
+     ...original.evidence,
+     ...aliases.map(sourceUrl=>({claimScope:'toolscout_editorial_review',
+       sourceUrl,verifiedAt:'2026-10-10',method:'direct_first_party_review'}))
+   ]
+ };
+ assert.equal(trustedManufacturerEvidence(revised,{decisionGrade:true}),true);
+ const reviewed=trustedCandidateOfficialFallbackUrls(revised,{limit:2});
+ assert.equal(reviewed.length,2,'the second genuinely independent page must survive more than eight aliases');
+ assert.equal(reviewed[0],aliases[0]);
+ assert.equal(reviewed[1],second);
+ assert.equal(new Set(reviewed.map(canonicalManufacturerDocumentIdentity)).size,2);
+ assert.match(runtime,/const result=\[\],identities=new Set\(\)/);
+ assert.match(runtime,/identities\.has\(identity\)\)continue/);
+});
