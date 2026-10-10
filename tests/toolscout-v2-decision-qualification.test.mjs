@@ -61,7 +61,8 @@ test('contextual comparisons cannot crown a candidate failing mandatory criteria
   assert.equal(out.structuredContent.verdict.type,'best_fit');
   assert.equal(out.structuredContent.verdict.tool,'documented-choice');
   assert.equal(out.structuredContent.tools.find(x=>x.slug==='high-score-unqualified').qualified_for_use_case,false);
-  assert.equal(out.structuredContent.cheaper_option_analysis.qualified_for_use_case,false);
+  assert.equal(out.structuredContent.cheaper_option_analysis.status,'not_comparable');
+  assert.equal(out.structuredContent.cheaper_option_analysis.affordability_leader,undefined);
 });
 
 test('no qualified comparison produces no invented winner',async()=>{
