@@ -750,7 +750,14 @@ export function candidatePage(tool,{monetized=false}={}){
   const freeFaq=tool.freePlanKnown===true?'<details><summary>Does '+esc(tool.name)+' have a free plan?</summary><p>'+(
     tool.freePlan?'The verified manufacturer records a perpetual free plan with documented conditions.':'The current documented plan listing does not include a perpetual free tier.'
   )+'</p></details>':'';
-  const outbound=monetized?'<a class="cta" href="/go/'+encodeURIComponent(tool.slug)+'" target="_blank" rel="nofollow sponsored noopener">Visit '+esc(tool.name)+'</a>':'';
+  // Owner-requested exception: Fresha currently has no approved affiliate route.
+  // Its company homepage is a non-affiliate product visit, never a /go/ CTA,
+  // manufacturer documentation link, or a monetized conversion.
+  const freshaDirect=tool?.slug==='fresha'&&
+    /^https:\/\/(?:www\.)?fresha\.com\/?$/i.test(String(tool.sourceUrl||''));
+  const outbound=monetized
+    ?'<a class="cta" href="/go/'+encodeURIComponent(tool.slug)+'" target="_blank" rel="nofollow sponsored noopener">Visit '+esc(tool.name)+'</a>'
+    :freshaDirect?'<a class="cta" data-commercial-status="non-affiliate" href="https://www.fresha.com/" target="_blank" rel="nofollow noopener noreferrer">Visit Fresha website</a>':'';
   const review=runtimeEditorialView(tool);
   const buyerCheck=String(tool?.editorialReview?.buyerCheck||'').trim();
   const editorialBuyerCheck=buyerCheck
@@ -821,9 +828,13 @@ export async function publicRuntimeToolResponse(env,slug){
   // The original 127 indexed profiles must never switch to the newer, more
   // basic runtime template merely because a verified D1 editorial revision
   // changed its source_status away from baseline_snapshot.
-  const [snapshot,staticTools]=await Promise.all([runtimeSnapshot(env),assetJson(env,'/data/tools.json',[])]);
+  const [snapshot,staticTools,affiliateRegistry]=await Promise.all([
+    runtimeSnapshot(env),assetJson(env,'/data/tools.json',[]),assetJson(env,'/data/affiliate.json',{})
+  ]);
   if(snapshot.baselineMirrors?.has(key)||(Array.isArray(staticTools)&&staticTools.some(tool=>String(tool?.slug||'').toLowerCase()===key)))return null;
-  return new Response(cleanPublicCatalogProfileCopy(candidatePage(candidate)),{status:200,headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'public, max-age=60'}});
+  const approved=affiliateRegistry?.[key];
+  const monetized=approved?.enabled===true&&Boolean(publicHttps(approved.url));
+  return new Response(cleanPublicCatalogProfileCopy(candidatePage(candidate,{monetized})),{status:200,headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'public, max-age=60'}});
 }
 export async function publicMergedSitemap(response,env){return mergedSitemap(response,env)}
 export async function publicRuntimeRankingResponse(env,path){return renderRuntimeRanking(env,path,await mergedTools(env))}
