@@ -777,8 +777,15 @@ function aiInteroperabilitySection(tool){
   // Manufacturer documentation is private editorial evidence, never a
   // public non-monetized outbound link on runtime software profiles.
   // Manufacturer evidence stays in the private catalog; no research-process prose is published.
-  const hasManufacturerProof=verified&&(p.sources||[]).some(x=>/^https:\/\//.test(String(x||'')));
-  const datedManufacturerProof=hasManufacturerProof&&/^\d{4}-\d{2}-\d{2}$/.test(String(p.verifiedAt||''));
+  const hasManufacturerProof=verified&&(p.sources||[]).some(x=>{
+    try{return new URL(x).pathname!=='/'&&sameManufacturerHost(x,tool.sourceUrl)}catch{return false}
+  });
+  const verificationDate=String(p.verifiedAt||'');
+  const verifiedDateMs=Date.parse(verificationDate+'T00:00:00Z');
+  const validVerificationDate=/^\d{4}-\d{2}-\d{2}$/.test(verificationDate)&&
+    Number.isFinite(verifiedDateMs)&&new Date(verifiedDateMs).toISOString().slice(0,10)===verificationDate&&
+    verifiedDateMs<=Date.now();
+  const datedManufacturerProof=hasManufacturerProof&&validVerificationDate;
   const evidenceNote=datedManufacturerProof?'<p class="small" data-ai-evidence-date="1"><strong>AI compatibility:</strong> Manufacturer-confirmed, verified '+esc(p.verifiedAt)+'.</p>':'';
   return '<section class="section" data-ai-interoperability="1"><div class="eyebrow">AI interoperability</div><h2>How '+esc(tool.name)+' works with AI assistants and agents</h2><p style="color:#667085;line-height:1.65">'+esc(summary)+'</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0"><span style="font-size:12px;border:1px solid #e4e7ec;border-radius:10px;padding:8px 10px"><strong>AI fit:</strong> '+esc(tier)+'</span><span style="font-size:12px;border:1px solid #e4e7ec;border-radius:10px;padding:8px 10px"><strong>Assistants:</strong> '+esc(assistants.length?assistants.join(', '):'Not verified')+'</span><span style="font-size:12px;border:1px solid #e4e7ec;border-radius:10px;padding:8px 10px"><strong>MCP:</strong> '+esc(mcp)+'</span><span style="font-size:12px;border:1px solid #e4e7ec;border-radius:10px;padding:8px 10px"><strong>Public API:</strong> '+esc(api)+'</span></div>'+evidenceNote+'</section>';
 }
