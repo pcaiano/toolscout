@@ -2565,6 +2565,7 @@ export default{
           await event(env,'authority_drain_scheduler_failed','failed',safe(error?.message||error,800)).catch(()=>{});
           return null;
         });
+        if(ctx?.waitUntil)ctx.waitUntil(drain); // preserve in-flight sender work if the bounded observation window expires
         let drainTimer;
         const drainState=await Promise.race([
           drain.then(()=> 'settled'),
