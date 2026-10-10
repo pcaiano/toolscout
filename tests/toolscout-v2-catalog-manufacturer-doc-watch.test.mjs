@@ -84,7 +84,7 @@ test('temporary vendor document changes revert safely, and blocked or third-part
 test('Growth Brain itself owns bounded two-hourly documentary verification, no new engine',()=>{
   assert.equal(missionOwner('catalog_runtime_quality'),'growth_scheduler');
   assert.equal(SCHEDULED_MISSIONS.catalog_runtime_quality.cron,TOOLSCOUT_CRONS.hourly);
-  assert.equal(SCHEDULED_MISSIONS.catalog_runtime_quality.subcadence,'2h_or_recovery');
+  assert.equal(SCHEDULED_MISSIONS.catalog_runtime_quality.subcadence,'hourly_bounded_six_official_products_or_recovery');
   const scheduler=fs.readFileSync(new URL('../growth-scheduler.js',import.meta.url),'utf8');
   assert.match(scheduler,/if\(twoHourly\)\{\s*scheduleTask\(ctx,runWithLedger\(env,\{engine:'catalog',mission:'runtime_quality'/);
   const catalog=fs.readFileSync(new URL('../catalog-autonomy-worker.js',import.meta.url),'utf8');
