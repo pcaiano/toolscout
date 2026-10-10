@@ -100,3 +100,16 @@ test('price scope never exchanges seat and subscription list prices',()=>{
  assert.deepEqual(manufacturerFactProposals(hubspot,watch('Starter plan costs €25 per subscription per month.')),[]);
  assert.equal(manufacturerFactProposals(hubspot,watch('Starter plan costs €25 per paid seat per month.')).find(x=>x.type==='price_quote')?.newValue,25);
 });
+
+test('real legacy response cleans reinserted unknown AI sections after injection',()=>{
+ const runtime=fs.readFileSync(new URL('../catalog-autonomy-worker.js',import.meta.url),'utf8');
+ const start=runtime.indexOf('export async function publicQualityEnhancedToolResponse');
+ const end=runtime.indexOf('export async function publicRuntimeToolResponse',start);
+ assert.ok(start>=0&&end>start);
+ const legacy=runtime.slice(start,end);
+ assert.match(legacy,/if\(tool\)html=injectAiInteroperability\(html,tool\);/);
+ assert.match(legacy,/return new Response\(cleanPublicCatalogProfileCopy\(html\)/);
+ assert.ok(legacy.indexOf('return new Response(cleanPublicCatalogProfileCopy(html)')>legacy.indexOf('if(tool)html=injectAiInteroperability(html,tool);'));
+ const injected='<section class="section aiInterop" data-ai-interoperability="1"><p>ToolScout has not yet verified this tool integration.</p></section>';
+ assert.doesNotMatch(cleanPublicCatalogProfileCopy(injected),/not yet verified|aiInterop/);
+});
