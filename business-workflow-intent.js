@@ -27,7 +27,7 @@ const SECTORS=[
   ['restaurants','restaurant or café',/\b(restaurants?|restaurantes?|cafes?|cafetarias?|bistros?|bars?|takeaways?|food trucks?|pizzerias?|pastelarias?)\b/,['tasks','crm','marketing','automation'],['Restaurant POS, table booking, kitchen and stock management']],
   ['architecture','architecture or design practice',/\b(architects?|architecture|arquitetos?|arquitetura|interior design studio|engineering firm|engenharia)\b/,['tasks','crm','forms','automation'],['BIM/CAD, cost estimation and drawing approval']],
   ['marketing_agencies','marketing agency',/\b(marketing (?:agenc(?:y|ies)|company|business|firm)|agencia de marketing|agência de marketing|digital agenc(?:y|ies)|creative (?:agency|studio)|advertising (?:agency|firm))\b/,['tasks','social','seo','analytics'],['Media buying, cross-client billing and agency profitability']],
-  ['healthcare','healthcare practice',/\b(clinics?|clinicas?|clínicas?|dentists?|dental practice|medical practice|healthcare practice|physiotherap(?:y|ist)|fisioterapia|veterinary|veterinaria)\b/,['tasks','crm','forms','automation'],['Clinical records, patient appointments, privacy and regional compliance']],
+  ['healthcare','healthcare practice',/\b(clinics?|clinicas?|clínicas?|dentists?|dental practice|medical practice|healthcare practice|physiotherap(?:y|ist)|fisioterapia|veterinary|veterinaria|veterinarians?|vet (?:clinics?|practices?)|animal hospitals?)\b/,['tasks','crm','forms','automation'],['Clinical records, patient appointments, privacy and regional compliance']],
   ['legal','law firm',/\b(law firms?|lawyers?|legal practice|advogados?|advogadas?|escritorio de advocacia)\b/,['tasks','crm','forms','automation'],['Case management, legal billing and privilege']],
   ['accounting','accounting practice',/\b(account(?:ancy|ing|ants?) (?:business|firm|practice)|bookkeeping|contabilistas?|contabilidade)\b/,['tasks','crm','forms','automation'],['Certified accounting, payroll and local tax filings']],
   ['real_estate','real-estate business',/\b(real estate (?:agenc(?:y|ies)|business|brokerage|company)|imobiliarias?|imobiliárias?|mediacao imobiliaria|mediação imobiliária|property brokerage)\b/,['crm','tasks','forms','marketing'],['Listing portals, property feeds and transactional compliance']],
@@ -50,11 +50,11 @@ const SECTORS=[
 // A specialist option is a job-specific handoff, never an industry-wide winner.
 // Use only canonical D1/published tools with current first-party capability proof.
 const SPECIALIST_WORKFLOW_TYPES=[
-  {sector:'restaurants',category:'restaurant-pos',title:'Restaurant POS and ordering',
+  {sector:'restaurants',category:'restaurant-pos',proofCapabilities:['restaurant point of sale','restaurant pos','restaurant ordering','kitchen display system'],title:'Restaurant POS and ordering',
     job:'restaurant point of sale software',
     scope:'Restaurant point of sale, ordering and kitchen operations. Check local payments, hardware and required integrations before choosing.'},
   {sector:'healthcare',context:/\b(veterinary|veterinarian|veterinari[ao]|vet clinic|vet practice|animal hospital)\b/,
-    category:'veterinary',title:'Veterinary practice management',
+    category:'veterinary',proofCapabilities:['veterinary medical records','veterinary practice management','veterinary patient records'],title:'Veterinary practice management',
     job:'veterinary practice management software',
     scope:'Clinical records and veterinary practice operations. Check medical workflows, data handling and regional compliance before choosing.'}
 ];
@@ -69,7 +69,8 @@ function documentedSpecialistWorkflows(sector,query,tools){
           ||t.editorialReview?.verificationStatus!=='vendor_documented')return false;
         let host;try{host=new URL(t.sourceUrl).hostname.replace(/^www\./,'')}catch{return false}
         return (t.decisionClaims||[]).some(c=>{
-          if(c?.type!=='capability'||c.status!=='verified'||!validDate(c.verifiedAt))return false;
+          if(c?.type!=='capability'||c.status!=='verified'||!validDate(c.verifiedAt)||
+            !spec.proofCapabilities.includes(normalize(c.value).trim()))return false;
           try{const evidenceHost=new URL(c.sourceUrl).hostname.replace(/^www\./,'');
             return evidenceHost===host||evidenceHost.endsWith('.'+host)}catch{return false}
         });
