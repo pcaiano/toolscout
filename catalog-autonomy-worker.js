@@ -19,6 +19,15 @@ const MAX_CANDIDATE_CHECKS_PER_CYCLE=32; // bounded source fetches, preserve fir
 const MAX_ADMISSION_WALL_MS=90000; // time-bound hourly supplier without reducing the 24-tool admission cap
 const OFFICIAL_SOURCE_HOLD_COOLDOWN_HOURS=3; // avoid re-fetching verified vendor failures every hourly admission run
 const MAX_RESEARCH_SEEDS_PER_CYCLE=80; // hourly discovery intake; never bypasses manufacturer/editorial admission
+const RESEARCH_HOLD_RETRY_HOURS=6; // move blocked staged products behind the next valid cohort
+// Both hourly admission and fast recovery ignore recently held staged revisions.
+// Re-staging a newer revision makes it eligible as soon as that updatedAt wins.
+const ACTIVE_RESEARCH_READY_WHERE=`c.status='research_ready' AND NOT EXISTS(
+  SELECT 1 FROM catalog_runtime_events h WHERE h.tool_slug=c.tool_slug
+    AND h.event_type IN ('catalog_candidate_manufacturer_docs_hold','catalog_candidate_official_source_hold',
+      'catalog_candidate_quality_hold','catalog_candidate_structure_hold','catalog_candidate_manufacturer_evidence_hold')
+    AND h.created_at>=datetime('now','-6 hours') AND h.created_at>=c.updated_at
+)`;
 const WARNING_RETRY_HOURS=6;
 const MAX_WARNING_RETRIES_PER_CYCLE=2;
 const FETCH_TIMEOUT_MS=6000;
@@ -705,7 +714,7 @@ export async function hasNewDecisionGradeCatalogSupply(env){
   if(unpublishedReadyCatalogSlugs(candidates,known).length>0)return true;
   // A newly staged D1 candidate is already preflighted for manufacturer
   // evidence, and should wake existing incident-recovery ownership.
-  const staged=await env.DB.prepare("SELECT tool_slug FROM catalog_runtime_candidates WHERE status='research_ready' LIMIT 1").first();
+  const staged=await env.DB.prepare(`SELECT c.tool_slug FROM catalog_runtime_candidates c WHERE ${ACTIVE_RESEARCH_READY_WHERE} LIMIT 1`).first();
   return Boolean(staged?.tool_slug);
 }
 export async function admitTrustedCandidates(env){
@@ -738,8 +747,8 @@ export async function admitTrustedCandidates(env){
   // Reviewed candidates enter the same admission contract directly from
   // canonical D1. No code deployment or parallel catalog is required per cohort.
   // Staged records are never part of runtimeCandidates() or public surfaces.
-  const staged=(await env.DB.prepare(`SELECT tool_slug,profile_json FROM catalog_runtime_candidates
-    WHERE status='research_ready' ORDER BY updated_at ASC LIMIT 128`).all()).results||[];
+  const staged=(await env.DB.prepare(`SELECT c.tool_slug,c.profile_json FROM catalog_runtime_candidates c
+    WHERE ${ACTIVE_RESEARCH_READY_WHERE} ORDER BY c.updated_at ASC LIMIT 128`).all()).results||[];
   if(setupDeadline('d1_research_ready'))return setupDeadline('d1_research_ready');
   // Recent source failures remain unpublished. Defer repeated retries, never
   // convert a blocked vendor into evidence or spend this cycle's network budget
@@ -750,6 +759,7 @@ export async function admitTrustedCandidates(env){
   if(setupDeadline('source_hold_cooldown'))return setupDeadline('source_hold_cooldown');
   const sourceHoldCooldown=new Set((recentSourceHolds.results||[]).map(row=>String(row.tool_slug||'').toLowerCase()));
   const researchSeeds=(Array.isArray(seeds?.candidates)?seeds.candidates:[]).filter(x=>x?.slug&&!existing.has(String(x.slug).toLowerCase()));
+  const stagedSlugs=new Set(staged.map(row=>String(row.tool_slug||'').toLowerCase()));
   const pool=[],seen=new Set();let sequence=0;
   for(const file of config?.trustedCandidateFiles||[]){
     if(setupDeadline('before_candidate_file'))return setupDeadline('before_candidate_file');
@@ -758,7 +768,7 @@ export async function admitTrustedCandidates(env){
     let prepared=0;
     for(const raw of Array.isArray(candidates)?candidates:[]){
       if(++prepared%64===0&&setupDeadline('candidate_pool'))return setupDeadline('candidate_pool');
-      const slug=String(raw?.slug||'').toLowerCase();if(!slug||existing.has(slug)||seen.has(slug))continue;
+      const slug=String(raw?.slug||'').toLowerCase();if(!slug||existing.has(slug)||seen.has(slug)||stagedSlugs.has(slug))continue;
       seen.add(slug);
       const priority=catalogCandidateResearchPriority(raw,affiliateRegistry.get(slug)||null,config);
       pool.push({raw,slug,priority,ready:trustedManufacturerEvidence(raw,{decisionGrade:true}),sequence:sequence++});
@@ -771,7 +781,8 @@ export async function admitTrustedCandidates(env){
     if(!raw||raw.slug!==slug||existing.has(slug)||seen.has(slug))continue;
     seen.add(slug);
     const priority=catalogCandidateResearchPriority(raw,affiliateRegistry.get(slug)||null,config);
-    pool.push({raw,slug,priority,ready:trustedManufacturerEvidence(raw,{decisionGrade:true}),origin:'d1_research_ready',sequence:sequence++});
+    pool.push({raw,slug,priority,ready:trustedManufacturerEvidence(raw,{decisionGrade:true}),
+      origin:'d1_research_ready',stagedProfileJson:row.profile_json,sequence:sequence++});
   }
   const categoryCounts=new Map();
   for(const t of staticTools||[]){const key=String(t.category||'');categoryCounts.set(key,(categoryCounts.get(key)||0)+1)}
@@ -800,7 +811,11 @@ export async function admitTrustedCandidates(env){
       const accessible=new Set(evidenceChecks.filter((result,index)=>
         result?.status==='ok'&&sameManufacturerHost(result.finalUrl,raw.sourceUrl)&&
         documents[index]&&publicHttps(result.finalUrl)?.pathname!=='/'
-      ).map(result=>result.finalUrl));
+      ).map(result=>{
+        const url=new URL(result.finalUrl);
+        // Tracking parameters and fragments do not create a second page.
+        return url.origin+url.pathname.replace(/\\/+$/,'');
+      }));
       if(accessible.size<2){
         held++;
         await logEvent(env,slug,'catalog_candidate_manufacturer_docs_hold','completed',
@@ -830,9 +845,24 @@ export async function admitTrustedCandidates(env){
     if(budgetStop())break; // quality pages and logo checks are awaited network phases
     if(!quality.publishable){held++;await logEvent(env,slug,'catalog_candidate_quality_hold','completed','Trusted candidate failed full catalog quality gate before publication.',{issues:quality.issues,warnings:quality.warnings,research_priority:priority});continue}
     profile=quality.repairedTool;
-    await env.DB.prepare(`INSERT INTO catalog_runtime_candidates(tool_slug,profile_json,status,source_status,verified_at,updated_at) VALUES(?,?,'published','ok',datetime('now'),datetime('now'))
-      ON CONFLICT(tool_slug) DO UPDATE SET profile_json=excluded.profile_json,status='published',source_status='ok',verified_at=datetime('now'),updated_at=datetime('now')`)
-      .bind(slug,JSON.stringify(profile)).run();
+    if(item.origin==='d1_research_ready'){
+      // Compare-and-swap preserves a newer researched revision that arrived
+      // during official document requests or logo audit. Never publish old JSON.
+      const updated=await env.DB.prepare(`UPDATE catalog_runtime_candidates
+        SET profile_json=?,status='published',source_status='ok',verified_at=datetime('now'),updated_at=datetime('now')
+        WHERE tool_slug=? AND status='research_ready' AND profile_json=?`)
+        .bind(JSON.stringify(profile),slug,item.stagedProfileJson).run();
+      if(Number(updated?.meta?.changes??updated?.changes??0)<1){
+        held++;
+        await logEvent(env,slug,'catalog_candidate_revision_superseded','deferred',
+          'A newer documented candidate arrived during verification; retained it for the next cycle.');
+        continue;
+      }
+    }else{
+      await env.DB.prepare(`INSERT INTO catalog_runtime_candidates(tool_slug,profile_json,status,source_status,verified_at,updated_at) VALUES(?,?,'published','ok',datetime('now'),datetime('now'))
+        ON CONFLICT(tool_slug) DO UPDATE SET profile_json=excluded.profile_json,status='published',source_status='ok',verified_at=datetime('now'),updated_at=datetime('now')`)
+        .bind(slug,JSON.stringify(profile)).run();
+    }
     await logEvent(env,slug,'catalog_candidate_admitted','completed','Trusted candidate admitted as a full ToolScout catalog peer after official-source and deterministic quality gates.',{source_url:profile.sourceUrl,category:profile.category,research_priority:priority});
     existing.add(slug);admitted++;
     if(budgetStop())break; // include database writes and admission evidence in elapsed time
