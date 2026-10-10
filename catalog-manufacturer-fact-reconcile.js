@@ -23,7 +23,7 @@ function eligibleSentence(s,plan,period,scope){
 function explicitGlobalRetirement(text,feature){
   const needle=escRe(feature.trim());
   if(!needle||feature.trim().length<5||feature.trim().length>85)return false;
-  const expression=new RegExp('^(?:we|our (?:product|platform|service)|the (?:product|platform|service))\\s+no longer (?:support|offer|provide|include)\\s+'+needle+'\\s*(?:[;:,]|$)|^'+needle+'\\s+(?:has been|is)\\s+(?:discontinued|retired|removed|no longer (?:available|supported))\\s*(?:[;:,]|$)','i');
+  const expression=new RegExp('^(?:we|our (?:product|platform|service)|the (?:product|platform|service))\\s+no longer (?:supports?|offers?|provides?|includes?)\\s+'+needle+'\\s*(?:[;:,]|$)|^'+needle+'\\s+(?:has been|is)\\s+(?:discontinued|retired|removed|no longer (?:available|supported))\\s*(?:[;:,]|$)','i');
   return String(text||'').replace(/\s+/g,' ').trim().split(/[.!?]/).some(sentence=>expression.test(sentence.trim()));
 }
 function claimKey(claim){
