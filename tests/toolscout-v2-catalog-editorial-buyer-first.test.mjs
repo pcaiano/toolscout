@@ -60,3 +60,25 @@ test('integrity workflow cannot reapply dated buyer editorial snapshots to live 
  assert.match(workflow,/name: Audit production closed-loop truth/);
  assert.match(workflow,/name: Verify real production MCP buyer decisions after Cloudflare deployment/);
 });
+
+test('runtime software profiles never publish AI research uncertainty as buyer copy',()=>{
+ const ready=JSON.parse(fs.readFileSync(new URL('../data/catalog-wave6-decision-ready.json',import.meta.url),'utf8'));
+ for(const tool of ready){
+  const html=candidatePage(tool);
+  assert.doesNotMatch(html,/not yet verified|not verified|the current free.plan position is not verified/i,tool.slug+' leaked internal research state');
+  assert.doesNotMatch(html,/data-ai-interoperability="1"/i,tool.slug+' should hide unsupported AI claims');
+ }
+});
+
+test('runtime AI interoperability becomes public only with dated first-party proof',()=>{
+ const ready=JSON.parse(fs.readFileSync(new URL('../data/catalog-wave6-decision-ready.json',import.meta.url),'utf8'));
+ const tool=structuredClone(ready.find(t=>t.slug==='activepieces'));
+ tool.aiIntegration={
+  status:'verified',tier:'moderate',mcp:'official',publicApi:true,
+  assistants:['ChatGPT'],summary:'The manufacturer documents MCP tools for its flows.',
+  verifiedAt:'2026-10-10',sources:['https://www.activepieces.com/docs/mcp/tools']
+ };
+ assert.match(candidatePage(tool),/data-ai-interoperability="1"/);
+ tool.aiIntegration.sources=['https://reviews.example.org/activepieces-ai'];
+ assert.doesNotMatch(candidatePage(tool),/data-ai-interoperability="1"/,'third-party AI evidence cannot make a public proof claim');
+});
