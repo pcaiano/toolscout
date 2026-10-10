@@ -637,21 +637,41 @@ export async function hasNewDecisionGradeCatalogSupply(env){
   return unpublishedReadyCatalogSlugs(candidates,known).length>0;
 }
 export async function admitTrustedCandidates(env){
-  // Count preparation, source verification, quality checks and post-processing
-  // against the same mission budget; a per-candidate-only guard is insufficient.
+  // The bounded supplier must include D1/schema, registry, seed and candidate-file
+  // preparation, not just per-tool fetch/quality verification.
   const startedAt=Date.now();
+  const setupDeadline=phase=>Date.now()-startedAt>MAX_ADMISSION_WALL_MS?{
+    ok:false,reason:'catalog_admission_setup_budget_exhausted',phase,
+    considered:0,admitted:0,held:0,missing_manufacturer_evidence:0,
+    cycle_budget_exhausted:true,cycle_wall_budget_ms:MAX_ADMISSION_WALL_MS,
+    cycle_elapsed_ms:Date.now()-startedAt,preparation_deferred:true,
+    max_admissions:MAX_ADMIT_PER_DAY,candidate_check_limit:MAX_CANDIDATE_CHECKS_PER_CYCLE
+  }:null;
+  // Returning ok:false leaves a recoverable failed mission in the existing
+  // ledger, so the next hourly scheduler can retry without publishing guesses.
   await ensureSchema(env);
+  if(setupDeadline('schema'))return setupDeadline('schema');
   const config=await assetJson(env,'/data/catalog-engine.json',{});
+  if(setupDeadline('config'))return setupDeadline('config');
   const staticTools=await assetJson(env,'/data/tools.json',[]);
+  if(setupDeadline('baseline'))return setupDeadline('baseline');
   const existing=new Set((Array.isArray(staticTools)?staticTools:[]).map(x=>String(x?.slug||'').toLowerCase()));
-  for(const x of await runtimeCandidates(env))existing.add(String(x?.slug||'').toLowerCase());
+  const runtime=await runtimeCandidates(env);
+  if(setupDeadline('runtime_candidates'))return setupDeadline('runtime_candidates');
+  for(const x of runtime)existing.add(String(x?.slug||'').toLowerCase());
   const affiliateRegistry=await affiliateResearchRegistry(env);
+  if(setupDeadline('affiliate_registry'))return setupDeadline('affiliate_registry');
   const seeds=await assetJson(env,'/data/catalog-research-seeds.json',{candidates:[]});
+  if(setupDeadline('research_seeds'))return setupDeadline('research_seeds');
   const researchSeeds=(Array.isArray(seeds?.candidates)?seeds.candidates:[]).filter(x=>x?.slug&&!existing.has(String(x.slug).toLowerCase()));
   const pool=[],seen=new Set();let sequence=0;
   for(const file of config?.trustedCandidateFiles||[]){
+    if(setupDeadline('before_candidate_file'))return setupDeadline('before_candidate_file');
     const candidates=await assetJson(env,'/'+String(file).replace(/^\//,''),[]);
+    if(setupDeadline('candidate_file'))return setupDeadline('candidate_file');
+    let prepared=0;
     for(const raw of Array.isArray(candidates)?candidates:[]){
+      if(++prepared%64===0&&setupDeadline('candidate_pool'))return setupDeadline('candidate_pool');
       const slug=String(raw?.slug||'').toLowerCase();if(!slug||existing.has(slug)||seen.has(slug))continue;
       seen.add(slug);
       const priority=catalogCandidateResearchPriority(raw,affiliateRegistry.get(slug)||null,config);
