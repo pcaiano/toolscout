@@ -724,6 +724,12 @@ export async function admitTrustedCandidates(env){
   if(setupDeadline('affiliate_registry'))return setupDeadline('affiliate_registry');
   const seeds=await assetJson(env,'/data/catalog-research-seeds.json',{candidates:[]});
   if(setupDeadline('research_seeds'))return setupDeadline('research_seeds');
+  // Reviewed candidates enter the same admission contract directly from
+  // canonical D1. No code deployment or parallel catalog is required per cohort.
+  // Staged records are never part of runtimeCandidates() or public surfaces.
+  const staged=(await env.DB.prepare(`SELECT tool_slug,profile_json FROM catalog_runtime_candidates
+    WHERE status='research_ready' ORDER BY updated_at ASC LIMIT 128`).all()).results||[];
+  if(setupDeadline('d1_research_ready'))return setupDeadline('d1_research_ready');
   // Recent source failures remain unpublished. Defer repeated retries, never
   // convert a blocked vendor into evidence or spend this cycle's network budget
   // on the same failed manufacturer every hour.
@@ -746,6 +752,15 @@ export async function admitTrustedCandidates(env){
       const priority=catalogCandidateResearchPriority(raw,affiliateRegistry.get(slug)||null,config);
       pool.push({raw,slug,priority,ready:trustedManufacturerEvidence(raw,{decisionGrade:true}),sequence:sequence++});
     }
+  }
+  for(const row of staged){
+    if(setupDeadline('d1_candidate_pool'))return setupDeadline('d1_candidate_pool');
+    let raw=null;try{raw=JSON.parse(row.profile_json||'null')}catch{}
+    const slug=String(row.tool_slug||'').toLowerCase();
+    if(!raw||raw.slug!==slug||existing.has(slug)||seen.has(slug))continue;
+    seen.add(slug);
+    const priority=catalogCandidateResearchPriority(raw,affiliateRegistry.get(slug)||null,config);
+    pool.push({raw,slug,priority,ready:trustedManufacturerEvidence(raw,{decisionGrade:true}),sequence:sequence++});
   }
   const categoryCounts=new Map();
   for(const t of staticTools||[]){const key=String(t.category||'');categoryCounts.set(key,(categoryCounts.get(key)||0)+1)}
@@ -809,6 +824,7 @@ export async function admitTrustedCandidates(env){
   }
   return{ok:true,considered,admitted,held,missing_manufacturer_evidence:missingManufacturerEvidence,
     trusted_sources_total:seen.size,ready_trusted_sources:pool.filter(x=>x.ready).length,
+    d1_research_ready_considered:staged.length,
     cycle_budget_exhausted:cycleBudgetExhausted,cycle_wall_budget_ms:MAX_ADMISSION_WALL_MS,
     cycle_elapsed_ms:Date.now()-startedAt,market_gaps_deferred,snapshot_deferred,
     official_source_retries_deferred:sourceRetriesDeferred,official_source_retry_hours:OFFICIAL_SOURCE_HOLD_COOLDOWN_HOURS,
@@ -1057,8 +1073,59 @@ async function status(env){
     baseline_remaining:Math.max(0,baselineTotal-baselinePresent),migration_phase:snapshot.degraded?'runtime_degraded':baselinePresent>=baselineTotal&&baselineTotal>0?'all_baseline_records_in_d1':'baseline_seeding',legacy_html_preserved:true},state:{total:Number(states?.total||0),healthy:Number(states?.healthy||0),changed:Number(states?.changed||0),suppressed:Number(states?.suppressed||0),warnings:Number(states?.warnings||0),last_checked_at:states?.last_checked_at||null},runtime_candidates:Math.max(0,Number(candidates?.total||0)-baselineSeeded),last_admitted_at:candidates?.last_admitted_at||null,document_watch:{product_coverage:watchable,two_source_coverage:multiSource,products_baselined:Number(documents?.baselined||0),confirmed_changes_7d:Number(documents?.changes_7d||0),last_baseline_at:documents?.last_baseline_at||null,rule:'First-party documentation is monitored; conservative prices, explicit plan limits and documented global capability retirements can update D1 after two identical observations. Other changes are not asserted.'},market_gaps:Number(gaps?.total||0),events_7d:Number(events?.n||0),whats_new:{official_sources:Number(newsSources?.total||0),last_source_check:newsSources?.last_checked_at||null,candidates:Number(newsCandidates?.total||0),last_candidate_at:newsCandidates?.last_candidate_at||null},rule:'Once admitted, runtime tools remain full catalog peers during recoverable quality holds, matching static-tool behavior. Only confirmed broken sources are suppressed. Official-source verification is required, and affiliate economics never affect catalog admission or ranking.'};
 }
 
+// Accept verified *research* records through the existing internal admin plane.
+// The hourly Catalog Autonomy runner remains the sole publication owner.
+export async function stageReviewedCatalogCandidate(env,raw){
+  if(!raw||typeof raw!=='object'||Array.isArray(raw))return{ok:false,reason:'invalid_candidate'};
+  const slug=String(raw.slug||'').toLowerCase();
+  if(!/^[a-z0-9][a-z0-9-]{0,79}$/.test(slug)||raw.slug!==slug
+    ||typeof raw.name!=='string'||!raw.name.trim()||raw.name.length>120)
+    return{ok:false,reason:'invalid_candidate_identity'};
+  const config=await assetJson(env,'/data/catalog-engine.json',null);
+  const baseline=await assetJson(env,'/data/tools.json',null);
+  if(!config||!Array.isArray(baseline))return{ok:false,reason:'catalog_assets_unavailable'};
+  if(baseline.some(x=>x.slug===slug))return{ok:false,reason:'existing_published_tool'};
+  const issues=validCandidate(raw,config);
+  if(issues.length)return{ok:false,reason:'incomplete_catalog_parity',issues};
+  if(!trustedManufacturerEvidence(raw,{decisionGrade:true}))
+    return{ok:false,reason:'manufacturer_decision_evidence_required'};
+  const serialized=JSON.stringify(raw);
+  if(serialized.length>60000)return{ok:false,reason:'candidate_too_large'};
+  await ensureSchema(env);
+  // Never replace a published profile, baseline mirror or a quality-held
+  // record through research intake. An update is permitted only while staged.
+  const write=await env.DB.prepare(`INSERT INTO catalog_runtime_candidates
+    (tool_slug,profile_json,status,source_status,verified_at,updated_at)
+    VALUES(?,?,'research_ready','documented_research_unchecked',NULL,datetime('now'))
+    ON CONFLICT(tool_slug) DO UPDATE SET
+      profile_json=excluded.profile_json,updated_at=datetime('now')
+    WHERE catalog_runtime_candidates.status='research_ready'`)
+    .bind(slug,serialized).run();
+  if(Number(write?.meta?.changes??write?.changes??0)<1)
+    return{ok:false,reason:'existing_non_staged_profile'};
+  await logEvent(env,slug,'catalog_candidate_research_staged','completed',
+    'Decision-grade first-party reviewed candidate staged privately. Hourly admission must still verify official source, visual asset and full quality gates.',
+    {source:'authenticated_research_intake',public:false,admitted:false});
+  return{ok:true,slug,status:'research_ready',admitted:false,published:false,
+    next:'existing_hourly_catalog_runtime_coverage_admission'};
+}
+async function handleReviewedCatalogStage(request,env){
+  if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});
+  if(!(request.headers.get('Content-Type')||'').toLowerCase().includes('application/json'))
+    return Response.json({error:'json_required'},{status:415,headers:JSON_H});
+  const body=await request.text();
+  if(body.length>60000)return Response.json({error:'candidate_too_large'},{status:413,headers:JSON_H});
+  let candidate=null;try{candidate=JSON.parse(body)}catch{
+    return Response.json({error:'invalid_json'},{status:400,headers:JSON_H});
+  }
+  const result=await stageReviewedCatalogCandidate(env,candidate);
+  return Response.json(result,{status:result.ok?202:result.reason==='existing_published_tool'||result.reason==='existing_non_staged_profile'?409:422,headers:JSON_H});
+}
+
 export async function handleCatalogAutonomyRoute(request,env){
   const u=new URL(request.url);
+  if(request.method==='POST'&&u.pathname==='/api/catalog-autonomy/research-stage')
+    return handleReviewedCatalogStage(request,env);
   if(request.method==='GET'&&u.pathname==='/api/catalog-autonomy/status'){
     if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});
     return Response.json(await status(env),{headers:JSON_H});
@@ -1079,6 +1146,8 @@ export async function handleCatalogAutonomyRoute(request,env){
 export default {
   async fetch(request,env,ctx){
     const u=new URL(request.url);
+    if(request.method==='POST'&&u.pathname==='/api/catalog-autonomy/research-stage')
+      return handleReviewedCatalogStage(request,env);
     if(request.method==='GET'&&u.pathname==='/api/catalog-autonomy/status'){if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});return Response.json(await status(env),{headers:JSON_H})}
     if(request.method==='POST'&&u.pathname==='/api/catalog-autonomy/run'){if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});const verify=await runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:'manual_api',singleFlightMinutes:8},()=>verifyBatch(env));const admit=await runWithLedger(env,{engine:'catalog',mission:'runtime_coverage',triggerName:'manual_api',singleFlightMinutes:8},()=>admitTrustedCandidates(env));return Response.json({ok:true,verify,admit},{headers:JSON_H})}
     if(request.method==='GET'&&u.pathname==='/data/tools.json'){
