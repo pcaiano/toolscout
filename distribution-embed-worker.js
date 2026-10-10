@@ -170,17 +170,13 @@ function parseBuyerDecisionQuery(u,profile,limit,job,explicitGoal){
     const values=u.searchParams.getAll(key).map(x=>x.trim());
     if(values.length>12||values.some(x=>!x||x.length>maxLen||[...x].some(c=>c.charCodeAt(0)<32)))
       return {error:'Invalid '+key+': provide up to 12 non-empty, length-bounded values.'};
-    if(key==='priorities'&&(values.length>6||values.some(x=>!['price','ease','automation','integrations','sales','ai','marketing','seo','research','content','agency,'features'].includes(x))||new Set(values).size!==values.length))
+    if(key==='priorities'&&(values.length>6||values.some(x=>!['price','ease','automation','integrations','sales','ai','marketing','seo','research','content','agency','features'].includes(x))||new Set(values).size!==values.length))
       return {error:'Invalid priorities: use up to six distinct supported decision dimensions.'};
     args[key]=[...new Set(values)];
   }
   // Explicit multi-dimensional priorities take precedence over the single
   // classic Finder selector. The latter remains effective in decision mode.
   if(!args.priorities.length&&profile.priority)args.priorities=[profile.priority];
-  if(args.priorities.length&&profile.priority&&!u.searchParams.has('priorities')){
-    // Keep classic single-selector behavior without fabricating other weights.
-    args.priorities=[profile.priority];
-  }
   if(u.searchParams.has('require_stack_fit')){
     const required=u.searchParams.get('require_stack_fit');
     if(required!=='true'&&required!=='false')return {error:'require_stack_fit must be true or false.'};
