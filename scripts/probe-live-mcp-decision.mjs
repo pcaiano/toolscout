@@ -166,14 +166,25 @@ assert(multiPriority.status===200&&aiMulti.isError===false,'Multi-priority decis
 assert(JSON.stringify(multiPriority.data.recommendations.map(x=>[x.slug,x.match]))===
   JSON.stringify(aiMulti.structuredContent.shortlist.map(x=>[x.slug,x.fit_score])),
   'Explicit multi-dimensional priorities did not override the legacy single priority');
-const unsupportedFeatures=await liveQualifiedFinder('q=CRM&mode=decision&priority=features');
-assert(unsupportedFeatures.status===422&&unsupportedFeatures.data?.decision_status==='needs_specific_features'&&
-  unsupportedFeatures.data?.recommendations?.length===0,
-  'Live Finder must reject an unscored feature-breadth priority without inventing winners');
+// A new per-priority policy needs its own canary: mode=decision and
+// selected-goal support both existed before the feature-depth safety fix.
+let unsupportedFeatures=null,featureReadyAttempts=0;
+for(let i=1;i<=15;i++){
+  featureReadyAttempts=i;
+  try{
+    const sample=await liveQualifiedFinder('q=CRM&mode=decision&priority=features');
+    if(sample.status===422&&sample.data?.decision_status==='needs_specific_features'&&
+      sample.data?.recommendations?.length===0){
+      unsupportedFeatures=sample;break;
+    }
+  }catch{}
+  if(i<15)await sleep(5000);
+}
+assert(unsupportedFeatures,'Feature-depth safety policy did not appear in production after Cloudflare rollout checks');
 const aiUnsupportedFeatures=await rpc('tools/call',{name:'decide_software',arguments:{job:'CRM',priorities:['features'],limit:3}});
 assert(aiUnsupportedFeatures.isError===true&&aiUnsupportedFeatures.structuredContent?.decision_status==='needs_specific_features',
   'Live MCP must not silently rank on a nonexistent features score');
-console.log(JSON.stringify({finderContextPreservedLive:true,goalReadyAttempts,selectedGoal:'crm',legacyPriority:'automation',
+console.log(JSON.stringify({finderContextPreservedLive:true,goalReadyAttempts,featureReadyAttempts,selectedGoal:'crm',legacyPriority:'automation',
   explicitPriorities:['ease','price'],mcpParity:true},null,2));
 
 
