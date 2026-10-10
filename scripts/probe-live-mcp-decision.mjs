@@ -141,6 +141,57 @@ for(const c of broadCases){
     t.profile_url?.startsWith('https://trytoolscout.org/tools/')&&t.status==='category_example_not_industry_qualified')),'unverified or external examples in guidance: '+c.sector);
   assert(!JSON.stringify(data).includes('sourceUrl'),'manufacturer source URLs leaked from business guidance: '+c.sector);
 }
+// Live canary for the specialist-workflow handoff. Previous versions passed
+// generic broad-business probes despite omitting a documented specialist job.
+// Re-check both the public Finder API and actual MCP network responses after
+// bounded Cloudflare rollout, without making continued D1 admission mandatory.
+let specialistHandoff=null,specialistAttempts=0;
+for(let i=1;i<=15;i++){
+  specialistAttempts=i;
+  try{
+    const [restaurant,clinic]=await Promise.all([
+      liveGuidance('best software for my restaurant'),
+      liveGuidance('best software for my veterinary clinic')
+    ]);
+    if(Array.isArray(restaurant.guidance?.specialist_workflows)&&
+      Array.isArray(clinic.guidance?.specialist_workflows)){
+      specialistHandoff={restaurant,clinic};break;
+    }
+  }catch(error){if(i===15)throw Error('Live specialist workflow Finder probe unavailable: '+String(error?.message||error))}
+  if(i<15)await sleep(5000);
+}
+assert(specialistHandoff,'Cloudflare still serves the old generic-only workflow response');
+for(const [industry,data,category] of [
+  ['restaurants',specialistHandoff.restaurant,'restaurant-pos'],
+  ['healthcare',specialistHandoff.clinic,'veterinary']
+]){
+  assert(data.guidance?.industry===industry,'Specialist sector mismatch: '+industry);
+  assert(data.recommendations?.length===0,'Broad business query invented a product winner: '+industry);
+  assert(data.guidance.workflows?.length===4,'Original four general workflows disappeared: '+industry);
+  assert(data.guidance.specialist_workflows.every(w=>
+    w.specialist===true&&w.category===category&&w.catalog_coverage>0&&
+    w.availability==='documented_specialist_category'&&w.job&&w.finder_url?.startsWith('https://trytoolscout.org/?q=')&&
+    w.category_examples?.length>0&&w.category_examples.every(t=>
+      t.status==='manufacturer_documented_category_candidate_not_industry_winner'&&
+      t.profile_url?.startsWith('https://trytoolscout.org/tools/'))),
+      'A specialist workflow bypasses proof gates or advertises unqualified vendors: '+industry);
+  assert(!/sourceUrl|\/go\/|pos\.toasttab\.com|squareup\.com|ezyvet\.com/.test(JSON.stringify(data.guidance)),
+    'Private manufacturer documentation or unapproved vendor visits leaked: '+industry);
+}
+for(const [job,guidance]of [
+  ['best software for my restaurant',specialistHandoff.restaurant.guidance],
+  ['best software for my veterinary clinic',specialistHandoff.clinic.guidance]
+]){
+  const agent=await rpc('tools/call',{name:'decide_software',arguments:{job,limit:3}});
+  assert(agent.isError===false&&agent.structuredContent?.decision_status==='needs_workflow_selection',
+    'MCP specialist workflow was replaced by an unqualified industry-wide recommendation: '+job);
+  assert(JSON.stringify(agent.structuredContent?.workflow_guidance?.specialist_workflows)===
+    JSON.stringify(guidance.specialist_workflows),'Public Finder and MCP disagree on specialist handoffs: '+job);
+}
+console.log(JSON.stringify({liveSpecialistWorkflowHandoff:true,specialistAttempts,
+  restaurantOptions:specialistHandoff.restaurant.guidance.specialist_workflows.map(w=>w.category_examples.map(x=>x.slug)),
+  veterinaryOptions:specialistHandoff.clinic.guidance.specialist_workflows.map(w=>w.category_examples.map(x=>x.slug))},null,2));
+
 const aiBusiness=await rpc('tools/call',{name:'decide_software',arguments:{job:'best software for an architecture studio',limit:3}});
 assert(aiBusiness.isError===false&&aiBusiness.structuredContent?.decision_status==='needs_workflow_selection','live MCP did not expose universal business guidance');
 assert(aiBusiness.structuredContent.workflow_guidance?.industry==='architecture','MCP industry not in parity with Finder');
