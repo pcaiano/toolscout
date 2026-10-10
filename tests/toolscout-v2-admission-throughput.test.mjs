@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {trustedManufacturerEvidence,stageReviewedCatalogCandidate,handleCatalogAutonomyRoute,canonicalManufacturerDocumentIdentity,publishStagedCandidateIfUnchanged} from '../catalog-autonomy-worker.js';
+import {trustedManufacturerEvidence,stageReviewedCatalogCandidate,handleCatalogAutonomyRoute,canonicalManufacturerDocumentIdentity,publishStagedCandidateIfUnchanged,trustedCandidateOfficialFallbackUrls} from '../catalog-autonomy-worker.js';
 import {structuralCatalogIssues} from '../catalog-quality-runtime.js';
 
 const runtime=fs.readFileSync(new URL('../catalog-autonomy-worker.js',import.meta.url),'utf8');
@@ -141,4 +141,39 @@ test('Codex P2: a concurrent newer D1 revision wins over the old admission snaps
  const admitted={DB:{prepare(){return{bind(){return{run:async()=>({meta:{changes:1}})}}}}}};
  assert.equal(await publishStagedCandidateIfUnchanged(admitted,'example',next,old),true);
  assert.match(runtime,/catalog_candidate_revision_superseded/);
+});
+
+
+test('Codex P2: a third independent official document remains eligible after two URL aliases',()=>{
+ const original=cohort[0];
+ const first=original.editorialReview.sourceUrls[0];
+ const second=original.editorialReview.sourceUrls[1];
+ const alias=first+'?utm_source=research';
+ const revised={
+   ...original,
+   editorialReview:{
+     ...original.editorialReview,
+     sourceUrls:[first,alias,second,...original.editorialReview.sourceUrls.slice(2)]
+   },
+   evidence:[...original.evidence,{
+     claimScope:'toolscout_editorial_review',sourceUrl:alias,
+     verifiedAt:'2026-10-10',method:'direct_first_party_review',handsOnTested:false
+   }]
+ };
+ assert.equal(trustedManufacturerEvidence(revised,{decisionGrade:true}),true);
+ const pages=trustedCandidateOfficialFallbackUrls(revised,{limit:8});
+ assert.ok(pages.length>=3,'an independent third document is not lost to the historic two-URL cap');
+ assert.equal(new Set(pages.map(canonicalManufacturerDocumentIdentity)).size>=2,true);
+ assert.match(runtime,/trustedCandidateOfficialFallbackUrls\(raw,\{limit:8\}\)/);
+ assert.match(runtime,/canonicalManufacturerDocumentIdentity\(x\)===identity/);
+});
+
+test('Codex P2: same-second restaging and holds have subsecond UTC ordering',()=>{
+ const stamp="strftime('%Y-%m-%d %H:%M:%f','now')";
+ const logs=runtime.slice(runtime.indexOf('async function logEvent('),runtime.indexOf('// Unlike best-effort lifecycle logs'));
+ const stage=runtime.slice(runtime.indexOf('export async function stageReviewedCatalogCandidate'),runtime.indexOf('async function handleReviewedCatalogStage'));
+ assert.ok(logs.includes(stamp),'the hold event must retain subsecond precision');
+ assert.ok(stage.includes(stamp),'each restaged revision must get comparable subsecond precision');
+ assert.match(runtime,/h\.created_at>=c\.updated_at/);
+ assert.ok('2026-10-10 21:20:01.001' < '2026-10-10 21:20:01.005');
 });
