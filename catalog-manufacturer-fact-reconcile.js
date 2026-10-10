@@ -20,6 +20,12 @@ function eligibleSentence(s,plan,period,scope){
   if(/\b(save|discount|was|previously|promotion|promotional|introductory|starting at|as low as|compared to)\b/i.test(s))return false;
   return true;
 }
+function explicitGlobalRetirement(text,feature){
+  const needle=escRe(feature.trim());
+  if(!needle||feature.trim().length<5||feature.trim().length>85)return false;
+  const expression=new RegExp('^(?:we|our (?:product|platform|service)|the (?:product|platform|service))\\s+no longer (?:support|offer|provide|include)\\s+'+needle+'\\s*(?:[;:,]|$)|^'+needle+'\\s+(?:has been|is)\\s+(?:discontinued|retired|removed|no longer (?:available|supported))\\s*(?:[;:,]|$)','i');
+  return String(text||'').replace(/\s+/g,' ').trim().split(/[.!?]/).some(sentence=>expression.test(sentence.trim()));
+}
 function claimKey(claim){
   return [claim.type,claim.value,claim.plan,claim.type==='plan_limit'?claim.unit:claim.currency,
     claim.type==='plan_limit'?claim.period:claim.billingCycle,claim.type==='plan_limit'?claim.scope:''].join('|');
@@ -27,9 +33,17 @@ function claimKey(claim){
 export function manufacturerFactProposals(tool,observations=[]){
   const changes=[];
   for(const claim of tool?.decisionClaims||[]){
-    if(claim?.status!=='verified'||!claim.plan||!claim.sourceUrl||!vendorOwned(claim.sourceUrl,tool))continue;
+    if(claim?.status!=='verified'||!claim.sourceUrl||!vendorOwned(claim.sourceUrl,tool))continue;
     const doc=observations.find(x=>x.url===claim.sourceUrl&&x.status==='ok'&&typeof x.documentText==='string');
     if(!doc)continue;
+    // Explicit worldwide product discontinuation only. A plan-specific
+    // removal cannot establish global loss of a feature.
+    if(claim.type==='capability'&&!claim.plan&&typeof claim.value==='string'&&
+       (tool.features||[]).some(value=>String(value).toLowerCase()===claim.value.toLowerCase())&&
+       explicitGlobalRetirement(doc.documentText,claim.value)){
+      changes.push({claimKey:claimKey(claim),type:'capability_retired',oldValue:claim.value,newValue:'retired',sourceUrl:claim.sourceUrl});
+    }
+    if(!claim.plan)continue;
     // Keep paragraphs separated: mixing multiple plan tiers into one sentence
     // would make otherwise reasonable numerical extraction unsafe.
     const sentences=doc.documentText.replace(/\r/g,'\n').split(/[\n.!?]/).map(x=>x.trim()).filter(Boolean);
@@ -64,6 +78,15 @@ export function manufacturerFactProposals(tool,observations=[]){
   }
   return changes.sort((a,b)=>a.claimKey.localeCompare(b.claimKey));
 }
+function retireExactCapabilitySentence(value,capability){
+  if(typeof value!=='string')return value;
+  // Remove obsolete feature assertions from buyer-facing prose. A fully
+  // confirmed retirement replaces a sentence, never a neighboring feature.
+  const needle=String(capability).toLowerCase();
+  return value.split(/(?<=[.!?])\s+/).map(sentence=>
+    sentence.toLowerCase().includes(needle)?'The manufacturer has discontinued '+capability+'.':sentence
+  ).join(' ');
+}
 function refreshExactNumericPhrase(value,claim,item){
   if(typeof value!=='string')return value;
   const oldPlain=String(item.oldValue),oldGrouped=Number(item.oldValue).toLocaleString('en-US');
@@ -90,7 +113,19 @@ export function reconcileManufacturerFacts(tool,changes,previous,{today=new Date
   for(const item of changes){
     const claim=(updated.decisionClaims||[]).find(x=>x?.status==='verified'&&x.sourceUrl===item.sourceUrl&&claimKey(x)===item.claimKey);
     if(!claim)continue;
-    if(item.type==='plan_limit'&&claim.quantity===item.oldValue){
+    if(item.type==='capability_retired'&&claim.value===item.oldValue&&!claim.plan){
+      const remaining=(updated.features||[]).filter(value=>String(value).toLowerCase()!==String(item.oldValue).toLowerCase());
+      if(remaining.length<3)continue; // Retain minimum public profile depth.
+      claim.status='retired';claim.verifiedAt=today;
+      updated.features=remaining;
+      updated.description=retireExactCapabilitySentence(updated.description,item.oldValue);
+      if(updated.editorialReview&&typeof updated.editorialReview==='object'){
+        updated.editorialReview.summary=retireExactCapabilitySentence(updated.editorialReview.summary,item.oldValue);
+        updated.editorialReview.buyerCheck=retireExactCapabilitySentence(updated.editorialReview.buyerCheck,item.oldValue);
+      }
+      updated.provenance={...(updated.provenance||{}),manufacturerRetiredCapabilities:[...(updated.provenance?.manufacturerRetiredCapabilities||[]),{value:item.oldValue,sourceUrl:item.sourceUrl,verifiedAt:today}]};
+      applied++;
+    }else if(item.type==='plan_limit'&&claim.quantity===item.oldValue){
       claim.quantity=item.newValue;claim.verifiedAt=today;
       if(claim.plan==='Free'&&updated.pricingDetails){
         updated.pricingDetails.freePlanSummary=refreshExactNumericPhrase(updated.pricingDetails.freePlanSummary,claim,item);
