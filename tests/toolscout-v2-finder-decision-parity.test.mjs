@@ -24,6 +24,7 @@ const rows=[crm('documented-crm',{linux:true}),crm('tracking-crm',{tracking:true
 const env={ASSETS:{async fetch(request){
   if(new URL(request.url).pathname==='/data/tools.json')return Response.json(rows);
   if(new URL(request.url).pathname==='/data/intents.json')return Response.json([]);
+  if(new URL(request.url).pathname==='/data/affiliate.json')return Response.json({'documented-crm':{enabled:true,url:'https://merchant.example/approved-referral'}});
   return new Response('Not found',{status:404});
 }}};
 async function finder(params){
