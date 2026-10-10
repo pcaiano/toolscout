@@ -46,6 +46,8 @@ test('dynamic profiles reuse the original profile content shell, and the global 
    assert.match(raw,/href="\/compare\.html\?a=/);
    assert.match(raw,new RegExp('<h1>'+tool.name+'</h1>'));
    assert.doesNotMatch(raw,/Free plan recorded: Unknown|not yet verified the current free-plan position/i);
+   assert.doesNotMatch(raw,/Editorial evidence:|First-party documentation informed this assessment|manufacturer documentation retained in ToolScout/i);
+   assert.match(raw,/Information last checked/);
    assert.doesNotMatch(raw,/href="https:\/\/[^"]*\/features\//i);
    for(const document of tool.editorialReview.sourceUrls)assert.ok(!raw.includes(document),tool.slug+' vendor URL leaked');
    const req=new Request('https://trytoolscout.org/tools/'+tool.slug);
