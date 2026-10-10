@@ -57,3 +57,50 @@ test('feature retirement never makes a previously full catalog profile a thin li
  const first=reconcileManufacturerFacts(thin,proposals,null);
  assert.equal(reconcileManufacturerFacts(thin,proposals,first.proposal).status,'not_applied');
 });
+
+test('punctuation cannot turn a Free-only change into global retirement',()=>{
+ const cases=[
+   'Shared inbox automation is no longer available: on the Free plan.',
+   'Shared inbox automation has been retired; only on Starter.',
+   'We no longer support shared inbox automation, on Basic only.',
+   'Shared inbox automation is discontinued, except for Pro.',
+   'Shared inbox automation is no longer supported for free users.'
+ ];
+ for(const statement of cases)assert.deepEqual(manufacturerFactProposals(tool,evidence(statement)),[],statement);
+});
+test('retirement preserves unrelated claims throughout buyer-facing fields',()=>{
+ const candidate=structuredClone(tool);
+ candidate.description='Support platform with shared inbox automation. Team workflows remain centralized.';
+ candidate.features.push('analytics');
+ candidate.bestFor=['Shared inbox automation','Support operations teams'];
+ candidate.strengths=['Team inbox, shared inbox automation, routing and analytics'];
+ candidate.limitations=['Reporting and team inboxes require attention'];
+ candidate.tradeoffs=['Shared inbox automation','Analytics versus implementation effort'];
+ candidate.editorialReview.angle='Shared inbox automation';
+ const changes=manufacturerFactProposals(candidate,evidence('Shared inbox automation has been discontinued.'));
+ assert.equal(changes.length,1);
+ const first=reconcileManufacturerFacts(candidate,changes,null);
+ const final=reconcileManufacturerFacts(candidate,changes,first.proposal,{today:'2026-10-10'});
+ assert.equal(final.status,'corrected');
+ assert.match(final.updatedTool.description,/Team workflows remain centralized/);
+ assert.match(final.updatedTool.editorialReview.summary,/team inboxes, reports and reusable routing/);
+ assert.match(final.updatedTool.strengths[0],/Team inbox/);
+ assert.match(final.updatedTool.strengths[0],/routing and analytics/);
+ assert.match(final.updatedTool.tradeoffs.join(' '),/Analytics versus implementation effort/);
+ assert.equal(final.updatedTool.decisionClaims[0].status,'retired');
+ const allText=[
+   final.updatedTool.strengths,final.updatedTool.limitations,final.updatedTool.tradeoffs,
+   final.updatedTool.bestFor,[final.updatedTool.editorialReview.angle,final.updatedTool.editorialReview.buyerCheck]
+ ].flat().join(' ');
+ assert.doesNotMatch(allText,/shared inbox automation/i);
+});
+test('ambiguous mixed capability prose fails closed instead of deleting other editorial facts',()=>{
+ const candidate=structuredClone(tool);
+ candidate.editorialReview.angle='Team routing and shared inbox automation can queue requests for manual review.';
+ const changes=manufacturerFactProposals(candidate,evidence('Shared inbox automation has been discontinued.'));
+ const first=reconcileManufacturerFacts(candidate,changes,null);
+ const result=reconcileManufacturerFacts(candidate,changes,first.proposal);
+ assert.equal(result.status,'not_applied');
+ assert.match(candidate.editorialReview.angle,/Team routing/);
+ assert.equal(candidate.decisionClaims[0].status,'verified');
+});

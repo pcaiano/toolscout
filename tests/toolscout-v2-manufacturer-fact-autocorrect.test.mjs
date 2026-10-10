@@ -67,3 +67,49 @@ test('manufacturer monitoring retains matching primary documentation URLs and or
  assert.ok(monitoredManufacturerDocuments(sample).includes(capacity.sourceUrl));
  assert.equal(catalog.length,127);
 });
+
+test('scope-specific limits reject another Airtable Team usage dimension',()=>{
+ const airtable=catalog.find(x=>x.slug==='airtable');
+ const claim=airtable.decisionClaims.find(x=>x.type==='plan_limit'&&x.plan==='Team'&&x.scope==='per_base');
+ assert.ok(claim);
+ const observe=text=>[{url:claim.sourceUrl,status:'ok',documentText:text}];
+ assert.deepEqual(manufacturerFactProposals(airtable,observe('Team plan includes 75000 records per workspace.')),[]);
+ const changes=manufacturerFactProposals(airtable,observe('Team plan includes 75000 records per base.'));
+ assert.equal(changes.find(x=>x.claimKey.includes('per_base'))?.newValue,75000);
+ assert.deepEqual(manufacturerFactProposals(airtable,observe('Team plan includes 75000 records per workspace and 80000 records per base.')),[]);
+});
+test('monthly subscription quote is pinned to manufacturer usage package and billed unit',()=>{
+ const make=catalog.find(x=>x.slug==='make');
+ const core=make.decisionClaims.find(x=>x.type==='price_quote'&&x.plan==='Core'&&x.billingCycle==='monthly');
+ assert.ok(core?.usageTier?.quantity===10000);
+ const watch=text=>[{url:core.sourceUrl,status:'ok',documentText:text}];
+ for(const phrase of [
+   'Core plan costs $5 per month for 100 credits.',
+   'Core plan costs $5 per month.',
+   'Core plan costs $5 per seat per month for 10000 credits.',
+   'Core plan promotional pricing is $5 per month for 10000 credits.',
+   'Core plan costs $5 per month for 10000 credits and 100 credits.'
+ ])assert.deepEqual(manufacturerFactProposals(make,watch(phrase)),[],phrase);
+ const right=manufacturerFactProposals(make,watch('Core plan costs $14 per month for 10000 credits.'));
+ assert.equal(right.find(x=>x.type==='price_quote'&&x.claimKey.includes('|Core|'))?.newValue,14);
+});
+test('price scope never exchanges seat and subscription list prices',()=>{
+ const hubspot=catalog.find(x=>x.slug==='hubspot');
+ const claim=hubspot.decisionClaims.find(x=>x.type==='price_quote'&&x.plan==='Starter'&&x.currency==='EUR');
+ const watch=text=>[{url:claim.sourceUrl,status:'ok',documentText:text}];
+ assert.deepEqual(manufacturerFactProposals(hubspot,watch('Starter plan costs €25 per subscription per month.')),[]);
+ assert.equal(manufacturerFactProposals(hubspot,watch('Starter plan costs €25 per paid seat per month.')).find(x=>x.type==='price_quote')?.newValue,25);
+});
+
+test('real legacy response cleans reinserted unknown AI sections after injection',()=>{
+ const runtime=fs.readFileSync(new URL('../catalog-autonomy-worker.js',import.meta.url),'utf8');
+ const start=runtime.indexOf('export async function publicQualityEnhancedToolResponse');
+ const end=runtime.indexOf('export async function publicRuntimeToolResponse',start);
+ assert.ok(start>=0&&end>start);
+ const legacy=runtime.slice(start,end);
+ assert.match(legacy,/if\(tool\)html=injectAiInteroperability\(html,tool\);/);
+ assert.match(legacy,/return new Response\(cleanPublicCatalogProfileCopy\(html\)/);
+ assert.ok(legacy.indexOf('return new Response(cleanPublicCatalogProfileCopy(html)')>legacy.indexOf('if(tool)html=injectAiInteroperability(html,tool);'));
+ const injected='<section class="section aiInterop" data-ai-interoperability="1"><p>ToolScout has not yet verified this tool integration.</p></section>';
+ assert.doesNotMatch(cleanPublicCatalogProfileCopy(injected),/not yet verified|aiInterop/);
+});
