@@ -206,6 +206,48 @@ const a2aResponse=await request('/a2a',{method:'POST',headers:{'Content-Type':'a
 const a2aData=await a2aResponse.json();
 assert(a2aResponse.status===200&&a2aData?.result?.message?.parts?.[1]?.data?.decision_status==='needs_specific_features',
   'A2A feature-depth question did not return actionable buyer guidance');
+// Verify the Codex P2 remediation against the real deployed Worker, not only
+// against an in-memory test fixture. A documented channel quote for Buffer
+// must be recognized as a valid pricing unit; another vendor lacking a
+// documented matching channel quote must still fail closed.
+let reviewedP2Live=false,reviewP2Attempts=0;
+for(let attempt=1;attempt<=15;attempt++){
+  reviewP2Attempts=attempt;
+  try{
+    const inquiry={jsonrpc:'2.0',id:82,method:'SendMessage',params:{
+      message:{role:'ROLE_USER',parts:[
+        {text:'CRM',mediaType:'text/plain'},
+        {data:{must_have:['ToolScoutImpossibleVendorCapabilityZ99']},mediaType:'application/json'}
+      ]}
+    }};
+    const response=await request('/a2a',{method:'POST',headers:{
+      'Content-Type':'application/json','A2A-Version':'1.0'
+    },body:JSON.stringify(inquiry)});
+    const payload=await response.json();
+    const parts=payload?.result?.message?.parts||[];
+    const summary=parts.find(x=>x.mediaType==='text/plain')?.text||'';
+    const structured=parts.find(x=>x.mediaType==='application/json')?.data;
+    const neutral=response.status===200&&
+      structured?.decision_status==='no_qualified_candidate'&&
+      structured.shortlist?.length===0&&
+      summary.includes('catalog may lack a relevant product')&&
+      !summary.includes('because missing manufacturer evidence is not proof');
+    const comparison=await rpc('tools/call',{
+      name:'compare_for_use_case',
+      arguments:{tools:['buffer','hootsuite'],use_case:'social media scheduling',priorities:['price']}
+    });
+    const cheaper=comparison.structuredContent?.cheaper_option_analysis;
+    const safe= comparison.isError===false&&cheaper?.status==='not_comparable'&&
+      cheaper.note?.includes('per-channel')&&
+      !cheaper.affordability_leader;
+    if(neutral&&safe){reviewedP2Live=true;break}
+  }catch(error){if(attempt===15)throw Error('Live Codex review regression probe failed: '+String(error?.message||error))}
+  if(attempt<15)await sleep(5000);
+}
+assert(reviewedP2Live,'Merged Codex P2 A2A empty-shortlist and per-channel pricing policy not yet verified live');
+console.log(JSON.stringify({codexP2Live:true,reviewP2Attempts,a2aNeutralNoCandidate:true,
+  perChannelQuotesRecognizedButMissingComparatorNotInvented:true},null,2));
+
 console.log(JSON.stringify({codexFollowupLive:true,guidedReadyAttempts,freeFormMcp:true,actionableA2A:true},null,2));
 console.log(JSON.stringify({finderContextPreservedLive:true,goalReadyAttempts,featureReadyAttempts,selectedGoal:'crm',legacyPriority:'automation',
   explicitPriorities:['ease','price'],mcpParity:true},null,2));
