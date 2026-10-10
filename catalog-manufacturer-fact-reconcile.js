@@ -126,6 +126,9 @@ function retireExactCapabilitySentence(value,capability){
     // When a sentence is *about* the retired feature, drop that claim only.
     if(new RegExp('^\\s*'+escaped+'\\b','i').test(original)||
       new RegExp('^\\s*(?:test|check|verify|validate|review|evaluate|confirm|compare)\\s+'+escaped+'\\b','i').test(original))continue;
+    // Never transfer a verb/entitlement from the removed feature to
+    // other items in a mixed subject ("A and retired B can do X").
+    if(new RegExp(escaped+'\\s+(?:can|could|may|might|will|does|is|are|has|have|had|helps?|provides?|supports?|enables?|allows?|requires?)\\b','i').test(original))return null;
     let rest=original;
     const patterns=[
       [new RegExp(',\\s*'+escaped+'\\s*,','gi'),','],
