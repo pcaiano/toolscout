@@ -4,8 +4,9 @@ import fs from 'node:fs';
 import {handleAgentProtocolRoute} from '../agent-protocol-core-worker.js';
 
 const catalog=JSON.parse(fs.readFileSync(new URL('../data/tools.json',import.meta.url),'utf8'));
+const affiliate=JSON.parse(fs.readFileSync(new URL('../data/affiliate.json',import.meta.url),'utf8'));
 async function invoke(name,args,rows=catalog){
-  const env={ASSETS:{fetch:async request=>new URL(request.url).pathname==='/data/tools.json'
+  const env={ASSETS:{fetch:async request=>new URL(request.url).pathname==='/data/affiliate.json'?Response.json(affiliate):new URL(request.url).pathname==='/data/tools.json'
     ?Response.json(rows):new Response('',{status:404})}};
   const response=await handleAgentProtocolRoute(new Request('https://trytoolscout.org/mcp',{
     method:'POST',
