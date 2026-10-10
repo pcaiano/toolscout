@@ -160,7 +160,7 @@
       let vendor=null;
       try{
         const target=item.tool_url?new URL(item.tool_url):null;
-        if(target&&target.origin===HOME&&target.pathname===`/go/${encodeURIComponent(item.slug)}`){
+        if(target&&target.origin===new URL(HOME).origin&&target.pathname===`/go/${encodeURIComponent(item.slug)}`){
           target.searchParams.set('source',`embed:${publisher}`);
           target.searchParams.set('utm_source',publisher);
           target.searchParams.set('utm_medium','distribution');
