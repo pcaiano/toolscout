@@ -1,4 +1,5 @@
 import {businessWorkflowGuidance,verifiedPmsCandidates} from './business-workflow-intent.js';
+import {qualifiedSoftwareDecisionShortlist} from './agent-protocol-core-worker.js';
 import {publicMergedTools} from './catalog-autonomy-worker.js';
 import base from './distribution-command-worker.js';
 import { prioritizedDistributionFeed } from './distribution-feed-priority.js';
@@ -155,6 +156,44 @@ function categoryLabel(score){
   if(score>=74)return 'Strong category fit';
   return 'Relevant category fit';
 }
+// The public Finder reuses the MCP decision evaluator whenever a buyer provides
+// hard requirements. Existing basic Finder URLs and publisher embeds remain valid.
+function parseBuyerDecisionQuery(u,profile,limit,job){
+  const listSpecs={must_have:100,avoid:100,constraints:160,existing_tools:100,priorities:40};
+  const requested=u.searchParams.get('mode')==='decision'
+    ||Object.keys(listSpecs).some(key=>u.searchParams.has(key))
+    ||['require_stack_fit','country','seat_count'].some(key=>u.searchParams.has(key));
+  if(!requested)return {requested:false};
+  const args={job,limit,budget:profile.budget,team:profile.team};
+  for(const [key,maxLen] of Object.entries(listSpecs)){
+    const values=u.searchParams.getAll(key).map(x=>x.trim());
+    if(values.length>12||values.some(x=>!x||x.length>maxLen||[...x].some(c=>c.charCodeAt(0)<32)))
+      return {error:'Invalid '+key+': provide up to 12 non-empty, length-bounded values.'};
+    if(key==='priorities'&&(values.length>6||values.some(x=>!['price','ease','automation','integrations','sales','ai','marketing','seo','research','content','agency'].includes(x))||new Set(values).size!==values.length))
+      return {error:'Invalid priorities: use up to six distinct supported decision dimensions.'};
+    args[key]=[...new Set(values)];
+  }
+  if(u.searchParams.has('require_stack_fit')){
+    const required=u.searchParams.get('require_stack_fit');
+    if(required!=='true'&&required!=='false')return {error:'require_stack_fit must be true or false.'};
+    args.require_stack_fit=required==='true';
+    if(args.require_stack_fit&&!args.existing_tools.length)
+      return {error:'require_stack_fit requires at least one existing_tools value.'};
+  }
+  if(u.searchParams.has('country')){
+    const country=String(u.searchParams.get('country')||'').toUpperCase();
+    if(!/^[A-Z]{2}$/.test(country))return {error:'country must be a two-letter ISO code.'};
+    args.country=country;
+  }
+  if(u.searchParams.has('seat_count')){
+    const raw=u.searchParams.get('seat_count'),number=Number(raw);
+    if(!/^[0-9]+$/.test(String(raw))||!Number.isInteger(number)||number<1||number>100)
+      return {error:'seat_count must be an integer from 1 to 100.'};
+    args.seat_count=number;
+  }
+  return {requested:true,args};
+}
+
 async function recommend(request,env){
   const u=new URL(request.url),q=safe(u.searchParams.get('q')||'',300).trim();
   if(q.length<2)return Response.json({error:'query_required',message:'Provide ?q= describing the software job or need.'},{status:400,headers:JSON_H});
@@ -173,10 +212,42 @@ async function recommend(request,env){
     // Only a user-supplied goal is a hard category instruction at this stage.
     const guidance=businessWorkflowGuidance(q,profile,tools);
     const p=inferredProfile(q,profile);
+    const buyerDecision=parseBuyerDecisionQuery(u,p,limit,q);
+    if(buyerDecision.error)return Response.json({error:'invalid_decision_constraints',message:buyerDecision.error},{status:400,headers:{...JSON_H,'Cache-Control':'no-store'}});
     if(!guidance&&!p.goal&&/\b(airbnb|vacation rental|short.term rental|holiday rental|alojamento local)\b/.test(normalize(q))&&verifiedPmsCandidates(tools).length)p.goal='vacation-rental';
     if(guidance)return Response.json({query:q,profile:profile,intent:null,recommendation_type:'workflow_guidance',
       guidance,count:0,recommendations:[],ranking:'Workflow decomposition before vendor ranking',
       affiliate_disclosure:'ToolScout may earn a commission from some outbound links. Affiliate relationships do not influence recommendations.'},{headers:JSON_H});
+    if(buyerDecision.requested){
+      const shortlist=qualifiedSoftwareDecisionShortlist(tools,buyerDecision.args);
+      if(!shortlist.length)return Response.json({
+        error:'recommendation_unresolved',decision_status:'no_qualified_candidate',
+        message:'No tool meets all mandatory criteria with the currently documented manufacturer evidence. Widen the criteria or choose another workflow.',
+        count:0,recommendations:[]
+      },{status:422,headers:{...JSON_H,'Cache-Control':'no-store'}});
+      const recommendations=shortlist.map(item=>({
+        slug:item.slug,name:item.name,category:item.category,description:item.description,
+        pricing:item.pricing,free_plan:item.free_plan,match:item.fit_score,
+        match_type:'decision_qualified',match_label:item.fit_score+'/100 editorial fit score',
+        reasons:item.advantages.slice(0,3),best_for:item.best_for,features:item.features.slice(0,6),
+        profile_url:item.profile_url,tool_url:'https://trytoolscout.org/go/'+encodeURIComponent(item.slug),
+        qualified_for_use_case:true,evidence_confidence:item.evidence_confidence,
+        requirement_evidence:item.requirement_evidence,avoid_evidence:item.avoid_evidence,
+        constraint_evidence:item.constraint_evidence,stack_fit:item.stack_fit,
+        plan_coherence:item.plan_coherence,tradeoffs:item.tradeoffs,
+        buyer_validation_plan:item.buyer_validation_plan
+      }));
+      return Response.json({
+        query:q,profile:p,recommendation_type:'decision_shortlist',
+        decision_status:'qualified_shortlist',count:recommendations.length,recommendations,
+        decision_basis:{job:q,must_have:buyerDecision.args.must_have,avoid:buyerDecision.args.avoid,
+          constraints:buyerDecision.args.constraints,existing_tools:buyerDecision.args.existing_tools,
+          require_stack_fit:buyerDecision.args.require_stack_fit===true,
+          methodology:'The same evidence-qualified eligibility and ranking used by ToolScout MCP. Unknown mandatory capabilities, unproven exact integrations and unsupported price or plan conditions never count as satisfied. Scores are editorial fit indicators, not probabilities. Affiliate terms are excluded.'},
+        ranking:'Shared ToolScout MCP evidence-qualified decision shortlist. No paid ranking.',
+        affiliate_disclosure:'ToolScout may earn a commission from some outbound links. Affiliate relationships do not influence ranking.'
+      },{headers:{...JSON_H,'Cache-Control':'no-store'}});
+    }
     const intent=detectIntent(q,intents),signal=querySignal(q,intent,p,tools);
     if(!signal.recognized){
       return Response.json({error:'recommendation_unresolved',message:'ToolScout could not identify a reliable software need. Add the job, team size, budget or a must-have feature.'},{status:422,headers:{...JSON_H,'Cache-Control':'no-store'}});

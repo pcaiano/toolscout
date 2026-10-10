@@ -831,6 +831,13 @@ function decisionCandidates(tools,args){
   const qualified=relevant.filter(x=>x.qualified_for_use_case);
   return qualified.sort((a,b)=>b.fit_score-a.fit_score||String(a.name).localeCompare(String(b.name)));
 }
+
+// Finder and MCP must use the same evidence-backed eligibility and ranking.
+// This is a read-only projection of the existing decision engine, not another planner.
+export function qualifiedSoftwareDecisionShortlist(tools,args){
+  const limit=Number.isInteger(args?.limit)?Math.max(1,Math.min(5,args.limit)):3;
+  return decisionCandidates(tools,args).filter(x=>x.fit_score>0).slice(0,limit);
+}
 function pairwiseTradeoffs(evaluated,dims){
   const out=[];
   for(let i=0;i<evaluated.length;i++)for(let j=i+1;j<evaluated.length;j++){
@@ -896,7 +903,7 @@ async function callCatalogTool(name,args,request,env){
       affiliate_disclosure:disclosure
     }};
     const limit=Math.max(2,Math.min(5,args.limit||3));
-    const shortlist=decisionCandidates(tools,args).filter(x=>x.fit_score>0).slice(0,limit);
+    const shortlist=qualifiedSoftwareDecisionShortlist(tools,{...args,limit});
     if(!shortlist.length)return {error:'ToolScout cannot qualify a recommendation with the current catalog evidence and mandatory criteria. Unverified requirements are not treated as satisfied.',status:422,data:{job:args.job,shortlist:[],decision_status:'no_qualified_candidate'}};
     const dims=requestedDimensions(args);
     return {data:{
