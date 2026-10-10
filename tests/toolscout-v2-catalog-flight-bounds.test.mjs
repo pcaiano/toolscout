@@ -11,7 +11,7 @@ const {safeJson}=await import('../engine-run-ledger.js');
 test('every scheduled catalog admission and verification has an expiring mission lease',()=>{
  for(const mission of ['runtime_coverage','runtime_quality']){
   const scheduled=scheduler.split('\n').filter(line=>line.includes("mission:'"+mission+"'")&&line.includes('runWithLedger('));
-  assert.equal(scheduled.length,mission==='runtime_coverage'?3:2,mission+' needs normal, hourly recovery and (for coverage) incident recovery entrypoints');
+  assert.equal(scheduled.length,3,mission+' needs normal, hourly recovery and incident recovery entrypoints');
   for(const line of scheduled)assert.match(line,/singleFlightMinutes:8/,mission+' must not leave unbounded running rows');
   const manual=catalog.split('\n').filter(line=>line.includes("mission:'"+mission+"'")&&line.includes("triggerName:'manual_api'"));
   assert.equal(manual.length,2,mission+' needs a lease for both authorized APIs');
@@ -99,7 +99,7 @@ test('Catalog coverage recovery is independent from potentially slow quality ver
 });
 
 test('Failed catalog coverage recovers on existing 15-minute Growth Brain tick',()=>{
- assert.match(scheduler,/if\(trigger===TOOLSCOUT_CRONS\.primaryGrowth\)\{\s*const failedCoverage=await missionNeedsRecovery\(env,'catalog','runtime_coverage'\)/);
+ assert.match(scheduler,/if\(trigger===TOOLSCOUT_CRONS\.primaryGrowth\)\{\s*const \[failedCoverage,failedQuality\]=await Promise\.all\(\[\s*missionNeedsRecovery\(env,'catalog','runtime_coverage'\)/);
  assert.match(scheduler,/if\(failedCoverage\)\{\s*scheduleTask\(ctx,runWithLedger\(env,\{engine:'catalog',mission:'runtime_coverage',triggerName:trigger\+':incident_recovery',singleFlightMinutes:8\}/);
  assert.match(scheduler,/\(\)=>admitTrustedCandidates\(env\)/);
  assert.doesNotMatch(scheduler,/primaryGrowth\s*=\s*['"]/,'reuse declared cron, never redefine schedule');
@@ -121,4 +121,25 @@ test('Codex #611: large mission failure evidence stays valid JSON and retains ti
  assert.equal(parsed.failed_result.preparation_deferred,true);
  assert.deepEqual(JSON.parse(safeJson({small:'ok'})),{small:'ok'});
  assert.deepEqual(JSON.parse(safeJson({cyclic:null})),{cyclic:null});
+});
+
+test('Quality verification is budgeted and research intake cannot outlive the mission',()=>{
+ const verify=catalog.slice(catalog.indexOf('export async function verifyBatch(env)'),catalog.indexOf('function validCandidate(',catalog.indexOf('export async function verifyBatch(env)')));
+ const intake=catalog.slice(catalog.indexOf('export async function syncCatalogResearchSupply(env'),catalog.indexOf('async function syncMarketGaps(',catalog.indexOf('export async function syncCatalogResearchSupply(env')));
+ assert.match(catalog,/MAX_VERIFY_CYCLE_WALL_MS=180000/);
+ assert.match(verify,/const startedAt=Date\.now\(\),deadlineAt=startedAt\+MAX_VERIFY_CYCLE_WALL_MS/);
+ assert.match(verify,/if\(Date\.now\(\)>=deadlineAt\)\{cycleBudgetExhausted=true;return;\}/);
+ assert.match(verify,/staged:0,deferred:true,reason:'catalog_quality_cycle_budget_exhausted'/);
+ assert.match(verify,/syncCatalogResearchSupply\(env,\{knownTools:all,deadlineAt\}\)/);
+ assert.match(intake,/deadlineAt=Infinity/,'independent research callers keep default behavior');
+ assert.match(intake,/if\(Date\.now\(\)>=deadlineAt\)\{deferred=true;break;\}/);
+ assert.match(verify,/cycle_budget_exhausted:cycleBudgetExhausted/);
+ assert.match(verify,/verifyManufacturerDocuments\(env,tool/,'first-party document checks still required');
+});
+
+test('Failed quality mission recovers independently on the existing 15-minute control tick',()=>{
+ assert.match(scheduler,/missionNeedsRecovery\(env,'catalog','runtime_quality'\)/);
+ assert.match(scheduler,/if\(failedQuality\)\{\s*scheduleTask\(ctx,runWithLedger\(env,\{engine:'catalog',mission:'runtime_quality',triggerName:trigger\+':incident_recovery',singleFlightMinutes:8\}/);
+ assert.match(scheduler,/\(\)=>verifyCatalogBatch\(env\)/);
+ assert.doesNotMatch(scheduler,/if\(failedCoverage\)[\s\S]{0,200}await runWithLedger\(env,\{engine:'catalog',mission:'runtime_quality'/);
 });

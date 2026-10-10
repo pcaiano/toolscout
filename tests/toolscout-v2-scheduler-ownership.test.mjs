@@ -149,3 +149,11 @@ test('catalog recovery cadence is owned by existing growth scheduler on all decl
  assert.equal(cronMatches('catalog_runtime_coverage',TOOLSCOUT_CRONS.renderKeepalive),false);
  assert.match(coverage.subcadence,/15m_failed_incident_only/);
 });
+
+test('quality recovery uses existing quarter-hour cron and the one growth scheduler owner',()=>{
+ const entry=SCHEDULED_MISSIONS.catalog_runtime_quality;
+ assert.equal(entry.owner,'growth_scheduler');
+ assert.deepEqual(entry.cron,[TOOLSCOUT_CRONS.hourly,TOOLSCOUT_CRONS.primaryGrowth]);
+ for(const cron of entry.cron)assert.equal(cronMatches('catalog_runtime_quality',cron),true);
+ assert.match(entry.subcadence,/15m_failed_incident_only/);
+});
