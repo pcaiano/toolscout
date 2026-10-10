@@ -144,7 +144,9 @@ jobs:
       - name: Audit controlled SEO surface
         run: node scripts/audit-controlled-seo-surface.mjs
       - name: Validate AEO GEO readiness
-        run: node scripts/validate-aeo-geo-readiness.mjs
+        run: |
+          node --test tests/gsc-and-decision-engine-contract.test.mjs
+          node scripts/validate-aeo-geo-readiness.mjs
       - name: Validate machine readability
         run: node scripts/validate-machine-readability.mjs
       - name: Validate SEO pages
