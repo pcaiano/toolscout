@@ -188,14 +188,19 @@
                             }
                           },
                           "tool_url": {
-                            "type": "string",
-                            "format": "uri"
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "format": "uri",
+                            "description": "A ToolScout /go/{slug} link only when the vendor has an enabled, approved HTTPS affiliate route. Null for unmonetized or unverified vendors. Never fabricate a vendor visit URL. Use profile_url to open ToolScout's independent analysis."
                           },
                           "match_type": {
                             "type": "string",
                             "enum": [
                               "personalized",
-                              "category_fit"
+                              "category_fit",
+                              "decision_qualified"
                             ]
                           },
                           "match_label": {
@@ -219,7 +224,8 @@
                       "enum": [
                         "category",
                         "personalized",
-                        "workflow_guidance"
+                        "workflow_guidance",
+                        "decision_shortlist"
                       ]
                     },
                     "guidance": {
