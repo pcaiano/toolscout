@@ -65,14 +65,24 @@ export function manufacturerFactProposals(tool,observations=[]){
   return changes.sort((a,b)=>a.claimKey.localeCompare(b.claimKey));
 }
 function refreshExactNumericPhrase(value,claim,item){
- if(typeof value!=='string')return value;
- const before=Number(item.oldValue),after=Number(item.newValue);
- if(!Number.isFinite(before)||!Number.isFinite(after))return value;
- const oldPlain=String(before),oldGrouped=before.toLocaleString('en-US');
- const newPlain=String(after),newGrouped=after.toLocaleString('en-US');
- const variants=item.type==='plan_limit'?
-  [oldGrouped+' '+claim.unit,oldPlain+' '+claim.unit]:
-  [({EUR:'€',USD:'
+  if(typeof value!=='string')return value;
+  const oldPlain=String(item.oldValue),oldGrouped=Number(item.oldValue).toLocaleString('en-US');
+  const newPlain=String(item.newValue),newGrouped=Number(item.newValue).toLocaleString('en-US');
+  const currency={EUR:'€',USD:String.fromCharCode(36),GBP:'£'}[claim.currency]||'';
+  const pairs=item.type==='plan_limit'?
+    [[oldGrouped+' '+claim.unit,newGrouped+' '+claim.unit],
+     [oldPlain+' '+claim.unit,newPlain+' '+claim.unit]]:
+    [[currency+oldPlain,currency+newPlain]];
+  for(const [from,to] of pairs){
+    if(from&&value.includes(from)&&value.split(from).length===2){
+      if(item.type==='price_quote'&&!value.toLowerCase().includes(String(claim.plan).toLowerCase()))continue;
+      return value.replace(from,to);
+    }
+  }
+  return value;
+}
+
+export function reconcileManufacturerFacts(tool,changes,previous,{today=new Date().toISOString().slice(0,10)}={}){
   if(!changes.length)return{status:'none'};
   const token=JSON.stringify(changes.map(x=>[x.claimKey,x.newValue,x.sourceUrl]));
   if(previous?.token!==token)return{status:'needs_second_observation',proposal:{token}};
@@ -94,53 +104,6 @@ function refreshExactNumericPhrase(value,claim,item){
       updated.pricing=refreshExactNumericPhrase(updated.pricing,claim,item);
       if(updated.editorialReview&&typeof updated.editorialReview==='object')updated.editorialReview.summary=refreshExactNumericPhrase(updated.editorialReview.summary,claim,item);
       applied++;
-    }
-  }
-  if(!applied)return{status:'not_applied'};
-  updated.provenance={...(updated.provenance||{}),lastAutomaticClaimCorrection:today};
-  return{status:'corrected',updatedTool:updated,count:applied};
-}
-,GBP:'£'}[claim.currency]||'')+oldPlain];
- for(const [index,needle] of variants.entries()){
-   if(!needle||!value.includes(needle)||value.split(needle).length!==2)continue;
-   if(item.type==='price_quote'&&!value.toLowerCase().includes(String(claim.plan).toLowerCase()))continue;
-   const replacement=item.type==='plan_limit'?(index===0?newGrouped:newPlain)+' '+claim.unit:
-      ({EUR:'€',USD:'
-  if(!changes.length)return{status:'none'};
-  const token=JSON.stringify(changes.map(x=>[x.claimKey,x.newValue,x.sourceUrl]));
-  if(previous?.token!==token)return{status:'needs_second_observation',proposal:{token}};
-  const updated=structuredClone(tool);let applied=0;
-  for(const item of changes){
-    const claim=(updated.decisionClaims||[]).find(x=>x?.status==='verified'&&x.sourceUrl===item.sourceUrl&&claimKey(x)===item.claimKey);
-    if(!claim)continue;
-    if(item.type==='plan_limit'&&claim.quantity===item.oldValue){
-      claim.quantity=item.newValue;claim.verifiedAt=today;applied++;
-    }else if(item.type==='price_quote'&&claim.amount===item.oldValue&&claim.chargeAmount===item.oldValue){
-      claim.amount=item.newValue;claim.chargeAmount=item.newValue;claim.verifiedAt=today;applied++;
-    }
-  }
-  if(!applied)return{status:'not_applied'};
-  updated.provenance={...(updated.provenance||{}),lastAutomaticClaimCorrection:today};
-  return{status:'corrected',updatedTool:updated,count:applied};
-}
-,GBP:'£'}[claim.currency]||'')+newPlain;
-   return value.replace(needle,replacement);
- }
- return value;
-}
-
-export function reconcileManufacturerFacts(tool,changes,previous,{today=new Date().toISOString().slice(0,10)}={}){
-  if(!changes.length)return{status:'none'};
-  const token=JSON.stringify(changes.map(x=>[x.claimKey,x.newValue,x.sourceUrl]));
-  if(previous?.token!==token)return{status:'needs_second_observation',proposal:{token}};
-  const updated=structuredClone(tool);let applied=0;
-  for(const item of changes){
-    const claim=(updated.decisionClaims||[]).find(x=>x?.status==='verified'&&x.sourceUrl===item.sourceUrl&&claimKey(x)===item.claimKey);
-    if(!claim)continue;
-    if(item.type==='plan_limit'&&claim.quantity===item.oldValue){
-      claim.quantity=item.newValue;claim.verifiedAt=today;applied++;
-    }else if(item.type==='price_quote'&&claim.amount===item.oldValue&&claim.chargeAmount===item.oldValue){
-      claim.amount=item.newValue;claim.chargeAmount=item.newValue;claim.verifiedAt=today;applied++;
     }
   }
   if(!applied)return{status:'not_applied'};
