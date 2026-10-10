@@ -126,7 +126,8 @@
     if(data.recommendation_type==='workflow_guidance'){
       const guidance=data.guidance||{};
       const specialist=Array.isArray(guidance.specialist_workflows)?guidance.specialist_workflows:[];
-       const workflows=[...specialist,...(Array.isArray(guidance.workflows)?guidance.workflows:[])].slice(0,mode==='mini'?2:4);
+       const general=Array.isArray(guidance.workflows)?guidance.workflows.slice(0,4):[];
+       const workflows=mode==='mini'?[...specialist,...general].slice(0,2):[...specialist,...general];
       results.innerHTML='<div class="result workflow"><div class="name">'+esc(guidance.title||'Choose the software task')+'</div><div class="description">'+esc(guidance.explanation||'')+'</div></div>'
         +workflows.map((w,index)=>{
           const examples=(w.category_examples||[]).slice(0,2).map(t=>'<a class="profile" data-action="profile" data-slug="'+esc(t.slug)+'" href="'+esc(trackedUrl('/tools/'+encodeURIComponent(t.slug),t.slug))+'" rel="noopener" target="_blank">'+esc(t.name)+'</a>').join(' · ');

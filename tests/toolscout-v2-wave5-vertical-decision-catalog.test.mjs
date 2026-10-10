@@ -127,3 +127,18 @@ test('hourly existing catalog admission sees documented wave5 once and never pub
  assert.deepEqual(unpublishedReadyCatalogSlugs([seeds.candidates],existing),[]);
  assert.deepEqual(unpublishedReadyCatalogSlugs([tools,tools],existing).sort(),slugs);
 });
+
+test('Codex P1: explicit generic jobs outweigh industry words even without a family synonym',()=>{
+ const all=[...baseline,...tools];
+ for(const [job,category] of [
+  ['automation software for my veterinary clinic','automation'],
+  ['automation software for a vacation rental business','automation'],
+  ['forms software for a veterinary clinic','forms'],
+  ['analytics software for a veterinary clinic','analytics']
+ ]){
+  assert.equal(businessWorkflowGuidance(job,{},all),null,job+' must reach the qualified shortlist');
+  const shortlist=qualifiedSoftwareDecisionShortlist(all,{job,limit:5});
+  assert.ok(shortlist.length>0,job+' should find real '+category+' catalog products');
+  assert.ok(shortlist.every(x=>x.category===category),job+' must not be hijacked by veterinary or rental systems');
+ }
+});

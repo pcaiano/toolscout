@@ -144,7 +144,8 @@ for(const c of broadCases){
 // Live canary for the specialist-workflow handoff. Previous versions passed
 // generic broad-business probes despite omitting a documented specialist job.
 // Re-check both the public Finder API and actual MCP network responses after
-// bounded Cloudflare rollout, without making continued D1 admission mandatory.
+// bounded Cloudflare rollout. A missing admitted specialist pathway is an
+// actionable catalog or deployment regression, never a vacuous green pass.
 let specialistHandoff=null,specialistAttempts=0;
 for(let i=1;i<=15;i++){
   specialistAttempts=i;
@@ -154,7 +155,9 @@ for(let i=1;i<=15;i++){
       liveGuidance('best software for my veterinary clinic')
     ]);
     if(Array.isArray(restaurant.guidance?.specialist_workflows)&&
-      Array.isArray(clinic.guidance?.specialist_workflows)){
+      Array.isArray(clinic.guidance?.specialist_workflows)&&
+      restaurant.guidance.specialist_workflows.some(w=>w.category==='restaurant-pos')&&
+      clinic.guidance.specialist_workflows.some(w=>w.category==='veterinary')){
       specialistHandoff={restaurant,clinic};break;
     }
   }catch(error){if(i===15)throw Error('Live specialist workflow Finder probe unavailable: '+String(error?.message||error))}
