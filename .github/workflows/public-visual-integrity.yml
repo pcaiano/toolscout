@@ -8,6 +8,9 @@ on:
     branches: [main]
     paths:
       - 'public-redesign-runtime.js'
+      - 'terms.html'
+      - 'support.html'
+      - 'distribution/publisher-kit.html'
       - 'scripts/verify-redesign-2-live.mjs'
       - 'tests/toolscout-v2-public-redesign.test.mjs'
       - 'sitemap.xml'
@@ -42,5 +45,8 @@ jobs:
           node --check scripts/verify-redesign-2-live.mjs
           node --test tests/toolscout-v2-public-redesign.test.mjs
       - name: Audit every live sitemap page
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-        run: node scripts/verify-redesign-2-live.mjs
+        run: |
+          # Cloudflare deploy and GitHub push CI are independently scheduled.
+          # Allow a bounded rollout period before testing production HTML.
+          if [ "${{ github.event_name }}" = "push" ]; then sleep 25; fi
+          node scripts/verify-redesign-2-live.mjs
