@@ -58,7 +58,7 @@ test('Fresha has manufacturer-homepage outbound without counterfeit affiliate tr
   const publicHtml=candidatePage(fresha);
   assert.match(publicHtml,/data-commercial-status="non-affiliate"/);
   assert.match(publicHtml,/href="\/go\/fresha"/);
-  assert.match(publicHtml,/Visit Fresha website/);
+  assert.match(publicHtml,/Visit Fresha<\/a>/);
   assert.doesNotMatch(publicHtml,/href="https:\/\/www\.fresha\.com\/"/);
   assert.doesNotMatch(publicHtml,/href="https:\/\/www\.fresha\.com\/for-business\/features/);
   const counterfeit={...fresha,sourceUrl:'https://fresha.com.evil.example/'};

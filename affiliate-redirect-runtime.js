@@ -1,4 +1,5 @@
 import commercialCore from './distribution-embed-worker.js';
+import {catalogFallbackRedirect} from './affiliate-workflow-worker.js';
 import {applyAffiliateRedirectIntegrity} from './outbound-integrity-worker.js';
 import {linkVisitorAfterRequest} from './visitor-integrity-worker.js';
 
@@ -36,6 +37,32 @@ export const AFFILIATE_REDIRECT_RUNTIME_CONTRACT=Object.freeze({
   ]
 });
 
+// The compute router owns /go/* directly; the old affiliate-workflow
+// default wrapper is not executed in production. Enforce the vendor-visit
+// invariant here, before social attribution and integrity stages.
+export async function enforceExternalProductDestination(request,env,url,response){
+  if(url.pathname==='/go/embed')return response;
+  const location=response?.headers?.get('Location');
+  try{
+    const target=location?new URL(location,url.origin):null;
+    if(response.status>=300&&response.status<400&&target&&
+      ['https:','http:'].includes(target.protocol)&&
+      !/(^|\.)trytoolscout\.org$/i.test(target.hostname))return response;
+  }catch{}
+  const slug=url.pathname.slice(4).toLowerCase();
+  if(/^[a-z0-9][a-z0-9-]*$/.test(slug)){
+    try{
+      const fallback=await catalogFallbackRedirect(request,env,slug);
+      if(fallback?.status>=300&&fallback.status<400){
+        const target=new URL(fallback.headers.get('Location'),url.origin);
+        if(target.protocol==='https:'&&!/(^|\.)trytoolscout\.org$/i.test(target.hostname))return fallback;
+      }
+    }catch{}
+  }
+  return new Response('Product destination unavailable',{status:404,
+    headers:{'Content-Type':'text/plain; charset=UTF-8','Cache-Control':'no-store','X-Robots-Tag':'noindex'}});
+}
+
 export async function handleAffiliateRedirectRoute(request,env,ctx){
   const url=new URL(request.url);
   if(request.method!=='GET'||!url.pathname.startsWith('/go/'))return null;
@@ -44,6 +71,7 @@ export async function handleAffiliateRedirectRoute(request,env,ctx){
   // decorator chain. This core includes /go/embed, catalog fallback and the
   // canonical trackedRedirect implementation that snapshots affiliate state.
   let response=await commercialCore.fetch(request,env,ctx);
+  response=await enforceExternalProductDestination(request,env,url,response);
 
   // These stages historically lived above the commercial core in separate
   // wrappers. Keep their ordering explicit so the commercial truth semantics

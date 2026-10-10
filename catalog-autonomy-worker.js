@@ -784,7 +784,15 @@ function aiInteroperabilitySection(tool){
   // public non-monetized outbound link on runtime software profiles.
   // Manufacturer evidence stays in the private catalog; no research-process prose is published.
   const hasManufacturerProof=verified&&(p.sources||[]).some(x=>{
-    try{return new URL(x).pathname!=='/'&&sameManufacturerHost(x,tool.sourceUrl)}catch{return false}
+    try{
+      const u=new URL(x),vendor=new URL(tool.sourceUrl);
+      const subdomain=u.hostname.toLowerCase().replace(/^www\./,'');
+      const parent=vendor.hostname.toLowerCase().replace(/^www\./,'');
+      const documentationRoot=/^(docs|help|developer|developers|support|api)\./i.test(subdomain)&&
+        subdomain.endsWith('.'+parent);
+      return u.protocol==='https:'&&sameManufacturerHost(x,tool.sourceUrl)&&
+        (u.pathname!=='/'||documentationRoot);
+    }catch{return false}
   });
   const verificationDate=String(p.verifiedAt||'');
   const verifiedDateMs=Date.parse(verificationDate+'T00:00:00Z');
@@ -811,14 +819,13 @@ export function candidatePage(tool,{monetized=false}={}){
   const freeFaq=tool.freePlanKnown===true?'<details><summary>Does '+esc(tool.name)+' have a free plan?</summary><p>'+(
     tool.freePlan?'The verified manufacturer records a perpetual free plan with documented conditions.':'The current documented plan listing does not include a perpetual free tier.'
   )+'</p></details>':'';
-  // Owner-requested exception: Fresha currently has no approved affiliate route.
-  // Its company homepage is a non-affiliate product visit, never a /go/ CTA,
-  // manufacturer documentation link, or a monetized conversion.
-  const freshaDirect=tool?.slug==='fresha'&&
-    /^https:\/\/(?:www\.)?fresha\.com\/?$/i.test(String(tool.sourceUrl||''));
-  const outbound=monetized
-    ?'<a class="cta" href="/go/'+encodeURIComponent(tool.slug)+'" target="_blank" rel="nofollow sponsored noopener">Visit '+esc(tool.name)+'</a>'
-    :freshaDirect?'<a class="cta" data-commercial-status="non-affiliate" href="/go/fresha" target="_blank" rel="nofollow noopener">Visit Fresha website</a>':'';
+  // Every admitted product has a real tracked vendor visit. /go/ chooses
+  // the approved affiliate when present, otherwise the verified manufacturer
+  // homepage; non-affiliate clicks must never count as monetized.
+  const visitable=Boolean(publicHttps(tool?.sourceUrl))&&trustedManufacturerEvidence(tool,{decisionGrade:true});
+  const outbound=visitable
+    ?'<a class="cta" data-commercial-status="'+(monetized?'affiliate':'non-affiliate')+'" href="/go/'+encodeURIComponent(tool.slug)+'" target="_blank" rel="nofollow'+(monetized?' sponsored':'')+' noopener">Visit '+esc(tool.name)+'</a>'
+    :'';
   const review=runtimeEditorialView(tool);
   const buyerCheck=String(tool?.editorialReview?.buyerCheck||'').trim();
   const editorialBuyerCheck=buyerCheck

@@ -64,18 +64,17 @@ test('dynamic profiles reuse the original profile content shell, and the global 
    assert.doesNotMatch(html,/class="backTools"/);
  }
 });
-test('new profiles use approved /go links; Fresha has an explicitly non-affiliate manufacturer-homepage exception',()=>{
+test('all documented runtime profiles link to tracked manufacturer visits; approved routes are separately marked sponsored',()=>{
  for(const tool of tools){
    const normal=candidatePage(tool,{monetized:false});
-   if(tool.slug!=='fresha')assert.doesNotMatch(normal,/href="\/go\//,'No commercial approval => no Visit button');
-   if(tool.slug==='fresha'){
-     assert.match(normal,/href="\/go\/fresha"/);
-     assert.match(normal,/data-commercial-status="non-affiliate"/);
-     assert.doesNotMatch(normal,/rel="nofollow sponsored/);
-   }else assert.doesNotMatch(normal,/data-commercial-status="non-affiliate"/);
+   assert.match(normal,new RegExp('href="/go/'+tool.slug+'"'));
+   assert.match(normal,/data-commercial-status="non-affiliate"/);
+   assert.match(normal,/rel="nofollow noopener"/);
+   assert.doesNotMatch(normal,/rel="nofollow sponsored/);
    assert.match(normal,/Add to comparator/);
    const approved=candidatePage(tool,{monetized:true});
    assert.match(approved,new RegExp('href="/go/'+tool.slug+'"'));
+   assert.match(approved,/data-commercial-status="affiliate"/);
    assert.match(approved,/rel="nofollow sponsored noopener"/);
    assert.match(approved,/target="_blank"/);
    assert.doesNotMatch(approved,/href="https:\/\/www\.(clio|fresha|bqe)\.com/i);
@@ -84,7 +83,6 @@ test('new profiles use approved /go links; Fresha has an explicitly non-affiliat
    assert.match(approved,/Affiliate relationships do not influence ToolScout rankings or recommendations\./);
  }
 });
-
 
 test('verified AI integrations never disclose private manufacturer verification operations on the public profile',()=>{
  const tool={...tools.find(x=>x.slug==='fresha'),aiIntegration:{status:'verified',tier:'moderate',mcp:'official',publicApi:true,assistants:['Claude'],summary:'Vendor-supported AI workflow has documented agent interoperability.',verifiedAt:'2026-10-10',sources:['https://www.fresha.com/for-business/features']}};

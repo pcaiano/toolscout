@@ -43,16 +43,23 @@ test('Fresha /go fallback reaches actual manufacturer and is recorded as non-aff
   assert.ok(env.sqlCalls.some(x=>x.sql.includes('catalog_runtime_candidates')));
 });
 
-test('unverified Fresha and other dynamic tools cannot use the explicit exception',async()=>{
+test('unverified manufacturer evidence is held, other documented tools also reach their manufacturer',async()=>{
   const invalid=envWithProfile({...fresha,sourceUrl:'https://fresha.com.evil.example'});
   const req=new Request('https://trytoolscout.org/go/fresha');
   assert.equal(await catalogFallbackRedirect(req,invalid,'fresha'),null);
   const noProof=envWithProfile({...fresha,decisionClaims:[]});
   assert.equal(await catalogFallbackRedirect(req,noProof,'fresha'),null);
-  const other=envWithProfile({...fresha,slug:'other'});
-  assert.equal(await catalogFallbackRedirect(new Request('https://trytoolscout.org/go/other'),other,'other'),null);
+  const ezyvet=JSON.parse(fs.readFileSync(new URL('../data/catalog-wave5-decision-ready.json',import.meta.url),'utf8')).find(t=>t.slug==='ezyvet');
+  const other=envWithProfile(ezyvet);
+  const otherResponse=await catalogFallbackRedirect(new Request('https://trytoolscout.org/go/ezyvet'),other,'ezyvet');
+  assert.equal(otherResponse?.status,302);
+  assert.equal(otherResponse.headers.get('Location'),'https://www.ezyvet.com/');
   const monetized=envWithProfile(fresha,{affiliate:{fresha:{enabled:true,url:'https://affiliate.example.com/approved'}}});
-  assert.equal(await catalogFallbackRedirect(req,monetized,'fresha'),null,'approved commercial routes remain primary');
+  const affiliateResponse=await catalogFallbackRedirect(req,monetized,'fresha');
+  assert.equal(affiliateResponse?.status,302);
+  assert.equal(affiliateResponse.headers.get('Location'),'https://affiliate.example.com/approved');
+  const fromThirdParty=envWithProfile({...fresha,sourceUrl:'https://competitor.example.com/'});
+  assert.equal(await catalogFallbackRedirect(req,fromThirdParty,'fresha'),null);
 });
 
 test('canonical public outbound policy retains the tracked Fresha CTA and never exposes documentary sources',async()=>{

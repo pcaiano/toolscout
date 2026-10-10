@@ -95,7 +95,8 @@ test('tools hub preserves live catalog loading behavior',async()=>{
   const response=await renderPublicNavigationCandidate(new Request('https://trytoolscout.org/tools'),env());
   const html=await response.text();
   assert.match(html,/\/data\/tools\.json/);
-  assert.match(html,/\/data\/pending-affiliate-tools\.json/);
+  assert.match(html,/\/data\/affiliate\.json/);
+  assert.doesNotMatch(html,/\/data\/pending-affiliate-tools\.json/,'Research-only affiliate registry must not inflate live software catalog');
   assert.match(html,/\/data\/tool-assets\.json/);
 });
 
