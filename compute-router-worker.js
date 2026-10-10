@@ -2557,8 +2557,13 @@ export default{
           Promise.allSettled([authority,primary]).then(()=> 'settled'),
           new Promise(resolve=>{preparationTimer=setTimeout(()=>resolve('deadline'),30000)})
         ]).finally(()=>clearTimeout(preparationTimer));
-        if(preparation==='deadline')await event(env,'authority_hourly_preparation_deferred','deferred',
-          'Authority sender and recovery continue after the bounded prerequisite window; unfinished upstream work remains independently observable.').catch(()=>{});
+        if(preparation==='deadline'){
+          // Do not race a still-running discovery/primary writer against a
+          // mutating sender drain. Re-enter on the next owned hourly cycle.
+          await event(env,'authority_hourly_preparation_deferred','deferred',
+            'Authority preparation exceeded its bounded window. Sender drain and closed loop were deferred to avoid overlapping D1 queue mutations.').catch(()=>{});
+          return {ok:false,status:'deferred',reason:'authority_preparation_window_exhausted'};
+        }
         // Sender drain remains the named owner of Make handoff. It must run
         // before closed-loop observation, but it cannot starve that observation.
         const drain=runAuthorityDrainScheduled(scheduledEvent,env,ctx).catch(async error=>{
@@ -2571,8 +2576,13 @@ export default{
           drain.then(()=> 'settled'),
           new Promise(resolve=>{drainTimer=setTimeout(()=>resolve('deadline'),45000)})
         ]).finally(()=>clearTimeout(drainTimer));
-        if(drainState==='deadline')await event(env,'authority_drain_window_exhausted','deferred',
-          'Sender drain exceeded the bounded window; closed-loop evaluation proceeds without claiming an external attempt.').catch(()=>{});
+        if(drainState==='deadline'){
+          // The sender remains registered with ctx.waitUntil. Never run the
+          // closed-loop observer concurrently with its candidate/lease writes.
+          await event(env,'authority_drain_window_exhausted','deferred',
+            'Sender drain has not finished; closed-loop evaluation is deferred until a subsequent owned cycle.').catch(()=>{});
+          return {ok:false,status:'deferred',reason:'authority_drain_window_exhausted'};
+        }
         await runGrowthClosedLoopScheduled(scheduledEvent,env,ctx).catch(async error=>{
           await event(env,'authority_closed_loop_scheduler_failed','failed',safe(error?.message||error,800)).catch(()=>{});
           return null;
