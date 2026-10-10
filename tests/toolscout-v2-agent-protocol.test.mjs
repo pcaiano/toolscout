@@ -247,7 +247,8 @@ async function benchmarkDecision(catalog,args){
 
 test('decision benchmark: separate words do not establish a mandatory capability',async()=>{
   const catalog=[
-    {slug:'qualified-crm',name:'Qualified CRM',category:'crm',description:'CRM for small firms',features:['crm','SOC2 certified'],bestFor:['small business'],freePlan:false,scores:{price:null,ease:8}},
+    {slug:'qualified-crm',name:'Qualified CRM',category:'crm',description:'CRM for small firms',sourceUrl:'https://qualified.example/',features:['crm','SOC2 certified'],bestFor:['small business'],freePlan:false,scores:{price:null,ease:8},decisionClaims:[{type:'capability',value:'SOC2 certified',status:'verified',sourceUrl:'https://docs.qualified.example/security',verifiedAt:'2026-10-08',plan:'Business'}]},
+    {slug:'listed-crm',name:'Catalog Mention CRM',category:'crm',description:'CRM for small firms',features:['crm','SOC2 certified'],bestFor:['small business'],freePlan:false,scores:{price:10,ease:10}},
     {slug:'unverified-crm',name:'Unverified CRM',category:'crm',description:'CRM for small firms',features:['crm','SOC2 dashboard','certified templates'],bestFor:['small business'],freePlan:false,scores:{price:10,ease:10}}
   ];
   const out=await benchmarkDecision(catalog,{must_have:['SOC2 certified'],priorities:['price','ease']});
@@ -472,4 +473,19 @@ test('specific AI decision job in Airbnb operations still selects the matching s
   assert.ok(result.structuredContent.shortlist.length>0);
   assert.ok(result.structuredContent.shortlist.every(t=>t.category==='crm'));
   assert.equal(result.structuredContent.decision_status,undefined);
+});
+
+
+test('decision hard gate: an exact legacy catalog feature is a lead, not manufacturer proof',async()=>{
+  const catalog=[
+    {slug:'catalog-only',name:'Catalog Only',category:'crm',description:'CRM with SOC2 certified in its old feature description',features:['SOC2 certified'],bestFor:['teams'],scores:{ease:10,price:10}},
+    {slug:'claim-without-vendor',name:'Claim Without Vendor',category:'crm',description:'CRM',features:['SOC2 certified'],bestFor:['teams'],decisionClaims:[{type:'capability',value:'SOC2 certified',status:'verified',verifiedAt:'2026-10-08',sourceUrl:'https://unrelated.example/security',plan:'Pro'}],scores:{ease:10,price:10}},
+    {slug:'vendor-proven',name:'Vendor Proven',category:'crm',description:'CRM',sourceUrl:'https://vendor.example/',features:['SOC2 certified'],bestFor:['teams'],decisionClaims:[{type:'capability',value:'SOC2 certified',status:'verified',verifiedAt:'2026-10-08',sourceUrl:'https://docs.vendor.example/security',plan:'Pro'}],scores:{ease:6,price:6}}
+  ];
+  const result=await benchmarkDecision(catalog,{must_have:['SOC2 certified'],priorities:['ease']});
+  assert.equal(result.isError,false);
+  assert.deepEqual(result.structuredContent.shortlist.map(x=>x.slug),['vendor-proven']);
+  const proven=result.structuredContent.shortlist[0];
+  assert.equal(proven.requirement_evidence[0].status,'verified');
+  assert.equal('source_url' in proven.requirement_evidence[0],false,'manufacturer proof URL stays private in public agent results');
 });
