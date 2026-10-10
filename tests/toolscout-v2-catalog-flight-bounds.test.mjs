@@ -6,6 +6,7 @@ const read=path=>fs.readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const scheduler=read('growth-scheduler.js');
 const catalog=read('catalog-autonomy-worker.js');
 const ledger=read('engine-run-ledger.js');
+const {safeJson}=await import('../engine-run-ledger.js');
 
 test('every scheduled catalog admission and verification has an expiring mission lease',()=>{
  for(const mission of ['runtime_coverage','runtime_quality']){
@@ -102,4 +103,22 @@ test('Failed catalog coverage recovers on existing 15-minute Growth Brain tick',
  assert.match(scheduler,/if\(failedCoverage\)\{\s*scheduleTask\(ctx,runWithLedger\(env,\{engine:'catalog',mission:'runtime_coverage',triggerName:trigger\+':incident_recovery',singleFlightMinutes:8\}/);
  assert.match(scheduler,/\(\)=>admitTrustedCandidates\(env\)/);
  assert.doesNotMatch(scheduler,/primaryGrowth\s*=\s*['"]/,'reuse declared cron, never redefine schedule');
+});
+
+test('Codex #611: large mission failure evidence stays valid JSON and retains timeout fields',()=>{
+ const record={name:'Error',message:'catalog admission failed',failed_result:{
+   ok:false,reason:'catalog_admission_setup_budget_exhausted',phase:'affiliate_registry',
+   cycle_elapsed_ms:92000,cycle_budget_exhausted:true,preparation_deferred:true,
+   large_payload:'\\'.repeat(17000)
+ },_cycle:{key:'existing',owner:'growth_scheduler'}};
+ const encoded=safeJson(record);
+ assert.ok(encoded.length<=12000,'D1 evidence must remain within record budget');
+ const parsed=JSON.parse(encoded);
+ assert.equal(parsed.truncated,true);
+ assert.equal(parsed.failed_result.reason,'catalog_admission_setup_budget_exhausted');
+ assert.equal(parsed.failed_result.phase,'affiliate_registry');
+ assert.equal(parsed.failed_result.cycle_elapsed_ms,92000);
+ assert.equal(parsed.failed_result.preparation_deferred,true);
+ assert.deepEqual(JSON.parse(safeJson({small:'ok'})),{small:'ok'});
+ assert.deepEqual(JSON.parse(safeJson({cyclic:null})),{cyclic:null});
 });
