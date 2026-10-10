@@ -182,7 +182,7 @@ export async function fetchOfficial(url,{deadlineAt=Infinity,includeResearchFing
     if(!r.ok)return{status:[403,429].includes(r.status)?'blocked_or_limited':'warning',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:null};
     const type=(r.headers.get('content-type')||'').toLowerCase();if(!type.includes('text/html')&&!type.includes('text/plain'))return{status:'warning',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:null};
     const html=(await r.text()).slice(0,500000),title=(html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]||'').replace(/\s+/g,' ').trim(),description=meta(html,'description')||meta(html,'og:description'),text=stripHtml(html).slice(0,14000);
-    return{status:'ok',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:await sha(`${title}\n${description}\n${text}`),...(includeResearchFingerprint?{researchBodyFingerprint:await sha(stripHtml(html.match(/<body\\b[^>]*>([\\s\\S]*?)<\\/body>/i)?.[1]||html))}:{}),title,description,documentText:html
+    return{status:'ok',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:await sha(`${title}\n${description}\n${text}`),...(includeResearchFingerprint?{researchBodyFingerprint:await sha(stripHtml(html.match(/<body\b[^>]*>([\s\S]*?)<\/body>/i)?.[1]||html))}:{}),title,description,documentText:html
       .replace(/<script[\s\S]*?<\/script>/gi,' ')
       .replace(/<style[\s\S]*?<\/style>/gi,' ')
       .replace(/<\/(?:p|li|tr|td|th|h[1-6]|section|div)>/gi,'\n')
