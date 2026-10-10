@@ -128,7 +128,7 @@ export function hasManufacturerDecisionClaim(tool){
     if(!['capability','integration','plan_limit','price_quote'].includes(claim.type)||
       typeof claim.value!=='string'||!claim.value.trim())return false;
     const date=String(claim.verifiedAt||'');
-    if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(date))return false;
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(date))return false;
     const timestamp=Date.parse(date+'T00:00:00Z');
     if(!Number.isFinite(timestamp)||new Date(timestamp).toISOString().slice(0,10)!==date||
       timestamp>Date.now()||Date.now()-timestamp>180*86400000)return false;
