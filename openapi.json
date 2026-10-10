@@ -199,7 +199,8 @@
                             "type": "string",
                             "enum": [
                               "personalized",
-                              "category_fit"
+                              "category_fit",
+                              "decision_qualified"
                             ]
                           },
                           "match_label": {
@@ -223,7 +224,8 @@
                       "enum": [
                         "category",
                         "personalized",
-                        "workflow_guidance"
+                        "workflow_guidance",
+                        "decision_shortlist"
                       ]
                     },
                     "guidance": {
