@@ -60,3 +60,25 @@ test('public Finder, mini widget and A2A all include the same gated specialist p
  assert.match(read('app.js'),/w\.specialist/);
  assert.match(read('embed/toolscout-finder.js'),/w\.specialist/);
 });
+
+test('Codex P2: specialist proof must describe the specialist job, not any unrelated capability',()=>{
+ const copy=wave5.map(t=>structuredClone(t));
+ for(const t of copy.filter(t=>t.category==='restaurant-pos'||t.category==='veterinary'))
+   t.decisionClaims=t.decisionClaims.map(c=>({...c,value:'email campaigns'}));
+ assert.deepEqual(businessWorkflowGuidance('best software for my restaurant',{},[...baseline,...copy]).specialist_workflows,[]);
+ assert.deepEqual(businessWorkflowGuidance('best software for my veterinary clinic',{},[...baseline,...copy]).specialist_workflows,[]);
+});
+
+test('Codex P2: veterinarian, vet practice and animal hospital route to healthcare specialist guidance',()=>{
+ for(const job of ['best software for my veterinarian','best software for my vet practice','best software for my animal hospital']){
+  const g=businessWorkflowGuidance(job,{},catalog);
+  assert.equal(g.industry,'healthcare',job);
+  assert.deepEqual(g.specialist_workflows.map(w=>w.category),['veterinary'],job);
+ }
+});
+
+test('Codex P2: Finder Full preserves all four general workflows alongside the specialist',()=>{
+ const js=fs.readFileSync(new URL('../embed/toolscout-finder.js',import.meta.url),'utf8');
+ assert.match(js,/const general=Array\.isArray\(guidance\.workflows\)\?guidance\.workflows\.slice\(0,4\)/);
+ assert.match(js,/mode==='mini'\?\[\.\.\.specialist,\.\.\.general\]\.slice\(0,2\):\[\.\.\.specialist,\.\.\.general\]/);
+});
