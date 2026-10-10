@@ -864,6 +864,76 @@ function pairwiseTradeoffs(evaluated,dims){
   }
   return out;
 }
+// A price score is an editorial signal, not proof that a product is cheaper.
+// Compare only matching, dated first-party monthly subscription quotations.
+function comparableMonthlyPrice(tool,evaluated,args){
+  if(evaluated.plan_coherence?.status==='not_verified')return null;
+  const needs=[...(evaluated.requirement_evidence||[]),
+    ...(args.require_stack_fit===true?(evaluated.stack_fit?.pairs||[]):[])];
+  if(needs.some(x=>!x.eligible_plans?.length))return null;
+  const planGroups=needs.map(x=>x.eligible_plans.map(catalogNormalize));
+  if(evaluated.plan_coherence?.status==='verified'&&evaluated.plan_coherence.selected_plan)
+    planGroups.push([catalogNormalize(evaluated.plan_coherence.selected_plan)]);
+  const prices=(tool.decisionClaims||[]).filter(q=>
+    q?.type==='price_quote'&&manufacturerClaim(tool,'price_quote',q.value)===q&&
+    q.unit==='subscription'&&q.billingCycle==='monthly'&&
+    typeof q.currency==='string'&&/^[A-Z]{3}$/.test(q.currency)&&
+    typeof q.market==='string'&&q.market.length>0&&
+    typeof q.taxStatus==='string'&&q.taxStatus.length>0&&
+    typeof q.plan==='string'&&q.plan.length>0&&
+    Number.isFinite(q.amount)&&q.amount>=0&&
+    Number.isFinite(q.chargeAmount)&&Math.abs(q.chargeAmount-q.amount)<0.00001&&
+    planGroups.every(plans=>plans.includes(catalogNormalize(q.plan)))&&
+    (args.budget!=='free'||freeTierMatches(tool,q.plan))
+  ).sort((a,b)=>a.amount-b.amount);
+  const q=prices[0];
+  return q?{name:tool.name,slug:tool.slug,plan:q.plan,amount:q.amount,
+    currency:q.currency,market:q.market,tax_status:q.taxStatus,unit:q.unit,
+    billing_cycle:q.billingCycle,verified_at:q.verifiedAt}:null;
+}
+function documentedAffordabilityComparison(found,evaluated,leader,args,dims){
+  const rows=found.map(tool=>({
+    result:evaluated.find(x=>x.slug===tool.slug),
+    price:comparableMonthlyPrice(tool,evaluated.find(x=>x.slug===tool.slug),args)
+  }));
+  const unavailable=rows.filter(x=>!x.price);
+  if(unavailable.length)return {
+    status:'not_comparable',
+    note:'A lower price cannot be established from editorial price scores. At least one product lacks a comparable, manufacturer-documented monthly subscription quote for the requested requirements.',
+    products_without_comparable_quote:unavailable.map(x=>x.result.name)
+  };
+  const base=rows[0].price;
+  if(rows.some(x=>['currency','market','tax_status','unit','billing_cycle']
+    .some(key=>x.price[key]!==base[key])))return {
+      status:'not_comparable',
+      note:'Documented prices have different currencies, markets, tax treatments, units or billing commitments. ToolScout does not assume an exchange rate or interchangeable checkout terms.'
+    };
+  rows.sort((a,b)=>a.price.amount-b.price.amount||a.result.name.localeCompare(b.result.name));
+  if(rows.length>1&&Math.abs(rows[0].price.amount-rows[1].price.amount)<0.005)return {
+    status:'price_tie',
+    monthly_price:rows[0].price.amount,currency:base.currency,
+    note:'The lowest comparable manufacturer-documented monthly list prices are tied; no unique cheaper choice is claimed.'
+  };
+  const affordable=rows[0],best=evaluated.find(x=>x.slug===leader?.slug);
+  const losses=best&&affordable.result.slug!==best.slug?dims.filter(d=>d!=='price').map(d=>{
+    const av=affordable.result.requested_dimensions.find(x=>x.dimension===d)?.score;
+    const lv=best.requested_dimensions.find(x=>x.dimension===d)?.score;
+    return av!=null&&lv!=null&&lv-av>=2?
+      {dimension:d,affordability_leader:av,best_fit_leader:lv,gap:lv-av,
+        evidence_type:'ToolScout editorial score, not a manufacturer feature-entitlement claim'}:null;
+  }).filter(Boolean):[];
+  return {
+    status:'documented_price_comparison',affordability_leader:affordable.result.name,
+    qualified_for_use_case:affordable.result.qualified_for_use_case,
+    blocking_reasons:affordable.result.blocking_reasons,
+    compared_plan:affordable.price.plan,monthly_list_price:affordable.price.amount,
+    currency:base.currency,market:base.market,tax_status:base.tax_status,
+    unit:base.unit,billing_cycle:base.billing_cycle,
+    verified_at:affordable.price.verified_at,
+    note:'This compares documented monthly list prices for matching billing terms, not taxes, add-ons, total checkout cost or unknown tiers. Editorial score gaps are not proofs of feature availability.',
+    what_you_may_lose_vs_best_fit:losses
+  };
+}
 async function assetText(request,env,path){
   if(!env?.ASSETS?.fetch)return null;
   try{const u=new URL(path,request.url);const r=await env.ASSETS.fetch(new Request(u.toString(),{method:'GET'}));return r.ok?await r.text():null}catch{return null}
@@ -953,22 +1023,15 @@ async function callCatalogTool(name,args,request,env){
     const evaluated=found.map(t=>qualifyDecision(decisionEvaluation(t,evalArgs),evalArgs)).sort((a,b)=>Number(b.qualified_for_use_case)-Number(a.qualified_for_use_case)||b.fit_score-a.fit_score);
     const qualified=evaluated.filter(x=>x.qualified_for_use_case);
     const dims=requestedDimensions(evalArgs),gap=qualified.length>=2?qualified[0].fit_score-qualified[1].fit_score:null;
-    const priceRank=[...evaluated].filter(x=>scoreOf(found.find(t=>t.slug===x.slug),'price')!=null)
-      .sort((a,b)=>(scoreOf(found.find(t=>t.slug===b.slug),'price')||0)-(scoreOf(found.find(t=>t.slug===a.slug),'price')||0));
-    const affordable=priceRank[0]||null;
     const leader=qualified[0]||null;
-    const losses=affordable&&leader?dims.filter(d=>d!=='price').map(d=>{
-      const at=found.find(t=>t.slug===affordable.slug),lt=found.find(t=>t.slug===leader.slug);
-      const av=scoreOf(at,d),lv=scoreOf(lt,d);
-      return av!=null&&lv!=null&&lv-av>=2?{dimension:d,affordability_leader:av,best_fit_leader:lv,gap:lv-av}:null;
-    }).filter(Boolean):[];
+    const affordability=documentedAffordabilityComparison(found,evaluated,leader,evalArgs,dims);
     return {data:{
       use_case:args.use_case,
       tools:evaluated,
       missing,
       verdict:!leader?{type:'no_qualified_winner',reason:'None of the compared products has catalog evidence satisfying every mandatory criterion; a fit score alone cannot establish suitability.',score_gap:null}:qualified.length===1?{type:'best_fit',tool:leader.name,reason:'Only compared product with evidence satisfying the supplied mandatory criteria. Check its disclosed limitations before purchasing.',score_gap:null}:gap>=4?{type:'best_fit',tool:leader.name,reason:'Highest editorial fit among products satisfying the supplied mandatory criteria.',score_gap:gap}:{type:'close_call',tools:qualified.slice(0,2).map(x=>x.name),reason:'Qualified fit scores are close; decide using the explicit trade-offs rather than a forced winner.',score_gap:gap},
       tradeoffs:pairwiseTradeoffs(evaluated,dims),
-      cheaper_option_analysis:affordable?{affordability_leader:affordable.name,qualified_for_use_case:affordable.qualified_for_use_case,blocking_reasons:affordable.blocking_reasons,pricing_signal:affordable.pricing,note:'Affordability is inferred from ToolScout price score and catalog pricing text, not a live quote. A cheaper option that fails mandatory requirements is not a recommended substitute.',what_you_may_lose_vs_best_fit:losses}: {note:'No comparable affordability score is available.'},
+      cheaper_option_analysis:affordability,
       affiliate_disclosure:disclosure
     }};
   }
