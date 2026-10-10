@@ -177,3 +177,53 @@ test('Features priority never fabricates unpopulated feature-depth scores',async
   const mixed=await finder({q:'CRM',mode:'decision',priorities:['price','features']});
   assert.equal(mixed.status,422,'do not silently discard an explicitly requested unsupported dimension');
 });
+
+test('Guided Finder Advanced features choice fails closed without mode=decision',async()=>{
+  const web=await finder({q:'CRM',goal:'crm',priority:'features'});
+  assert.equal(web.status,422);
+  assert.equal(web.data.decision_status,'needs_specific_features');
+  assert.deepEqual(web.data.recommendations,[]);
+  const generic=await finder({q:'software for our team',goal:'crm',priority:'features'});
+  assert.equal(generic.status,422);
+  assert.equal(generic.data.decision_status,'needs_specific_features');
+});
+
+test('Free-form feature depth triggers the same documented limitation in MCP',async()=>{
+  for(const job of ['CRM with the best feature depth','CRM with advanced features','CRM with the widest feature set']){
+    const ai=await mcp({job,limit:3});
+    assert.equal(ai.isError,true,job);
+    assert.equal(ai.structuredContent?.decision_status,'needs_specific_features',job);
+    assert.deepEqual(ai.structuredContent?.shortlist,[],job);
+  }
+  const specific=await mcp({job:'CRM with Linux support',limit:3});
+  assert.notEqual(specific.structuredContent?.decision_status,'needs_specific_features',
+    'A named capability must not be mistaken for broad feature-depth ranking');
+});
+
+async function a2a(parts){
+  const body={jsonrpc:'2.0',id:47,method:'SendMessage',params:{message:{
+    role:'ROLE_USER',parts
+  }}};
+  const response=await handleAgentProtocolRoute(new Request('https://trytoolscout.org/a2a',{
+    method:'POST',headers:{'Content-Type':'application/json','A2A-Version':'1.0'},
+    body:JSON.stringify(body)
+  }),env,{waitUntil(){}});
+  return {status:response.status,data:await response.json()};
+}
+
+test('A2A returns actionable feature-breadth guidance rather than internal HTTP 500',async()=>{
+  for(const parts of [
+    [{text:'CRM',mediaType:'text/plain'},{data:{priorities:['features']},mediaType:'application/json'}],
+    [{text:'CRM with the best feature depth',mediaType:'text/plain'}]
+  ]){
+    const result=await a2a(parts);
+    assert.equal(result.status,200);
+    assert.ok(result.data.result?.message);
+    assert.equal(result.data.error,undefined);
+    const [message,structured]=result.data.result.message.parts;
+    assert.match(message.text,/exact capabilities|must_have/i);
+    assert.equal(structured.data.decision_status,'needs_specific_features');
+    assert.deepEqual(structured.data.shortlist,[]);
+    assert.doesNotMatch(JSON.stringify(result.data),/DECISION_UNAVAILABLE/);
+  }
+});
