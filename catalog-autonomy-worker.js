@@ -6,6 +6,7 @@ import {auditCatalogTool,mapLimit,hasManufacturerDecisionClaim} from './catalog-
 import {hydrateLegacyCatalogProfile} from './catalog-profile-hydration.js';
 import {verifyManufacturerDocuments,monitoredManufacturerDocuments} from './catalog-manufacturer-document-watch.js';
 import {manufacturerFactProposals,reconcileManufacturerFacts} from './catalog-manufacturer-fact-reconcile.js';
+import {cleanPublicCatalogProfileCopy} from './catalog-public-fact-copy.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
 const MAX_VERIFY_PER_CYCLE=4; // every two hours: 48 tools/day, target full catalog scan <= 72 hours
@@ -686,6 +687,7 @@ export async function publicQualityEnhancedToolResponse(response,env,slug){
   const proof=snapshot.verifiedRevisions?.has(key)&&trustedManufacturerEvidence(revision,{decisionGrade:true})&&hasManufacturerDecisionClaim(revision);
   const hydrated=proof?hydrateLegacyCatalogProfile(html,revision):null;
   if(hydrated)html=hydrated;
+  html=cleanPublicCatalogProfileCopy(html);
   // Private change detection never becomes a public generic uncertainty banner.
   if(row?.logo_url){
     const logo=esc(row.logo_url);
@@ -709,7 +711,7 @@ export async function publicRuntimeToolResponse(env,slug){
   // changed its source_status away from baseline_snapshot.
   const [snapshot,staticTools]=await Promise.all([runtimeSnapshot(env),assetJson(env,'/data/tools.json',[])]);
   if(snapshot.baselineMirrors?.has(key)||(Array.isArray(staticTools)&&staticTools.some(tool=>String(tool?.slug||'').toLowerCase()===key)))return null;
-  return new Response(candidatePage(candidate),{status:200,headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'public, max-age=60'}});
+  return new Response(cleanPublicCatalogProfileCopy(candidatePage(candidate)),{status:200,headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'public, max-age=60'}});
 }
 export async function publicMergedSitemap(response,env){return mergedSitemap(response,env)}
 export async function publicRuntimeRankingResponse(env,path){return renderRuntimeRanking(env,path,await mergedTools(env))}
@@ -775,7 +777,7 @@ export default {
     if(request.method==='GET'&&slug){
       const [state,candidate]=await Promise.all([toolState(env,slug),runtimeCandidate(env,slug)]);
       if(state?.quality_status==='confirmed_broken')return new Response('Tool profile temporarily unavailable while the official source is re-verified.',{status:404,headers:{'Content-Type':'text/plain; charset=UTF-8','Cache-Control':'no-store','X-Robots-Tag':'noindex'}});
-      if(candidate)return new Response(candidatePage(candidate),{status:200,headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'public, max-age=300'}});
+      if(candidate)return new Response(cleanPublicCatalogProfileCopy(candidatePage(candidate)),{status:200,headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'public, max-age=300'}});
       const response=await base.fetch(request,env,ctx);
       if(response.ok&&state?.quality_status==='change_detected'&&(response.headers.get('Content-Type')||'').includes('text/html')){
         const html=await response.text(),h=new Headers(response.headers);h.delete('Content-Length');h.set('Cache-Control','public, max-age=60');return new Response(html,{status:response.status,headers:h});
