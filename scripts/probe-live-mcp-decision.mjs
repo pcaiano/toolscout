@@ -152,8 +152,12 @@ assert(aiQualified.isError===false,'MCP cannot return a CRM shortlist for parity
 const finderCandidates=finderQualified.data.recommendations.map(x=>({slug:x.slug,fit:x.match}));
 const mcpCandidates=aiQualified.structuredContent.shortlist.map(x=>({slug:x.slug,fit:x.fit_score}));
 assert(JSON.stringify(finderCandidates)===JSON.stringify(mcpCandidates),'Live Finder and MCP return different candidates/scores for the identical CRM decision');
-assert(finderQualified.data.recommendations.every(x=>x.qualified_for_use_case===true&&x.tool_url?.startsWith('https://trytoolscout.org/go/')),
-  'Live Finder decision failed qualifying gate or first-party monetizable CTA');
+assert(finderQualified.data.recommendations.every(x=>{
+  const agent=aiQualified.structuredContent.shortlist.find(t=>t.slug===x.slug);
+  return x.qualified_for_use_case===true&&Boolean(agent)&&
+    x.profile_url===agent.profile_url&&
+    x.tool_url===(agent.tool_url?agent.tool_url.split('?')[0]:null);
+}), 'Live Finder and MCP disagree on qualified products, profile URLs or approved commercial visits');
 assert(!JSON.stringify(finderQualified.data).includes('sourceUrl'),'Live Finder leaked manufacturer evidence URLs');
 const impossibleFinder=await liveQualifiedFinder('q=CRM&mode=decision&must_have=ToolScoutUnobtainableProofToken');
 assert(impossibleFinder.status===422&&impossibleFinder.data?.decision_status==='no_qualified_candidate'&&
@@ -326,7 +330,9 @@ for(let attempt=1;attempt<=15;attempt++){
       (data.alternatives||[]).every(x=>(x.improvements_over_source||[]).every(d=>d.dimension!=='price'))&&
       !JSON.stringify(data).includes('sourceUrl')&&
       !JSON.stringify(data).includes('hubspot.com/pricing')&&
-      data?.source?.tool_url?.startsWith('https://trytoolscout.org/go/');
+      data?.source?.slug==='hubspot'&&
+      data?.source?.tool_url===null&&
+      data?.source?.profile_url==='https://trytoolscout.org/tools/hubspot';
     if(safe){alternativeReady=true;break}
   }catch(error){
     if(attempt===15)throw Error('Live price-evidence alternatives verification failed: '+String(error?.message||error));
