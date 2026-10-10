@@ -19,6 +19,7 @@ const MAX_CANDIDATE_CHECKS_PER_CYCLE=32; // bounded source fetches, preserve fir
 const MAX_ADMISSION_WALL_MS=90000; // time-bound hourly supplier without reducing the 24-tool admission cap
 const OFFICIAL_SOURCE_HOLD_COOLDOWN_HOURS=3; // avoid re-fetching verified vendor failures every hourly admission run
 const MAX_RESEARCH_SEEDS_PER_CYCLE=80; // hourly discovery intake; never bypasses manufacturer/editorial admission
+const MAX_MANUFACTURER_DOSSIERS_PER_CYCLE=2; // bounded manufacturer research on existing quality mission
 const RESEARCH_HOLD_RETRY_HOURS=6; // move blocked staged products behind the next valid cohort
 // Both hourly admission and fast recovery ignore recently held staged revisions.
 // Re-staging a newer revision makes it eligible as soon as that updatedAt wins.
@@ -147,6 +148,25 @@ function releaseLinks(html,base){
   }catch{}
   return [...new Set(out)].slice(0,4);
 }
+export function linkedManufacturerDocumentation(html,base,{limit=12}={}){
+  const out=[],seen=new Set(),root=publicHttps(base);
+  if(!root)return out;
+  const re=/<a\b[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+  let hit;
+  while((hit=re.exec(String(html||'')))&&out.length<Math.min(16,Math.max(1,Number(limit)||12))){
+    let url;
+    try{url=new URL(hit[1],root)}catch{continue}
+    if(url.protocol!=='https:'||url.username||url.password||!sameManufacturerHost(url.href,root.href))continue;
+    const label=stripHtml(hit[2]).slice(0,140).toLowerCase(),path=url.pathname.toLowerCase();
+    if(path==='/'||!/(?:\/|^)(docs?|documentation|features?|integrations?|pricing|product|solutions?|developer|api|help|support)(?:\/|$|-)/.test(path)&&
+      !/\b(documentation|developer docs|product features|features|integrations|pricing|api reference)\b/.test(label))continue;
+    if(/\/(privacy|terms|careers|login|register|sign-?up|news|blog|contact)(?:\/|$)/.test(path))continue;
+    const identity=canonicalManufacturerDocumentIdentity(url.href);
+    if(!identity||seen.has(identity))continue;
+    seen.add(identity);out.push(url.href);
+  }
+  return out;
+}
 async function sha(value){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(value)));return [...new Uint8Array(buf)].map(x=>x.toString(16).padStart(2,'0')).join('').slice(0,24)}
 export async function fetchOfficial(url,{deadlineAt=Infinity}={}){
   const u=publicHttps(url);if(!u)return{status:'invalid',httpStatus:null,finalUrl:null,fingerprint:null};
@@ -169,7 +189,7 @@ export async function fetchOfficial(url,{deadlineAt=Infinity}={}){
       .replace(/<[^>]+>/g,' ')
       .replace(/&(?:nbsp|amp|quot|#39);/gi,' ')
       .replace(/[^\S\n]+/g,' ')
-      .split('\n').map(x=>x.trim()).filter(Boolean).join('\n').slice(0,16000),releaseLinks:releaseLinks(html,r.url||u.href)};
+      .split('\n').map(x=>x.trim()).filter(Boolean).join('\n').slice(0,16000),releaseLinks:releaseLinks(html,r.url||u.href),manufacturerLinks:linkedManufacturerDocumentation(html,r.url||u.href)};
   }catch(e){
     // A deadline-shortened retry is unfinished work, not evidence that the
     // manufacturer's source is unreachable or a product fact has changed.
