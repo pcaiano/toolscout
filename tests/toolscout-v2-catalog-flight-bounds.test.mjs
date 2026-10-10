@@ -99,7 +99,7 @@ test('Catalog coverage recovery is independent from potentially slow quality ver
 });
 
 test('Failed catalog coverage recovers on existing 15-minute Growth Brain tick',()=>{
- assert.match(scheduler,/if\(trigger===TOOLSCOUT_CRONS\.primaryGrowth\)\{\s*const failedCoverage=await missionNeedsRecovery\(env,'catalog','runtime_coverage'\)/);
+ assert.match(scheduler,/if\(trigger===TOOLSCOUT_CRONS\.primaryGrowth\)\{\s*const \[failedCoverage,failedQuality\]=await Promise\.all\(\[\s*missionNeedsRecovery\(env,'catalog','runtime_coverage'\)/);
  assert.match(scheduler,/if\(failedCoverage\)\{\s*scheduleTask\(ctx,runWithLedger\(env,\{engine:'catalog',mission:'runtime_coverage',triggerName:trigger\+':incident_recovery',singleFlightMinutes:8\}/);
  assert.match(scheduler,/\(\)=>admitTrustedCandidates\(env\)/);
  assert.doesNotMatch(scheduler,/primaryGrowth\s*=\s*['"]/,'reuse declared cron, never redefine schedule');
