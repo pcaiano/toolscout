@@ -15,7 +15,12 @@ async function missionNeedsRecovery(env,engine,mission,maxAgeMinutes=0){
     const row=await env.DB.prepare(`SELECT status,started_at,completed_at FROM engine_runs WHERE engine=? AND mission=? ORDER BY started_at DESC LIMIT 1`).bind(engine,mission).first();
     if(!row)return true;
     if(row.status==='failed'||row.status==='degraded')return true;
-    if(row.status==='running')return false;
+    if(row.status==='running'){
+      // A terminated Worker can leave a ledger row running after its lease
+      // expires. Re-enter the mission so runWithLedger can reap and retry.
+      const at=Date.parse(String(row.started_at||'').replace(' ','T')+'Z');
+      return engine==='catalog'&&['runtime_quality','runtime_coverage'].includes(mission)&&Number.isFinite(at)&&Date.now()-at>12*60000;
+    }
     if(maxAgeMinutes>0&&row.status==='completed'){
       const stamp=row.completed_at||row.started_at;
       const t=Date.parse(String(stamp||'').replace(' ','T')+'Z');
@@ -92,7 +97,7 @@ export async function runGrowthScheduler(event,env,ctx,{delegate=null}={}){
     }
     // A small hourly batch covers 127 existing vendors in about one day,
     // without a separate update scheduler or unbounded vendor requests.
-    scheduleTask(ctx,runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:trigger,singleFlightMinutes:20},()=>verifyCatalogBatch(env)));
+    scheduleTask(ctx,runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:trigger,singleFlightMinutes:8},()=>verifyCatalogBatch(env)));
     if(sixHourly||contentRecovery){
       scheduleTask(ctx,runWithLedger(env,{engine:'content',mission:'social_intelligence',triggerName:contentRecovery?trigger+':recovery':trigger,singleFlightMinutes:15},()=>runContentSocialIntelligenceCycle(env)));
     }
@@ -103,7 +108,7 @@ export async function runGrowthScheduler(event,env,ctx,{delegate=null}={}){
 
   if(daily){
     scheduleTask(ctx,(async()=>{
-      try{await runWithLedger(env,{engine:'catalog',mission:'runtime_coverage',triggerName:trigger},()=>admitTrustedCandidates(env))}catch{}
+      try{await runWithLedger(env,{engine:'catalog',mission:'runtime_coverage',triggerName:trigger,singleFlightMinutes:8},()=>admitTrustedCandidates(env))}catch{}
       try{await runWithLedger(env,{engine:'content',mission:'software_news_source_watch',triggerName:trigger},()=>verifyNewsSources(env))}catch{}
     })());
   }else if(hourly){
@@ -116,8 +121,8 @@ export async function runGrowthScheduler(event,env,ctx,{delegate=null}={}){
     ]);
     if(recoverCoverage||recoverNews||recoverQuality||recoverWarnings||newCandidateSupply){
       scheduleTask(ctx,(async()=>{
-        if(recoverQuality||recoverWarnings){try{await runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:trigger+':recovery',singleFlightMinutes:20},()=>verifyCatalogBatch(env))}catch{}}
-        if(recoverCoverage||newCandidateSupply){try{await runWithLedger(env,{engine:'catalog',mission:'runtime_coverage',triggerName:trigger+(newCandidateSupply?':new_documented_cohort':':recovery')},()=>admitTrustedCandidates(env))}catch{}}
+        if(recoverQuality||recoverWarnings){try{await runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:trigger+':recovery',singleFlightMinutes:8},()=>verifyCatalogBatch(env))}catch{}}
+        if(recoverCoverage||newCandidateSupply){try{await runWithLedger(env,{engine:'catalog',mission:'runtime_coverage',triggerName:trigger+(newCandidateSupply?':new_documented_cohort':':recovery'),singleFlightMinutes:8},()=>admitTrustedCandidates(env))}catch{}}
         if(recoverNews){try{await runWithLedger(env,{engine:'content',mission:'software_news_source_watch',triggerName:trigger+':recovery'},()=>verifyNewsSources(env))}catch{}}
       })());
     }

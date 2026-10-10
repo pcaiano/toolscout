@@ -14,6 +14,7 @@ const MAX_NEWS_SOURCE_CHECKS_PER_CYCLE=4;
 const MAX_ADMIT_PER_DAY=24; // actually per-cycle cap: enable documented cohorts to publish within one hourly run
 const MAX_BASELINE_SEED_PER_CYCLE=40; // bounded migration inside the existing catalog autonomy engine
 const MAX_CANDIDATE_CHECKS_PER_CYCLE=32; // bounded source fetches, preserve first-party and quality gates
+const MAX_ADMISSION_WALL_MS=90000; // time-bound hourly supplier without reducing the 24-tool admission cap
 const MAX_RESEARCH_SEEDS_PER_CYCLE=80; // hourly discovery intake; never bypasses manufacturer/editorial admission
 const WARNING_RETRY_HOURS=6;
 const MAX_WARNING_RETRIES_PER_CYCLE=2;
@@ -658,9 +659,11 @@ export async function admitTrustedCandidates(env){
   pool.sort((a,b)=>Number(b.ready)-Number(a.ready)||
     Math.max(0,target-(categoryCounts.get(b.raw.category)||0))-Math.max(0,target-(categoryCounts.get(a.raw.category)||0))||
     b.priority.score-a.priority.score||a.sequence-b.sequence||a.slug.localeCompare(b.slug));
-  let admitted=0,held=0,considered=0,missingManufacturerEvidence=0;
+  let admitted=0,held=0,considered=0,missingManufacturerEvidence=0,cycleBudgetExhausted=false;
+  const startedAt=Date.now();
   for(const item of pool){
     if(admitted>=MAX_ADMIT_PER_DAY||considered>=MAX_CANDIDATE_CHECKS_PER_CYCLE)break;
+    if(Date.now()-startedAt>MAX_ADMISSION_WALL_MS){cycleBudgetExhausted=true;break;}
     const {raw,slug,priority}=item;considered++;
     const errors=validCandidate(raw,config);if(errors.length){held++;await logEvent(env,slug,'catalog_candidate_structure_hold','completed','Catalog record failed admission field completeness before publication.',{issues:errors});continue}
     // Pure preflight before any network fetch. Undocumented research seeds
@@ -696,6 +699,7 @@ export async function admitTrustedCandidates(env){
   if(admitted>0)await runtimeSnapshot(env,{force:true}).catch(()=>null);
   return{ok:true,considered,admitted,held,missing_manufacturer_evidence:missingManufacturerEvidence,
     trusted_sources_total:seen.size,ready_trusted_sources:pool.filter(x=>x.ready).length,
+    cycle_budget_exhausted:cycleBudgetExhausted,cycle_wall_budget_ms:MAX_ADMISSION_WALL_MS,
     research_seeds_total:researchSeeds.length,research_seeds_status:'first_party_documentation_research_only_not_admission_ready',
     candidate_supply_status:pool.some(x=>x.ready)?'documented_candidates_available':researchSeeds.length?'research_evidence_incomplete':'no_new_candidate_supply',
     market_gaps_synced:market_gaps,max_admissions:MAX_ADMIT_PER_DAY,candidate_check_limit:MAX_CANDIDATE_CHECKS_PER_CYCLE,
@@ -949,8 +953,8 @@ export async function handleCatalogAutonomyRoute(request,env){
   }
   if(request.method==='POST'&&u.pathname==='/api/catalog-autonomy/run'){
     if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});
-    const verify=await runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:'manual_api'},()=>verifyBatch(env));
-    const admit=await runWithLedger(env,{engine:'catalog',mission:'runtime_coverage',triggerName:'manual_api'},()=>admitTrustedCandidates(env));
+    const verify=await runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:'manual_api',singleFlightMinutes:8},()=>verifyBatch(env));
+    const admit=await runWithLedger(env,{engine:'catalog',mission:'runtime_coverage',triggerName:'manual_api',singleFlightMinutes:8},()=>admitTrustedCandidates(env));
     return Response.json({ok:true,verify,admit},{headers:JSON_H});
   }
   if(request.method==='GET'&&(u.pathname==='/data/catalog-inventory.json'||u.pathname==='/api/catalog-inventory')){
@@ -964,7 +968,7 @@ export default {
   async fetch(request,env,ctx){
     const u=new URL(request.url);
     if(request.method==='GET'&&u.pathname==='/api/catalog-autonomy/status'){if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});return Response.json(await status(env),{headers:JSON_H})}
-    if(request.method==='POST'&&u.pathname==='/api/catalog-autonomy/run'){if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});const verify=await runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:'manual_api'},()=>verifyBatch(env));const admit=await runWithLedger(env,{engine:'catalog',mission:'runtime_coverage',triggerName:'manual_api'},()=>admitTrustedCandidates(env));return Response.json({ok:true,verify,admit},{headers:JSON_H})}
+    if(request.method==='POST'&&u.pathname==='/api/catalog-autonomy/run'){if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});const verify=await runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:'manual_api',singleFlightMinutes:8},()=>verifyBatch(env));const admit=await runWithLedger(env,{engine:'catalog',mission:'runtime_coverage',triggerName:'manual_api',singleFlightMinutes:8},()=>admitTrustedCandidates(env));return Response.json({ok:true,verify,admit},{headers:JSON_H})}
     if(request.method==='GET'&&u.pathname==='/data/tools.json'){
       const tools=await mergedTools(env).catch(()=>assetJson(env,'/data/tools.json',[]));
       return Response.json(Array.isArray(tools)?tools:[],{headers:{'Content-Type':'application/json; charset=UTF-8','Cache-Control':'public, max-age=60','X-ToolScout-Catalog':'canonical-merged'}});
