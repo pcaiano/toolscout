@@ -110,7 +110,7 @@ for(const slug of ['fresha','bqe-core']){
   need(/data-toolscout-public-redesign=["']2["']/.test(r.text),slug+'_shared_2_design_missing');
   need(/class=["']editorialIntro["']/.test(r.text),slug+'_indexed_editorial_design_missing');
   need(/class=["']editorialBuyerCheck["']/.test(r.text),slug+'_buyer_check_design_missing');
-  need(/class=["']secondaryCta["']/.test(r.text),slug+'_comparator_design_missing');
+  need(/class=["'][^"']*\bsecondaryCta\b[^"']*["']/.test(r.text),slug+'_comparator_design_missing');
   need(/class=["']ts2-back-tools["']/.test(r.text),slug+'_hero_back_link_missing');
   need(!/class=["']editorial["']/.test(r.text),slug+'_legacy_dark_editorial_card');
   need(!/class=["']cta secondary["']/.test(r.text),slug+'_legacy_cta_style');
