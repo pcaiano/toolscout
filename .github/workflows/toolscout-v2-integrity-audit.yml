@@ -232,3 +232,6 @@ jobs:
       - name: Verify real production MCP buyer decisions after Cloudflare deployment
         if: always()
         run: node scripts/probe-live-mcp-decision.mjs
+      - name: Verify every real catalog outbound link leads outside ToolScout
+        if: always()
+        run: node scripts/probe-live-catalog-outbound.mjs
