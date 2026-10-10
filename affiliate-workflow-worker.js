@@ -22,29 +22,44 @@ async function updateWorkflow(request,env,slug){let body={};try{body=await reque
 async function reconcileReply(request,env){let message={};try{message=await request.json();}catch{return Response.json({error:'invalid_json'},{status:400});}const tools=await assetJson(request,env,'/data/tools.json',[]);const result=reconcileAffiliateReply(message,new Set(tools.map(x=>x.slug)));if(!result.accepted)return Response.json({error:result.reason},{status:422});const forwarded=new Request(new URL(`/affiliate-workflow/api/${result.tool_slug}`,request.url),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(result)});return updateWorkflow(forwarded,env,result.tool_slug);}
 async function distributionSnapshot(request,env){const [config,rows]=await Promise.all([assetJson(request,env,'/data/distribution-workflow.json',{items:[],submission_pack:{}}),env.DB.prepare('SELECT item_slug,status,submitted_at,response_at,live_url,notes,updated_at FROM distribution_workflow').all()]);const smap=new Map((rows.results||[]).map(x=>[x.item_slug,x]));const items=(config.items||[]).map(x=>{const s=smap.get(x.slug)||null;return {...x,status:s?.status||x.status||'research_required',submitted_at:s?.submitted_at||null,response_at:s?.response_at||null,live_url:s?.live_url||null,notes:s?.notes||x.notes||null,updated_at:s?.updated_at||null};});return {items,submissionPack:config.submission_pack||{}};}
 async function updateDistribution(request,env,slug){let body={};try{body=await request.json();}catch{return Response.json({error:'invalid_json'},{status:400});}const status=body.status&&DISTRIBUTION_STATUSES.has(String(body.status))?String(body.status):null;const notes=body.notes===undefined?null:String(body.notes).slice(0,4000);const liveUrl=body.live_url===undefined?null:String(body.live_url).slice(0,2000);if(!status&&notes===null&&liveUrl===null)return Response.json({error:'no_valid_fields'},{status:400});const existing=await env.DB.prepare('SELECT status,submitted_at,response_at,live_url,notes FROM distribution_workflow WHERE item_slug=?').bind(slug).first();const nextStatus=status||existing?.status||'research_required';const submittedAt=['submitted','scheduled','live'].includes(nextStatus)&&!existing?.submitted_at?new Date().toISOString():existing?.submitted_at||null;const responseAt=['live','rejected','needs_info'].includes(nextStatus)&&!existing?.response_at?new Date().toISOString():existing?.response_at||null;await env.DB.prepare(`INSERT INTO distribution_workflow(item_slug,status,submitted_at,response_at,live_url,notes,updated_at) VALUES(?,?,?,?,?,?,datetime('now')) ON CONFLICT(item_slug) DO UPDATE SET status=excluded.status,submitted_at=excluded.submitted_at,response_at=excluded.response_at,live_url=excluded.live_url,notes=excluded.notes,updated_at=datetime('now')`).bind(slug,nextStatus,submittedAt,responseAt,liveUrl??existing?.live_url??null,notes??existing?.notes??null).run();return Response.json({ok:true,item_slug:slug,status:nextStatus});}
-export async function catalogFallbackRedirect(request,env,slug){const [affiliate,tools]=await Promise.all([assetJson(request,env,'/data/affiliate.json',{}),assetJson(request,env,'/data/tools.json',[])]);const entry=affiliate[slug];if(entry?.enabled&&entry?.url)return null;
+export async function catalogFallbackRedirect(request,env,slug){const [affiliate,tools]=await Promise.all([assetJson(request,env,'/data/affiliate.json',{}),assetJson(request,env,'/data/tools.json',[])]);const entry=affiliate[slug];
+const approvedUrl=value=>{
+  try{const u=new URL(String(value||'').replaceAll('&amp;','&'));
+    if(u.protocol!=='https:'||u.username||u.password||
+       /(^|\.)trytoolscout\.org$/i.test(u.hostname))return null;
+    return u.toString();
+  }catch{return null}
+};
 const d1=await env.DB?.prepare("SELECT status,affiliate_url FROM affiliate_workflow WHERE tool_slug=? LIMIT 1")?.bind(slug)?.first().catch(()=>null);
-if(d1?.affiliate_url&&['link_acquired','active','verified','earning'].includes(String(d1.status||'')))return null;
-// Owner-requested non-affiliate Fresha visit: use the existing tracked /go/
-// public route and a published first-party-verified D1 profile. Never invent
-// an affiliate agreement, admit a research seed, or redirect to arbitrary hosts.
-let freshaDestination=null;
-if(slug==='fresha'){
-  const approved=await env.DB?.prepare("SELECT profile_json,status,source_status FROM catalog_runtime_candidates WHERE tool_slug=? LIMIT 1")?.bind(slug)?.first().catch(()=>null);
-  if(approved?.status==='published'&&approved?.source_status==='ok'){
+const approvedStatic=entry?.enabled===true?approvedUrl(entry.url):null;
+const approvedD1=['active','verified','earning','link_acquired'].includes(String(d1?.status||''))
+  ?approvedUrl(d1?.affiliate_url):null;
+const tool=tools.find(t=>t?.slug===slug);
+let dynamicTool=null;
+if(!tool){
+  const row=await env.DB?.prepare("SELECT profile_json,status,source_status FROM catalog_runtime_candidates WHERE tool_slug=? LIMIT 1")?.bind(slug)?.first().catch(()=>null);
+  if(row&&['published','admitted_coverage'].includes(String(row.status))&&row.source_status==='ok'){
     try{
-      const product=JSON.parse(approved.profile_json||'{}');
-      if(product.slug==='fresha'&&/^https:\/\/(?:www\.)?fresha\.com\/?$/i.test(String(product.sourceUrl||''))&&
-         product.editorialReview?.verificationStatus==='vendor_documented'&&
-         (product.decisionClaims||[]).some(x=>x?.status==='verified'&&x?.type==='capability'))
-        freshaDestination='https://www.fresha.com/';
+      const candidate=JSON.parse(row.profile_json||'{}');
+      const source=approvedUrl(candidate.sourceUrl);
+      const review=candidate.editorialReview||{};
+      const proof=Array.isArray(candidate.evidence)&&candidate.evidence.some(x=>
+        x?.claimScope==='toolscout_editorial_review'&&x?.sourceUrl===review.sourceUrl&&
+        /^\d{4}-\d{2}-\d{2}$/.test(String(x?.verifiedAt||'')));
+      if(candidate.slug===slug&&source&&review.verificationStatus==='vendor_documented'&&proof&&
+        Array.isArray(candidate.decisionClaims)&&candidate.decisionClaims.some(x=>x?.status==='verified'&&x?.type==='capability'))
+        dynamicTool=candidate;
     }catch{}
   }
 }
-const tool=tools.find(t=>t?.slug===slug);
-const destination=entry?.publicUrl||tool?.sourceUrl||freshaDestination;
+// Never invent an outbound route for an unpublished, unverified or unknown
+// product. On known products always choose a real external destination.
+const vendor=approvedUrl(tool?.sourceUrl||dynamicTool?.sourceUrl||entry?.publicUrl);
+if(!tool&&!dynamicTool)return null;
+const approved=approvedD1||approvedStatic;
+const destination=approved||vendor;
 if(!destination)return null;
-try{const u=new URL(destination);if(!/^https?:$/.test(u.protocol))return null;}catch{return null;}const referrer=request.headers.get('Referer')||request.headers.get('Referrer')||'';let seoIntent='general',referrerHost=null;try{const refUrl=new URL(referrer);referrerHost=refUrl.hostname.slice(0,120);const page=refUrl.pathname.split('/').filter(Boolean).pop()?.replace(/\.html$/i,'')||'';if(page&&page!=='seo'&&/^[a-z0-9][a-z0-9-]{0,99}$/i.test(page))seoIntent=page;}catch{}const classification=classifySessionRequest(request);const owner=classification===SESSION_CLASSIFICATIONS.OWNER;const source=owner?'internal-test':(seoIntent!=='general'?'seo-page':'public-redirect');const cookie=request.headers.get('Cookie')||'';const match=cookie.match(/(?:^|;\s*)toolscout_session=([^;]+)/);const candidate=match?decodeURIComponent(match[1]):'';const valid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(candidate);const session=valid?candidate:crypto.randomUUID();const synthetic=classification===SESSION_CLASSIFICATIONS.SYNTHETIC;if(!synthetic){await env.DB.batch([env.DB.prepare("INSERT INTO click_events (tool_slug,intent_slug,session_id,source,click_ref,affiliate_sub_id,affiliate_active_at_click,affiliate_program,affiliate_route,created_at) VALUES (?,?,?,?,?,?,?,?,?,datetime('now'))").bind(slug,seoIntent,session,source,null,null,0,null,'public'),env.DB.prepare(SESSION_UPSERT_SQL).bind(session,source,owner?1:0,classification),env.DB.prepare("INSERT INTO funnel_events (event_id,session_id,event_type,intent_slug,tool_slug,path,source,referrer_host,created_at) VALUES (?,?,?,?,?,?,?,?,datetime('now'))").bind(`evt_${crypto.randomUUID()}`,session,'outbound_clicked',seoIntent,slug,new URL(request.url).pathname,source,referrerHost)]);}const headers=new Headers({Location:destination,'Cache-Control':'no-store'});if(!valid)headers.append('Set-Cookie',`toolscout_session=${session}; Max-Age=1800; Path=/; SameSite=Lax; Secure`);return new Response(null,{status:302,headers});}
+const monetized=Boolean(approved);const referrer=request.headers.get('Referer')||request.headers.get('Referrer')||'';let seoIntent='general',referrerHost=null;try{const refUrl=new URL(referrer);referrerHost=refUrl.hostname.slice(0,120);const page=refUrl.pathname.split('/').filter(Boolean).pop()?.replace(/\.html$/i,'')||'';if(page&&page!=='seo'&&/^[a-z0-9][a-z0-9-]{0,99}$/i.test(page))seoIntent=page;}catch{}const classification=classifySessionRequest(request);const owner=classification===SESSION_CLASSIFICATIONS.OWNER;const source=owner?'internal-test':(seoIntent!=='general'?'seo-page':'public-redirect');const cookie=request.headers.get('Cookie')||'';const match=cookie.match(/(?:^|;\s*)toolscout_session=([^;]+)/);const candidate=match?decodeURIComponent(match[1]):'';const valid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(candidate);const session=valid?candidate:crypto.randomUUID();const synthetic=classification===SESSION_CLASSIFICATIONS.SYNTHETIC;if(!synthetic){await env.DB.batch([env.DB.prepare("INSERT INTO click_events (tool_slug,intent_slug,session_id,source,click_ref,affiliate_sub_id,affiliate_active_at_click,affiliate_program,affiliate_route,created_at) VALUES (?,?,?,?,?,?,?,?,?,datetime('now'))").bind(slug,seoIntent,session,source,null,null,monetized?1:0,null,monetized?'affiliate':'public'),env.DB.prepare(SESSION_UPSERT_SQL).bind(session,source,owner?1:0,classification),env.DB.prepare("INSERT INTO funnel_events (event_id,session_id,event_type,intent_slug,tool_slug,path,source,referrer_host,created_at) VALUES (?,?,?,?,?,?,?,?,datetime('now'))").bind(`evt_${crypto.randomUUID()}`,session,'outbound_clicked',seoIntent,slug,new URL(request.url).pathname,source,referrerHost)]);}const headers=new Headers({Location:destination,'Cache-Control':'no-store'});if(!valid)headers.append('Set-Cookie',`toolscout_session=${session}; Max-Age=1800; Path=/; SameSite=Lax; Secure`);return new Response(null,{status:302,headers});}
 export async function handleAffiliateWorkflowRoute(request,env,ctx){
   const url=new URL(request.url);
   const affiliatePage=['/affiliate-workflow.html','/affiliate-workflow','/affiliate-workflow/'].includes(url.pathname);
@@ -86,7 +101,7 @@ export default {
     const owned=await handleAffiliateWorkflowRoute(request,env,ctx);
     if(owned)return owned;
     const url=new URL(request.url);
-    if(request.method==='GET'&&url.pathname.startsWith('/go/')){
+    if(request.method==='GET'&&url.pathname.startsWith('/go/')&&url.pathname!=='/go/embed'){
       // Do not let the public fallback outrank an active D1 affiliate route.
       // Only invoke it if the primary commercial redirect failed.
       const slug=url.pathname.slice(4).toLowerCase().replace(/[^a-z0-9-]/g,'');
@@ -102,7 +117,9 @@ export default {
       if(slug){
         try{const fallback=await catalogFallbackRedirect(request,env,slug);if(fallback)return fallback;}catch{}
       }
-      return primary||new Response('ToolScout redirect temporarily unavailable',{status:503});
+      // Never let an outbound CTA fall through to the site's Tools index.
+      // Unknown or unverified slugs have no outgoing link to follow.
+      return new Response('Product destination unavailable',{status:404,headers:{'Content-Type':'text/plain; charset=UTF-8','Cache-Control':'no-store','X-Robots-Tag':'noindex'}});
     }
     return base.fetch(request,env,ctx);
   },
