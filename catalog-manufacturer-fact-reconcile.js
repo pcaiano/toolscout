@@ -64,6 +64,24 @@ export function manufacturerFactProposals(tool,observations=[]){
   }
   return changes.sort((a,b)=>a.claimKey.localeCompare(b.claimKey));
 }
+function refreshExactNumericPhrase(value,claim,item){
+  if(typeof value!=='string')return value;
+  const oldPlain=String(item.oldValue),oldGrouped=Number(item.oldValue).toLocaleString('en-US');
+  const newPlain=String(item.newValue),newGrouped=Number(item.newValue).toLocaleString('en-US');
+  const currency={EUR:'€',USD:String.fromCharCode(36),GBP:'£'}[claim.currency]||'';
+  const pairs=item.type==='plan_limit'?
+    [[oldGrouped+' '+claim.unit,newGrouped+' '+claim.unit],
+     [oldPlain+' '+claim.unit,newPlain+' '+claim.unit]]:
+    [[currency+oldPlain,currency+newPlain]];
+  for(const [from,to] of pairs){
+    if(from&&value.includes(from)&&value.split(from).length===2){
+      if(item.type==='price_quote'&&!value.toLowerCase().includes(String(claim.plan).toLowerCase()))continue;
+      return value.replace(from,to);
+    }
+  }
+  return value;
+}
+
 export function reconcileManufacturerFacts(tool,changes,previous,{today=new Date().toISOString().slice(0,10)}={}){
   if(!changes.length)return{status:'none'};
   const token=JSON.stringify(changes.map(x=>[x.claimKey,x.newValue,x.sourceUrl]));
@@ -73,9 +91,19 @@ export function reconcileManufacturerFacts(tool,changes,previous,{today=new Date
     const claim=(updated.decisionClaims||[]).find(x=>x?.status==='verified'&&x.sourceUrl===item.sourceUrl&&claimKey(x)===item.claimKey);
     if(!claim)continue;
     if(item.type==='plan_limit'&&claim.quantity===item.oldValue){
-      claim.quantity=item.newValue;claim.verifiedAt=today;applied++;
+      claim.quantity=item.newValue;claim.verifiedAt=today;
+      if(claim.plan==='Free'&&updated.pricingDetails){
+        updated.pricingDetails.freePlanSummary=refreshExactNumericPhrase(updated.pricingDetails.freePlanSummary,claim,item);
+        if(Array.isArray(updated.pricingDetails.limits))updated.pricingDetails.limits=updated.pricingDetails.limits.map(x=>refreshExactNumericPhrase(x,claim,item));
+      }
+      updated.pricing=refreshExactNumericPhrase(updated.pricing,claim,item);
+      if(updated.editorialReview&&typeof updated.editorialReview==='object')updated.editorialReview.summary=refreshExactNumericPhrase(updated.editorialReview.summary,claim,item);
+      applied++;
     }else if(item.type==='price_quote'&&claim.amount===item.oldValue&&claim.chargeAmount===item.oldValue){
-      claim.amount=item.newValue;claim.chargeAmount=item.newValue;claim.verifiedAt=today;applied++;
+      claim.amount=item.newValue;claim.chargeAmount=item.newValue;claim.verifiedAt=today;
+      updated.pricing=refreshExactNumericPhrase(updated.pricing,claim,item);
+      if(updated.editorialReview&&typeof updated.editorialReview==='object')updated.editorialReview.summary=refreshExactNumericPhrase(updated.editorialReview.summary,claim,item);
+      applied++;
     }
   }
   if(!applied)return{status:'not_applied'};
