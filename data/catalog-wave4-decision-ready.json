@@ -58,8 +58,11 @@
       "summary": "Clio Manage makes sense for law firms that want documents, case deadlines, contacts, time entries and invoices connected to each matter. This is more specialised than a general CRM, where case administration and billing may require separate tools. Its value depends on whether the whole team consistently records work and follows the same billing process. Test a representative matter from opening to invoice and check the permissions available in the chosen plan. Firms mainly looking to track sales leads may not need the additional case-management structure.",
       "buyerCheck": "Follow a typical matter from opening to billing. Check document permissions, deadlines and whether the selected plan suits your practice.",
       "reviewedAt": "2026-10-10",
-      "sourceUrl": "https://www.clio.com/features/case-management/",
+      "sourceUrl": "https://help.clio.com/hc/en-us/articles/9285920226075-Clio-Manage-Matters-Overview",
       "sourceUrls": [
+        "https://help.clio.com/hc/en-us/articles/9285920226075-Clio-Manage-Matters-Overview",
+        "https://help.clio.com/hc/en-us/articles/9290308200091-Create-and-Upload-Document-Files-and-Folders",
+        "https://help.clio.com/hc/en-us/articles/9289741706779-Time-Entries",
         "https://www.clio.com/features/case-management/",
         "https://www.clio.com/features/legal-billing-software/"
       ],
@@ -92,6 +95,27 @@
         "verifiedAt": "2026-10-10",
         "method": "direct_first_party_review",
         "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://help.clio.com/hc/en-us/articles/9285920226075-Clio-Manage-Matters-Overview",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://help.clio.com/hc/en-us/articles/9290308200091-Create-and-Upload-Document-Files-and-Folders",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://help.clio.com/hc/en-us/articles/9289741706779-Time-Entries",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
       }
     ],
     "pricingDetails": {
@@ -104,14 +128,14 @@
         "type": "capability",
         "value": "case management",
         "status": "verified",
-        "sourceUrl": "https://www.clio.com/features/case-management/",
+        "sourceUrl": "https://help.clio.com/hc/en-us/articles/9285920226075-Clio-Manage-Matters-Overview",
         "verifiedAt": "2026-10-10"
       },
       {
         "type": "capability",
         "value": "document management",
         "status": "verified",
-        "sourceUrl": "https://www.clio.com/features/case-management/",
+        "sourceUrl": "https://help.clio.com/hc/en-us/articles/9290308200091-Create-and-Upload-Document-Files-and-Folders",
         "verifiedAt": "2026-10-10"
       },
       {
@@ -125,7 +149,7 @@
         "type": "capability",
         "value": "time tracking",
         "status": "verified",
-        "sourceUrl": "https://www.clio.com/features/legal-billing-software/",
+        "sourceUrl": "https://help.clio.com/hc/en-us/articles/9289741706779-Time-Entries",
         "verifiedAt": "2026-10-10"
       }
     ]
