@@ -47,6 +47,46 @@ const SECTORS=[
   ['travel','travel agency',/\b(travel (?:agency|business|company)|tour operators?|agencias? de viagens|agências? de viagens)\b/,['crm','tasks','marketing','forms'],['Travel booking systems, settlements and itinerary management']],
   ['agriculture','farming business',/\b(farms?|farming (?:business|company)|agriculture|agricultural business|quinta agricola|exploracao agricola)\b/,['tasks','analytics','crm','automation'],['Farm planning, crops, livestock and traceability']]
 ];
+// A specialist option is a job-specific handoff, never an industry-wide winner.
+// Use only canonical D1/published tools with current first-party capability proof.
+const SPECIALIST_WORKFLOW_TYPES=[
+  {sector:'restaurants',category:'restaurant-pos',title:'Restaurant POS and ordering',
+    job:'restaurant point of sale software',
+    scope:'Restaurant point of sale, ordering and kitchen operations. Check local payments, hardware and required integrations before choosing.'},
+  {sector:'healthcare',context:/\b(veterinary|veterinarian|veterinari[ao]|vet clinic|vet practice|animal hospital)\b/,
+    category:'veterinary',title:'Veterinary practice management',
+    job:'veterinary practice management software',
+    scope:'Clinical records and veterinary practice operations. Check medical workflows, data handling and regional compliance before choosing.'}
+];
+function documentedSpecialistWorkflows(sector,query,tools){
+  const normalized=clean(query),validDate=d=>/^\d{4}-\d{2}-\d{2}$/.test(String(d||''))
+    &&Number.isFinite(Date.parse(d+'T00:00:00Z'))&&Date.parse(d+'T00:00:00Z')<=Date.now()
+    &&Date.now()-Date.parse(d+'T00:00:00Z')<=180*86400000;
+  return SPECIALIST_WORKFLOW_TYPES.filter(spec=>spec.sector===sector.id&&(!spec.context||spec.context.test(normalized)))
+    .flatMap(spec=>{
+      const candidates=(Array.isArray(tools)?tools:[]).filter(t=>{
+        if(t?.category!==spec.category||t.rankingEligible===false||t.categoryReviewRequired===true
+          ||t.editorialReview?.verificationStatus!=='vendor_documented')return false;
+        let host;try{host=new URL(t.sourceUrl).hostname.replace(/^www\./,'')}catch{return false}
+        return (t.decisionClaims||[]).some(c=>{
+          if(c?.type!=='capability'||c.status!=='verified'||!validDate(c.verifiedAt))return false;
+          try{const evidenceHost=new URL(c.sourceUrl).hostname.replace(/^www\./,'');
+            return evidenceHost===host||evidenceHost.endsWith('.'+host)}catch{return false}
+        });
+      }).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
+      if(!candidates.length)return [];
+      return [{
+        specialist:true,category:spec.category,title:spec.title,job:spec.job,scope:spec.scope,
+        catalog_coverage:candidates.length,availability:'documented_specialist_category',
+        category_examples:candidates.slice(0,2).map(t=>({
+          name:t.name,slug:t.slug,profile_url:'https://trytoolscout.org/tools/'+encodeURIComponent(t.slug),
+          status:'manufacturer_documented_category_candidate_not_industry_winner'
+        })),
+        finder_url:'https://trytoolscout.org/?q='+encodeURIComponent(spec.job)+'&source=ai-agent#finder',
+        evidence_scope:'Manufacturer-documented category capabilities. Operational, geographic and buyer-specific suitability still requires verification against the actual requirements.'
+      }];
+    });
+}
 const JOBS={
   crm:['Customers and sales','CRM to manage customer enquiries, relationships and sales follow-ups','Customer records and pipelines; not specialist booking or regulated patient records'],
   tasks:['Projects and team operations','project management software for tasks, team coordination and delivery','Work coordination, not a sector-specific operational platform'],
@@ -104,6 +144,7 @@ export function businessWorkflowGuidance(query,profile={},tools=[]){
       finder_url:'https://trytoolscout.org/?q='+encodeURIComponent(job)+'&source=ai-agent#finder',
       evidence_scope:'Category coverage, not documented suitability for this specific industry.'};
   });
+  const specialistWorkflows=documentedSpecialistWorkflows(sector,query,eligible);
   const rental=sector.id==='short_term_rentals';
   return {
     title:rental?'Managing a short-term rental business needs more than one software job.':'Choose what to improve in your '+sector.label+'.',
@@ -112,8 +153,8 @@ export function businessWorkflowGuidance(query,profile={},tools=[]){
       :'A business has several different software jobs. Pick the operation to improve before comparing products. General software category coverage does not prove specialized operational fit.',
     industry:sector.id,industry_label:sector.label,specialist_requirements:sector.specialist,
     finder_url:'https://trytoolscout.org/?q='+encodeURIComponent(query)+'&source=ai-agent#finder',
-    workflows,decision_status:'needs_workflow_selection',decision_scope:'industry_workflows_not_product_winners',
-    next_step:'Choose a workflow and specify budget, team size, required integrations and must-have capabilities.',
+    workflows,specialist_workflows:specialistWorkflows,decision_status:'needs_workflow_selection',decision_scope:'industry_workflows_not_product_winners',
+    next_step:'Choose a specialist or general workflow and specify budget, team size, required integrations and must-have capabilities.',
     catalog_coverage:{covered_workflows:workflows.filter(w=>w.catalog_coverage>0).length,total_workflows:workflows.length},
     catalog_scale_note:'Catalog coverage is not exhaustive; unlisted products and capabilities may exist.'
   };
