@@ -69,7 +69,7 @@ test('all seven first-party documented dynamic admissions have external manufact
  }
 });
 test('approved affiliate destination wins; sponsored label appears only for verified affiliate route',async()=>{
- const slug='semrush';
+ const slug='systeme-io';
  const entry=affiliate[slug];
  assert.equal(entry.enabled,true);
  const {env,batches}=fixture({registry:{[slug]:entry}});
