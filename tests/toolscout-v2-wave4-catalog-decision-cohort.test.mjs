@@ -99,6 +99,13 @@ test('verified AI integrations never disclose private manufacturer verification 
  const undocumented={...tool,aiIntegration:{...tool.aiIntegration,sources:[],verifiedAt:null}};
  const noProof=candidatePage(undocumented);
  assert.doesNotMatch(noProof,/Manufacturer-confirmed/,'unsubstantiated integrations cannot receive a manufacturer-confirmed badge');
+ const thirdParty={...tool,aiIntegration:{...tool.aiIntegration,sources:['https://review.example.com/fresha/']}};
+ assert.doesNotMatch(candidatePage(thirdParty),/Manufacturer-confirmed/,'external commentary is not manufacturer proof');
+ const future={...tool,aiIntegration:{...tool.aiIntegration,verifiedAt:'2099-12-01'}};
+ assert.doesNotMatch(candidatePage(future),/Manufacturer-confirmed/,'future claim cannot carry a completed verification date');
+ const impossible={...tool,aiIntegration:{...tool.aiIntegration,verifiedAt:'2026-99-99'}};
+ assert.doesNotMatch(candidatePage(impossible),/Manufacturer-confirmed/,'impossible date cannot be verified');
+
 });
 test('hourly supply signal wakes only for first-party complete new vendor cohorts',()=>{
  const existing=original.map(t=>t.slug);
