@@ -35,8 +35,8 @@ test('fully documented future admissions retain review object and preflight befo
  assert.match(s,/ready_trusted_sources/);
  assert.match(s,/research_seeds_total/);
  assert.match(s,/candidate_supply_status/);
- assert.match(s,/MAX_ADMIT_PER_DAY=6/);
- assert.match(s,/MAX_CANDIDATE_CHECKS_PER_CYCLE=12/);
+ assert.match(s,/MAX_ADMIT_PER_DAY=24/);
+ assert.match(s,/MAX_CANDIDATE_CHECKS_PER_CYCLE=32/);
 });
 test('candidate research is never a substitute for two documentary source pages or affiliate route verification',()=>{
  const config=load('data/catalog-engine.json');
