@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {trustedManufacturerEvidence,candidatePage} from '../catalog-autonomy-worker.js';
+import {trustedManufacturerEvidence,candidatePage,unpublishedReadyCatalogSlugs} from '../catalog-autonomy-worker.js';
 import {hasManufacturerDecisionClaim,structuralCatalogIssues} from '../catalog-quality-runtime.js';
 const tools=JSON.parse(fs.readFileSync(new URL('../data/catalog-wave4-decision-ready.json',import.meta.url),'utf8'));
 const original=JSON.parse(fs.readFileSync(new URL('../data/tools.json',import.meta.url),'utf8'));
@@ -52,4 +52,21 @@ test('new profiles never advertise an unmonetized product visit; eligible routes
    assert.match(approved,/target="_blank"/);
    assert.doesNotMatch(approved,/href="https:\/\/www\.(clio|fresha|bqe)\.com/i);
  }
+});
+
+test('hourly supply signal wakes only for first-party complete new vendor cohorts',()=>{
+ const existing=original.map(t=>t.slug);
+ const ready=unpublishedReadyCatalogSlugs([tools],existing);
+ assert.deepEqual(ready.sort(),['bqe-core','clio-manage','fresha']);
+ assert.deepEqual(unpublishedReadyCatalogSlugs([tools],[...existing,...ready]),[],
+   'published canonical D1 slugs must not reactivate hourly admission');
+ const research=JSON.parse(fs.readFileSync(new URL('../data/catalog-research-seeds.json',import.meta.url),'utf8'));
+ assert.deepEqual(unpublishedReadyCatalogSlugs([research.candidates],existing),[],
+   'research seed URLs are never a publication trigger');
+ assert.deepEqual(unpublishedReadyCatalogSlugs([tools,tools],existing).sort(),ready,
+   'duplicate trusted files must not trigger duplicate vendor admissions');
+ const scheduler=fs.readFileSync(new URL('../growth-scheduler.js',import.meta.url),'utf8');
+ assert.match(scheduler,/hasNewDecisionGradeCatalogSupply\(env\)/);
+ assert.match(scheduler,/recoverCoverage\|\|newCandidateSupply/);
+ assert.match(scheduler,/admitTrustedCandidates\(env\)/);
 });

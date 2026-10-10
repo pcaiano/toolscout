@@ -498,6 +498,34 @@ async function syncMarketGaps(env){
   }
   return synced;
 }
+// Signal existing Growth Brain scheduler when a reviewed cohort becomes
+// admission-ready. This is discovery only; the existing documented-source,
+// image, D1 and publication gates remain exclusively in admitTrustedCandidates.
+export function unpublishedReadyCatalogSlugs(candidateLists,existingSlugs){
+  const existing=new Set([...existingSlugs].map(v=>String(v||'').toLowerCase()));
+  const ready=[];
+  for(const candidates of candidateLists||[]){
+    for(const tool of Array.isArray(candidates)?candidates:[]){
+      const slug=String(tool?.slug||'').toLowerCase();
+      if(!slug||existing.has(slug)||!trustedManufacturerEvidence(tool,{decisionGrade:true}))continue;
+      ready.push(slug);
+      existing.add(slug);
+    }
+  }
+  return ready;
+}
+export async function hasNewDecisionGradeCatalogSupply(env){
+  await ensureSchema(env);
+  const config=await assetJson(env,'/data/catalog-engine.json',{});
+  const [staticTools,runtimeTools,candidates]=await Promise.all([
+    assetJson(env,'/data/tools.json',[]),
+    runtimeCandidates(env),
+    Promise.all((config.trustedCandidateFiles||[]).map(file=>
+      assetJson(env,'/'+String(file).replace(new RegExp('^/'),''),[])))
+  ]);
+  const known=[...(Array.isArray(staticTools)?staticTools:[]),...runtimeTools].map(t=>t?.slug);
+  return unpublishedReadyCatalogSlugs(candidates,known).length>0;
+}
 export async function admitTrustedCandidates(env){
   await ensureSchema(env);
   const config=await assetJson(env,'/data/catalog-engine.json',{});

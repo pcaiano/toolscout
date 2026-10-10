@@ -1,7 +1,7 @@
 import {runDistributionNetworkCycle} from './distribution-network-worker.js';
 import {runWithLedger,reapStaleEngineRuns,missionCycleContext} from './engine-run-ledger.js';
 import {runAuditedAffiliateCoverageCycle} from './affiliate-coverage-entry-worker.js';
-import {verifyBatch as verifyCatalogBatch,admitTrustedCandidates,verifyNewsSources,seedBaselineCatalog} from './catalog-autonomy-worker.js';
+import {verifyBatch as verifyCatalogBatch,admitTrustedCandidates,hasNewDecisionGradeCatalogSupply,verifyNewsSources,seedBaselineCatalog} from './catalog-autonomy-worker.js';
 import {runContentSocialIntelligenceCycle} from './content-engine-intelligence-worker.js';
 import {rebalanceDistributionPriorities} from './distribution-priority-worker.js';
 import {growthSupervisorDirective,runGrowthSupervisorAudit} from './growth-supervisor.js';
@@ -107,16 +107,17 @@ export async function runGrowthScheduler(event,env,ctx,{delegate=null}={}){
       try{await runWithLedger(env,{engine:'content',mission:'software_news_source_watch',triggerName:trigger},()=>verifyNewsSources(env))}catch{}
     })());
   }else if(hourly){
-    const [recoverCoverage,recoverNews,recoverQuality,recoverWarnings]=await Promise.all([
+    const [recoverCoverage,recoverNews,recoverQuality,recoverWarnings,newCandidateSupply]=await Promise.all([
       missionNeedsRecovery(env,'catalog','runtime_coverage'),
       missionNeedsRecovery(env,'content','software_news_source_watch'),
       catalogQualityNeedsRecovery(env),
-      catalogWarningsNeedRecovery(env,6)
+      catalogWarningsNeedRecovery(env,6),
+      hasNewDecisionGradeCatalogSupply(env).catch(()=>false)
     ]);
-    if(recoverCoverage||recoverNews||recoverQuality||recoverWarnings){
+    if(recoverCoverage||recoverNews||recoverQuality||recoverWarnings||newCandidateSupply){
       scheduleTask(ctx,(async()=>{
         if(recoverQuality||recoverWarnings){try{await runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:trigger+':recovery',singleFlightMinutes:20},()=>verifyCatalogBatch(env))}catch{}}
-        if(recoverCoverage){try{await runWithLedger(env,{engine:'catalog',mission:'runtime_coverage',triggerName:trigger+':recovery'},()=>admitTrustedCandidates(env))}catch{}}
+        if(recoverCoverage||newCandidateSupply){try{await runWithLedger(env,{engine:'catalog',mission:'runtime_coverage',triggerName:trigger+(newCandidateSupply?':new_documented_cohort':':recovery')},()=>admitTrustedCandidates(env))}catch{}}
         if(recoverNews){try{await runWithLedger(env,{engine:'content',mission:'software_news_source_watch',triggerName:trigger+':recovery'},()=>verifyNewsSources(env))}catch{}}
       })());
     }
