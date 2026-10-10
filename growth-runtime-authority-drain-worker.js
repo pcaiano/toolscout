@@ -4,6 +4,7 @@ import {TOOLSCOUT_CRONS} from './runtime-schedule-contract.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store, max-age=0'};
 const MAX_DRAIN_PASSES=4;
+const MAX_DRAIN_WALL_MS=40000; // reserve the sender/ledger completion window before the hourly closed loop
 const HANDOFF_BATCH_LIMIT=8;
 
 async function first(env,sql,bindings=[]){try{let q=env.DB.prepare(sql);if(bindings.length)q=q.bind(...bindings);return await q.first()}catch{return null}}
@@ -34,9 +35,16 @@ async function internalJson(request,env,ctx,path,{method='POST'}={}){
   try{const headers=new Headers({Authorization:`Bearer ${env.ADMIN_TOKEN}`,'Content-Type':'application/json'});copyMissionCycleHeaders(request,headers);const r=await base.fetch(new Request(new URL(path,request.url),{method,headers}),env,ctx);let payload=null;try{payload=await r.json()}catch{}return {ok:r.ok,status:r.status,payload}}catch(error){return {ok:false,status:0,payload:null,error:String(error?.message||error).slice(0,400)}}
 }
 async function drainSender(request,env,ctx){
-  const passes=[];
+  const passes=[],deadlineAt=Date.now()+MAX_DRAIN_WALL_MS;
+  const defer=async()=>{
+    await record(env,'authority_sender_drain_budget_deferred','deferred',
+      'Bounded sender drain reached its deadline; no further candidate leases or dispatches were started.');
+    return {ok:false,status:'deferred_budget_exhausted',passes};
+  };
   for(let i=0;i<MAX_DRAIN_PASSES;i++){
+    if(Date.now()>=deadlineAt)return defer();
     let state=await senderState(env);
+    if(Date.now()>=deadlineAt)return defer();
     if(state.dispatchReady>0){
       const handoff=await internalJson(request,env,ctx,'/api/distribution/vendor-amplification/public-candidates?limit=8',{method:'GET'});
       const items=Array.isArray(handoff?.payload?.items)?handoff.payload.items:[];
@@ -47,12 +55,16 @@ async function drainSender(request,env,ctx){
       passes.push({pass:i+1,phase:'claimed_not_executable',claimed:state.claimed,dispatchReady:0,handoffStatus:handoff.status,reason:handoff?.payload?.reason||null});
       // The sender endpoint defers a claimed task that has no matching ready candidate.
     }
+    if(Date.now()>=deadlineAt)return defer();
     const dispatch=await internalJson(request,env,ctx,'/api/growth/execution/dispatch');
     state=await senderState(env);
+    if(Date.now()>=deadlineAt)return defer();
     passes.push({pass:i+1,phase:'redispatch',dispatchStatus:dispatch.status,claimedAfter:state.claimed,dispatchReadyAfter:state.dispatchReady});
     if(state.claimed===0&&state.dispatchReady===0&&i>=1)break;
   }
+  if(Date.now()>=deadlineAt)return defer();
   const after=await senderState(env);
+  if(Date.now()>=deadlineAt)return defer();
   if(after.dispatchReady>0){await record(env,'authority_sender_handoff_pending','pending',`${after.dispatchReady} executable sender candidate(s) remain ready for external consumption.`);return {ok:true,status:'pending_external_confirmation',passes,after}}
   await record(env,'authority_sender_drain_no_candidate','warning',`Post-schedule authority drain ended with ${after.claimed} claimed sender task(s) and ${after.dispatchReady} executable candidates after ${MAX_DRAIN_PASSES} bounded passes.`);
   return {ok:true,status:after.claimed?'claimed_without_executable_candidate':'no_executable_sender_candidate',passes,after};
@@ -86,7 +98,7 @@ export async function runAuthorityDrainScheduled(event,env,ctx){
   const req=new Request('https://trytoolscout.org/api/distribution/authority/post-schedule-drain',{headers:missionCycleHeaders(event,'authority_drain_scheduler')});
   try{
     const result=await drainSender(req,env,ctx);
-    return {ok:true,status:'completed',result};
+    return {ok:result?.ok!==false,status:result?.ok===false?'deferred':'completed',result};
   }catch(error){
     await record(env,'authority_sender_drain_error','failed',String(error?.message||error).slice(0,1000));
     throw error;

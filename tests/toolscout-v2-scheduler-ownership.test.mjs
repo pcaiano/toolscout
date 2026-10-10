@@ -186,3 +186,27 @@ test('authority sender work precedes the closed-loop check and has a bounded obs
   assert.equal(SCHEDULED_MISSIONS.authority_closed_loop.owner,'growth_runtime_closed_loop');
   assert.equal(SCHEDULED_MISSIONS.authority_closed_loop.cron,TOOLSCOUT_CRONS.hourly);
 });
+
+
+test('Codex P1: hourly acquisition waits for actual pipeline recovery before releasing sender drain',()=>{
+  const authority=read('authority-acquisition-worker.js');
+  const scheduled=authority.slice(authority.indexOf('export async function runAuthorityAcquisitionScheduled('),authority.indexOf('\nexport default{',authority.indexOf('export async function runAuthorityAcquisitionScheduled(')));
+  assert.match(scheduled,/const task=recoverAuthorityPipeline\(/);
+  assert.match(scheduled,/if\(ctx\?\.waitUntil\)ctx\.waitUntil\(task\)/);
+  assert.match(scheduled,/const result=await task/);
+  assert.doesNotMatch(scheduled,/waitUntil\(task\);return \{scheduled:true,deferred:true\}/);
+});
+
+test('Codex P2: hourly closed loop cannot race an unfinished authority recovery or mutating sender drain',()=>{
+  const compute=read('compute-router-worker.js');
+  const chain=compute.slice(compute.indexOf('const authorityChain=(async()=>{'),compute.indexOf('const combined=Promise.allSettled([growth,authority,primary,seo,newsletterSync,linkableResearch,authorityChain])'));
+  assert.match(chain,/if\(preparation==='deadline'\)\{[\s\S]*?return \{ok:false,status:'deferred',reason:'authority_preparation_window_exhausted'\}/);
+  assert.match(chain,/drain\.then\(result=>result\?\.status==='deferred'\?'deferred':'settled'\)/);
+  assert.match(chain,/if\(drainState==='deadline'\|\|drainState==='deferred'\)\{[\s\S]*?return \{ok:false,status:'deferred',reason:'authority_drain_window_exhausted'\}/);
+  assert.ok(chain.indexOf("return {ok:false,status:'deferred',reason:'authority_drain_window_exhausted'}")<chain.indexOf('await runGrowthClosedLoopScheduled('));
+  const sender=read('growth-runtime-authority-drain-worker.js');
+  assert.match(sender,/const MAX_DRAIN_WALL_MS=40000/);
+  assert.match(sender,/if\(Date\.now\(\)>=deadlineAt\)return defer\(\)/);
+  assert.match(sender,/return \{ok:false,status:'deferred_budget_exhausted',passes\}/);
+  assert.match(sender,/return \{ok:result\?\.ok!==false,status:result\?\.ok===false\?'deferred':'completed',result\}/);
+});

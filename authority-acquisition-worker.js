@@ -233,9 +233,12 @@ export async function runAuthorityAcquisitionScheduled(event,env,ctx){
   if(trigger!==TOOLSCOUT_CRONS.hourly)return null;
   await Promise.all([runVetted(env).catch(()=>null),reconcilePublicPlacements(env).catch(()=>null)]);
   const task=recoverAuthorityPipeline(new Request('https://trytoolscout.org/',{headers:missionCycleHeaders(event,'authority_acquisition_scheduler')}),env,ctx).catch(()=>null);
-  if(ctx?.waitUntil){ctx.waitUntil(task);return {scheduled:true,deferred:true};}
-  await task;
-  return {scheduled:true,deferred:false};
+  // Preserve the Worker background registration, but resolve this scheduler
+  // promise only after the actual authority discovery/recovery has settled.
+  // Otherwise the downstream sender drain races an unfinished queue mutation.
+  if(ctx?.waitUntil)ctx.waitUntil(task);
+  const result=await task;
+  return {scheduled:true,deferred:false,result};
 }
 
 export default{
