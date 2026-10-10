@@ -869,7 +869,7 @@ function pairwiseTradeoffs(evaluated,dims){
   return out;
 }
 // A price score is an editorial signal, not proof that a product is cheaper.
-// Compare only matching, dated first-party monthly subscription or per-seat quotations.
+// Compare only matching, dated first-party monthly subscription, per-seat or per-channel quotations.
 function comparableMonthlyPrice(tool,evaluated,args){
   if(evaluated.plan_coherence?.status==='not_verified')return null;
   const needs=[...(evaluated.requirement_evidence||[]),
@@ -880,7 +880,7 @@ function comparableMonthlyPrice(tool,evaluated,args){
     planGroups.push([catalogNormalize(evaluated.plan_coherence.selected_plan)]);
   const prices=(tool.decisionClaims||[]).filter(q=>
     q?.type==='price_quote'&&manufacturerClaim(tool,'price_quote',q.value)===q&&
-    ['subscription','seat'].includes(q.unit)&&q.unitQuantity===1&&q.billingCycle==='monthly'&&
+    ['subscription','seat','channel'].includes(q.unit)&&q.unitQuantity===1&&q.billingCycle==='monthly'&&
     (args.seat_count==null||q.unit==='seat')&&
     (args.country?q.market===args.country:q.market==='unspecified')&&
     q.promotion!==true&&
@@ -909,7 +909,7 @@ function documentedAffordabilityComparison(found,evaluated,leader,args,dims){
   const unavailable=rows.filter(x=>!x.price);
   if(unavailable.length)return {
     status:'not_comparable',
-    note:'A lower price cannot be established from editorial price scores. At least one product lacks a comparable, manufacturer-documented monthly subscription or per-seat quote for the requested requirements, territory and seat count.',
+    note:'A lower price cannot be established from editorial price scores. At least one product lacks a comparable, manufacturer-documented monthly subscription, per-seat or per-channel quote for the requested requirements, territory and seat count.',
     products_without_comparable_quote:unavailable.map(x=>x.result.name)
   };
   const base=rows[0].price;
@@ -944,7 +944,7 @@ function documentedAffordabilityComparison(found,evaluated,leader,args,dims){
     currency:base.currency,market:base.market,tax_status:base.tax_status,
     unit:base.unit,billing_cycle:base.billing_cycle,
     verified_at:affordable.price.verified_at,
-    note:'This compares matching manufacturer monthly unit prices. For per-seat billing, a requested seat count yields only the arithmetic subscription subtotal before tax, not a verified final invoice, add-ons, billing minimum or licence eligibility. Editorial score gaps are not proofs of feature availability.',
+    note:'This compares matching manufacturer monthly unit prices. A channel price covers one channel only; a per-seat price covers one billed seat. For per-seat billing, a requested seat count yields only the arithmetic subscription subtotal before tax, not a verified final invoice, add-ons, billing minimum or licence eligibility. Editorial score gaps are not proofs of feature availability.',
     what_you_may_lose_vs_best_fit:losses
   };
 }
@@ -1162,7 +1162,7 @@ function recommendationText(data){
   if(data?.decision_status==='needs_specific_features')
     return 'ToolScout cannot rank products by general feature breadth without validated manufacturer evidence. Please list the exact capabilities you need as must_have requirements to receive a qualified shortlist.';
   if(data?.decision_status==='no_qualified_candidate')
-    return 'ToolScout cannot verify a qualified software recommendation for this job and the supplied mandatory requirements. No product is shortlisted because missing manufacturer evidence is not proof of suitability. Specify a narrower workflow, change the constraints or ask for a factual comparison; do not treat an unknown capability as supported.';
+    return 'ToolScout has no evidence-qualified recommendation for this request. The catalog may lack a relevant product, a requested requirement may be unverified, or documented product constraints may exclude candidates. No product is shortlisted. Try a narrower workflow, revise the constraints, or compare named tools to see their individual evidence and blockers.';
   if(data?.decision_status==='needs_workflow_selection'&&data.workflow_guidance){
     const g=data.workflow_guidance;
     const list=(g.workflows||[]).map((w,i)=>String(i+1)+'. '+w.title+': '+w.scope+' ('+w.finder_url+')').join('\n');
