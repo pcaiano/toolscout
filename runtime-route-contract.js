@@ -90,6 +90,7 @@ export const ROUTE_GROUPS=Object.freeze([
   {id:'audience_reply_prepare',owner:'audience_runtime',plane:'executor',methods:['POST'],exact:['/api/audience/bluesky-reply/prepare']},
   {id:'catalog_autonomy_status',owner:'catalog_autonomy_runtime',plane:'signals',methods:['GET'],exact:['/api/catalog-autonomy/status','/data/catalog-inventory.json','/api/catalog-inventory']},
   {id:'catalog_autonomy_run',owner:'catalog_autonomy_runtime',plane:'executor',methods:['POST'],exact:['/api/catalog-autonomy/run']},
+  {id:'catalog_reviewed_research_intake',owner:'catalog_autonomy_runtime',plane:'control',methods:['POST'],exact:['/api/catalog-autonomy/research-stage']},
   {id:'funnel_events',owner:'funnel_runtime',plane:'signals',methods:['POST','OPTIONS'],exact:['/api/events']},
   {id:'dynamic_tracking',owner:'dynamic_runtime',plane:'signals',methods:['POST'],exact:['/api/click','/api/search']},
   {id:'dynamic_content_signals',owner:'dynamic_runtime',plane:'signals',methods:['GET'],exact:['/api/content-signals']},

@@ -272,8 +272,12 @@ export async function executeCatalogGrowthTask(env,task={}){
       return{ok:true,verified:true,admitted:false,already_admitted:true,slug,profile,toolscoutUrl:BASE+'/tools/'+slug};
     }
   }
-  const gap=await env.DB.prepare("SELECT signals,sources_json,examples_json FROM catalog_market_gaps WHERE tool_slug=?").bind(slug).first();
+  const gap=await env.DB.prepare("SELECT signals,sources_json,examples_json,status FROM catalog_market_gaps WHERE tool_slug=?").bind(slug).first();
   if(!gap)return{ok:false,verified:false,reason:'catalog_gap_not_found',slug};
+  // Existing contracts may outlive a taxonomy demotion by the market-gap
+  // classifier. Never let them re-promote an invalid software identity.
+  if(gap.status!=='research_required')
+    return{ok:true,verified:false,admitted:false,reason:'market_gap_not_product_qualified',slug};
   if(Number(gap.signals||0)<2)return{ok:true,verified:false,reason:'insufficient_independent_market_signals',slug};
   let examples=[],sources=[];try{examples=JSON.parse(gap.examples_json||'[]')}catch{}try{sources=JSON.parse(gap.sources_json||'[]')}catch{}
   const official=await discover(slug,examples);
@@ -293,7 +297,7 @@ export async function executeCatalogGrowthTask(env,task={}){
     (hint?.strengths||[]).length>=2&&(hint?.limitations||[]).length>=2&&(hint?.tradeoffs||[]).length>=1&&
     Boolean(hint?.pricingDetails?.freePlanStatus)&&hasManufacturerDecisionClaim(hint);
   if(!documentedReview?.summary||documentedReview.verificationStatus==='catalog_only'||documentedReview?.handsOnTested===true||!datedDocument||!ownedDoc(documentedSource)||!decisionGrade){
-    await env.DB.prepare("UPDATE catalog_market_gaps SET status='research_required',updated_at=datetime('now') WHERE tool_slug=?").bind(slug).run().catch(()=>{});
+    await env.DB.prepare("UPDATE catalog_market_gaps SET updated_at=datetime('now') WHERE tool_slug=? AND status='research_required'").bind(slug).run().catch(()=>{});
     return{ok:true,verified:false,admitted:false,reason:'manufacturer_editorial_documentation_required',slug};
   }
   const corpus=official.title+' '+official.description+' '+official.text,extractedFeatures=capabilities(corpus);
@@ -328,10 +332,16 @@ export async function executeCatalogGrowthTask(env,task={}){
   profile.evidence=documentedEvidence;
   const quality=await auditCatalogTool(env,profile,{officialPage:official});
   if(!quality.publishable){
-    await env.DB.prepare("UPDATE catalog_market_gaps SET status='research_required',updated_at=datetime('now') WHERE tool_slug=?").bind(slug).run().catch(()=>{});
+    await env.DB.prepare("UPDATE catalog_market_gaps SET updated_at=datetime('now') WHERE tool_slug=? AND status='research_required'").bind(slug).run().catch(()=>{});
     return{ok:true,verified:false,reason:quality.issues.includes('visual_asset_unresolved')?'visual_asset_unresolved':'catalog_quality_gate_failed',slug,issues:quality.issues,warnings:quality.warnings,sourceUrl:official.url};
   }
   Object.assign(profile,quality.repairedTool);
+  // A later discovery refresh may have demoted the gap while its external
+  // source fetch was in progress. Do not publish a candidate for that stale
+  // execution contract.
+  const currentGap=await env.DB.prepare("SELECT status FROM catalog_market_gaps WHERE tool_slug=?").bind(slug).first();
+  if(currentGap?.status!=='research_required')
+    return{ok:true,verified:false,admitted:false,reason:'market_gap_demoted_during_research',slug};
   await env.DB.prepare("INSERT INTO catalog_runtime_candidates(tool_slug,profile_json,status,source_status,verified_at,updated_at) VALUES(?,?,'published','ok',datetime('now'),datetime('now')) ON CONFLICT(tool_slug) DO UPDATE SET profile_json=excluded.profile_json,status='published',source_status='ok',verified_at=datetime('now'),updated_at=datetime('now')").bind(slug,JSON.stringify(profile)).run();
   await env.DB.prepare("INSERT INTO catalog_runtime_state(tool_slug,source_url,source_status,http_status,final_url,quality_status,static_last_verified,last_checked_at,updated_at) VALUES(?,?,'ok',200,?,'healthy',date('now'),datetime('now'),datetime('now')) ON CONFLICT(tool_slug) DO UPDATE SET source_url=excluded.source_url,source_status='ok',http_status=200,final_url=excluded.final_url,quality_status='healthy',static_last_verified=date('now'),last_checked_at=datetime('now'),updated_at=datetime('now')").bind(slug,official.url,official.url).run().catch(()=>{});
   await env.DB.prepare("UPDATE catalog_market_gaps SET status='published',updated_at=datetime('now') WHERE tool_slug=?").bind(slug).run();

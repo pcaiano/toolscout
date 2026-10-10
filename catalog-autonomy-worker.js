@@ -629,7 +629,9 @@ export function classifyMarketGapEvidence(gap){
   const slug=String(gap?.slug||'').toLowerCase();
   if(!/^[a-z0-9][a-z0-9-]*$/.test(slug))
     return{status:'discovery_only',reason:'invalid_product_identity',independent_product_hosts:0};
-  const productHosts=new Set(),taxonomyHosts=new Set();
+  const productHosts=new Map(),taxonomyHosts=new Set();
+  const publisherNames=(Array.isArray(gap?.sources)?gap.sources:[])
+    .map(v=>String(v||'').toLowerCase().replace(/[^a-z0-9]/g,'')).filter(x=>x.length>=4);
   for(const raw of Array.isArray(gap?.exampleUrls)?gap.exampleUrls:[]){
     try{
       const u=new URL(String(raw));
@@ -640,14 +642,19 @@ export function classifyMarketGapEvidence(gap){
       const taxonomy=parts.some(part=>['category','categories','feature','features','faq','tag','tags','topics','search','browse','filter','pricing'].includes(part))
         ||/(?:-software|-tools)$/.test(terminal)&&terminal!==slug;
       if(taxonomy){taxonomyHosts.add(host);continue;}
-      // An exact named product URL on two independent directories is a
-      // research signal, never evidence of product functionality or pricing.
-      if(parts.length&&terminal===slug)productHosts.add(host);
+      if(!parts.length||terminal!==slug)continue;
+      // Correlate each cited publisher to its own site, not two unrelated
+      // source labels with two mirrored subdomains of the same publisher.
+      const labels=host.split('.');
+      const suffix=labels.slice(-2).join('.');
+      const multiSuffix=['co.uk','org.uk','com.au','co.jp','co.in','com.br','com.mx','com.tr','co.nz'].includes(suffix);
+      const publisherRoot=labels.slice(multiSuffix?-3:-2).join('.');
+      const flat=publisherRoot.replace(/[^a-z0-9]/g,'');
+      const matchedPublisher=publisherNames.find(label=>flat.includes(label));
+      if(matchedPublisher)productHosts.set(publisherRoot,matchedPublisher);
     }catch{}
   }
-  const independentSources=new Set((Array.isArray(gap?.sources)?gap.sources:[])
-    .map(v=>String(v||'').toLowerCase().trim()).filter(Boolean));
-  const independent=Math.min(productHosts.size,independentSources.size);
+  const independent=Math.min(productHosts.size,new Set(productHosts.values()).size);
   return independent>=2
     ?{status:'research_required',reason:'independent_product_page_signals',independent_product_hosts:independent,taxonomy_hosts:taxonomyHosts.size}
     :{status:'discovery_only',reason:'insufficient_product_identity_signals',independent_product_hosts:independent,taxonomy_hosts:taxonomyHosts.size};
@@ -695,7 +702,11 @@ export async function hasNewDecisionGradeCatalogSupply(env){
       assetJson(env,'/'+String(file).replace(new RegExp('^/'),''),[])))
   ]);
   const known=[...(Array.isArray(staticTools)?staticTools:[]),...runtimeTools].map(t=>t?.slug);
-  return unpublishedReadyCatalogSlugs(candidates,known).length>0;
+  if(unpublishedReadyCatalogSlugs(candidates,known).length>0)return true;
+  // A newly staged D1 candidate is already preflighted for manufacturer
+  // evidence, and should wake existing incident-recovery ownership.
+  const staged=await env.DB.prepare("SELECT tool_slug FROM catalog_runtime_candidates WHERE status='research_ready' LIMIT 1").first();
+  return Boolean(staged?.tool_slug);
 }
 export async function admitTrustedCandidates(env){
   // The bounded supplier must include D1/schema, registry, seed and candidate-file
@@ -724,6 +735,12 @@ export async function admitTrustedCandidates(env){
   if(setupDeadline('affiliate_registry'))return setupDeadline('affiliate_registry');
   const seeds=await assetJson(env,'/data/catalog-research-seeds.json',{candidates:[]});
   if(setupDeadline('research_seeds'))return setupDeadline('research_seeds');
+  // Reviewed candidates enter the same admission contract directly from
+  // canonical D1. No code deployment or parallel catalog is required per cohort.
+  // Staged records are never part of runtimeCandidates() or public surfaces.
+  const staged=(await env.DB.prepare(`SELECT tool_slug,profile_json FROM catalog_runtime_candidates
+    WHERE status='research_ready' ORDER BY updated_at ASC LIMIT 128`).all()).results||[];
+  if(setupDeadline('d1_research_ready'))return setupDeadline('d1_research_ready');
   // Recent source failures remain unpublished. Defer repeated retries, never
   // convert a blocked vendor into evidence or spend this cycle's network budget
   // on the same failed manufacturer every hour.
@@ -747,6 +764,15 @@ export async function admitTrustedCandidates(env){
       pool.push({raw,slug,priority,ready:trustedManufacturerEvidence(raw,{decisionGrade:true}),sequence:sequence++});
     }
   }
+  for(const row of staged){
+    if(setupDeadline('d1_candidate_pool'))return setupDeadline('d1_candidate_pool');
+    let raw=null;try{raw=JSON.parse(row.profile_json||'null')}catch{}
+    const slug=String(row.tool_slug||'').toLowerCase();
+    if(!raw||raw.slug!==slug||existing.has(slug)||seen.has(slug))continue;
+    seen.add(slug);
+    const priority=catalogCandidateResearchPriority(raw,affiliateRegistry.get(slug)||null,config);
+    pool.push({raw,slug,priority,ready:trustedManufacturerEvidence(raw,{decisionGrade:true}),origin:'d1_research_ready',sequence:sequence++});
+  }
   const categoryCounts=new Map();
   for(const t of staticTools||[]){const key=String(t.category||'');categoryCounts.set(key,(categoryCounts.get(key)||0)+1)}
   const target=Math.max(1,Number(config?.coverage?.minimumToolsPerIntentCategory||5));
@@ -764,6 +790,25 @@ export async function admitTrustedCandidates(env){
     // Pure preflight before any network fetch. Undocumented research seeds
     // cannot become published software merely through a reachable homepage.
     if(!trustedManufacturerEvidence(raw,{decisionGrade:true})){held++;missingManufacturerEvidence++;await logEvent(env,slug,'catalog_candidate_manufacturer_evidence_hold','completed','Vendor documentation or claim-level decision evidence is insufficient for publication.',{required:'decision_grade_manufacturer_evidence'});continue}
+    if(item.origin==='d1_research_ready'){
+      // API-supplied research attestation alone cannot publish a product:
+      // independently check two distinct private manufacturer document pages
+      // before applying the same visual/source/editorial admission gates.
+      const documents=trustedCandidateOfficialFallbackUrls(raw).slice(0,3);
+      const evidenceChecks=await mapLimit(documents,2,url=>fetchOfficial(url,{deadlineAt:startedAt+MAX_ADMISSION_WALL_MS}));
+      if(budgetStop())break;
+      const accessible=new Set(evidenceChecks.filter((result,index)=>
+        result?.status==='ok'&&sameManufacturerHost(result.finalUrl,raw.sourceUrl)&&
+        documents[index]&&publicHttps(result.finalUrl)?.pathname!=='/'
+      ).map(result=>result.finalUrl));
+      if(accessible.size<2){
+        held++;
+        await logEvent(env,slug,'catalog_candidate_manufacturer_docs_hold','completed',
+          'Two independently fetched first-party manufacturer documents were not reachable. Research remains private.',
+          {document_checks:evidenceChecks.length,reachable_distinct:accessible.size});
+        continue;
+      }
+    }
     const source=await fetchTrustedCandidateOfficialSource(raw);
     if(budgetStop())break; // homepage and documentation fallbacks may consume several timeouts
     if(config?.admission?.requireReachableOfficialSource!==false&&source.status!=='ok'){
@@ -809,6 +854,7 @@ export async function admitTrustedCandidates(env){
   }
   return{ok:true,considered,admitted,held,missing_manufacturer_evidence:missingManufacturerEvidence,
     trusted_sources_total:seen.size,ready_trusted_sources:pool.filter(x=>x.ready).length,
+    d1_research_ready_considered:staged.length,
     cycle_budget_exhausted:cycleBudgetExhausted,cycle_wall_budget_ms:MAX_ADMISSION_WALL_MS,
     cycle_elapsed_ms:Date.now()-startedAt,market_gaps_deferred,snapshot_deferred,
     official_source_retries_deferred:sourceRetriesDeferred,official_source_retry_hours:OFFICIAL_SOURCE_HOLD_COOLDOWN_HOURS,
@@ -1034,9 +1080,10 @@ export async function publicRuntimeRankingResponse(env,path){return renderRuntim
 
 async function status(env){
   await ensureSchema(env);
-  const [states,candidates,gaps,events,newsSources,newsCandidates,documents]=await Promise.all([
+  const [states,candidates,staged,gaps,events,newsSources,newsCandidates,documents]=await Promise.all([
     env.DB.prepare(`SELECT COUNT(*) total,SUM(CASE WHEN quality_status='healthy' THEN 1 ELSE 0 END) healthy,SUM(CASE WHEN quality_status='change_detected' THEN 1 ELSE 0 END) changed,SUM(CASE WHEN quality_status='confirmed_broken' THEN 1 ELSE 0 END) suppressed,SUM(CASE WHEN source_status NOT IN ('ok','broken') THEN 1 ELSE 0 END) warnings,MAX(last_checked_at) last_checked_at FROM catalog_runtime_state`).first(),
     env.DB.prepare(`SELECT COUNT(*) total, SUM(CASE WHEN source_status='baseline_snapshot' THEN 1 ELSE 0 END) baseline_seeded, MAX(CASE WHEN source_status IS NULL OR source_status!='baseline_snapshot' THEN verified_at END) last_admitted_at FROM catalog_runtime_candidates WHERE status IN ('published','admitted_coverage','quality_hold')`).first(),
+    env.DB.prepare(`SELECT COUNT(*) total FROM catalog_runtime_candidates WHERE status='research_ready'`).first(),
     env.DB.prepare(`SELECT COUNT(*) total FROM catalog_market_gaps WHERE status='research_required'`).first(),
     env.DB.prepare(`SELECT COUNT(*) n FROM catalog_runtime_events WHERE created_at>=datetime('now','-7 days')`).first(),
     env.DB.prepare(`SELECT COUNT(*) total,MAX(last_checked_at) last_checked_at FROM software_news_sources WHERE status='active'`).first(),
@@ -1054,11 +1101,62 @@ async function status(env){
   const baselinePresent=[...originalSlugs].filter(slug=>snapshot.candidateMap?.has(slug)).length;
   return{ok:true,version:'1.3',storage:{mode:'d1_primary_static_fallback',baseline_total:baselineTotal,baseline_seeded:baselineSeeded,
     baseline_present:baselinePresent,baseline_revised:Math.max(0,baselinePresent-baselineSeeded),
-    baseline_remaining:Math.max(0,baselineTotal-baselinePresent),migration_phase:snapshot.degraded?'runtime_degraded':baselinePresent>=baselineTotal&&baselineTotal>0?'all_baseline_records_in_d1':'baseline_seeding',legacy_html_preserved:true},state:{total:Number(states?.total||0),healthy:Number(states?.healthy||0),changed:Number(states?.changed||0),suppressed:Number(states?.suppressed||0),warnings:Number(states?.warnings||0),last_checked_at:states?.last_checked_at||null},runtime_candidates:Math.max(0,Number(candidates?.total||0)-baselineSeeded),last_admitted_at:candidates?.last_admitted_at||null,document_watch:{product_coverage:watchable,two_source_coverage:multiSource,products_baselined:Number(documents?.baselined||0),confirmed_changes_7d:Number(documents?.changes_7d||0),last_baseline_at:documents?.last_baseline_at||null,rule:'First-party documentation is monitored; conservative prices, explicit plan limits and documented global capability retirements can update D1 after two identical observations. Other changes are not asserted.'},market_gaps:Number(gaps?.total||0),events_7d:Number(events?.n||0),whats_new:{official_sources:Number(newsSources?.total||0),last_source_check:newsSources?.last_checked_at||null,candidates:Number(newsCandidates?.total||0),last_candidate_at:newsCandidates?.last_candidate_at||null},rule:'Once admitted, runtime tools remain full catalog peers during recoverable quality holds, matching static-tool behavior. Only confirmed broken sources are suppressed. Official-source verification is required, and affiliate economics never affect catalog admission or ranking.'};
+    baseline_remaining:Math.max(0,baselineTotal-baselinePresent),migration_phase:snapshot.degraded?'runtime_degraded':baselinePresent>=baselineTotal&&baselineTotal>0?'all_baseline_records_in_d1':'baseline_seeding',legacy_html_preserved:true},state:{total:Number(states?.total||0),healthy:Number(states?.healthy||0),changed:Number(states?.changed||0),suppressed:Number(states?.suppressed||0),warnings:Number(states?.warnings||0),last_checked_at:states?.last_checked_at||null},runtime_candidates:Math.max(0,Number(candidates?.total||0)-baselineSeeded),last_admitted_at:candidates?.last_admitted_at||null,research_intake:{ready_private:Number(staged?.total||0),publication_owner:'existing_runtime_coverage',requires_live_first_party_documentation:true},document_watch:{product_coverage:watchable,two_source_coverage:multiSource,products_baselined:Number(documents?.baselined||0),confirmed_changes_7d:Number(documents?.changes_7d||0),last_baseline_at:documents?.last_baseline_at||null,rule:'First-party documentation is monitored; conservative prices, explicit plan limits and documented global capability retirements can update D1 after two identical observations. Other changes are not asserted.'},market_gaps:Number(gaps?.total||0),events_7d:Number(events?.n||0),whats_new:{official_sources:Number(newsSources?.total||0),last_source_check:newsSources?.last_checked_at||null,candidates:Number(newsCandidates?.total||0),last_candidate_at:newsCandidates?.last_candidate_at||null},rule:'Once admitted, runtime tools remain full catalog peers during recoverable quality holds, matching static-tool behavior. Only confirmed broken sources are suppressed. Official-source verification is required, and affiliate economics never affect catalog admission or ranking.'};
+}
+
+// Accept verified *research* records through the existing internal admin plane.
+// The hourly Catalog Autonomy runner remains the sole publication owner.
+export async function stageReviewedCatalogCandidate(env,raw){
+  if(!raw||typeof raw!=='object'||Array.isArray(raw))return{ok:false,reason:'invalid_candidate'};
+  const slug=String(raw.slug||'').toLowerCase();
+  if(!/^[a-z0-9][a-z0-9-]{0,79}$/.test(slug)||raw.slug!==slug
+    ||typeof raw.name!=='string'||!raw.name.trim()||raw.name.length>120)
+    return{ok:false,reason:'invalid_candidate_identity'};
+  const config=await assetJson(env,'/data/catalog-engine.json',null);
+  const baseline=await assetJson(env,'/data/tools.json',null);
+  if(!config||!Array.isArray(baseline))return{ok:false,reason:'catalog_assets_unavailable'};
+  if(baseline.some(x=>x.slug===slug))return{ok:false,reason:'existing_published_tool'};
+  const issues=validCandidate(raw,config);
+  if(issues.length)return{ok:false,reason:'incomplete_catalog_parity',issues};
+  if(!trustedManufacturerEvidence(raw,{decisionGrade:true}))
+    return{ok:false,reason:'manufacturer_decision_evidence_required'};
+  const serialized=JSON.stringify(raw);
+  if(serialized.length>60000)return{ok:false,reason:'candidate_too_large'};
+  await ensureSchema(env);
+  // Never replace a published profile, baseline mirror or a quality-held
+  // record through research intake. An update is permitted only while staged.
+  const write=await env.DB.prepare(`INSERT INTO catalog_runtime_candidates
+    (tool_slug,profile_json,status,source_status,verified_at,updated_at)
+    VALUES(?,?,'research_ready','documented_research_unchecked',NULL,datetime('now'))
+    ON CONFLICT(tool_slug) DO UPDATE SET
+      profile_json=excluded.profile_json,updated_at=datetime('now')
+    WHERE catalog_runtime_candidates.status='research_ready'`)
+    .bind(slug,serialized).run();
+  if(Number(write?.meta?.changes??write?.changes??0)<1)
+    return{ok:false,reason:'existing_non_staged_profile'};
+  await logEvent(env,slug,'catalog_candidate_research_staged','completed',
+    'Decision-grade first-party reviewed candidate staged privately. Hourly admission must still verify official source, visual asset and full quality gates.',
+    {source:'authenticated_research_intake',public:false,admitted:false});
+  return{ok:true,slug,status:'research_ready',admitted:false,published:false,
+    next:'existing_hourly_catalog_runtime_coverage_admission'};
+}
+async function handleReviewedCatalogStage(request,env){
+  if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});
+  if(!(request.headers.get('Content-Type')||'').toLowerCase().includes('application/json'))
+    return Response.json({error:'json_required'},{status:415,headers:JSON_H});
+  const body=await request.text();
+  if(body.length>60000)return Response.json({error:'candidate_too_large'},{status:413,headers:JSON_H});
+  let candidate=null;try{candidate=JSON.parse(body)}catch{
+    return Response.json({error:'invalid_json'},{status:400,headers:JSON_H});
+  }
+  const result=await stageReviewedCatalogCandidate(env,candidate);
+  return Response.json(result,{status:result.ok?202:result.reason==='existing_published_tool'||result.reason==='existing_non_staged_profile'?409:422,headers:JSON_H});
 }
 
 export async function handleCatalogAutonomyRoute(request,env){
   const u=new URL(request.url);
+  if(request.method==='POST'&&u.pathname==='/api/catalog-autonomy/research-stage')
+    return handleReviewedCatalogStage(request,env);
   if(request.method==='GET'&&u.pathname==='/api/catalog-autonomy/status'){
     if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});
     return Response.json(await status(env),{headers:JSON_H});
@@ -1079,6 +1177,8 @@ export async function handleCatalogAutonomyRoute(request,env){
 export default {
   async fetch(request,env,ctx){
     const u=new URL(request.url);
+    if(request.method==='POST'&&u.pathname==='/api/catalog-autonomy/research-stage')
+      return handleReviewedCatalogStage(request,env);
     if(request.method==='GET'&&u.pathname==='/api/catalog-autonomy/status'){if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});return Response.json(await status(env),{headers:JSON_H})}
     if(request.method==='POST'&&u.pathname==='/api/catalog-autonomy/run'){if(!authorized(request,env))return Response.json({error:'unauthorized'},{status:401,headers:JSON_H});const verify=await runWithLedger(env,{engine:'catalog',mission:'runtime_quality',triggerName:'manual_api',singleFlightMinutes:8},()=>verifyBatch(env));const admit=await runWithLedger(env,{engine:'catalog',mission:'runtime_coverage',triggerName:'manual_api',singleFlightMinutes:8},()=>admitTrustedCandidates(env));return Response.json({ok:true,verify,admit},{headers:JSON_H})}
     if(request.method==='GET'&&u.pathname==='/data/tools.json'){
