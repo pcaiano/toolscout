@@ -106,10 +106,13 @@ test('compute router dispatches growth scheduling while growth scheduler owns th
   const drain=read('growth-runtime-authority-drain-worker.js');
   assert.match(drain,/export async function runAuthorityDrainScheduled/);
   assert.match(drain,/authority_drain_scheduler/);
-  const hourlyCore=compute.indexOf('await Promise.allSettled([growth,authority,primary,seo,newsletterSync,linkableResearch])');
+  const authorityPrep=compute.indexOf("Promise.allSettled([authority,primary]).then(()=> 'settled')");
   const closedLoopCall=compute.indexOf('await runGrowthClosedLoopScheduled(scheduledEvent,env,ctx)');
-  const drainCall=compute.indexOf('await runAuthorityDrainScheduled(scheduledEvent,env,ctx)');
-  assert.ok(hourlyCore>=0&&drainCall>hourlyCore,'authority sender drain must execute after hourly core scheduling, including newsletter sync, settles');
+  const drainCall=compute.indexOf('const drain=runAuthorityDrainScheduled(scheduledEvent,env,ctx)');
+  assert.ok(authorityPrep>=0&&drainCall>authorityPrep,
+    'sender drain must follow bounded preparation by the actual authority and execution owners, not wait on unrelated newsletter or SEO work');
+  assert.match(compute,/preparationTimer=setTimeout\(\(\)=>resolve\('deadline'\),30000\)/,
+    'slow upstream work cannot indefinitely prevent the authority sender drain');
   assert.doesNotMatch(compute,/runGrowthRuntimeIntegrityScheduled/,'observer layer must not own a second authority recovery execution');
   assert.ok(closedLoopCall>drainCall,'canonical authority closed loop must observe handoff only after the named sender drain owner has dispatched runnable work');
   assert.match(compute,/trigger===TOOLSCOUT_CRONS\.hourly\|\|trigger===TOOLSCOUT_CRONS\.daily/);
