@@ -14,6 +14,7 @@ const MAX_NEWS_SOURCE_CHECKS_PER_CYCLE=4;
 const MAX_ADMIT_PER_DAY=6;
 const MAX_BASELINE_SEED_PER_CYCLE=40; // bounded migration inside the existing catalog autonomy engine
 const MAX_CANDIDATE_CHECKS_PER_CYCLE=12;
+const MAX_RESEARCH_SEEDS_PER_CYCLE=80; // hourly discovery intake; never bypasses manufacturer/editorial admission
 const WARNING_RETRY_HOURS=6;
 const MAX_WARNING_RETRIES_PER_CYCLE=2;
 const FETCH_TIMEOUT_MS=6000;
@@ -466,7 +467,12 @@ export async function verifyBatch(env){
       .bind(slug,verifyUrl,result.status,result.httpStatus,result.finalUrl,canonicalFingerprint,pendingFingerprint,confirmations,contentChanged,broken,quality,staticVerified,lastChange).run();
   });
   runtimeCache.at=0;
-  return{ok:true,checked,healthy,changed,suppressed,warnings,documentation_checked:documentationChecked,documentation_baselined:documentationBaselined,documentation_changed:documentationChanged,documentation_warnings:documentationWarnings,verified_facts_corrected:factsCorrected,verified_fact_proposals:factsProposed,batch_limit:MAX_VERIFY_PER_CYCLE,warning_retry_hours:WARNING_RETRY_HOURS,max_warning_retries_per_cycle:MAX_WARNING_RETRIES_PER_CYCLE,evidence:'official_homepage_and_first_party_documentation',write_policy:'due_check_only'};
+  const researchSupply=await syncCatalogResearchSupply(env,{knownTools:all}).catch(async error=>{
+    const reason=safeText(error?.message||error,250);
+    await logEvent(env,null,'catalog_research_supply_failed','failed','Bounded discovery intake failed without blocking ongoing official document verification.',{error:reason});
+    return{ok:false,reason,staged:0};
+  });
+  return{ok:true,checked,healthy,changed,suppressed,warnings,documentation_checked:documentationChecked,documentation_baselined:documentationBaselined,documentation_changed:documentationChanged,documentation_warnings:documentationWarnings,verified_facts_corrected:factsCorrected,verified_fact_proposals:factsProposed,batch_limit:MAX_VERIFY_PER_CYCLE,warning_retry_hours:WARNING_RETRY_HOURS,max_warning_retries_per_cycle:MAX_WARNING_RETRIES_PER_CYCLE,evidence:'official_homepage_and_first_party_documentation',write_policy:'due_check_only',research_supply:researchSupply};
 }
 function validCandidate(candidate,config){
   const allowed=new Set(config?.admission?.allowedCatalogCategories||[]);
@@ -533,6 +539,48 @@ export function catalogCandidateResearchPriority(candidate,affiliateStatus=null,
     if(raw&&!/pending|unknown|none|not available|no program/.test(raw)){affiliate=knownAffiliate;affiliateSignal='candidate_program_evidence'}
   }
   return{score:ai+affiliate+(ai>0&&affiliate>0?combo:0),ai,affiliate,aiSignal,affiliateSignal};
+}
+// Directory discovery is a supply signal, not proof of manufacturer features,
+// commercial terms, two independent demand signals or decision-grade editorial.
+// Stage leads in the existing D1 market-gap queue without publishing any tool.
+export function selectCatalogResearchLeads(leads,existingGapSlugs=[],knownToolSlugs=[],limit=MAX_RESEARCH_SEEDS_PER_CYCLE){
+  const excluded=new Set([...existingGapSlugs,...knownToolSlugs].map(x=>String(x||'').toLowerCase()));
+  const seen=new Set(),selected=[];
+  for(const lead of Array.isArray(leads)?leads:[]){
+    const slug=String(lead?.slug||'').toLowerCase(),candidateUrl=String(lead?.candidateUrl||'');
+    if(!/^[a-z0-9][a-z0-9-]*$/.test(slug)||seen.has(slug)||excluded.has(slug))continue;
+    const u=publicHttps(candidateUrl);
+    if(!u||!u.hostname||/\s/.test(candidateUrl))continue;
+    seen.add(slug);
+    selected.push({slug,candidateUrl:u.href});
+    if(selected.length>=Math.max(1,Math.min(200,Number(limit)||MAX_RESEARCH_SEEDS_PER_CYCLE)))break;
+  }
+  return selected;
+}
+export async function syncCatalogResearchSupply(env,{knownTools=null,limit=MAX_RESEARCH_SEEDS_PER_CYCLE}={}){
+  await ensureSchema(env);
+  const directory=await assetJson(env,'/data/catalog-research-seeds-scale.json',null);
+  if(directory?.schemaVersion!==1||directory?.status!=='research_only_not_catalog'||!Array.isArray(directory.candidates))
+    return{ok:false,reason:'research_supply_asset_unavailable_or_invalid',staged:0};
+  const gaps=await env.DB.prepare('SELECT tool_slug FROM catalog_market_gaps').all();
+  const known=Array.isArray(knownTools)?knownTools:await mergedTools(env);
+  const existing=(gaps.results||[]).map(x=>x.tool_slug);
+  const selected=selectCatalogResearchLeads(directory.candidates,existing,known.map(x=>x.slug),limit);
+  let staged=0;
+  for(const lead of selected){
+    const result=await env.DB.prepare(`INSERT OR IGNORE INTO catalog_market_gaps
+      (tool_slug,signals,sources_json,examples_json,status,updated_at)
+      VALUES(?,1,?,?,'research_required',datetime('now'))`)
+      .bind(lead.slug,JSON.stringify(['awesome-selfhosted-directory']),JSON.stringify([lead.candidateUrl])).run();
+    staged+=Number(result?.meta?.changes||result?.changes||0);
+  }
+  if(staged>0)await logEvent(env,null,'catalog_research_supply_staged','completed',
+    'Research-only directory leads were queued without manufacturer proof, editorial admission, public profiles or monetized links.',
+    {staged,source:'awesome-selfhosted-directory',directory_leads:directory.candidates.length,
+      existing_before:existing.length,max_per_cycle:MAX_RESEARCH_SEEDS_PER_CYCLE});
+  return{ok:true,staged,source:'awesome-selfhosted-directory',
+    directory_leads:directory.candidates.length,queued_before:existing.length,
+    admission:'blocked_until_decision_grade_first_party_evidence',max_per_cycle:MAX_RESEARCH_SEEDS_PER_CYCLE};
 }
 async function syncMarketGaps(env){
   const report=await assetJson(env,'/reports/competitive-gap-signals.json',{gaps:[]});
@@ -729,8 +777,15 @@ function aiInteroperabilitySection(tool){
   // Manufacturer documentation is private editorial evidence, never a
   // public non-monetized outbound link on runtime software profiles.
   // Manufacturer evidence stays in the private catalog; no research-process prose is published.
-  const hasManufacturerProof=verified&&(p.sources||[]).some(x=>/^https:\/\//.test(String(x||'')));
-  const datedManufacturerProof=hasManufacturerProof&&/^\d{4}-\d{2}-\d{2}$/.test(String(p.verifiedAt||''));
+  const hasManufacturerProof=verified&&(p.sources||[]).some(x=>{
+    try{return new URL(x).pathname!=='/'&&sameManufacturerHost(x,tool.sourceUrl)}catch{return false}
+  });
+  const verificationDate=String(p.verifiedAt||'');
+  const verifiedDateMs=Date.parse(verificationDate+'T00:00:00Z');
+  const validVerificationDate=/^\d{4}-\d{2}-\d{2}$/.test(verificationDate)&&
+    Number.isFinite(verifiedDateMs)&&new Date(verifiedDateMs).toISOString().slice(0,10)===verificationDate&&
+    verifiedDateMs<=Date.now();
+  const datedManufacturerProof=hasManufacturerProof&&validVerificationDate;
   const evidenceNote=datedManufacturerProof?'<p class="small" data-ai-evidence-date="1"><strong>AI compatibility:</strong> Manufacturer-confirmed, verified '+esc(p.verifiedAt)+'.</p>':'';
   return '<section class="section" data-ai-interoperability="1"><div class="eyebrow">AI interoperability</div><h2>How '+esc(tool.name)+' works with AI assistants and agents</h2><p style="color:#667085;line-height:1.65">'+esc(summary)+'</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0"><span style="font-size:12px;border:1px solid #e4e7ec;border-radius:10px;padding:8px 10px"><strong>AI fit:</strong> '+esc(tier)+'</span><span style="font-size:12px;border:1px solid #e4e7ec;border-radius:10px;padding:8px 10px"><strong>Assistants:</strong> '+esc(assistants.length?assistants.join(', '):'Not verified')+'</span><span style="font-size:12px;border:1px solid #e4e7ec;border-radius:10px;padding:8px 10px"><strong>MCP:</strong> '+esc(mcp)+'</span><span style="font-size:12px;border:1px solid #e4e7ec;border-radius:10px;padding:8px 10px"><strong>Public API:</strong> '+esc(api)+'</span></div>'+evidenceNote+'</section>';
 }
@@ -750,7 +805,14 @@ export function candidatePage(tool,{monetized=false}={}){
   const freeFaq=tool.freePlanKnown===true?'<details><summary>Does '+esc(tool.name)+' have a free plan?</summary><p>'+(
     tool.freePlan?'The verified manufacturer records a perpetual free plan with documented conditions.':'The current documented plan listing does not include a perpetual free tier.'
   )+'</p></details>':'';
-  const outbound=monetized?'<a class="cta" href="/go/'+encodeURIComponent(tool.slug)+'" target="_blank" rel="nofollow sponsored noopener">Visit '+esc(tool.name)+'</a>':'';
+  // Owner-requested exception: Fresha currently has no approved affiliate route.
+  // Its company homepage is a non-affiliate product visit, never a /go/ CTA,
+  // manufacturer documentation link, or a monetized conversion.
+  const freshaDirect=tool?.slug==='fresha'&&
+    /^https:\/\/(?:www\.)?fresha\.com\/?$/i.test(String(tool.sourceUrl||''));
+  const outbound=monetized
+    ?'<a class="cta" href="/go/'+encodeURIComponent(tool.slug)+'" target="_blank" rel="nofollow sponsored noopener">Visit '+esc(tool.name)+'</a>'
+    :freshaDirect?'<a class="cta" data-commercial-status="non-affiliate" href="https://www.fresha.com/" target="_blank" rel="nofollow noopener noreferrer">Visit Fresha website</a>':'';
   const review=runtimeEditorialView(tool);
   const buyerCheck=String(tool?.editorialReview?.buyerCheck||'').trim();
   const editorialBuyerCheck=buyerCheck
@@ -821,9 +883,13 @@ export async function publicRuntimeToolResponse(env,slug){
   // The original 127 indexed profiles must never switch to the newer, more
   // basic runtime template merely because a verified D1 editorial revision
   // changed its source_status away from baseline_snapshot.
-  const [snapshot,staticTools]=await Promise.all([runtimeSnapshot(env),assetJson(env,'/data/tools.json',[])]);
+  const [snapshot,staticTools,affiliateRegistry]=await Promise.all([
+    runtimeSnapshot(env),assetJson(env,'/data/tools.json',[]),assetJson(env,'/data/affiliate.json',{})
+  ]);
   if(snapshot.baselineMirrors?.has(key)||(Array.isArray(staticTools)&&staticTools.some(tool=>String(tool?.slug||'').toLowerCase()===key)))return null;
-  return new Response(cleanPublicCatalogProfileCopy(candidatePage(candidate)),{status:200,headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'public, max-age=60'}});
+  const approved=affiliateRegistry?.[key];
+  const monetized=approved?.enabled===true&&Boolean(publicHttps(approved.url));
+  return new Response(cleanPublicCatalogProfileCopy(candidatePage(candidate,{monetized})),{status:200,headers:{'Content-Type':'text/html; charset=UTF-8','Cache-Control':'public, max-age=60'}});
 }
 export async function publicMergedSitemap(response,env){return mergedSitemap(response,env)}
 export async function publicRuntimeRankingResponse(env,path){return renderRuntimeRanking(env,path,await mergedTools(env))}

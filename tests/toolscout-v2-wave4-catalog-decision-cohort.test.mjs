@@ -64,10 +64,15 @@ test('dynamic profiles reuse the original profile content shell, and the global 
    assert.doesNotMatch(html,/class="backTools"/);
  }
 });
-test('new profiles never advertise an unmonetized product visit; eligible routes remain internal /go links',()=>{
+test('new profiles use approved /go links; Fresha has an explicitly non-affiliate manufacturer-homepage exception',()=>{
  for(const tool of tools){
    const normal=candidatePage(tool,{monetized:false});
    assert.doesNotMatch(normal,/href="\/go\//,'No commercial approval => no Visit button');
+   if(tool.slug==='fresha'){
+     assert.match(normal,/href="https:\/\/www\.fresha\.com\/"/);
+     assert.match(normal,/data-commercial-status="non-affiliate"/);
+     assert.doesNotMatch(normal,/rel="nofollow sponsored/);
+   }else assert.doesNotMatch(normal,/data-commercial-status="non-affiliate"/);
    assert.match(normal,/Add to comparator/);
    const approved=candidatePage(tool,{monetized:true});
    assert.match(approved,new RegExp('href="/go/'+tool.slug+'"'));
@@ -94,6 +99,13 @@ test('verified AI integrations never disclose private manufacturer verification 
  const undocumented={...tool,aiIntegration:{...tool.aiIntegration,sources:[],verifiedAt:null}};
  const noProof=candidatePage(undocumented);
  assert.doesNotMatch(noProof,/Manufacturer-confirmed/,'unsubstantiated integrations cannot receive a manufacturer-confirmed badge');
+ const thirdParty={...tool,aiIntegration:{...tool.aiIntegration,sources:['https://review.example.com/fresha/']}};
+ assert.doesNotMatch(candidatePage(thirdParty),/Manufacturer-confirmed/,'external commentary is not manufacturer proof');
+ const future={...tool,aiIntegration:{...tool.aiIntegration,verifiedAt:'2099-12-01'}};
+ assert.doesNotMatch(candidatePage(future),/Manufacturer-confirmed/,'future claim cannot carry a completed verification date');
+ const impossible={...tool,aiIntegration:{...tool.aiIntegration,verifiedAt:'2026-99-99'}};
+ assert.doesNotMatch(candidatePage(impossible),/Manufacturer-confirmed/,'impossible date cannot be verified');
+
 });
 test('hourly supply signal wakes only for first-party complete new vendor cohorts',()=>{
  const existing=original.map(t=>t.slug);
