@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {trustedManufacturerEvidence,stageReviewedCatalogCandidate,handleCatalogAutonomyRoute} from '../catalog-autonomy-worker.js';
+import {trustedManufacturerEvidence,stageReviewedCatalogCandidate,handleCatalogAutonomyRoute,canonicalManufacturerDocumentIdentity,publishStagedCandidateIfUnchanged} from '../catalog-autonomy-worker.js';
 import {structuralCatalogIssues} from '../catalog-quality-runtime.js';
 
 const runtime=fs.readFileSync(new URL('../catalog-autonomy-worker.js',import.meta.url),'utf8');
@@ -86,15 +86,59 @@ test('research intake refuses undated evidence and cannot overwrite canonical st
 });
 
 test('D1 research ready ingestion shares existing bounded hourly catalog coverage contract',()=>{
- assert.match(runtime,/WHERE status='research_ready' ORDER BY updated_at ASC LIMIT 128/);
+ assert.match(runtime,/WHERE \$\{ACTIVE_RESEARCH_READY_WHERE\} ORDER BY c\.updated_at ASC LIMIT 128/);
  assert.match(runtime,/profile_json FROM catalog_runtime_candidates/);
  assert.match(runtime,/if\(!trustedManufacturerEvidence\(raw,\{decisionGrade:true\}\)\)/);
  assert.match(runtime,/if\(config\?\.admission\?\.requireReachableOfficialSource!==false&&source.status!=='ok'\)/);
  assert.match(runtime,/if\(!quality\.publishable\)/);
- assert.match(runtime,/SELECT tool_slug FROM catalog_runtime_candidates WHERE status='research_ready' LIMIT 1/);
+ assert.match(runtime,/SELECT c\.tool_slug FROM catalog_runtime_candidates c WHERE \$\{ACTIVE_RESEARCH_READY_WHERE\} LIMIT 1/);
  const routes=fs.readFileSync(new URL('../runtime-route-contract.js',import.meta.url),'utf8');
  assert.match(routes,/id:'catalog_reviewed_research_intake',owner:'catalog_autonomy_runtime'/);
  assert.match(runtime,/u\.pathname==='\/api\/catalog-autonomy\/research-stage'/);
  assert.match(runtime,/WHERE status IN \('published','admitted_coverage','quality_hold'\)/,
    'staged profiles cannot enter the public runtime snapshot');
+});
+
+
+test('Codex P1: recent failed research is deferred so 32 permanent holds cannot starve a new valid cohort',()=>{
+ assert.match(runtime,/const RESEARCH_HOLD_RETRY_HOURS=6/);
+ assert.match(runtime,/const ACTIVE_RESEARCH_READY_WHERE=/);
+ assert.match(runtime,/catalog_candidate_manufacturer_docs_hold/);
+ assert.match(runtime,/catalog_candidate_quality_hold/);
+ assert.match(runtime,/h\.created_at>=datetime\('now','-\$\{RESEARCH_HOLD_RETRY_HOURS\} hours'\)/);
+ assert.match(runtime,/h\.created_at>=c\.updated_at/);
+ const uses=runtime.match(/\$\{ACTIVE_RESEARCH_READY_WHERE\}/g)||[];
+ assert.ok(uses.length>=2,'hourly selection and incident recovery both respect hold cooldown');
+ assert.match(runtime,/stagedSlugs\.has\(slug\)/,'the API-staged revision takes precedence over stale checked-in files');
+});
+
+test('Codex P2: two URLs with different tracking parameters do not prove two manufacturer documents',()=>{
+ const base='https://docs.vendor.example/features/pricing';
+ assert.equal(canonicalManufacturerDocumentIdentity(base+'?utm_campaign=a'),
+   canonicalManufacturerDocumentIdentity(base+'?utm_campaign=b#details'));
+ assert.equal(canonicalManufacturerDocumentIdentity(base+'/'),
+   canonicalManufacturerDocumentIdentity(base));
+ assert.notEqual(canonicalManufacturerDocumentIdentity(base),
+   canonicalManufacturerDocumentIdentity('https://docs.vendor.example/features/integrations'));
+ assert.equal(canonicalManufacturerDocumentIdentity('http://docs.vendor.example/features/pricing'),null);
+ assert.match(runtime,/canonicalManufacturerDocumentIdentity\(result\.finalUrl\)/);
+});
+
+test('Codex P2: a concurrent newer D1 revision wins over the old admission snapshot',async()=>{
+ const changes=[];
+ const env={DB:{prepare(sql){return{bind(...params){
+   changes.push({sql,params});
+   return{run:async()=>({meta:{changes:0}})};
+ }}}}};
+ const old=JSON.stringify({slug:'example',editorial:'old'});
+ const next={slug:'example',editorial:'new'};
+ assert.equal(await publishStagedCandidateIfUnchanged(env,'example',next,old),false);
+ assert.equal(changes.length,1);
+ assert.match(changes[0].sql,/WHERE tool_slug=\? AND status='research_ready' AND profile_json=\?/);
+ assert.equal(changes[0].params[2],old);
+ assert.equal(changes[0].params[1],'example');
+ assert.deepEqual(JSON.parse(changes[0].params[0]),next);
+ const admitted={DB:{prepare(){return{bind(){return{run:async()=>({meta:{changes:1}})}}}}}};
+ assert.equal(await publishStagedCandidateIfUnchanged(admitted,'example',next,old),true);
+ assert.match(runtime,/catalog_candidate_revision_superseded/);
 });
