@@ -81,6 +81,6 @@ test('admission accepts only fields actually usable by the decision qualifier',(
 });
 test('catalog growth cannot short-circuit source review with scores alone',()=>{
  const source=fs.readFileSync(new URL('../catalog-gap-runtime-worker.js',import.meta.url),'utf8');
- assert.match(source,/function isFullParityProfile\\(p\\)/);
- assert.match(source,/p\\.editorialReview\\?\\.verificationStatus==='vendor_documented'&&hasManufacturerDecisionClaim\\(p\\)/);
+ assert.ok(source.includes('function isFullParityProfile(p)'));
+ assert.ok(source.includes("p.editorialReview?.verificationStatus==='vendor_documented'&&hasManufacturerDecisionClaim(p)"));
 });
