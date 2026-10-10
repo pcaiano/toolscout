@@ -36,8 +36,12 @@ function verifiedQuoteScope(sentence,claim){
   const unit=String(claim.unit||'').toLowerCase();
   if(unit==='seat'){
     if(!/\bper\s+(?:(?:paid|core|billable)\s+)?(?:seat|user|collaborator)\b/i.test(sentence))return false;
+  }else if(unit==='channel'){
+    // Channel-priced subscriptions such as Buffer must not inherit seat or
+    // entire-account prices; the vendor sentence must say "per channel".
+    if(!/\bper\s+channel\b/i.test(sentence))return false;
   }else if(unit==='subscription'){
-    if(/\bper\s+(?:(?:paid|core|billable)\s+)?(?:seat|user|collaborator)\b/i.test(sentence))return false;
+    if(/\bper\s+(?:(?:paid|core|billable)\s+)?(?:seat|user|collaborator|channel)\b/i.test(sentence))return false;
   }else return false; // Unknown quote units need editorial proof, not auto edits.
   if(claim.unitQuantity!==undefined&&claim.unitQuantity!==1)return false;
   if(claim.usageTier){
@@ -224,10 +228,17 @@ export function reconcileManufacturerFacts(tool,changes,previous,{today=new Date
       // All exported editorial fields must be coherent before a D1 write.
       // A complex mixed factual sentence blocks automation rather than
       // silently erasing other manufacturer-backed product information.
-      if(!retireFieldsWithoutCollateralLoss(updated,item.oldValue))continue;
-      claim.status='retired';claim.verifiedAt=today;
-      updated.features=remaining;
-      updated.provenance={...(updated.provenance||{}),manufacturerRetiredCapabilities:[...(updated.provenance?.manufacturerRetiredCapabilities||[]),{value:item.oldValue,sourceUrl:item.sourceUrl,verifiedAt:today}]};
+      // Stage the entire retirement on a temporary copy. A rejected edit
+      // must not leak earlier field mutations into subsequent price/limit
+      // corrections in the same batch.
+      const staged=structuredClone(updated);
+      if(!retireFieldsWithoutCollateralLoss(staged,item.oldValue))continue;
+      const stagedClaim=(staged.decisionClaims||[]).find(x=>x.status==='verified'&&x.sourceUrl===item.sourceUrl&&claimKey(x)===item.claimKey);
+      if(!stagedClaim)continue;
+      stagedClaim.status='retired';stagedClaim.verifiedAt=today;
+      staged.features=remaining;
+      staged.provenance={...(staged.provenance||{}),manufacturerRetiredCapabilities:[...(staged.provenance?.manufacturerRetiredCapabilities||[]),{value:item.oldValue,sourceUrl:item.sourceUrl,verifiedAt:today}]};
+      Object.assign(updated,staged);
       applied++;
     }else if(item.type==='plan_limit'&&claim.quantity===item.oldValue){
       claim.quantity=item.newValue;claim.verifiedAt=today;

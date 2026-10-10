@@ -104,3 +104,24 @@ test('ambiguous mixed capability prose fails closed instead of deleting other ed
  assert.match(candidate.editorialReview.angle,/Team routing/);
  assert.equal(candidate.decisionClaims[0].status,'verified');
 });
+
+test('rejected retirement is atomic even when the same batch updates a plan quota',()=>{
+ const candidate=structuredClone(tool);
+ candidate.editorialReview.angle='Team routing and shared inbox automation can queue requests for manual review.';
+ candidate.decisionClaims.push({type:'plan_limit',value:'free contacts',plan:'Free',unit:'contacts',quantity:2000,period:'total',scope:'stored',sourceUrl,status:'verified',verifiedAt:'2026-10-08'});
+ candidate.pricingDetails={freePlanStatus:'verified_available',freePlanSummary:'Free plan includes 2,000 contacts',limits:['2,000 contacts']};
+ const beforeDescription=candidate.description;
+ const beforeReview=candidate.editorialReview.summary;
+ const changes=manufacturerFactProposals(candidate,evidence('Shared inbox automation has been discontinued. Free plan includes up to 2500 contacts.'));
+ assert.deepEqual(changes.map(x=>x.type).sort(),['capability_retired','plan_limit']);
+ const first=reconcileManufacturerFacts(candidate,changes,null);
+ const result=reconcileManufacturerFacts(candidate,changes,first.proposal,{today:'2026-10-10'});
+ assert.equal(result.status,'corrected');
+ assert.equal(result.count,1);
+ assert.equal(result.updatedTool.decisionClaims.find(x=>x.type==='capability').status,'verified');
+ assert.ok(result.updatedTool.features.includes('shared inbox automation'));
+ assert.equal(result.updatedTool.description,beforeDescription,'discard every partial retirement edit');
+ assert.equal(result.updatedTool.editorialReview.summary,beforeReview,'unrelated editorial assessment must survive');
+ assert.equal(result.updatedTool.decisionClaims.find(x=>x.type==='plan_limit').quantity,2500);
+ assert.match(result.updatedTool.pricingDetails.freePlanSummary,/2,500 contacts/);
+});
