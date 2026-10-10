@@ -11,6 +11,7 @@ import {cleanPublicCatalogProfileCopy} from './catalog-public-fact-copy.js';
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
 const MAX_VERIFY_PER_CYCLE=6; // hourly: up to 144 tools/day, bounded official document verification
 const MAX_VERIFY_CYCLE_WALL_MS=180000; // keep discovery writes from extending official quality mission indefinitely
+const QUALITY_NETWORK_SETTLE_MS=8000; // reserve time for already-started per-tool D1 writes and ledger finalisation
 const MAX_NEWS_SOURCE_CHECKS_PER_CYCLE=4;
 const MAX_ADMIT_PER_DAY=24; // actually per-cycle cap: enable documented cohorts to publish within one hourly run
 const MAX_BASELINE_SEED_PER_CYCLE=40; // bounded migration inside the existing catalog autonomy engine
@@ -125,11 +126,13 @@ function releaseLinks(html,base){
   return [...new Set(out)].slice(0,4);
 }
 async function sha(value){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(value)));return [...new Uint8Array(buf)].map(x=>x.toString(16).padStart(2,'0')).join('').slice(0,24)}
-async function fetchOfficial(url){
+export async function fetchOfficial(url,{deadlineAt=Infinity}={}){
   const u=publicHttps(url);if(!u)return{status:'invalid',httpStatus:null,finalUrl:null,fingerprint:null};
   let lastError=null;
   for(let attempt=1;attempt<=2;attempt++){
-  const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),FETCH_TIMEOUT_MS);
+  const available=deadlineAt-Date.now()-QUALITY_NETWORK_SETTLE_MS;
+  if(available<=0)return{status:'network_warning',httpStatus:null,finalUrl:u.href,fingerprint:null,error:'quality_cycle_budget_deferred'};
+  const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),Math.min(FETCH_TIMEOUT_MS,available));
   try{
     const r=await fetch(u.href,{method:'GET',redirect:'follow',headers:{'User-Agent':attempt===1?'ToolScout-Catalog-Autonomy/1.1 (+https://trytoolscout.org/)':'Mozilla/5.0 (compatible; ToolScoutCatalogVerifier/1.1; +https://trytoolscout.org/)','Accept':'text/html,application/xhtml+xml,text/plain;q=0.9,*/*;q=0.5'},signal:ctl.signal});
     if(r.status===404||r.status===410)return{status:'broken',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:null};
@@ -422,7 +425,8 @@ export async function verifyBatch(env){
   let checked=0,healthy=0,changed=0,suppressed=0,warnings=0,documentationChecked=0,documentationChanged=0,documentationWarnings=0,documentationBaselined=0,factsCorrected=0,factsProposed=0,cycleBudgetExhausted=false;
   await mapLimit(chosen,2,async tool=>{
     if(Date.now()>=deadlineAt){cycleBudgetExhausted=true;return;} // do not start another vendor after budget
-    const slug=String(tool.slug).toLowerCase(),prior=smap.get(slug)||{},verifyUrl=verificationUrl(tool),verificationSourceChanged=Boolean(prior.source_url&&prior.source_url!==verifyUrl),result=await fetchOfficial(verifyUrl),staticVerified=String(tool.lastVerified||tool.sourceCheckedOn||'');
+    const slug=String(tool.slug).toLowerCase(),prior=smap.get(slug)||{},verifyUrl=verificationUrl(tool),verificationSourceChanged=Boolean(prior.source_url&&prior.source_url!==verifyUrl),result=await fetchOfficial(verifyUrl,{deadlineAt}),staticVerified=String(tool.lastVerified||tool.sourceCheckedOn||'');
+    if(result.error==='quality_cycle_budget_deferred'){cycleBudgetExhausted=true;return;}
     const staticVerifiedMs=staticVerified?Date.parse(/T/.test(staticVerified)?staticVerified:`${staticVerified}T00:00:00Z`):NaN;
     const staticVerificationFresh=Number.isFinite(staticVerifiedMs)&&Date.now()-staticVerifiedMs<=45*86400000;
     checked++;
@@ -430,8 +434,17 @@ export async function verifyBatch(env){
     const reviewedSinceChange=Boolean(prior.last_change_at&&prior.static_last_verified&&staticVerified&&staticVerified!==prior.static_last_verified);
     const fingerprintChanged=result.status==='ok'&&prior.fingerprint&&result.fingerprint&&result.fingerprint!==prior.fingerprint;
     const broken=result.status==='broken'?Number(prior.broken_consecutive||0)+1:0;
-    const documentation=await verifyManufacturerDocuments(env,tool,{fetchDocument:fetchOfficial,hash:sha,writeEvent:persistManufacturerWatchEvent})
-      .catch(error=>({status:'documentation_warning',checked:0,changed:false,error:safeText(error?.message||error,250)}));
+    let documentBudgetDeferred=false;
+    const documentation=await verifyManufacturerDocuments(env,tool,{
+      fetchDocument:async url=>{
+        const response=await fetchOfficial(url,{deadlineAt});
+        if(response.error==='quality_cycle_budget_deferred')documentBudgetDeferred=true;
+        return response;
+      },hash:sha,writeEvent:persistManufacturerWatchEvent
+    }).catch(error=>({status:'documentation_warning',checked:0,changed:false,error:safeText(error?.message||error,250)}));
+    // A time-limited fetch is not evidence that a vendor removed a feature.
+    // Keep the prior D1 tool state intact and retry this product next cycle.
+    if(documentBudgetDeferred||Date.now()>=deadlineAt){cycleBudgetExhausted=true;return;}
     documentationChecked+=Number(documentation.checked||0);
     if(documentation.status==='baselined')documentationBaselined++;
     if(documentation.status==='documentation_warning')documentationWarnings++;
