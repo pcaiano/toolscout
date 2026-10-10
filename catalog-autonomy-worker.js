@@ -80,6 +80,14 @@ function sameManufacturerHost(url,home){
     return a===b||a.endsWith('.'+b);
   }catch{return false}
 }
+// Query strings and fragments never make a second independent document.
+export function canonicalManufacturerDocumentIdentity(value){
+  try{
+    const url=new URL(String(value||''));
+    if(url.protocol!=='https:'||url.username||url.password)return null;
+    return url.origin+url.pathname.replace(/\/+$/,'');
+  }catch{return null}
+}
 // Fallbacks must be dated internal first-party manufacturer evidence and
 // must not include an arbitrary promotional homepage or outside review site.
 export function trustedCandidateOfficialFallbackUrls(candidate){
@@ -717,6 +725,17 @@ export async function hasNewDecisionGradeCatalogSupply(env){
   const staged=await env.DB.prepare(`SELECT c.tool_slug FROM catalog_runtime_candidates c WHERE ${ACTIVE_RESEARCH_READY_WHERE} LIMIT 1`).first();
   return Boolean(staged?.tool_slug);
 }
+// The documented profile has been fetched and audited, but it may already
+// have been superseded by a newer research submission. Publish atomically
+// only when the exact reviewed snapshot is still staged in canonical D1.
+export async function publishStagedCandidateIfUnchanged(env,slug,profile,expectedProfileJson){
+  if(!expectedProfileJson||typeof expectedProfileJson!=='string')return false;
+  const result=await env.DB.prepare(`UPDATE catalog_runtime_candidates
+    SET profile_json=?,status='published',source_status='ok',verified_at=datetime('now'),updated_at=datetime('now')
+    WHERE tool_slug=? AND status='research_ready' AND profile_json=?`)
+    .bind(JSON.stringify(profile),slug,expectedProfileJson).run();
+  return Number(result?.meta?.changes??result?.changes??0)===1;
+}
 export async function admitTrustedCandidates(env){
   // The bounded supplier must include D1/schema, registry, seed and candidate-file
   // preparation, not just per-tool fetch/quality verification.
@@ -811,11 +830,7 @@ export async function admitTrustedCandidates(env){
       const accessible=new Set(evidenceChecks.filter((result,index)=>
         result?.status==='ok'&&sameManufacturerHost(result.finalUrl,raw.sourceUrl)&&
         documents[index]&&publicHttps(result.finalUrl)?.pathname!=='/'
-      ).map(result=>{
-        const url=new URL(result.finalUrl);
-        // Tracking parameters and fragments do not create a second page.
-        return url.origin+url.pathname.replace(/\/+$/,'');
-      }));
+      ).map(result=>canonicalManufacturerDocumentIdentity(result.finalUrl)).filter(Boolean));
       if(accessible.size<2){
         held++;
         await logEvent(env,slug,'catalog_candidate_manufacturer_docs_hold','completed',
@@ -848,11 +863,7 @@ export async function admitTrustedCandidates(env){
     if(item.origin==='d1_research_ready'){
       // Compare-and-swap preserves a newer researched revision that arrived
       // during official document requests or logo audit. Never publish old JSON.
-      const updated=await env.DB.prepare(`UPDATE catalog_runtime_candidates
-        SET profile_json=?,status='published',source_status='ok',verified_at=datetime('now'),updated_at=datetime('now')
-        WHERE tool_slug=? AND status='research_ready' AND profile_json=?`)
-        .bind(JSON.stringify(profile),slug,item.stagedProfileJson).run();
-      if(Number(updated?.meta?.changes??updated?.changes??0)<1){
+      if(!(await publishStagedCandidateIfUnchanged(env,slug,profile,item.stagedProfileJson))){
         held++;
         await logEvent(env,slug,'catalog_candidate_revision_superseded','deferred',
           'A newer documented candidate arrived during verification; retained it for the next cycle.');
