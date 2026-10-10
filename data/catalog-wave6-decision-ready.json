@@ -1,0 +1,1034 @@
+[
+  {
+    "slug": "activepieces",
+    "name": "Activepieces",
+    "category": "automation",
+    "description": "Open automation platform for building workflows with triggers, actions, app connections and tables that move records between services.",
+    "pricing": "Cloud and self-hosted deployments have different infrastructure and administration costs; compare current plans against the volume of workflow runs.",
+    "freePlan": false,
+    "freePlanKnown": false,
+    "features": [
+      "event and scheduled workflow triggers",
+      "visual flow actions",
+      "Tables integration",
+      "MCP flow tooling"
+    ],
+    "bestFor": [
+      "teams coordinating app-to-app data flows",
+      "operations teams automating repetitive records",
+      "builders needing extensible workflow control"
+    ],
+    "sourceUrl": "https://www.activepieces.com/",
+    "lastVerified": "2026-10-10",
+    "scores": {
+      "price": 7,
+      "ease": 7,
+      "automation": 9,
+      "integrations": 8,
+      "sales": 4,
+      "ai": 7,
+      "marketing": 3,
+      "seo": 2,
+      "research": 4,
+      "content": 5,
+      "agency": 6
+    },
+    "scoreProvenance": {
+      "method": "ToolScout independent editorial judgment, not a manufacturer-verified performance measurement",
+      "reviewedAt": "2026-10-10"
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "AI interoperability claims are not included without product-specific first-party proof.",
+      "verifiedAt": null,
+      "sources": []
+    },
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "affiliateUrl": "",
+    "editorialReview": {
+      "angle": "Practical automation depth rather than a broad list of connected apps",
+      "summary": "Activepieces can suit teams that need to combine service events, schedules and actions without maintaining separate scripts for every step. The first-party flow guide explains its trigger-and-action model, while its Tables integration handles records that need to move between steps. A key buying distinction is how easily staff can monitor failures and maintain flows as processes change. Verify that the particular pieces and deployment model cover your real workflow before comparing operating cost with other automation platforms.",
+      "buyerCheck": "Build one live workflow with a schedule, an incoming record and a failure case. Evaluate how your team will maintain it after launch.",
+      "reviewedAt": "2026-10-10",
+      "sourceUrl": "https://www.activepieces.com/docs/flows/building-flows",
+      "sourceUrls": [
+        "https://www.activepieces.com/docs/flows/building-flows",
+        "https://www.activepieces.com/pieces/tables",
+        "https://www.activepieces.com/docs/mcp/tools"
+      ],
+      "method": "first_party_documentation_and_independent_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false
+    },
+    "strengths": [
+      "Manufacturer flow documentation explains schedule, webhook and event triggers.",
+      "Documented Tables integration supports record-oriented automation in connected workflows."
+    ],
+    "limitations": [
+      "Workflow reliability depends on appropriate error handling and monitoring.",
+      "The cost of hosting and maintaining self-managed automation needs to be included in the decision."
+    ],
+    "tradeoffs": [
+      "Extensible, controllable flow construction versus ongoing responsibility for monitoring and connector maintenance."
+    ],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.activepieces.com/docs/flows/building-flows",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.activepieces.com/pieces/tables",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.activepieces.com/docs/mcp/tools",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      }
+    ],
+    "pricingDetails": {
+      "freePlanStatus": "unknown",
+      "verifiedAt": "2026-10-10",
+      "freePlanSummary": "No specific perpetual free-tier entitlement inferred from these documentation pages."
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "workflow triggers",
+        "status": "verified",
+        "sourceUrl": "https://www.activepieces.com/docs/flows/building-flows",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "workflow actions",
+        "status": "verified",
+        "sourceUrl": "https://www.activepieces.com/docs/flows/building-flows",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "Tables integration",
+        "status": "verified",
+        "sourceUrl": "https://www.activepieces.com/pieces/tables",
+        "verifiedAt": "2026-10-10"
+      }
+    ]
+  },
+  {
+    "slug": "appwrite",
+    "name": "Appwrite",
+    "category": "developer",
+    "description": "Application backend platform combining authentication, managed application data and additional APIs for developers building digital products.",
+    "pricing": "Appwrite offers shared and dedicated infrastructure options; evaluate the database specification, usage entitlements and deployment responsibilities.",
+    "freePlan": false,
+    "freePlanKnown": false,
+    "features": [
+      "user authentication",
+      "application databases",
+      "data access permissions",
+      "developer SDKs and APIs"
+    ],
+    "bestFor": [
+      "application teams implementing sign-in and data access",
+      "developers avoiding a separate authentication stack",
+      "products that need database and backend capabilities together"
+    ],
+    "sourceUrl": "https://appwrite.io/",
+    "lastVerified": "2026-10-10",
+    "scores": {
+      "price": 6,
+      "ease": 7,
+      "automation": 7,
+      "integrations": 8,
+      "sales": 3,
+      "ai": 7,
+      "marketing": 2,
+      "seo": 1,
+      "research": 5,
+      "content": 3,
+      "agency": 5
+    },
+    "scoreProvenance": {
+      "method": "ToolScout independent editorial judgment, not a manufacturer-verified performance measurement",
+      "reviewedAt": "2026-10-10"
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "AI interoperability claims are not included without product-specific first-party proof.",
+      "verifiedAt": null,
+      "sources": []
+    },
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "affiliateUrl": "",
+    "editorialReview": {
+      "angle": "Backend building blocks versus owning the implementation details",
+      "summary": "Appwrite is relevant when a development team wants authentication and application data in a coherent backend rather than assembling every service separately. Its own documentation sets out multiple sign-in methods and database choices, including structured and document-oriented storage. The decision depends on your existing stack and how much control you need over database technology, access policy and hosting. Test the complete sign-in-to-data-request path, not just an example CRUD call, and price the exact infrastructure model.",
+      "buyerCheck": "Test user signup, access permissions and a representative application query. Check migration options and which features apply to the intended database type.",
+      "reviewedAt": "2026-10-10",
+      "sourceUrl": "https://appwrite.io/docs/products/auth",
+      "sourceUrls": [
+        "https://appwrite.io/docs/products/auth",
+        "https://appwrite.io/docs/products/databases",
+        "https://appwrite.io/docs"
+      ],
+      "method": "first_party_documentation_and_independent_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false
+    },
+    "strengths": [
+      "Official Auth documentation details several authentication and identity methods.",
+      "Manufacturer database guide describes multiple data models and infrastructure options."
+    ],
+    "limitations": [
+      "Identity, database permissions and operational configuration require specialist review.",
+      "Choosing between database engines may introduce different migration and scaling trade-offs."
+    ],
+    "tradeoffs": [
+      "Integrated backend productivity versus tighter coupling to the chosen platform and database APIs."
+    ],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://appwrite.io/docs/products/auth",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://appwrite.io/docs/products/databases",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://appwrite.io/docs",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      }
+    ],
+    "pricingDetails": {
+      "freePlanStatus": "unknown",
+      "verifiedAt": "2026-10-10",
+      "freePlanSummary": "No specific perpetual free-tier entitlement inferred from these documentation pages."
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "authentication methods",
+        "status": "verified",
+        "sourceUrl": "https://appwrite.io/docs/products/auth",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "managed application databases",
+        "status": "verified",
+        "sourceUrl": "https://appwrite.io/docs/products/databases",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "database permissions",
+        "status": "verified",
+        "sourceUrl": "https://appwrite.io/docs/products/databases",
+        "verifiedAt": "2026-10-10"
+      }
+    ]
+  },
+  {
+    "slug": "supabase",
+    "name": "Supabase",
+    "category": "developer",
+    "description": "Postgres-based application platform joining database management, authentication and data access controls for web and mobile teams.",
+    "pricing": "Hosted database plans differ in backup, compute and recovery entitlements; compare the current project tier and expected database growth.",
+    "freePlan": false,
+    "freePlanKnown": false,
+    "features": [
+      "Postgres database",
+      "authentication and authorization",
+      "table and SQL editing",
+      "database access policies"
+    ],
+    "bestFor": [
+      "teams building Postgres-backed applications",
+      "developers implementing database-linked sign-in",
+      "projects requiring SQL access alongside managed backend services"
+    ],
+    "sourceUrl": "https://supabase.com/",
+    "lastVerified": "2026-10-10",
+    "scores": {
+      "price": 7,
+      "ease": 7,
+      "automation": 7,
+      "integrations": 8,
+      "sales": 2,
+      "ai": 7,
+      "marketing": 2,
+      "seo": 1,
+      "research": 6,
+      "content": 3,
+      "agency": 5
+    },
+    "scoreProvenance": {
+      "method": "ToolScout independent editorial judgment, not a manufacturer-verified performance measurement",
+      "reviewedAt": "2026-10-10"
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "AI interoperability claims are not included without product-specific first-party proof.",
+      "verifiedAt": null,
+      "sources": []
+    },
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "affiliateUrl": "",
+    "editorialReview": {
+      "angle": "Postgres familiarity with integrated authentication rather than a closed data model",
+      "summary": "Supabase is a reasonable shortlist choice for development teams that want a managed Postgres foundation with authentication woven into the same application stack. Its first-party database guide describes direct SQL and visual administration, while the Auth material explains user identity and row-level access. The appeal is avoiding separate integration work between those two layers. The main diligence task is understanding policies, backups and project scaling before the system becomes operationally critical.",
+      "buyerCheck": "Create a sample schema, secure it with row-level policies and test authentication on a production-like client, including backup and migration requirements.",
+      "reviewedAt": "2026-10-10",
+      "sourceUrl": "https://supabase.com/docs/guides/database/overview",
+      "sourceUrls": [
+        "https://supabase.com/docs/guides/database/overview",
+        "https://supabase.com/docs/guides/auth",
+        "https://supabase.com/docs/guides/auth/general-configuration"
+      ],
+      "method": "first_party_documentation_and_independent_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false
+    },
+    "strengths": [
+      "Manufacturer documentation identifies a full Postgres database with SQL and table editors.",
+      "Official Auth guidance documents identity methods and database-linked authorization."
+    ],
+    "limitations": [
+      "Row-level access policies need careful testing to avoid exposing application data.",
+      "Project scale and recovery requirements can affect the suitable hosting tier."
+    ],
+    "tradeoffs": [
+      "Integrated Postgres and Auth convenience versus responsibility for correct security policies and data lifecycle design."
+    ],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://supabase.com/docs/guides/database/overview",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://supabase.com/docs/guides/auth",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://supabase.com/docs/guides/auth/general-configuration",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      }
+    ],
+    "pricingDetails": {
+      "freePlanStatus": "unknown",
+      "verifiedAt": "2026-10-10",
+      "freePlanSummary": "No specific perpetual free-tier entitlement inferred from these documentation pages."
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "Postgres database",
+        "status": "verified",
+        "sourceUrl": "https://supabase.com/docs/guides/database/overview",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "authentication",
+        "status": "verified",
+        "sourceUrl": "https://supabase.com/docs/guides/auth",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "row-level security",
+        "status": "verified",
+        "sourceUrl": "https://supabase.com/docs/guides/auth",
+        "verifiedAt": "2026-10-10"
+      }
+    ]
+  },
+  {
+    "slug": "metabase",
+    "name": "Metabase",
+    "category": "analytics",
+    "description": "Business intelligence software for querying connected data, creating dashboards and organizing reusable analytics for teams.",
+    "pricing": "Edition and deployment choices affect administration and governance; selected collection verification features are confined to Pro and Enterprise editions.",
+    "freePlan": false,
+    "freePlanKnown": false,
+    "features": [
+      "graphical and SQL questions",
+      "interactive dashboards",
+      "analytics collections",
+      "dashboard subscriptions"
+    ],
+    "bestFor": [
+      "business teams exploring database metrics",
+      "analytics leads distributing recurring dashboards",
+      "organizations wanting self-service questions with controlled collections"
+    ],
+    "sourceUrl": "https://www.metabase.com/",
+    "lastVerified": "2026-10-10",
+    "scores": {
+      "price": 7,
+      "ease": 8,
+      "automation": 5,
+      "integrations": 7,
+      "sales": 3,
+      "ai": 5,
+      "marketing": 3,
+      "seo": 2,
+      "research": 9,
+      "content": 5,
+      "agency": 7
+    },
+    "scoreProvenance": {
+      "method": "ToolScout independent editorial judgment, not a manufacturer-verified performance measurement",
+      "reviewedAt": "2026-10-10"
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "AI interoperability claims are not included without product-specific first-party proof.",
+      "verifiedAt": null,
+      "sources": []
+    },
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "affiliateUrl": "",
+    "editorialReview": {
+      "angle": "Usable analytics for the broader team versus permissions discipline",
+      "summary": "Metabase fits organizations whose data is already accessible in a database and whose users need reusable questions and dashboards. The manufacturer's documentation distinguishes questions, dashboard compositions and collections, which clarifies where analysts build and where business teams consume results. Adoption is easiest when common metric definitions are agreed in advance. Check data permissions, collection ownership and which governance features belong to the edition being purchased; attractive charts alone will not ensure consistent decisions.",
+      "buyerCheck": "Connect a realistic dataset, recreate a key report using a saved question, and test access rights and email subscriptions for each intended audience.",
+      "reviewedAt": "2026-10-10",
+      "sourceUrl": "https://www.metabase.com/docs/latest/questions/introduction",
+      "sourceUrls": [
+        "https://www.metabase.com/docs/latest/questions/introduction",
+        "https://www.metabase.com/docs/latest/dashboards/introduction",
+        "https://www.metabase.com/docs/latest/exploration-and-organization/collections"
+      ],
+      "method": "first_party_documentation_and_independent_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false
+    },
+    "strengths": [
+      "Official docs support both graphical and SQL-based analytical questions.",
+      "Dashboards and collections organize reporting outputs for reuse and scheduled distribution."
+    ],
+    "limitations": [
+      "Analytics consistency depends on dependable underlying data definitions.",
+      "Some governance and verified collection functions are reserved for higher editions."
+    ],
+    "tradeoffs": [
+      "Faster self-service reporting versus the need to manage data access, metrics and content ownership."
+    ],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.metabase.com/docs/latest/questions/introduction",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.metabase.com/docs/latest/dashboards/introduction",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.metabase.com/docs/latest/exploration-and-organization/collections",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      }
+    ],
+    "pricingDetails": {
+      "freePlanStatus": "unknown",
+      "verifiedAt": "2026-10-10",
+      "freePlanSummary": "No specific perpetual free-tier entitlement inferred from these documentation pages."
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "visual and SQL questions",
+        "status": "verified",
+        "sourceUrl": "https://www.metabase.com/docs/latest/questions/introduction",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "dashboards",
+        "status": "verified",
+        "sourceUrl": "https://www.metabase.com/docs/latest/dashboards/introduction",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "collections",
+        "status": "verified",
+        "sourceUrl": "https://www.metabase.com/docs/latest/exploration-and-organization/collections",
+        "verifiedAt": "2026-10-10"
+      }
+    ]
+  },
+  {
+    "slug": "nocodb",
+    "name": "NocoDB",
+    "category": "developer",
+    "description": "No-code database interface providing configurable record views, data-entry forms and table administration for structured information.",
+    "pricing": "Some advanced access controls and branding options are tied to paid tiers; deployment and plan choices influence the actual cost.",
+    "freePlan": false,
+    "freePlanKnown": false,
+    "features": [
+      "table-based records",
+      "grid and kanban views",
+      "form data entry",
+      "table tools and webhooks"
+    ],
+    "bestFor": [
+      "teams creating operational record tables",
+      "builders who need form intake into structured data",
+      "departments replacing disconnected spreadsheets with controlled views"
+    ],
+    "sourceUrl": "https://nocodb.com/",
+    "lastVerified": "2026-10-10",
+    "scores": {
+      "price": 7,
+      "ease": 7,
+      "automation": 6,
+      "integrations": 7,
+      "sales": 3,
+      "ai": 4,
+      "marketing": 2,
+      "seo": 1,
+      "research": 6,
+      "content": 4,
+      "agency": 6
+    },
+    "scoreProvenance": {
+      "method": "ToolScout independent editorial judgment, not a manufacturer-verified performance measurement",
+      "reviewedAt": "2026-10-10"
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "AI interoperability claims are not included without product-specific first-party proof.",
+      "verifiedAt": null,
+      "sources": []
+    },
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "affiliateUrl": "",
+    "editorialReview": {
+      "angle": "Accessible tables and forms without mistaking them for a full CRM",
+      "summary": "NocoDB is worth considering when the central problem is organizing structured records and exposing different views to different workflows. The official documentation covers multiple view types and customizable forms, making it useful for internal data collection rather than only spreadsheet-style editing. It is not automatically a substitute for a specialist CRM or inventory management system. Review permission needs and paid feature boundaries before creating sensitive workflows; test whether nontechnical users can maintain the resulting schema.",
+      "buyerCheck": "Prototype a table with relations, a data-entry form and separate views for two roles. Confirm permission and paid-tier implications before migration.",
+      "reviewedAt": "2026-10-10",
+      "sourceUrl": "https://nocodb.com/docs/product/tables/views",
+      "sourceUrls": [
+        "https://nocodb.com/docs/product/tables/views",
+        "https://www.nocodb.com/docs/product/tables/views/view-types/form",
+        "https://nocodb.com/docs/product/tables/table-operations/table-details"
+      ],
+      "method": "first_party_documentation_and_independent_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false
+    },
+    "strengths": [
+      "Vendor docs list configurable table views including grid, form and kanban.",
+      "The manufacturer form guide covers form layout, field exposure and sharing."
+    ],
+    "limitations": [
+      "Advanced permission and form branding options are not universal across plans.",
+      "Internal database organization still requires good schema and access design."
+    ],
+    "tradeoffs": [
+      "Flexible no-code information management versus specialist workflow depth and permissions complexity."
+    ],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://nocodb.com/docs/product/tables/views",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.nocodb.com/docs/product/tables/views/view-types/form",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://nocodb.com/docs/product/tables/table-operations/table-details",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      }
+    ],
+    "pricingDetails": {
+      "freePlanStatus": "unknown",
+      "verifiedAt": "2026-10-10",
+      "freePlanSummary": "No specific perpetual free-tier entitlement inferred from these documentation pages."
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "configurable data views",
+        "status": "verified",
+        "sourceUrl": "https://nocodb.com/docs/product/tables/views",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "form view",
+        "status": "verified",
+        "sourceUrl": "https://www.nocodb.com/docs/product/tables/views/view-types/form",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "table access tools",
+        "status": "verified",
+        "sourceUrl": "https://nocodb.com/docs/product/tables/table-operations/table-details",
+        "verifiedAt": "2026-10-10"
+      }
+    ]
+  },
+  {
+    "slug": "baserow",
+    "name": "Baserow",
+    "category": "developer",
+    "description": "Collaborative no-code database software for structured tables, filtered views and permission-controlled workspaces.",
+    "pricing": "Baserow documentation ties some granular role and view permissions to paid editions; validate the selected subscription before deployment.",
+    "freePlan": false,
+    "freePlanKnown": false,
+    "features": [
+      "filtered table views",
+      "collaborative and personal views",
+      "workspace and database roles",
+      "restricted views"
+    ],
+    "bestFor": [
+      "teams building shared operational databases",
+      "organizations separating views by user responsibility",
+      "developers and operators who need a flexible spreadsheet alternative"
+    ],
+    "sourceUrl": "https://baserow.io/",
+    "lastVerified": "2026-10-10",
+    "scores": {
+      "price": 7,
+      "ease": 7,
+      "automation": 6,
+      "integrations": 6,
+      "sales": 3,
+      "ai": 4,
+      "marketing": 2,
+      "seo": 1,
+      "research": 5,
+      "content": 4,
+      "agency": 6
+    },
+    "scoreProvenance": {
+      "method": "ToolScout independent editorial judgment, not a manufacturer-verified performance measurement",
+      "reviewedAt": "2026-10-10"
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "AI interoperability claims are not included without product-specific first-party proof.",
+      "verifiedAt": null,
+      "sources": []
+    },
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "affiliateUrl": "",
+    "editorialReview": {
+      "angle": "Collaborative data work with distinct roles and controlled visibility",
+      "summary": "Baserow works best when teams need consistent shared tables but do not all need the same view of the underlying records. Its documentation sets out personal, collaborative and restricted views and a hierarchy of roles, which makes permissions a central selection criterion. The challenge is less about creating the first table and more about governing access as people and processes change. Buyers should distinguish basic collaboration from higher-tier restrictions and assess how existing spreadsheet workflows will migrate.",
+      "buyerCheck": "Build one shared table with two filtered views and test editor versus read-only access. Confirm which permission controls your intended tier includes.",
+      "reviewedAt": "2026-10-10",
+      "sourceUrl": "https://baserow.io/user-docs/overview-of-baserow-views",
+      "sourceUrls": [
+        "https://baserow.io/user-docs/overview-of-baserow-views",
+        "https://baserow.io/user-docs/set-permission-level",
+        "https://baserow.io/user-docs/view-level-permissions"
+      ],
+      "method": "first_party_documentation_and_independent_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false
+    },
+    "strengths": [
+      "Official docs explain views with independent filters, sorting and field visibility.",
+      "Manufacturer guides define permissions from workspace down to restricted views."
+    ],
+    "limitations": [
+      "Advanced role controls are tier-dependent rather than uniformly available.",
+      "A flexible table schema can become difficult to govern without conventions."
+    ],
+    "tradeoffs": [
+      "Fast collaborative database setup versus growing complexity in permissions and data modeling."
+    ],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://baserow.io/user-docs/overview-of-baserow-views",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://baserow.io/user-docs/set-permission-level",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://baserow.io/user-docs/view-level-permissions",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      }
+    ],
+    "pricingDetails": {
+      "freePlanStatus": "unknown",
+      "verifiedAt": "2026-10-10",
+      "freePlanSummary": "No specific perpetual free-tier entitlement inferred from these documentation pages."
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "filtered views",
+        "status": "verified",
+        "sourceUrl": "https://baserow.io/user-docs/overview-of-baserow-views",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "role-based permissions",
+        "status": "verified",
+        "sourceUrl": "https://baserow.io/user-docs/set-permission-level",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "restricted views",
+        "status": "verified",
+        "sourceUrl": "https://baserow.io/user-docs/view-level-permissions",
+        "verifiedAt": "2026-10-10"
+      }
+    ]
+  },
+  {
+    "slug": "directus",
+    "name": "Directus",
+    "category": "developer",
+    "description": "Data management platform with access policies and configurable event-driven flows on top of structured application content.",
+    "pricing": "Deployment and enterprise support terms affect total cost; prioritize requirements for permissions, custom flows and managed operations.",
+    "freePlan": false,
+    "freePlanKnown": false,
+    "features": [
+      "event-driven flows",
+      "data access control",
+      "custom permission policies",
+      "flow import and export"
+    ],
+    "bestFor": [
+      "teams managing structured application content",
+      "developers exposing data through controlled APIs",
+      "organizations automating data workflows with explicit access policies"
+    ],
+    "sourceUrl": "https://directus.com/",
+    "lastVerified": "2026-10-10",
+    "scores": {
+      "price": 5,
+      "ease": 6,
+      "automation": 8,
+      "integrations": 8,
+      "sales": 3,
+      "ai": 5,
+      "marketing": 2,
+      "seo": 1,
+      "research": 7,
+      "content": 6,
+      "agency": 6
+    },
+    "scoreProvenance": {
+      "method": "ToolScout independent editorial judgment, not a manufacturer-verified performance measurement",
+      "reviewedAt": "2026-10-10"
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "AI interoperability claims are not included without product-specific first-party proof.",
+      "verifiedAt": null,
+      "sources": []
+    },
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "affiliateUrl": "",
+    "editorialReview": {
+      "angle": "Data operations and access policy together rather than automation alone",
+      "summary": "Directus is a candidate for teams that need a controllable content and data layer with workflow triggers and permission policies. Its manufacturer documentation describes event-driven Flows and granular collection action permissions, useful when many applications share the same data. The advantage is bringing administration and automation closer to the underlying records. The cost is operational discipline: permissions, elevated flow execution and import behavior need proper review. Test roles and flow failures together before choosing a deployment model.",
+      "buyerCheck": "Configure a restricted collection and an event-triggered flow on sample records, then test user permissions, flow export and rollback behavior.",
+      "reviewedAt": "2026-10-10",
+      "sourceUrl": "https://directus.com/docs/guides/flows/",
+      "sourceUrls": [
+        "https://directus.com/docs/guides/flows/",
+        "https://directus.com/docs/guides/auth/access-control",
+        "https://directus.com/docs/guides/flows/manage-flows"
+      ],
+      "method": "first_party_documentation_and_independent_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false
+    },
+    "strengths": [
+      "Official Flows documentation covers triggers and sequences of operations.",
+      "Vendor access-control guidance details collection-level permission actions and policies."
+    ],
+    "limitations": [
+      "Automation with elevated privileges requires careful security controls.",
+      "Access policies and data model changes can introduce configuration overhead."
+    ],
+    "tradeoffs": [
+      "Unified data administration and automation versus the governance required for permissions and executable flows."
+    ],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://directus.com/docs/guides/flows/",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://directus.com/docs/guides/auth/access-control",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://directus.com/docs/guides/flows/manage-flows",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      }
+    ],
+    "pricingDetails": {
+      "freePlanStatus": "unknown",
+      "verifiedAt": "2026-10-10",
+      "freePlanSummary": "No specific perpetual free-tier entitlement inferred from these documentation pages."
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "event-driven flows",
+        "status": "verified",
+        "sourceUrl": "https://directus.com/docs/guides/flows/",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "access control",
+        "status": "verified",
+        "sourceUrl": "https://directus.com/docs/guides/auth/access-control",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "flow administration",
+        "status": "verified",
+        "sourceUrl": "https://directus.com/docs/guides/flows/manage-flows",
+        "verifiedAt": "2026-10-10"
+      }
+    ]
+  },
+  {
+    "slug": "bookstack",
+    "name": "BookStack",
+    "category": "content",
+    "description": "Self-hosted documentation platform organizing knowledge into books, chapters and pages with search and content navigation.",
+    "pricing": "Self-hosted software has infrastructure, maintenance and implementation costs; plan for backups, access management and operational ownership.",
+    "freePlan": false,
+    "freePlanKnown": false,
+    "features": [
+      "books and chapter structure",
+      "documentation pages",
+      "global content search",
+      "content organization and navigation"
+    ],
+    "bestFor": [
+      "technical teams documenting internal processes",
+      "organizations publishing structured knowledge",
+      "support teams maintaining a searchable reference library"
+    ],
+    "sourceUrl": "https://www.bookstackapp.com/",
+    "lastVerified": "2026-10-10",
+    "scores": {
+      "price": 9,
+      "ease": 7,
+      "automation": 4,
+      "integrations": 4,
+      "sales": 2,
+      "ai": 3,
+      "marketing": 2,
+      "seo": 2,
+      "research": 6,
+      "content": 8,
+      "agency": 5
+    },
+    "scoreProvenance": {
+      "method": "ToolScout independent editorial judgment, not a manufacturer-verified performance measurement",
+      "reviewedAt": "2026-10-10"
+    },
+    "aiIntegration": {
+      "status": "unverified",
+      "tier": "unknown",
+      "mcp": "unknown",
+      "publicApi": null,
+      "assistants": [],
+      "summary": "AI interoperability claims are not included without product-specific first-party proof.",
+      "verifiedAt": null,
+      "sources": []
+    },
+    "rankingEligible": true,
+    "comparisonEligible": true,
+    "affiliateUrl": "",
+    "editorialReview": {
+      "angle": "Opinionated knowledge structure instead of a generic note-taking workspace",
+      "summary": "BookStack suits organizations prepared to organize their documentation deliberately into books, chapters and pages. The first-party content guide makes the hierarchy explicit, while the search documentation covers discovery across the library. This is a strength for procedures and enduring reference material but less suitable for teams that want an unrestricted canvas for arbitrary records. A buyer should evaluate the effort of maintaining the hierarchy as information grows, together with hosting, backup and permission responsibilities.",
+      "buyerCheck": "Create a representative book with several chapters, search across pages, and test the editing and backup workflow for the team that will maintain the content.",
+      "reviewedAt": "2026-10-10",
+      "sourceUrl": "https://www.bookstackapp.com/docs/user/content-overview/",
+      "sourceUrls": [
+        "https://www.bookstackapp.com/docs/user/content-overview/",
+        "https://www.bookstackapp.com/docs/user/searching/",
+        "https://www.bookstackapp.com/docs/user/organising-content/"
+      ],
+      "method": "first_party_documentation_and_independent_editorial_judgment",
+      "verificationStatus": "vendor_documented",
+      "handsOnTested": false
+    },
+    "strengths": [
+      "Official user guide documents a predictable hierarchy of books, chapters and pages.",
+      "Manufacturer documentation explains global search and navigation functions."
+    ],
+    "limitations": [
+      "A prescribed hierarchy may not suit free-form notes or complex relational records.",
+      "Self-hosted deployments need an accountable owner for backups and upgrades."
+    ],
+    "tradeoffs": [
+      "Clear documentation hierarchy and search versus flexibility and ongoing infrastructure management."
+    ],
+    "evidence": [
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.bookstackapp.com/docs/user/content-overview/",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.bookstackapp.com/docs/user/searching/",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      },
+      {
+        "claimScope": "toolscout_editorial_review",
+        "sourceUrl": "https://www.bookstackapp.com/docs/user/organising-content/",
+        "verifiedAt": "2026-10-10",
+        "method": "direct_first_party_review",
+        "handsOnTested": false
+      }
+    ],
+    "pricingDetails": {
+      "freePlanStatus": "unknown",
+      "verifiedAt": "2026-10-10",
+      "freePlanSummary": "No specific perpetual free-tier entitlement inferred from these documentation pages."
+    },
+    "decisionClaims": [
+      {
+        "type": "capability",
+        "value": "books and chapters",
+        "status": "verified",
+        "sourceUrl": "https://www.bookstackapp.com/docs/user/content-overview/",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "documentation search",
+        "status": "verified",
+        "sourceUrl": "https://www.bookstackapp.com/docs/user/searching/",
+        "verifiedAt": "2026-10-10"
+      },
+      {
+        "type": "capability",
+        "value": "content organization",
+        "status": "verified",
+        "sourceUrl": "https://www.bookstackapp.com/docs/user/organising-content/",
+        "verifiedAt": "2026-10-10"
+      }
+    ]
+  }
+]
