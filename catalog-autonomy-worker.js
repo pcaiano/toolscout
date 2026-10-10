@@ -10,6 +10,7 @@ import {cleanPublicCatalogProfileCopy} from './catalog-public-fact-copy.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
 const MAX_VERIFY_PER_CYCLE=6; // hourly: up to 144 tools/day, bounded official document verification
+const MAX_VERIFY_CYCLE_WALL_MS=180000; // keep discovery writes from extending official quality mission indefinitely
 const MAX_NEWS_SOURCE_CHECKS_PER_CYCLE=4;
 const MAX_ADMIT_PER_DAY=24; // actually per-cycle cap: enable documented cohorts to publish within one hourly run
 const MAX_BASELINE_SEED_PER_CYCLE=40; // bounded migration inside the existing catalog autonomy engine
@@ -392,6 +393,7 @@ export async function publicCatalogInventory(env){
   };
 }
 export async function verifyBatch(env){
+  const startedAt=Date.now(),deadlineAt=startedAt+MAX_VERIFY_CYCLE_WALL_MS;
   await ensureSchema(env);
   const all=await mergedTools(env);
   const states=await env.DB.prepare(`SELECT tool_slug,source_url,source_status,fingerprint,pending_fingerprint,change_confirmations,content_changed,broken_consecutive,quality_status,static_last_verified,last_checked_at,last_change_at FROM catalog_runtime_state`).all();
@@ -417,8 +419,9 @@ export async function verifyBatch(env){
     ...retryWarning.slice(0,MAX_WARNING_RETRIES_PER_CYCLE).map(x=>x.tool),
     ...regular.map(x=>x.tool)
   ].slice(0,MAX_VERIFY_PER_CYCLE);
-  let checked=0,healthy=0,changed=0,suppressed=0,warnings=0,documentationChecked=0,documentationChanged=0,documentationWarnings=0,documentationBaselined=0,factsCorrected=0,factsProposed=0;
+  let checked=0,healthy=0,changed=0,suppressed=0,warnings=0,documentationChecked=0,documentationChanged=0,documentationWarnings=0,documentationBaselined=0,factsCorrected=0,factsProposed=0,cycleBudgetExhausted=false;
   await mapLimit(chosen,2,async tool=>{
+    if(Date.now()>=deadlineAt){cycleBudgetExhausted=true;return;} // do not start another vendor after budget
     const slug=String(tool.slug).toLowerCase(),prior=smap.get(slug)||{},verifyUrl=verificationUrl(tool),verificationSourceChanged=Boolean(prior.source_url&&prior.source_url!==verifyUrl),result=await fetchOfficial(verifyUrl),staticVerified=String(tool.lastVerified||tool.sourceCheckedOn||'');
     const staticVerifiedMs=staticVerified?Date.parse(/T/.test(staticVerified)?staticVerified:`${staticVerified}T00:00:00Z`):NaN;
     const staticVerificationFresh=Number.isFinite(staticVerifiedMs)&&Date.now()-staticVerifiedMs<=45*86400000;
@@ -474,12 +477,15 @@ export async function verifyBatch(env){
       .bind(slug,verifyUrl,result.status,result.httpStatus,result.finalUrl,canonicalFingerprint,pendingFingerprint,confirmations,contentChanged,broken,quality,staticVerified,lastChange).run();
   });
   runtimeCache.at=0;
-  const researchSupply=await syncCatalogResearchSupply(env,{knownTools:all}).catch(async error=>{
+  const researchSupply=Date.now()>=deadlineAt
+    ?{ok:true,staged:0,deferred:true,reason:'catalog_quality_cycle_budget_exhausted'}
+    :await syncCatalogResearchSupply(env,{knownTools:all,deadlineAt}).catch(async error=>{
     const reason=safeText(error?.message||error,250);
     await logEvent(env,null,'catalog_research_supply_failed','failed','Bounded discovery intake failed without blocking ongoing official document verification.',{error:reason});
     return{ok:false,reason,staged:0};
   });
-  return{ok:true,checked,healthy,changed,suppressed,warnings,documentation_checked:documentationChecked,documentation_baselined:documentationBaselined,documentation_changed:documentationChanged,documentation_warnings:documentationWarnings,verified_facts_corrected:factsCorrected,verified_fact_proposals:factsProposed,batch_limit:MAX_VERIFY_PER_CYCLE,warning_retry_hours:WARNING_RETRY_HOURS,max_warning_retries_per_cycle:MAX_WARNING_RETRIES_PER_CYCLE,evidence:'official_homepage_and_first_party_documentation',write_policy:'due_check_only',research_supply:researchSupply};
+  if(Date.now()>=deadlineAt)cycleBudgetExhausted=true;
+  return{ok:true,checked,healthy,changed,suppressed,warnings,documentation_checked:documentationChecked,documentation_baselined:documentationBaselined,documentation_changed:documentationChanged,documentation_warnings:documentationWarnings,verified_facts_corrected:factsCorrected,verified_fact_proposals:factsProposed,batch_limit:MAX_VERIFY_PER_CYCLE,warning_retry_hours:WARNING_RETRY_HOURS,max_warning_retries_per_cycle:MAX_WARNING_RETRIES_PER_CYCLE,evidence:'official_homepage_and_first_party_documentation',write_policy:'due_check_only',research_supply:researchSupply,cycle_budget_exhausted:cycleBudgetExhausted,cycle_wall_budget_ms:MAX_VERIFY_CYCLE_WALL_MS,cycle_elapsed_ms:Date.now()-startedAt};
 }
 function validCandidate(candidate,config){
   const allowed=new Set(config?.admission?.allowedCatalogCategories||[]);
@@ -564,7 +570,7 @@ export function selectCatalogResearchLeads(leads,existingGapSlugs=[],knownToolSl
   }
   return selected;
 }
-export async function syncCatalogResearchSupply(env,{knownTools=null,limit=MAX_RESEARCH_SEEDS_PER_CYCLE}={}){
+export async function syncCatalogResearchSupply(env,{knownTools=null,limit=MAX_RESEARCH_SEEDS_PER_CYCLE,deadlineAt=Infinity}={}){
   await ensureSchema(env);
   const directory=await assetJson(env,'/data/catalog-research-seeds-scale.json',null);
   if(directory?.schemaVersion!==1||directory?.status!=='research_only_not_catalog'||!Array.isArray(directory.candidates))
@@ -579,8 +585,9 @@ export async function syncCatalogResearchSupply(env,{knownTools=null,limit=MAX_R
   const known=Array.isArray(knownTools)?knownTools:await mergedTools(env);
   const existing=(gaps.results||[]).map(x=>x.tool_slug);
   const selected=selectCatalogResearchLeads(directory.candidates,existing,known.map(x=>x.slug),limit);
-  let staged=0;
+  let staged=0,deferred=false;
   for(const lead of selected){
+    if(Date.now()>=deadlineAt){deferred=true;break;}
     const result=await env.DB.prepare(`INSERT OR IGNORE INTO catalog_market_gaps
       (tool_slug,signals,sources_json,examples_json,status,updated_at)
       VALUES(?,1,?,?,'discovery_only',datetime('now'))`)
@@ -591,7 +598,7 @@ export async function syncCatalogResearchSupply(env,{knownTools=null,limit=MAX_R
     'Research-only directory leads were queued without manufacturer proof, editorial admission, public profiles or monetized links.',
     {staged,source:'awesome-selfhosted-directory',directory_leads:directory.candidates.length,
       existing_before:existing.length,max_per_cycle:MAX_RESEARCH_SEEDS_PER_CYCLE});
-  return{ok:true,staged,converted_from_executable:Number(recovered?.meta?.changes||recovered?.changes||0),
+  return{ok:true,staged,deferred,converted_from_executable:Number(recovered?.meta?.changes||recovered?.changes||0),
     source:'awesome-selfhosted-directory',directory_leads:directory.candidates.length,queued_before:existing.length,
     admission:'discovery_only_until_independent_signal_and_decision_grade_first_party_evidence',max_per_cycle:MAX_RESEARCH_SEEDS_PER_CYCLE};
 }
