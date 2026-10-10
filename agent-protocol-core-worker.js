@@ -1084,6 +1084,8 @@ function a2aArgs(message){
 function recommendationText(data){
   if(data?.decision_status==='needs_specific_features')
     return 'ToolScout cannot rank products by general feature breadth without validated manufacturer evidence. Please list the exact capabilities you need as must_have requirements to receive a qualified shortlist.';
+  if(data?.decision_status==='no_qualified_candidate')
+    return 'ToolScout cannot verify a qualified software recommendation for this job and the supplied mandatory requirements. No product is shortlisted because missing manufacturer evidence is not proof of suitability. Specify a narrower workflow, change the constraints or ask for a factual comparison; do not treat an unknown capability as supported.';
   if(data?.decision_status==='needs_workflow_selection'&&data.workflow_guidance){
     const g=data.workflow_guidance;
     const list=(g.workflows||[]).map((w,i)=>String(i+1)+'. '+w.title+': '+w.scope+' ('+w.finder_url+')').join('\n');
@@ -1105,7 +1107,10 @@ async function handleA2A(request,env,ctx){
   const out=await callCatalogTool('decide_software',extracted.args,request,env);
   // Unsupported editorial dimensions are buyer guidance, not a server outage.
   // Return the same structured decision status and a human-readable next step.
-  if(out.error&&!(out.status===422&&out.data?.decision_status==='needs_specific_features')){
+  // A buyer request with no evidence-qualified result is valid decision guidance,
+  // not a provider outage. Keep genuine catalog failures as transport errors.
+  const guidanceStatus=out.status===422&&['needs_specific_features','no_qualified_candidate'].includes(out.data?.decision_status);
+  if(out.error&&!guidanceStatus){
     ctx.waitUntil(logProtocol(env,'a2a','SendMessage',{success:false}));
     return a2aError(body.id,-32603,'Internal error','DECISION_UNAVAILABLE',500);
   }
