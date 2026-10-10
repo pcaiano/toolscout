@@ -21,7 +21,7 @@ for(let i=1;i<=30;i++){
   const location=probe.headers.get('Location');
   const target=location?new URL(location,BASE):null;
   const external=target&&target.protocol==='https:'&&
-   !/(^|\\.)trytoolscout\\.org$/i.test(target.hostname);
+   !/(^|\.)trytoolscout\.org$/i.test(target.hostname);
   const routed=probe.headers.get('X-ToolScout-Route-Owner')==='affiliate_redirect'&&
    probe.headers.get('X-ToolScout-Commercial-Core')==='bounded-compat-v1';
   if(probe.status>=300&&probe.status<400&&external&&routed){
