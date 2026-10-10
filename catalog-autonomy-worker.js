@@ -9,7 +9,7 @@ import {manufacturerFactProposals,reconcileManufacturerFacts} from './catalog-ma
 import {cleanPublicCatalogProfileCopy} from './catalog-public-fact-copy.js';
 
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
-const MAX_VERIFY_PER_CYCLE=4; // every two hours: 48 tools/day, target full catalog scan <= 72 hours
+const MAX_VERIFY_PER_CYCLE=6; // hourly: up to 144 tools/day, bounded official document verification
 const MAX_NEWS_SOURCE_CHECKS_PER_CYCLE=4;
 const MAX_ADMIT_PER_DAY=6;
 const MAX_BASELINE_SEED_PER_CYCLE=40; // bounded migration inside the existing catalog autonomy engine
