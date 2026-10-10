@@ -168,7 +168,7 @@ export function linkedManufacturerDocumentation(html,base,{limit=12}={}){
   return out;
 }
 async function sha(value){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(value)));return [...new Uint8Array(buf)].map(x=>x.toString(16).padStart(2,'0')).join('').slice(0,24)}
-export async function fetchOfficial(url,{deadlineAt=Infinity}={}){
+export async function fetchOfficial(url,{deadlineAt=Infinity,includeResearchFingerprint=false}={}){
   const u=publicHttps(url);if(!u)return{status:'invalid',httpStatus:null,finalUrl:null,fingerprint:null};
   let lastError=null;
   for(let attempt=1;attempt<=2;attempt++){
@@ -182,7 +182,7 @@ export async function fetchOfficial(url,{deadlineAt=Infinity}={}){
     if(!r.ok)return{status:[403,429].includes(r.status)?'blocked_or_limited':'warning',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:null};
     const type=(r.headers.get('content-type')||'').toLowerCase();if(!type.includes('text/html')&&!type.includes('text/plain'))return{status:'warning',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:null};
     const html=(await r.text()).slice(0,500000),title=(html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]||'').replace(/\s+/g,' ').trim(),description=meta(html,'description')||meta(html,'og:description'),text=stripHtml(html).slice(0,14000);
-    return{status:'ok',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:await sha(`${title}\n${description}\n${text}`),title,description,documentText:html
+    return{status:'ok',httpStatus:r.status,finalUrl:r.url||u.href,fingerprint:await sha(`${title}\n${description}\n${text}`),...(includeResearchFingerprint?{researchBodyFingerprint:await sha(stripHtml(html.match(/<body\b[^>]*>([\s\S]*?)<\/body>/i)?.[1]||html))}:{}),title,description,documentText:html
       .replace(/<script[\s\S]*?<\/script>/gi,' ')
       .replace(/<style[\s\S]*?<\/style>/gi,' ')
       .replace(/<\/(?:p|li|tr|td|th|h[1-6]|section|div)>/gi,'\n')
@@ -745,7 +745,7 @@ export async function researchCatalogManufacturerDossiers(env,{deadlineAt=Infini
         {reason:'publisher_or_ambiguous_homepage'});
       checked++;continue;
     }
-    const source=await fetchOfficial(home.href,{deadlineAt});
+    const source=await fetchOfficial(home.href,{deadlineAt,includeResearchFingerprint:true});
     if(source.error==='quality_cycle_budget_deferred'){deferred=true;break}
     checked++;
     if(source.status!=='ok'||!sameManufacturerHost(source.finalUrl,home.href)){
@@ -755,7 +755,7 @@ export async function researchCatalogManufacturerDossiers(env,{deadlineAt=Infini
       continue;
     }
     const urls=(source.manufacturerLinks||[]).slice(0,4);
-    const pages=await mapLimit(urls,2,url=>fetchOfficial(url,{deadlineAt}));
+    const pages=await mapLimit(urls,2,url=>fetchOfficial(url,{deadlineAt,includeResearchFingerprint:true}));
     if(pages.some(x=>x.error==='quality_cycle_budget_deferred')){deferred=true;break}
     const seen=new Set(),fingerprints=new Set(),proof=[];
     const homepageIdentity=canonicalManufacturerDocumentIdentity(source.finalUrl);
@@ -764,11 +764,11 @@ export async function researchCatalogManufacturerDossiers(env,{deadlineAt=Infini
       // SPAs and soft-404 routes often return the same marketing HTML under
       // several links. Two distinct URL paths alone are not two documents.
       if(page?.status!=='ok'||!identity||identity===homepageIdentity||seen.has(identity)||
-         !page.fingerprint||page.fingerprint===source.fingerprint||fingerprints.has(page.fingerprint)||
+         !page.researchBodyFingerprint||page.researchBodyFingerprint===source.researchBodyFingerprint||fingerprints.has(page.researchBodyFingerprint)||
          !sameManufacturerHost(page.finalUrl,home.href)||
          String(page.documentText||'').length<120)continue;
-      seen.add(identity);fingerprints.add(page.fingerprint);
-      proof.push({url:page.finalUrl,fingerprint:page.fingerprint,title:safeText(page.title,160),
+      seen.add(identity);fingerprints.add(page.researchBodyFingerprint);
+      proof.push({url:page.finalUrl,fingerprint:page.researchBodyFingerprint,fingerprint_scope:'full_visible_body',title:safeText(page.title,160),
         summary:safeText(page.description,280),verified_at:new Date().toISOString().slice(0,10)});
       if(proof.length>=2)break;
     }
@@ -780,7 +780,7 @@ export async function researchCatalogManufacturerDossiers(env,{deadlineAt=Infini
     }
     await persistManufacturerWatchEvent(env,slug,'catalog_manufacturer_dossier_documented','completed',
       'Two first-party manufacturer pages recorded privately; editorial analysis and claims still required.',
-      {source:'manufacturer_first_party',home_url:source.finalUrl,home_fingerprint:source.fingerprint,
+      {source:'manufacturer_first_party',home_url:source.finalUrl,home_fingerprint:source.researchBodyFingerprint,
        product_name:lead.name,discovery_category:lead.discoveryCategory||null,documents:proof,
        editorial_complete:false,decision_claims_complete:false,admission_ready:false});
     const result=await env.DB.prepare("UPDATE catalog_market_gaps SET status='source_researched',"+

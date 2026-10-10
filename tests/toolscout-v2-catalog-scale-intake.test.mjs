@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {selectCatalogResearchLeads,syncCatalogResearchSupply,classifyMarketGapEvidence,candidatePage,
-  linkedManufacturerDocumentation,researchCatalogManufacturerDossiers}
+  linkedManufacturerDocumentation,researchCatalogManufacturerDossiers,fetchOfficial}
   from '../catalog-autonomy-worker.js';
 import {executeCatalogGrowthTask} from '../catalog-gap-runtime-worker.js';
 
@@ -281,7 +281,50 @@ test('Codex P2: manufacturer dossier proof checks both page identity and content
  const section=src.slice(src.indexOf('export async function researchCatalogManufacturerDossiers'),
    src.indexOf('async function syncMarketGaps('));
  assert.match(section,/fingerprints=new Set\(\)/);
- assert.match(section,/fingerprints\.has\(page\.fingerprint\)/);
- assert.match(section,/page\.fingerprint===source\.fingerprint/);
+ assert.match(section,/fingerprints\.has\(page\.researchBodyFingerprint\)/);
+ assert.match(section,/page\.researchBodyFingerprint===source\.researchBodyFingerprint/);
  assert.match(section,/identity===homepageIdentity/);
+});
+
+
+test('Codex P2: long vendor documents differing after 14k prefix retain distinct full-body proofs',async()=>{
+ const originalFetch=globalThis.fetch;
+ const common='Identical documentation navigation and shared sidebars. '.repeat(360);
+ const makePage=unique=>'<html><head><title>Product Docs</title>'+
+   '<meta name="description" content="Vendor product documentation"></head>'+
+   '<body><main><p>'+common+'</p><section>'+unique.repeat(5)+'</section></main></body></html>';
+ const pages={
+   '/docs/first':makePage('Unique integration endpoint details and API field references. '),
+   '/docs/second':makePage('Unique purchasing plan entitlements and support scope. ')
+ };
+ globalThis.fetch=async raw=>{
+   const u=new URL(raw);
+   assert.equal(u.hostname,'docs-vendor.example');
+   return new Response(pages[u.pathname]||'missing',{
+     status:pages[u.pathname]?200:404,headers:{'Content-Type':'text/html'}
+   });
+ };
+ try{
+   const a=await fetchOfficial('https://docs-vendor.example/docs/first');
+   const b=await fetchOfficial('https://docs-vendor.example/docs/second');
+   assert.equal(a.fingerprint,b.fingerprint,
+     'legacy 14k summary can legitimately coincide; do not silently change existing source-change hashes');
+   const first=await fetchOfficial('https://docs-vendor.example/docs/first',{includeResearchFingerprint:true});
+   const second=await fetchOfficial('https://docs-vendor.example/docs/second',{includeResearchFingerprint:true});
+   assert.notEqual(first.researchBodyFingerprint,second.researchBodyFingerprint);
+   assert.equal(first.fingerprint,a.fingerprint,'quality tracker fingerprint remains unchanged');
+   assert.equal(second.fingerprint,b.fingerprint,'legacy fingerprint stays stable');
+   assert.equal(a.researchBodyFingerprint,undefined,
+     'normal source verification does not perform extra full-body digests');
+ }finally{globalThis.fetch=originalFetch}
+});
+
+test('full-body manufacturer digest is opt-in and does not alter historic catalog source-change detection',()=>{
+ const source=fs.readFileSync(new URL('../catalog-autonomy-worker.js',import.meta.url),'utf8');
+ assert.match(source,/includeResearchFingerprint=false/);
+ assert.match(source,/researchBodyFingerprint:await sha\(stripHtml/);
+ assert.match(source,/fetchOfficial\(url,\{deadlineAt,includeResearchFingerprint:true\}\)/);
+ assert.match(source,/page\.researchBodyFingerprint===source\.researchBodyFingerprint/);
+ assert.match(source,/fingerprints\.has\(page\.researchBodyFingerprint\)/);
+ assert.match(source,/fingerprint:await sha/);
 });
