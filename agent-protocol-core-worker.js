@@ -411,7 +411,7 @@ function verifiedIntegrationPair(tool,existing){
     const name=catalogNormalize(pair.product||pair.tool||pair.name);
     const source=String(pair.sourceUrl||pair.source_url||'');
     const verifiedAt=String(pair.verifiedAt||pair.verified_at||'');
-    if(name!==target||!/^\\d{4}-\\d{2}-\\d{2}$/.test(verifiedAt))return false;
+    if(name!==target||!/^\d{4}-\d{2}-\d{2}$/.test(verifiedAt))return false;
     const checked=new Date(verifiedAt+'T00:00:00Z');
     if(!Number.isFinite(checked.valueOf())||checked.toISOString().slice(0,10)!==verifiedAt
       ||checked.valueOf()>Date.now()||Date.now()-checked.valueOf()>180*86400000)return false;
@@ -421,8 +421,8 @@ function verifiedIntegrationPair(tool,existing){
     try{
       const documented=new URL(source);
       if(documented.protocol!=='https:'||documented.username||documented.password)return false;
-      const host=documented.hostname.toLowerCase().replace(/^www\\./,'');
-      const vendor=tool.sourceUrl?new URL(tool.sourceUrl).hostname.toLowerCase().replace(/^www\\./,''):'';
+      const host=documented.hostname.toLowerCase().replace(/^www\./,'');
+      const vendor=tool.sourceUrl?new URL(tool.sourceUrl).hostname.toLowerCase().replace(/^www\./,''):'';
       if(!vendor)return false;
       const registered=Array.isArray(tool.editorialReview?.sourceUrls)
         &&tool.editorialReview.sourceUrls.includes(source);
