@@ -33,6 +33,10 @@ test('Finder embed is an inline discovery product rather than a link-only launch
   assert.match(src,/dataset\.publisher/);
   assert.match(src,/profile_click/);
   assert.match(src,/vendor_click/);
+  assert.match(src,/const target=item\.tool_url\?new URL\(item\.tool_url\):null/);
+  assert.match(src,/target\.pathname===/);
+  assert.match(src,/\$\{vendor\?/);
+  assert.doesNotMatch(src,/const vendor=new URL\(`\/go\//,'widget must not mint unsolicited product visits');
   assert.match(src,/data-toolscout-embed','finder/);
   assert.doesNotMatch(src,/window\.open\('https:\/\/trytoolscout\.org\/\?'/);
 });
