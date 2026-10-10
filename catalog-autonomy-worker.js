@@ -629,7 +629,9 @@ export function classifyMarketGapEvidence(gap){
   const slug=String(gap?.slug||'').toLowerCase();
   if(!/^[a-z0-9][a-z0-9-]*$/.test(slug))
     return{status:'discovery_only',reason:'invalid_product_identity',independent_product_hosts:0};
-  const productHosts=new Set(),taxonomyHosts=new Set();
+  const productHosts=new Map(),taxonomyHosts=new Set();
+  const publisherNames=(Array.isArray(gap?.sources)?gap.sources:[])
+    .map(v=>String(v||'').toLowerCase().replace(/[^a-z0-9]/g,'')).filter(x=>x.length>=4);
   for(const raw of Array.isArray(gap?.exampleUrls)?gap.exampleUrls:[]){
     try{
       const u=new URL(String(raw));
@@ -640,14 +642,19 @@ export function classifyMarketGapEvidence(gap){
       const taxonomy=parts.some(part=>['category','categories','feature','features','faq','tag','tags','topics','search','browse','filter','pricing'].includes(part))
         ||/(?:-software|-tools)$/.test(terminal)&&terminal!==slug;
       if(taxonomy){taxonomyHosts.add(host);continue;}
-      // An exact named product URL on two independent directories is a
-      // research signal, never evidence of product functionality or pricing.
-      if(parts.length&&terminal===slug)productHosts.add(host);
+      if(!parts.length||terminal!==slug)continue;
+      // Correlate each cited publisher to its own site, not two unrelated
+      // source labels with two mirrored subdomains of the same publisher.
+      const labels=host.split('.');
+      const suffix=labels.slice(-2).join('.');
+      const multiSuffix=['co.uk','org.uk','com.au','co.jp','co.in','com.br','com.mx','com.tr','co.nz'].includes(suffix);
+      const publisherRoot=labels.slice(multiSuffix?-3:-2).join('.');
+      const flat=publisherRoot.replace(/[^a-z0-9]/g,'');
+      const matchedPublisher=publisherNames.find(label=>flat.includes(label));
+      if(matchedPublisher)productHosts.set(publisherRoot,matchedPublisher);
     }catch{}
   }
-  const independentSources=new Set((Array.isArray(gap?.sources)?gap.sources:[])
-    .map(v=>String(v||'').toLowerCase().trim()).filter(Boolean));
-  const independent=Math.min(productHosts.size,independentSources.size);
+  const independent=Math.min(productHosts.size,new Set(productHosts.values()).size);
   return independent>=2
     ?{status:'research_required',reason:'independent_product_page_signals',independent_product_hosts:independent,taxonomy_hosts:taxonomyHosts.size}
     :{status:'discovery_only',reason:'insufficient_product_identity_signals',independent_product_hosts:independent,taxonomy_hosts:taxonomyHosts.size};
