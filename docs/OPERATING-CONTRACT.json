@@ -210,6 +210,7 @@
     "role": "ci_telemetry_and_manual_recovery_only",
     "primary_scheduler_forbidden": true,
     "active_workflows": [
+      "codex-review-autofix.yml",
       "deploy-worker.yml",
       "growth-brain-seo-executor.yml",
       "gsc-growth-bridge.yml",

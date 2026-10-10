@@ -374,6 +374,13 @@ function clamp(n,min,max){return Math.max(min,Math.min(max,n))}
 function scoreOf(tool,key){const raw=tool?.scores?.[key];if(raw==null||raw==='')return null;const n=Number(raw);return Number.isFinite(n)?clamp(n,0,10):null}
 function textTerms(value){return catalogNormalize(value).split(' ').filter(x=>x.length>1&&!STOP_WORDS.has(x))}
 function toolHay(tool){return catalogNormalize([tool?.name,tool?.slug,tool?.category,tool?.description,...(tool?.features||[]),...(tool?.bestFor||[])].join(' '))}
+// Broad feature *depth* is not a verified score. Named must-have capabilities
+// remain eligible for claim-scoped validation instead of being treated as breadth.
+function requestsFeatureBreadth(args){
+  if(Array.isArray(args?.priorities)&&args.priorities.includes('features'))return true;
+  const text=catalogNormalize([args?.job,args?.use_case,args?.dislike,...(args?.constraints||[])].join(' '));
+  return /\b(?:feature (?:depth|breadth|richness|coverage|set)|features (?:depth|breadth|richness|coverage)|feature rich|most features|best features|advanced features|widest feature set|deepest features|richest features|fullest feature set|extensive features)\b/.test(text);
+}
 function requestedDimensions(args){
   const direct=Array.isArray(args?.priorities)?args.priorities.filter(x=>DECISION_DIMENSIONS[x]):[];
   if(direct.length)return direct;
@@ -897,7 +904,7 @@ async function callCatalogTool(name,args,request,env){
     // Feature-depth scores do not exist in the canonical catalog. Do not rank
     // candidates on a fabricated neutral dimension or a content-score proxy.
     // Exact must-have capabilities can be evaluated with claim-level evidence.
-    if((args.priorities||[]).includes('features'))
+    if(requestsFeatureBreadth(args))
       return {error:'Feature breadth is not independently scored yet. Specify concrete capabilities as must_have requirements instead of ranking on feature count.',status:422,
         data:{job:args.job,shortlist:[],decision_status:'needs_specific_features'}};
     const guidance=businessWorkflowGuidance(args.job,{},tools);
@@ -936,7 +943,7 @@ async function callCatalogTool(name,args,request,env){
     }};
   }
   if(name==='compare_for_use_case'){
-    if((args.priorities||[]).includes('features'))
+    if(requestsFeatureBreadth(args))
       return {error:'A general feature-breadth score is not documented. Compare named must_have capabilities and their verified plan entitlements instead.',status:422,
         data:{use_case:args.use_case,decision_status:'needs_specific_features',tools:[],verdict:{type:'no_qualified_winner'},tradeoffs:[]}};
     const found=[],missing=[];
@@ -1075,6 +1082,8 @@ function a2aArgs(message){
   return {args};
 }
 function recommendationText(data){
+  if(data?.decision_status==='needs_specific_features')
+    return 'ToolScout cannot rank products by general feature breadth without validated manufacturer evidence. Please list the exact capabilities you need as must_have requirements to receive a qualified shortlist.';
   if(data?.decision_status==='needs_workflow_selection'&&data.workflow_guidance){
     const g=data.workflow_guidance;
     const list=(g.workflows||[]).map((w,i)=>String(i+1)+'. '+w.title+': '+w.scope+' ('+w.finder_url+')').join('\n');
@@ -1094,7 +1103,12 @@ async function handleA2A(request,env,ctx){
   const extracted=a2aArgs(body?.params?.message);
   if(extracted.error){ctx.waitUntil(logProtocol(env,'a2a','SendMessage',{success:false}));return a2aError(body.id,-32602,'Invalid parameters','INVALID_PARAMS',400)}
   const out=await callCatalogTool('decide_software',extracted.args,request,env);
-  if(out.error){ctx.waitUntil(logProtocol(env,'a2a','SendMessage',{success:false}));return a2aError(body.id,-32603,'Internal error','DECISION_UNAVAILABLE',500)}
+  // Unsupported editorial dimensions are buyer guidance, not a server outage.
+  // Return the same structured decision status and a human-readable next step.
+  if(out.error&&!(out.status===422&&out.data?.decision_status==='needs_specific_features')){
+    ctx.waitUntil(logProtocol(env,'a2a','SendMessage',{success:false}));
+    return a2aError(body.id,-32603,'Internal error','DECISION_UNAVAILABLE',500);
+  }
   const incoming=body.params.message,contextId=incoming.contextId||crypto.randomUUID();
   const message={messageId:crypto.randomUUID(),contextId,role:'ROLE_AGENT',parts:[{text:recommendationText(out.data),mediaType:'text/plain'},{data:out.data,mediaType:'application/json'}]};
   ctx.waitUntil(logProtocol(env,'a2a','SendMessage',{resultCount:Number(out.data?.shortlist?.length||0)}));

@@ -106,7 +106,7 @@ function broadCategoryQuery(profile={},signal={}){
   return Boolean(profile.goal&&!profile.budget&&!profile.team&&!profile.priority&&!signal.directTool&&(signal.words||[]).length<=2);
 }
 function decisionDimensions(intent,profile){
-  const weights=intent?.weights||{},priority=profile.priority==='features'?'content':profile.priority;
+  const weights=intent?.weights||{},priority=profile.priority;
   const keys=priority?[priority]:Object.keys(weights).filter(x=>['price','ease','automation','integrations','sales','marketing','seo','research','content','agency','ai'].includes(x));
   return keys.length?keys:['ease','integrations','automation','price'];
 }
@@ -218,16 +218,19 @@ async function recommend(request,env){
     const p=inferredProfile(q,profile);
     const buyerDecision=parseBuyerDecisionQuery(u,p,limit,q,profile.goal);
     if(buyerDecision.error)return Response.json({error:'invalid_decision_constraints',message:buyerDecision.error},{status:400,headers:{...JSON_H,'Cache-Control':'no-store'}});
+    // The guided Finder has always passed priority=features *without* mode=decision.
+    // This guard must precede legacy routing, workflow guidance and scoring.
+    // Never substitute unrelated content scores for undocumented feature breadth.
+    if(profile.priority==='features'||(buyerDecision.requested&&buyerDecision.args.priorities.includes('features')))
+      return Response.json({error:'recommendation_unresolved',
+        decision_status:'needs_specific_features',count:0,recommendations:[],
+        message:'ToolScout cannot verify a general feature-depth ranking. Specify the actual must-have capabilities so each can be checked against manufacturer evidence.'},
+      {status:422,headers:{...JSON_H,'Cache-Control':'no-store'}});
     if(!guidance&&!p.goal&&/\b(airbnb|vacation rental|short.term rental|holiday rental|alojamento local)\b/.test(normalize(q))&&verifiedPmsCandidates(tools).length)p.goal='vacation-rental';
     if(guidance)return Response.json({query:q,profile:profile,intent:null,recommendation_type:'workflow_guidance',
       guidance,count:0,recommendations:[],ranking:'Workflow decomposition before vendor ranking',
       affiliate_disclosure:'ToolScout may earn a commission from some outbound links. Affiliate relationships do not influence recommendations.'},{headers:JSON_H});
     if(buyerDecision.requested){
-      if((buyerDecision.args.priorities||[]).includes('features'))
-        return Response.json({error:'recommendation_unresolved',
-          decision_status:'needs_specific_features',count:0,recommendations:[],
-          message:'ToolScout cannot verify a general feature-depth ranking. Specify the actual must-have capabilities so each can be checked against manufacturer evidence.'},
-        {status:422,headers:{...JSON_H,'Cache-Control':'no-store'}});
       const shortlist=qualifiedSoftwareDecisionShortlist(tools,buyerDecision.args);
       if(!shortlist.length)return Response.json({
         error:'recommendation_unresolved',decision_status:'no_qualified_candidate',

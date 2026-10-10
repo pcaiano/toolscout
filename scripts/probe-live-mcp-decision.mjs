@@ -184,6 +184,29 @@ assert(unsupportedFeatures,'Feature-depth safety policy did not appear in produc
 const aiUnsupportedFeatures=await rpc('tools/call',{name:'decide_software',arguments:{job:'CRM',priorities:['features'],limit:3}});
 assert(aiUnsupportedFeatures.isError===true&&aiUnsupportedFeatures.structuredContent?.decision_status==='needs_specific_features',
   'Live MCP must not silently rank on a nonexistent features score');
+// Review P1: guided Finder sends legacy priority alone; it must fail closed.
+let guidedFeatures=null,guidedReadyAttempts=0;
+for(let i=1;i<=15;i++){
+  guidedReadyAttempts=i;
+  try{
+    const sample=await liveQualifiedFinder('q=CRM&goal=crm&priority=features');
+    if(sample.status===422&&sample.data?.decision_status==='needs_specific_features'){
+      guidedFeatures=sample;break;
+    }
+  }catch{}
+  if(i<15)await sleep(5000);
+}
+assert(guidedFeatures,'Guided Finder bypassed undocumented feature-depth guard after bounded rollout');
+const broadFeatureText=await rpc('tools/call',{name:'decide_software',arguments:{job:'CRM with the best feature depth',limit:3}});
+assert(broadFeatureText.isError===true&&broadFeatureText.structuredContent?.decision_status==='needs_specific_features',
+  'Free-form MCP feature-depth request silently ranked on an unsupported dimension');
+const a2aRequest={jsonrpc:'2.0',id:64,method:'SendMessage',params:{message:{role:'ROLE_USER',
+  parts:[{text:'CRM with the best feature depth',mediaType:'text/plain'}]}}};
+const a2aResponse=await request('/a2a',{method:'POST',headers:{'Content-Type':'application/json','A2A-Version':'1.0'},body:JSON.stringify(a2aRequest)});
+const a2aData=await a2aResponse.json();
+assert(a2aResponse.status===200&&a2aData?.result?.message?.parts?.[1]?.data?.decision_status==='needs_specific_features',
+  'A2A feature-depth question did not return actionable buyer guidance');
+console.log(JSON.stringify({codexFollowupLive:true,guidedReadyAttempts,freeFormMcp:true,actionableA2A:true},null,2));
 console.log(JSON.stringify({finderContextPreservedLive:true,goalReadyAttempts,featureReadyAttempts,selectedGoal:'crm',legacyPriority:'automation',
   explicitPriorities:['ease','price'],mcpParity:true},null,2));
 
