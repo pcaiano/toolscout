@@ -121,13 +121,39 @@ export function hasManufacturerDecisionClaim(tool){
       return doc.protocol==='https:'&&doc.pathname!=='/'&&(host===root||host.endsWith('.'+root));
     }catch{return false}
   };
-  return (Array.isArray(tool?.decisionClaims)?tool.decisionClaims:[]).some(claim=>
-    claim&&claim.status==='verified'&&
-    typeof claim.type==='string'&&claim.type.trim().length>0&&
-    (typeof claim.value==='string'?claim.value.trim().length>0:claim.value!==null&&claim.value!==undefined)&&
-    /^\d{4}-\d{2}-\d{2}$/.test(String(claim.verifiedAt||''))&&
-    !Number.isNaN(Date.parse(claim.verifiedAt))&&isOwned(claim.sourceUrl)
-  );
+  const decisionEligibleClaim=claim=>{
+    if(!claim||claim.status!=='verified'||!isOwned(claim.sourceUrl))return false;
+    // Admission must use the same claim kinds and 180-day freshness boundary
+    // as the buyer qualification runtime, not merely a parseable date.
+    if(!['capability','integration','plan_limit','price_quote'].includes(claim.type)||
+      typeof claim.value!=='string'||!claim.value.trim())return false;
+    const date=String(claim.verifiedAt||'');
+    if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(date))return false;
+    const timestamp=Date.parse(date+'T00:00:00Z');
+    if(!Number.isFinite(timestamp)||new Date(timestamp).toISOString().slice(0,10)!==date||
+      timestamp>Date.now()||Date.now()-timestamp>180*86400000)return false;
+    if(claim.type==='plan_limit'){
+      if(!String(claim.plan||'').trim()||!String(claim.unit||'').trim()||
+        !['day','month','total'].includes(claim.period)||
+        !Number.isFinite(claim.quantity)||claim.quantity<=0)return false;
+      if(claim.unit==='contacts'&&!['stored','automation'].includes(claim.scope))return false;
+    }
+    if(claim.type==='price_quote'){
+      if(!String(claim.plan||'').trim()||!['USD','EUR','GBP'].includes(claim.currency)||
+        !['monthly','annual'].includes(claim.billingCycle)||
+        !['subscription','seat','channel'].includes(claim.unit)||
+        claim.unitQuantity!==1||!String(claim.market||'').trim()||
+        !['unknown','included','excluded'].includes(claim.taxStatus)||
+        !Number.isFinite(claim.amount)||claim.amount<0||
+        !Number.isFinite(claim.chargeAmount)||claim.chargeAmount<0||
+        claim.promotion===true)return false;
+      const quoted=claim.billingCycle==='monthly'?claim.chargeAmount:claim.chargeAmount/12;
+      if(Math.abs(quoted-claim.amount)>0.011)return false;
+    }
+    return true;
+  };
+  return (Array.isArray(tool?.decisionClaims)?tool.decisionClaims:[])
+    .some(decisionEligibleClaim);
 }
 
 export function structuralCatalogIssues(tool){
