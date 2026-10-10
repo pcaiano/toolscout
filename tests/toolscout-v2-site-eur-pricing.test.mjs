@@ -42,7 +42,8 @@ test('14 first-party Webflow and HubSpot financial decisions keep plans, EUR rat
     assert.equal(price.monthly_equivalent,amount,label);
     assert.equal(price.charge_amount,plan==='Starter'?20:amount*12,label);
     assert.equal(price.currency,slug==='hubspot'?'EUR':'USD',label);
-    assert.ok(out.tool_url.startsWith('https://trytoolscout.org/go/'),label);
+    assert.equal(out.tool_url,null,label+' is not a confirmed monetized affiliate route');
+    assert.equal(out.profile_url,'https://trytoolscout.org/tools/'+slug,label+' retains an accessible profile');
     assert.ok(!JSON.stringify(out).includes('https://www.hubspot.com/pricing/sales'),label);
     assert.ok(!JSON.stringify(out).includes('https://webflow.com/pricing'),label);
   }
