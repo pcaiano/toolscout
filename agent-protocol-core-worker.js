@@ -367,8 +367,7 @@ const DECISION_DIMENSIONS=Object.freeze({
   seo:['seo','search engine','keyword','keywords','organic'],
   research:['research','analysis','analytics','insight','insights'],
   content:['content','writing','newsletter','publishing','creative'],
-  agency:['agency','agencies','client','clients'],
-  features:['features','feature depth','functionality','functional depth']
+  agency:['agency','agencies','client','clients']
 });
 const STOP_WORDS=new Set(['the','and','for','with','that','this','from','into','our','your','you','my','we','software','tool','tools','app','apps','need','want','best','right','which','use','using','to','of','a','an','in','on','or','is','are']);
 function clamp(n,min,max){return Math.max(min,Math.min(max,n))}
@@ -895,6 +894,12 @@ async function callCatalogTool(name,args,request,env){
   try{tools=await loadCatalog(request,env)}catch{return {error:'ToolScout catalog is temporarily unavailable.',status:503}}
   const disclosure='ToolScout may earn a commission from some outbound links. Affiliate relationships do not influence ranking, shortlist order, comparison conclusions or factual output.';
   if(name==='decide_software'){
+    // Feature-depth scores do not exist in the canonical catalog. Do not rank
+    // candidates on a fabricated neutral dimension or a content-score proxy.
+    // Exact must-have capabilities can be evaluated with claim-level evidence.
+    if((args.priorities||[]).includes('features'))
+      return {error:'Feature breadth is not independently scored yet. Specify concrete capabilities as must_have requirements instead of ranking on feature count.',status:422,
+        data:{job:args.job,shortlist:[],decision_status:'needs_specific_features'}};
     const guidance=businessWorkflowGuidance(args.job,{},tools);
     if(guidance)return {data:{
       job:args.job,shortlist:[],decision_status:'needs_workflow_selection',
@@ -931,6 +936,9 @@ async function callCatalogTool(name,args,request,env){
     }};
   }
   if(name==='compare_for_use_case'){
+    if((args.priorities||[]).includes('features'))
+      return {error:'A general feature-breadth score is not documented. Compare named must_have capabilities and their verified plan entitlements instead.',status:422,
+        data:{use_case:args.use_case,decision_status:'needs_specific_features',tools:[],verdict:{type:'no_qualified_winner'},tradeoffs:[]}};
     const found=[],missing=[];
     for(const value of args.tools){const tool=findCatalogTool(tools,value);if(tool)found.push(tool);else missing.push(value)}
     if(found.length<2)return {error:'At least two requested tools must exist in the ToolScout catalog.',status:404,data:{missing}};
