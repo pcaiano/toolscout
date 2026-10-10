@@ -55,6 +55,52 @@ export function trustedManufacturerEvidence(tool,{decisionGrade=false}={}) {
     docs.length>=2&&datedDocs.length>=2&&(tool.strengths||[]).length>=2&&(tool.limitations||[]).length>=2&&
     (tool.tradeoffs||[]).length>=1&&Boolean(tool.pricingDetails?.freePlanStatus)&&hasManufacturerDecisionClaim(tool);
 }
+
+function sameManufacturerHost(url,home){
+  try{
+    const link=new URL(String(url||'')),manufacturer=new URL(String(home||''));
+    if(link.protocol!=='https:'||manufacturer.protocol!=='https:')return false;
+    const a=link.hostname.toLowerCase().replace(/^www\\./,'');
+    const b=manufacturer.hostname.toLowerCase().replace(/^www\\./,'');
+    return a===b||a.endsWith('.'+b);
+  }catch{return false}
+}
+// Every URL below has already been part of the candidate's dated internal
+// manufacturer evidence. This fallback cannot broaden to arbitrary websites.
+export function trustedCandidateOfficialFallbackUrls(candidate){
+  if(!trustedManufacturerEvidence(candidate,{decisionGrade:true}))return [];
+  const home=candidate.sourceUrl,review=candidate.editorialReview||{};
+  const evidence=Array.isArray(candidate.evidence)?candidate.evidence:[];
+  const docs=Array.isArray(review.sourceUrls)?review.sourceUrls:[];
+  const result=[];
+  for(const url of docs){
+    let u;
+    try{u=new URL(url)}catch{continue}
+    if(u.pathname==='/'||!sameManufacturerHost(url,home))continue;
+    if(!evidence.some(row=>row?.claimScope==='toolscout_editorial_review'&&
+      row?.sourceUrl===url&&/^\\d{4}-\\d{2}-\\d{2}$/.test(String(row.verifiedAt||''))))continue;
+    if(!result.includes(url))result.push(url);
+    if(result.length>=2)break;
+  }
+  return result;
+}
+export async function fetchTrustedCandidateOfficialSource(candidate){
+  const home=candidate?.sourceUrl;
+  const original=await fetchOfficial(home);
+  if(original.status==='ok'&&sameManufacturerHost(original.finalUrl,home))
+    return {...original,selectedSource:'manufacturer_home'};
+  for(const url of trustedCandidateOfficialFallbackUrls(candidate)){
+    const proof=await fetchOfficial(url);
+    if(proof.status==='ok'&&sameManufacturerHost(proof.finalUrl,home)){
+      try{
+        if(new URL(proof.finalUrl).pathname!=='/')
+          return {...proof,selectedSource:'manufacturer_document'};
+      }catch{}
+    }
+  }
+  return {...original,status:original.status==='ok'?'untrusted_redirect':original.status,
+    selectedSource:'none',fallbackDocumentsAttempted:trustedCandidateOfficialFallbackUrls(candidate).length};
+}
 function stripHtml(html){return String(html||'').replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/&[a-z#0-9]+;/gi,' ').replace(/\s+/g,' ').trim()}
 function meta(html,name){const a=new RegExp(`<meta[^>]+(?:name|property)=["']${name}["'][^>]+content=["']([^"']+)["']`,'i'),b=new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]+(?:name|property)=["']${name}["']`,'i');return (String(html).match(a)?.[1]||String(html).match(b)?.[1]||'').trim()}
 function releaseLinks(html,base){
@@ -555,16 +601,25 @@ export async function admitTrustedCandidates(env){
   for(const item of pool){
     if(admitted>=MAX_ADMIT_PER_DAY||considered>=MAX_CANDIDATE_CHECKS_PER_CYCLE)break;
     const {raw,slug,priority}=item;considered++;
-    const errors=validCandidate(raw,config);if(errors.length){held++;continue}
+    const errors=validCandidate(raw,config);if(errors.length){held++;await logEvent(env,slug,'catalog_candidate_structure_hold','completed','Catalog record failed admission field completeness before publication.',{issues:errors});continue}
     // Pure preflight before any network fetch. Undocumented research seeds
     // cannot become published software merely through a reachable homepage.
-    if(!trustedManufacturerEvidence(raw,{decisionGrade:true})){held++;missingManufacturerEvidence++;continue}
-    const source=await fetchOfficial(raw.sourceUrl);if(config?.admission?.requireReachableOfficialSource!==false&&source.status!=='ok'){held++;continue}
+    if(!trustedManufacturerEvidence(raw,{decisionGrade:true})){held++;missingManufacturerEvidence++;await logEvent(env,slug,'catalog_candidate_manufacturer_evidence_hold','completed','Vendor documentation or claim-level decision evidence is insufficient for publication.',{required:'decision_grade_manufacturer_evidence'});continue}
+    const source=await fetchTrustedCandidateOfficialSource(raw);
+    if(config?.admission?.requireReachableOfficialSource!==false&&source.status!=='ok'){
+      held++;
+      await logEvent(env,slug,'catalog_candidate_official_source_hold','completed',
+        'Neither the vendor homepage nor dated first-party product documents yielded a reachable trustworthy source.',
+        {source_status:source.status,http_status:source.httpStatus||null,
+          verified_vendor_fallbacks_checked:source.fallbackDocumentsAttempted||0});
+      continue;
+    }
     const aiIntegration=raw?.aiIntegration&&typeof raw.aiIntegration==='object'?raw.aiIntegration:{status:'unverified',tier:'unknown',mcp:'unknown',publicApi:null,assistants:[],summary:'ToolScout has not yet verified this tool\'s current ChatGPT, Claude, Gemini, MCP or agent integration options.',verifiedAt:null,sources:[]};
-    let profile={...raw,aiIntegration,sourceUrl:source.finalUrl||raw.sourceUrl,lastVerified:new Date().toISOString().slice(0,10),rankingEligible:true,comparisonEligible:true,provenance:{...(raw.provenance||{}),mode:'runtime_trusted_catalog',admittedAt:new Date().toISOString(),affiliateNeutral:true,reviewMethod:'first_party_verified_structured_profile_v2',researchPriority:{score:priority.score,aiSignal:priority.aiSignal,affiliateSignal:priority.affiliateSignal}}};
+    let profile={...raw,aiIntegration,sourceUrl:raw.sourceUrl,lastVerified:new Date().toISOString().slice(0,10),rankingEligible:true,comparisonEligible:true,provenance:{...(raw.provenance||{}),mode:'runtime_trusted_catalog',admittedAt:new Date().toISOString(),affiliateNeutral:true,reviewMethod:'first_party_verified_structured_profile_v2',researchPriority:{score:priority.score,aiSignal:priority.aiSignal,affiliateSignal:priority.affiliateSignal}}};
     // Keep the structured review and dated private manufacturer sources. A
     // flattened string destroys verification evidence in downstream decisions.
     profile.editorialReview={...raw.editorialReview};
+    profile.provenance.sourceAvailabilityVerifiedVia=source.selectedSource;
     profile.editorialEvidence={sourceUrl:raw.editorialReview.sourceUrl,verifiedAt:new Date().toISOString().slice(0,10),verificationStatus:'vendor_documented'};
     const quality=await auditCatalogTool(env,profile);
     if(!quality.publishable){held++;await logEvent(env,slug,'catalog_candidate_quality_hold','completed','Trusted candidate failed full catalog quality gate before publication.',{issues:quality.issues,warnings:quality.warnings,research_priority:priority});continue}
