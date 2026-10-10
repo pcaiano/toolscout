@@ -158,20 +158,28 @@ function categoryLabel(score){
 }
 // The public Finder reuses the MCP decision evaluator whenever a buyer provides
 // hard requirements. Existing basic Finder URLs and publisher embeds remain valid.
-function parseBuyerDecisionQuery(u,profile,limit,job){
+function parseBuyerDecisionQuery(u,profile,limit,job,explicitGoal){
   const listSpecs={must_have:100,avoid:100,constraints:160,existing_tools:100,priorities:40};
   const requested=u.searchParams.get('mode')==='decision'
     ||Object.keys(listSpecs).some(key=>u.searchParams.has(key))
     ||['require_stack_fit','country','seat_count'].some(key=>u.searchParams.has(key));
   if(!requested)return {requested:false};
   const args={job,limit,budget:profile.budget,team:profile.team};
+  if(explicitGoal)args.goal=explicitGoal;
   for(const [key,maxLen] of Object.entries(listSpecs)){
     const values=u.searchParams.getAll(key).map(x=>x.trim());
     if(values.length>12||values.some(x=>!x||x.length>maxLen||[...x].some(c=>c.charCodeAt(0)<32)))
       return {error:'Invalid '+key+': provide up to 12 non-empty, length-bounded values.'};
-    if(key==='priorities'&&(values.length>6||values.some(x=>!['price','ease','automation','integrations','sales','ai','marketing','seo','research','content','agency'].includes(x))||new Set(values).size!==values.length))
+    if(key==='priorities'&&(values.length>6||values.some(x=>!['price','ease','automation','integrations','sales','ai','marketing','seo','research','content','agency,'features'].includes(x))||new Set(values).size!==values.length))
       return {error:'Invalid priorities: use up to six distinct supported decision dimensions.'};
     args[key]=[...new Set(values)];
+  }
+  // Explicit multi-dimensional priorities take precedence over the single
+  // classic Finder selector. The latter remains effective in decision mode.
+  if(!args.priorities.length&&profile.priority)args.priorities=[profile.priority];
+  if(args.priorities.length&&profile.priority&&!u.searchParams.has('priorities')){
+    // Keep classic single-selector behavior without fabricating other weights.
+    args.priorities=[profile.priority];
   }
   if(u.searchParams.has('require_stack_fit')){
     const required=u.searchParams.get('require_stack_fit');
@@ -212,7 +220,7 @@ async function recommend(request,env){
     // Only a user-supplied goal is a hard category instruction at this stage.
     const guidance=businessWorkflowGuidance(q,profile,tools);
     const p=inferredProfile(q,profile);
-    const buyerDecision=parseBuyerDecisionQuery(u,p,limit,q);
+    const buyerDecision=parseBuyerDecisionQuery(u,p,limit,q,profile.goal);
     if(buyerDecision.error)return Response.json({error:'invalid_decision_constraints',message:buyerDecision.error},{status:400,headers:{...JSON_H,'Cache-Control':'no-store'}});
     if(!guidance&&!p.goal&&/\b(airbnb|vacation rental|short.term rental|holiday rental|alojamento local)\b/.test(normalize(q))&&verifiedPmsCandidates(tools).length)p.goal='vacation-rental';
     if(guidance)return Response.json({query:q,profile:profile,intent:null,recommendation_type:'workflow_guidance',
