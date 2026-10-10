@@ -669,7 +669,8 @@ const server = http.createServer(async (req, res) => {
 
 if (isMainThread) server.listen(PORT, "0.0.0.0", () => {
   console.log(`ToolScout PR Media Crawler listening on ${PORT}`);
-  console.log("PR_AUTOPILOT_CONFIG "+JSON.stringify({enabled:process.env.PR_AUTOPILOT_ENABLED==="1",hasGoogleSheetsCredential:Boolean(process.env.PR_SHEETS_SERVICE_ACCOUNT_JSON)}));
+  const autoSheets = Boolean(process.env.PR_SHEETS_SERVICE_ACCOUNT_JSON && process.env.PR_AUTOPILOT_ENABLED !== "0");
+  console.log("PR_AUTOPILOT_CONFIG "+JSON.stringify({enabled:autoSheets,hasGoogleSheetsCredential:Boolean(process.env.PR_SHEETS_SERVICE_ACCOUNT_JSON)}));
   startPrSheetAutopilot(crawlMany);
 
   const startupDomains = [...new Set(
@@ -737,7 +738,7 @@ if (isMainThread) server.listen(PORT, "0.0.0.0", () => {
       .filter(Boolean)
   )].slice(0, 400);
 
-  if (seriesDomains.length && process.env.PR_AUTOPILOT_ENABLED !== "1") {
+  if (seriesDomains.length && !autoSheets) {
     (async () => {
       const seriesId = process.env.SERIES_ID || new Date().toISOString();
       console.log("PR_CRAWL_SERIES_START " + JSON.stringify({series_id: seriesId, domains: seriesDomains.length}));
