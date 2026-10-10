@@ -79,7 +79,9 @@ function compareCapabilities(pathname,html){
   if(pathname==='/tools'){
     for(const [code,re] of [
       ['tool_catalog_fetch_lost',/\/data\/tools\.json/],
-      ['pending_affiliate_fetch_lost',/\/data\/pending-affiliate-tools\.json/],
+      // Pending affiliate leads are not published catalog products. Their
+      // removal from the public Tools directory is an intentional correction.
+      ['affiliate_truth_fetch_lost',/\/data\/affiliate\.json/],
       ['tool_assets_fetch_lost',/\/data\/tool-assets\.json/]
     ])if(!re.test(html))errors.push(code);
   }
