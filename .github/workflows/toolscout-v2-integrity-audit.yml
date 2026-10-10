@@ -221,12 +221,12 @@ jobs:
           npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
           SELECT tool_slug,status,source_status,verified_at
           FROM catalog_runtime_candidates
-          WHERE tool_slug IN ('clio-manage','fresha','bqe-core')
+          WHERE tool_slug IN ('clio-manage','fresha','bqe-core','toast-pos','square-for-restaurants','ezyvet','guesty','hostaway','lodgify')
           ORDER BY tool_slug;
           SELECT tool_slug,event_type,status,detail,created_at
           FROM catalog_runtime_events
-          WHERE tool_slug IN ('clio-manage','fresha','bqe-core')
-          ORDER BY created_at DESC LIMIT 12;
+          WHERE tool_slug IN ('clio-manage','fresha','bqe-core','toast-pos','square-for-restaurants','ezyvet','guesty','hostaway','lodgify')
+          ORDER BY created_at DESC LIMIT 35;
           "
 
       - name: Verify real production MCP buyer decisions after Cloudflare deployment
