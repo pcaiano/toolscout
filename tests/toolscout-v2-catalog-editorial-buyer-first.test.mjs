@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {candidatePage,trustedManufacturerEvidence} from '../catalog-autonomy-worker.js';
 import {buildCatalogEditorialRevisionSql} from '../scripts/build-catalog-editorial-revision.mjs';
+import {verifyCatalogEditorialD1Result} from '../scripts/verify-catalog-editorial-d1.mjs';
 
 const source=JSON.parse(fs.readFileSync(new URL('../data/catalog-wave4-decision-ready.json',import.meta.url),'utf8'));
 const countWords=s=>s.trim().split(/\s+/).length;
@@ -39,4 +40,13 @@ test('editorial D1 revisions are bounded, preserve claims and require exact vend
  const bad=structuredClone(source);
  bad[1].editorialReview.summary='Do not transfer published US-dollar charges into another country';
  assert.throws(()=>buildCatalogEditorialRevisionSql(bad),/manufacturer_evidence_missing|reader_quality_hold/);
+});
+
+test('remote D1 verification rejects stale or partial editorial publication',()=>{
+ const rows=[{results:source.filter(x=>x.slug!=='clio-manage').map(x=>({tool_slug:x.slug,status:'published',summary:x.editorialReview.summary,buyer_check:x.editorialReview.buyerCheck}))}];
+ assert.deepEqual(verifyCatalogEditorialD1Result(rows,source).verifiedSlugs.sort(),['bqe-core','fresha']);
+ const tampered=structuredClone(rows);tampered[0].results[0].summary='Old internal document note';
+ assert.throws(()=>verifyCatalogEditorialD1Result(tampered,source),/not reconciled/);
+ const missing=structuredClone(rows);missing[0].results=missing[0].results.filter(x=>x.tool_slug!=='fresha');
+ assert.throws(()=>verifyCatalogEditorialD1Result(missing,source),/published D1 row missing/);
 });
