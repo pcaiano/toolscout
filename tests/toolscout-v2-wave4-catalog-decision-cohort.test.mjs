@@ -29,7 +29,11 @@ test('catalog cohort supplies distinct new vendor-documented tools for canonical
 test('dynamic catalog profiles use one dark ToolScout 2.0 navigation shell and never publish manufacturer sources',()=>{
  for(const tool of tools){
    const html=candidatePage(tool);
-   assert.equal((html.match(/class="global"/g)||[]).length,1,tool.slug);
+   assert.equal((html.match(/class="ts2-global-nav"/g)||[]).length,1,tool.slug);
+   assert.match(html,/data-toolscout-public-redesign="2"/);
+   assert.match(html,/data-toolscout-redesign="2"/);
+   assert.match(html,/data-toolscout-surface="tool-profile"/);
+   assert.match(html,/class="ts2-brand"/);
    assert.equal((html.match(/aria-label="Site navigation"/g)||[]).length,1);
    assert.match(html,/background:#0b0d0c/);
    assert.match(html,/href="\/compare\.html\?a=/);
