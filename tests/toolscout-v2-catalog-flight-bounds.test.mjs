@@ -5,6 +5,7 @@ import fs from 'node:fs';
 const read=path=>fs.readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const scheduler=read('growth-scheduler.js');
 const catalog=read('catalog-autonomy-worker.js');
+const ledger=read('engine-run-ledger.js');
 
 test('every scheduled catalog admission and verification has an expiring mission lease',()=>{
  for(const mission of ['runtime_coverage','runtime_quality']){
@@ -32,7 +33,7 @@ test('catalog can admit 24 documented tools but never runs unbounded research wi
 
 test('Codex P2: deadline is rechecked after awaited supplier phases and bounds trailing sync',()=>{
  const admission=catalog.slice(catalog.indexOf('export async function admitTrustedCandidates(env)'),catalog.indexOf('export async function auditCatalogQualityBatch(env'));
- assert.match(admission,/const startedAt=Date\.now\(\);\s*await ensureSchema\(env\)/,'setup must count against wall time');
+ assert.match(admission,/const startedAt=Date\.now\(\);[\s\S]*?await ensureSchema\(env\);\s*if\(setupDeadline\('schema'\)\)return setupDeadline\('schema'\)/,'setup must count against wall time and recheck after schema');
  assert.match(admission,/const source=await fetchTrustedCandidateOfficialSource\(raw\);\s*if\(budgetStop\(\)\)break/,'slow source fallback cannot continue into quality gate');
  assert.match(admission,/const quality=await auditCatalogTool\(env,profile\);\s*if\(budgetStop\(\)\)break/,'slow quality/logo probe cannot continue to D1 admission');
  assert.match(admission,/existing\.add\(slug\);admitted\+\+;\s*if\(budgetStop\(\)\)break/,'committed admissions must report elapsed deadline');
@@ -41,4 +42,36 @@ test('Codex P2: deadline is rechecked after awaited supplier phases and bounds t
  assert.match(admission,/if\(budgetStop\(\)\)snapshot_deferred=true/,'do not start an overdue forced snapshot');
  assert.match(catalog,/if\(Date\.now\(\)>deadlineAt\)\{deferred=true;break;\}/,'market gap writes stop at deadline');
  assert.match(admission,/cycle_elapsed_ms:Date\.now\(\)-startedAt,market_gaps_deferred,snapshot_deferred/,'ledger must expose bounded and deferred work');
+});
+
+test('Codex #606: bounded supplier checks the 90-second deadline after each awaited setup phase',()=>{
+ const setup=catalog.slice(catalog.indexOf('export async function admitTrustedCandidates(env)'),catalog.indexOf('  const categoryCounts=new Map();',catalog.indexOf('export async function admitTrustedCandidates(env)')));
+ assert.match(setup,/const startedAt=Date\.now\(\);/);
+ assert.match(setup,/const setupDeadline=phase=>Date\.now\(\)-startedAt>MAX_ADMISSION_WALL_MS/);
+ for(const [phase,call] of [
+   ['schema','await ensureSchema(env);'],
+   ['config',"await assetJson(env,'/data/catalog-engine.json',{});"],
+   ['baseline',"await assetJson(env,'/data/tools.json',[]);"],
+   ['runtime_candidates','await runtimeCandidates(env);'],
+   ['affiliate_registry','await affiliateResearchRegistry(env);'],
+   ['research_seeds',"await assetJson(env,'/data/catalog-research-seeds.json',{candidates:[]});"]
+ ]){
+   const position=setup.indexOf(call),guard=setup.indexOf("if(setupDeadline('"+phase+"'))return setupDeadline('"+phase+"');");
+   assert.ok(position>=0,phase+' network/D1 phase must be present');
+   assert.ok(guard>position,phase+' must check deadline following its awaited operation');
+   assert.ok(guard-position<200,phase+' deadline check must immediately follow its awaited operation');
+ }
+ assert.match(setup,/if\(setupDeadline\('before_candidate_file'\)\)return setupDeadline\('before_candidate_file'\)/);
+ assert.match(setup,/if\(setupDeadline\('candidate_file'\)\)return setupDeadline\('candidate_file'\)/);
+ assert.match(setup,/prepared%64===0&&setupDeadline\('candidate_pool'\)/);
+ assert.match(setup,/ok:false,reason:'catalog_admission_setup_budget_exhausted'/,'setup exhaustion must remain recoverable by hourly scheduler');
+ assert.match(scheduler,/if\(row.status==='failed'\|\|row.status==='degraded'\)return true/,'failed admission must be retried');
+});
+
+test('Codex #607: failed mission records retain structured setup-timeout evidence',()=>{
+ assert.match(ledger,/const explicitResult=error\?\.engineResult&&typeof error\.engineResult==='object'\?error\.engineResult:null/);
+ assert.match(ledger,/failed_result:explicitResult/);
+ assert.match(ledger,/status:'failed'/);
+ assert.match(catalog,/preparation_deferred:true/);
+ assert.match(catalog,/cycle_elapsed_ms:Date\.now\(\)-startedAt/);
 });
