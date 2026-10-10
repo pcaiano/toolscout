@@ -11,9 +11,9 @@ import {cleanPublicCatalogProfileCopy} from './catalog-public-fact-copy.js';
 const JSON_H={'Content-Type':'application/json; charset=UTF-8','Cache-Control':'private, no-store'};
 const MAX_VERIFY_PER_CYCLE=6; // hourly: up to 144 tools/day, bounded official document verification
 const MAX_NEWS_SOURCE_CHECKS_PER_CYCLE=4;
-const MAX_ADMIT_PER_DAY=6;
+const MAX_ADMIT_PER_DAY=24; // actually per-cycle cap: enable documented cohorts to publish within one hourly run
 const MAX_BASELINE_SEED_PER_CYCLE=40; // bounded migration inside the existing catalog autonomy engine
-const MAX_CANDIDATE_CHECKS_PER_CYCLE=12;
+const MAX_CANDIDATE_CHECKS_PER_CYCLE=32; // bounded source fetches, preserve first-party and quality gates
 const MAX_RESEARCH_SEEDS_PER_CYCLE=80; // hourly discovery intake; never bypasses manufacturer/editorial admission
 const WARNING_RETRY_HOURS=6;
 const MAX_WARNING_RETRIES_PER_CYCLE=2;
