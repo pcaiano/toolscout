@@ -411,7 +411,24 @@ function verifiedIntegrationPair(tool,existing){
     const name=catalogNormalize(pair.product||pair.tool||pair.name);
     const source=String(pair.sourceUrl||pair.source_url||'');
     const verifiedAt=String(pair.verifiedAt||pair.verified_at||'');
-    return name===target&&/^https:\/\//i.test(source)&&/^\d{4}-\d{2}-\d{2}$/.test(verifiedAt);
+    if(name!==target||!/^\d{4}-\d{2}-\d{2}$/.test(verifiedAt))return false;
+    const checked=new Date(verifiedAt+'T00:00:00Z');
+    if(!Number.isFinite(checked.valueOf())||checked.toISOString().slice(0,10)!==verifiedAt
+      ||checked.valueOf()>Date.now()||Date.now()-checked.valueOf()>180*86400000)return false;
+    // A HTTPS URL and a date do not prove manufacturer ownership. Keep
+    // evidence private and only qualify named integration claims from the
+    // product's vendor host or its explicitly reviewed documentation URLs.
+    try{
+      const documented=new URL(source);
+      if(documented.protocol!=='https:'||documented.username||documented.password)return false;
+      const host=documented.hostname.toLowerCase().replace(/^www\./,'');
+      const vendor=tool.sourceUrl?new URL(tool.sourceUrl).hostname.toLowerCase().replace(/^www\./,''):'';
+      if(!vendor)return false;
+      const registered=Array.isArray(tool.editorialReview?.sourceUrls)
+        &&tool.editorialReview.sourceUrls.includes(source);
+      const primary=tool.editorialReview?.sourceUrl===source;
+      return host===vendor||host.endsWith('.'+vendor)||registered||primary;
+    }catch{return false}
   })||null;
 }
 // Verified requirements are claim-scoped. A reviewed profile documents the product,
