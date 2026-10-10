@@ -26,6 +26,9 @@ on:
       - 'scripts/persist-v2-integrity-report.mjs'
       - 'agent-protocol-core-worker.js'
       - 'data/tools.json'
+      - 'data/catalog-wave4-decision-ready.json'
+      - 'scripts/build-catalog-editorial-revision.mjs'
+      - 'scripts/verify-catalog-editorial-d1.mjs'
       - 'scripts/probe-live-mcp-decision.mjs'
       - 'tests/toolscout-v2-*.test.mjs'
 
@@ -61,6 +64,24 @@ jobs:
             tests/toolscout-v2-search-action-quality.test.mjs \
             tests/toolscout-v2-search-plan-contract-separation.test.mjs \
             tests/toolscout-v2-search-evidence-watchdog.test.mjs
+
+      - name: Synchronize evidence-gated buyer editorial to canonical D1
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          node --test tests/toolscout-v2-catalog-editorial-buyer-first.test.mjs
+          node scripts/build-catalog-editorial-revision.mjs /tmp/toolscout-catalog-editorial-revision.sql
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --file /tmp/toolscout-catalog-editorial-revision.sql
+          npx wrangler d1 execute toolscout --remote --config wrangler.toml --json --command "
+          SELECT tool_slug,status,
+                 json_extract(profile_json,'$.editorialReview.summary') AS summary,
+                 json_extract(profile_json,'$.editorialReview.buyerCheck') AS buyer_check
+          FROM catalog_runtime_candidates
+          WHERE tool_slug IN ('fresha','bqe-core','clio-manage') AND status='published'
+          ORDER BY tool_slug;" > /tmp/toolscout-catalog-editorial-check.json
+          node scripts/verify-catalog-editorial-d1.mjs /tmp/toolscout-catalog-editorial-check.json
 
       - name: Audit production closed-loop truth
         id: production_audit
