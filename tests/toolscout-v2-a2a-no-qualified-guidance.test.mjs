@@ -34,8 +34,9 @@ test('A2A returns an actionable no-qualified decision instead of a 500',async()=
   const parts=body.result.message.parts;
   assert.equal(parts[1].data.decision_status,'no_qualified_candidate');
   assert.deepEqual(parts[1].data.shortlist,[]);
-  assert.match(parts[0].text,/cannot verify a qualified software recommendation/i);
-  assert.match(parts[0].text,/manufacturer evidence/i);
+  assert.match(parts[0].text,/no evidence-qualified recommendation/i);
+  assert.match(parts[0].text,/may lack a relevant product/i);
+  assert.doesNotMatch(parts[0].text,/because missing manufacturer evidence is not proof/i);
   assert.doesNotMatch(JSON.stringify(body),/DECISION_UNAVAILABLE/);
 });
 
@@ -44,4 +45,26 @@ test('A2A does not convert a catalog outage into misleading buyer guidance',asyn
     {ASSETS:{async fetch(){throw Error('fixture outage')}}});
   assert.equal(status,500);
   assert.equal(body.error.data[0].reason,'DECISION_UNAVAILABLE');
+});
+
+test('A2A explains absent category coverage without alleging a missing manufacturer claim',async()=>{
+  const {status,body}=await a2a({job:'marine sonar fleet management platform',limit:3});
+  assert.equal(status,200);
+  assert.equal(body.result.message.parts[1].data.decision_status,'no_qualified_candidate');
+  const summary=body.result.message.parts[0].text;
+  assert.match(summary,/catalog may lack a relevant product/i);
+  assert.doesNotMatch(summary,/supplied mandatory requirements|No product is shortlisted because missing/i);
+});
+
+test('A2A does not misdiagnose verified free-plan conflicts as undocumented must-haves',async()=>{
+  const paid=tools.map(t=>({...t,freePlan:false,freePlanKnown:true}));
+  const env={ASSETS:{async fetch(req){
+    return new URL(req.url).pathname==='/data/tools.json'
+      ?Response.json(paid):new Response('',{status:404});
+  }}};
+  const {status,body}=await a2a({budget:'free',limit:3},env);
+  assert.equal(status,200);
+  assert.equal(body.result.message.parts[1].data.decision_status,'no_qualified_candidate');
+  assert.match(body.result.message.parts[0].text,/documented product constraints may exclude candidates/i);
+  assert.doesNotMatch(body.result.message.parts[0].text,/because missing manufacturer evidence is not proof/i);
 });
