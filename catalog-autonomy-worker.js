@@ -95,14 +95,19 @@ export function trustedCandidateOfficialFallbackUrls(candidate,{limit=2}={}){
   const home=candidate.sourceUrl,review=candidate.editorialReview||{};
   const evidence=Array.isArray(candidate.evidence)?candidate.evidence:[];
   const docs=Array.isArray(review.sourceUrls)?review.sourceUrls:[];
-  const result=[];
+  const result=[],identities=new Set();
   for(const url of docs){
     let u;
     try{u=new URL(url)}catch{continue}
     if(u.pathname==='/'||!sameManufacturerHost(url,home))continue;
     if(!evidence.some(row=>row?.claimScope==='toolscout_editorial_review'&&
       row?.sourceUrl===url&&/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(String(row.verifiedAt||''))))continue;
-    if(!result.includes(url))result.push(url);
+    // The limit counts independent manufacturer *pages*, never tracking
+    // variants of the same URL. A later distinct document must remain eligible.
+    const identity=canonicalManufacturerDocumentIdentity(url);
+    if(!identity||identities.has(identity))continue;
+    identities.add(identity);
+    result.push(url);
     if(result.length>=Math.max(2,Math.min(8,Number(limit)||2)))break;
   }
   return result;
