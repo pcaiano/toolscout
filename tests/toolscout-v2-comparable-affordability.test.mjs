@@ -4,26 +4,26 @@ import {handleAgentProtocolRoute} from '../agent-protocol-core-worker.js';
 
 const checked=new Date().toISOString().slice(0,10);
 const firstParty=slug=>'https://'+slug+'.example/pricing';
-function quote(slug,amount,{currency='EUR',market='unspecified',plan='Starter',billingCycle='monthly'}={}){
+function quote(slug,amount,{currency='EUR',market='unspecified',plan='Starter',billingCycle='monthly',unit='subscription'}={}){
   return {type:'price_quote',value:plan+' monthly list price',status:'verified',
     sourceUrl:firstParty(slug),verifiedAt:checked,plan,currency,market,
-    taxStatus:'unknown',unit:'subscription',unitQuantity:1,
+    taxStatus:'unknown',unit,unitQuantity:1,
     billingCycle,amount,chargeAmount:billingCycle==='annual'?amount*12:amount};
 }
-function crm(slug,{priceScore,amount,currency='EUR',market='unspecified',claims=[]}={}){
+function crm(slug,{priceScore,amount,currency='EUR',market='unspecified',unit='subscription',claims=[]}={}){
   return {slug,name:slug,category:'crm',description:'CRM for small sales teams',
     sourceUrl:'https://'+slug+'.example',features:['crm'],
     bestFor:['small sales teams'],scores:{price:priceScore,ease:priceScore,automation:priceScore,integrations:7},
     editorialReview:{verificationStatus:'vendor_documented',sourceUrl:firstParty(slug)},
-    decisionClaims:[...(amount===null?[]:[quote(slug,amount,{currency,market})]),...claims]};
+    decisionClaims:[...(amount===null?[]:[quote(slug,amount,{currency,market,unit})]),...claims]};
 }
-async function compare(catalog,must_have=[]){
+async function compare(catalog,must_have=[],extras={}){
   const env={ASSETS:{async fetch(req){
     return new URL(req.url).pathname==='/data/tools.json'?Response.json(catalog):new Response('',{status:404});
   }}};
   const params={name:'compare_for_use_case',arguments:{
     tools:catalog.map(t=>t.slug),use_case:'CRM for a small sales team',
-    priorities:['price','ease','automation'],must_have
+    priorities:['price','ease','automation'],must_have,...extras
   },_meta:{'io.modelcontextprotocol/protocolVersion':'2026-07-28'}};
   const request=new Request('https://trytoolscout.org/mcp',{
     method:'POST',headers:{'Content-Type':'application/json',
@@ -81,4 +81,48 @@ test('a lower price for the wrong feature tier is not compared as eligible',asyn
   assert.equal(result.cheaper_option_analysis.status,'documented_price_comparison');
   assert.equal(result.cheaper_option_analysis.affordability_leader,'standard');
   assert.equal(result.cheaper_option_analysis.compared_plan,'Pro');
+});
+
+test('two documented per-seat prices produce a labelled five-seat pre-tax subtotal',async()=>{
+  const result=await compare([
+    crm('low-seat',{priceScore:3,amount:12,unit:'seat'}),
+    crm('high-seat',{priceScore:10,amount:18,unit:'seat'})
+  ],[],{seat_count:5});
+  const price=result.cheaper_option_analysis;
+  assert.equal(price.status,'documented_price_comparison');
+  assert.equal(price.affordability_leader,'low-seat');
+  assert.equal(price.unit,'seat');
+  assert.equal(price.monthly_list_price,12,'unit price must remain per billed seat');
+  assert.equal(price.seat_count,5);
+  assert.equal(price.seat_monthly_subtotal_before_tax,60);
+  assert.match(price.note,/not a verified final invoice/i);
+});
+test('per-seat monthly list price can be compared without assuming five seats',async()=>{
+  const result=await compare([
+    crm('a-seat',{priceScore:10,amount:18,unit:'seat'}),
+    crm('b-seat',{priceScore:5,amount:14,unit:'seat'})
+  ]);
+  assert.equal(result.cheaper_option_analysis.status,'documented_price_comparison');
+  assert.equal(result.cheaper_option_analysis.affordability_leader,'b-seat');
+  assert.equal(result.cheaper_option_analysis.seat_monthly_subtotal_before_tax,null);
+});
+test('territory and incompatible units cannot be silently normalized',async()=>{
+  const sample=[
+    crm('euro-pt',{priceScore:10,amount:15,unit:'seat',market:'PT'}),
+    crm('euro-pt-two',{priceScore:5,amount:20,unit:'seat',market:'PT'})
+  ];
+  assert.equal((await compare(sample,[],{seat_count:4,country:'PT'})).cheaper_option_analysis.seat_monthly_subtotal_before_tax,60);
+  assert.equal((await compare(sample,[],{seat_count:4,country:'US'})).cheaper_option_analysis.status,'not_comparable');
+  assert.equal((await compare(sample)).cheaper_option_analysis.status,'not_comparable');
+  const mixed=await compare([
+    crm('flat-fee',{priceScore:10,amount:10,unit:'subscription'}),
+    crm('per-seat',{priceScore:5,amount:12,unit:'seat'})
+  ]);
+  assert.equal(mixed.cheaper_option_analysis.status,'not_comparable');
+  const unlicensed=await compare([
+    crm('flat-one',{priceScore:10,amount:10,unit:'subscription'}),
+    crm('flat-two',{priceScore:5,amount:12,unit:'subscription'})
+  ],[],{seat_count:6});
+  assert.equal(unlicensed.cheaper_option_analysis.status,'not_comparable',
+    'a single subscription is not evidence of the price for six seats');
 });

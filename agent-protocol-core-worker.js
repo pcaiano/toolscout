@@ -75,6 +75,8 @@ function toolDefinitions(){
         properties:{
           tools:{type:'array',minItems:2,maxItems:4,uniqueItems:true,items:{type:'string',minLength:1,maxLength:120}},
           use_case:{type:'string',minLength:3,maxLength:500},
+          country:{type:'string',pattern:'^[A-Z]{2}$',description:'ISO country for manufacturer-documented country-specific price comparison.'},
+          seat_count:{type:'integer',minimum:1,maximum:100,description:'Exact billed seat count for labelled before-tax per-seat subscription subtotals.'},
           must_have:{type:'array',maxItems:12,items:{type:'string',minLength:1,maxLength:100}},
           budget:{type:'string',enum:['free','low','mid','high']},
           team:{type:'string',enum:['solo','small','team','large','agency']},
@@ -228,6 +230,8 @@ function validToolArguments(name,a){
     if(!validStrings(a.must_have,12,100)||!validStrings(a.existing_tools,12,100)||!validBudget(a.budget)||!validTeam(a.team)||!validPriorities(a.priorities))return 'comparison constraints are invalid';
     if(a.require_stack_fit!==undefined&&typeof a.require_stack_fit!=='boolean')return 'require_stack_fit must be boolean';
     if(a.require_stack_fit===true&&(!Array.isArray(a.existing_tools)||!a.existing_tools.length))return 'require_stack_fit requires at least one existing tool';
+    if(a.country!==undefined&&(typeof a.country!=='string'||!/^[A-Z]{2}$/.test(a.country)))return 'country must be an ISO 3166-1 alpha-2 code';
+    if(a.seat_count!==undefined&&(!Number.isInteger(a.seat_count)||a.seat_count<1||a.seat_count>100))return 'seat_count must be an integer from 1 to 100';
     return null;
   }
   if(name==='find_alternatives'){
@@ -865,7 +869,7 @@ function pairwiseTradeoffs(evaluated,dims){
   return out;
 }
 // A price score is an editorial signal, not proof that a product is cheaper.
-// Compare only matching, dated first-party monthly subscription quotations.
+// Compare only matching, dated first-party monthly subscription or per-seat quotations.
 function comparableMonthlyPrice(tool,evaluated,args){
   if(evaluated.plan_coherence?.status==='not_verified')return null;
   const needs=[...(evaluated.requirement_evidence||[]),
@@ -876,7 +880,10 @@ function comparableMonthlyPrice(tool,evaluated,args){
     planGroups.push([catalogNormalize(evaluated.plan_coherence.selected_plan)]);
   const prices=(tool.decisionClaims||[]).filter(q=>
     q?.type==='price_quote'&&manufacturerClaim(tool,'price_quote',q.value)===q&&
-    q.unit==='subscription'&&q.billingCycle==='monthly'&&
+    ['subscription','seat'].includes(q.unit)&&q.unitQuantity===1&&q.billingCycle==='monthly'&&
+    (args.seat_count==null||q.unit==='seat')&&
+    (args.country?q.market===args.country:q.market==='unspecified')&&
+    q.promotion!==true&&
     typeof q.currency==='string'&&/^[A-Z]{3}$/.test(q.currency)&&
     typeof q.market==='string'&&q.market.length>0&&
     typeof q.taxStatus==='string'&&q.taxStatus.length>0&&
@@ -889,7 +896,10 @@ function comparableMonthlyPrice(tool,evaluated,args){
   const q=prices[0];
   return q?{name:tool.name,slug:tool.slug,plan:q.plan,amount:q.amount,
     currency:q.currency,market:q.market,tax_status:q.taxStatus,unit:q.unit,
-    billing_cycle:q.billingCycle,verified_at:q.verifiedAt}:null;
+    billing_cycle:q.billingCycle,verified_at:q.verifiedAt,
+    seat_count:q.unit==='seat'?(args.seat_count||null):null,
+    seat_monthly_subtotal_before_tax:q.unit==='seat'&&args.seat_count
+      ?Number((q.amount*args.seat_count).toFixed(2)):null}:null;
 }
 function documentedAffordabilityComparison(found,evaluated,leader,args,dims){
   const rows=found.map(tool=>({
@@ -899,7 +909,7 @@ function documentedAffordabilityComparison(found,evaluated,leader,args,dims){
   const unavailable=rows.filter(x=>!x.price);
   if(unavailable.length)return {
     status:'not_comparable',
-    note:'A lower price cannot be established from editorial price scores. At least one product lacks a comparable, manufacturer-documented monthly subscription quote for the requested requirements.',
+    note:'A lower price cannot be established from editorial price scores. At least one product lacks a comparable, manufacturer-documented monthly subscription or per-seat quote for the requested requirements, territory and seat count.',
     products_without_comparable_quote:unavailable.map(x=>x.result.name)
   };
   const base=rows[0].price;
@@ -911,8 +921,10 @@ function documentedAffordabilityComparison(found,evaluated,leader,args,dims){
   rows.sort((a,b)=>a.price.amount-b.price.amount||a.result.name.localeCompare(b.result.name));
   if(rows.length>1&&Math.abs(rows[0].price.amount-rows[1].price.amount)<0.005)return {
     status:'price_tie',
-    monthly_price:rows[0].price.amount,currency:base.currency,
-    note:'The lowest comparable manufacturer-documented monthly list prices are tied; no unique cheaper choice is claimed.'
+    monthly_price:rows[0].price.amount,currency:base.currency,unit:base.unit,
+    seat_count:rows[0].price.seat_count,
+    seat_monthly_subtotal_before_tax:rows[0].price.seat_monthly_subtotal_before_tax,
+    note:'The lowest comparable manufacturer-documented monthly list prices are tied on the quoted unit. No unique cheaper choice is claimed.'
   };
   const affordable=rows[0],best=evaluated.find(x=>x.slug===leader?.slug);
   const losses=best&&affordable.result.slug!==best.slug?dims.filter(d=>d!=='price').map(d=>{
@@ -927,10 +939,12 @@ function documentedAffordabilityComparison(found,evaluated,leader,args,dims){
     qualified_for_use_case:affordable.result.qualified_for_use_case,
     blocking_reasons:affordable.result.blocking_reasons,
     compared_plan:affordable.price.plan,monthly_list_price:affordable.price.amount,
+    seat_count:affordable.price.seat_count,
+    seat_monthly_subtotal_before_tax:affordable.price.seat_monthly_subtotal_before_tax,
     currency:base.currency,market:base.market,tax_status:base.tax_status,
     unit:base.unit,billing_cycle:base.billing_cycle,
     verified_at:affordable.price.verified_at,
-    note:'This compares documented monthly list prices for matching billing terms, not taxes, add-ons, total checkout cost or unknown tiers. Editorial score gaps are not proofs of feature availability.',
+    note:'This compares matching manufacturer monthly unit prices. For per-seat billing, a requested seat count yields only the arithmetic subscription subtotal before tax, not a verified final invoice, add-ons, billing minimum or licence eligibility. Editorial score gaps are not proofs of feature availability.',
     what_you_may_lose_vs_best_fit:losses
   };
 }
@@ -1019,7 +1033,7 @@ async function callCatalogTool(name,args,request,env){
     const found=[],missing=[];
     for(const value of args.tools){const tool=findCatalogTool(tools,value);if(tool)found.push(tool);else missing.push(value)}
     if(found.length<2)return {error:'At least two requested tools must exist in the ToolScout catalog.',status:404,data:{missing}};
-    const evalArgs={job:args.use_case,use_case:args.use_case,must_have:args.must_have||[],budget:args.budget,team:args.team,priorities:args.priorities||[],existing_tools:args.existing_tools||[],require_stack_fit:args.require_stack_fit===true};
+    const evalArgs={job:args.use_case,use_case:args.use_case,must_have:args.must_have||[],budget:args.budget,team:args.team,country:args.country||null,seat_count:args.seat_count||null,priorities:args.priorities||[],existing_tools:args.existing_tools||[],require_stack_fit:args.require_stack_fit===true};
     const evaluated=found.map(t=>qualifyDecision(decisionEvaluation(t,evalArgs),evalArgs)).sort((a,b)=>Number(b.qualified_for_use_case)-Number(a.qualified_for_use_case)||b.fit_score-a.fit_score);
     const qualified=evaluated.filter(x=>x.qualified_for_use_case);
     const dims=requestedDimensions(evalArgs),gap=qualified.length>=2?qualified[0].fit_score-qualified[1].fit_score:null;
