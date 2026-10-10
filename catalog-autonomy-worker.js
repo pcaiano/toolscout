@@ -126,7 +126,7 @@ function releaseLinks(html,base){
   return [...new Set(out)].slice(0,4);
 }
 async function sha(value){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(value)));return [...new Uint8Array(buf)].map(x=>x.toString(16).padStart(2,'0')).join('').slice(0,24)}
-async function fetchOfficial(url,{deadlineAt=Infinity}={}){
+export async function fetchOfficial(url,{deadlineAt=Infinity}={}){
   const u=publicHttps(url);if(!u)return{status:'invalid',httpStatus:null,finalUrl:null,fingerprint:null};
   let lastError=null;
   for(let attempt=1;attempt<=2;attempt++){
