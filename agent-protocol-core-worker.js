@@ -708,8 +708,9 @@ function jobIntentProfile(tools,job){
   const specialist=familyMatches.find(cat=>specialistFamilies.includes(cat));
   const otherJob=familyMatches.filter(cat=>!specialistFamilies.includes(cat));
   const explicitJobCategory=explicitCategories.filter(cat=>cat!=='business'&&!specialistFamilies.includes(cat));
-  const qualifiedCategories=otherJob.length
-    ? (explicitJobCategory.length?explicitJobCategory:otherJob)
+  const qualifiedCategories=explicitJobCategory.length
+    ? explicitJobCategory
+    : otherJob.length?otherJob
     : specialist?[specialist]:(explicitCategories.length?explicitCategories:familyMatches);
   return {normalized,explicitCategories:qualifiedCategories,intentTerms};
 }
