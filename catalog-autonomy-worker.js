@@ -653,7 +653,7 @@ function injectAiInteroperability(html,tool){
   if(String(html).includes(faq))return String(html).replace(faq,section+faq);
   return String(html).includes('</main>')?String(html).replace('</main>','</main>'+section):String(html).replace('</body>',section+'</body>');
 }
-function candidatePage(tool,{monetized=false}={}){
+export function candidatePage(tool,{monetized=false}={}){
   const url=`https://trytoolscout.org/tools/${encodeURIComponent(tool.slug)}`;
   const logo=runtimeLogo(tool),initials=runtimeInitials(tool.name);
   const features=(tool.features||[]).map(x=>`<span style="font-size:12px;background:#f2f4f7;border-radius:999px;padding:7px 9px">${esc(x)}</span>`).join('');
