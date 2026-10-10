@@ -75,3 +75,15 @@ test('Codex #607: failed mission records retain structured setup-timeout evidenc
  assert.match(catalog,/preparation_deferred:true/);
  assert.match(catalog,/cycle_elapsed_ms:Date\.now\(\)-startedAt/);
 });
+
+test('Catalog source holds have a bounded cooldown, without admission or ranking shortcuts',()=>{
+ const admission=catalog.slice(catalog.indexOf('export async function admitTrustedCandidates(env)'),catalog.indexOf('export async function auditCatalogQualityBatch(env)'));
+ assert.match(catalog,/OFFICIAL_SOURCE_HOLD_COOLDOWN_HOURS=3/);
+ assert.match(admission,/SELECT DISTINCT tool_slug FROM catalog_runtime_events/);
+ assert.match(admission,/event_type='catalog_candidate_official_source_hold' AND created_at>=datetime\('now', \?\)/);
+ assert.match(admission,/if\(setupDeadline\('source_hold_cooldown'\)\)return setupDeadline\('source_hold_cooldown'\)/);
+ assert.match(admission,/if\(sourceHoldCooldown\.has\(item\.slug\)\)\{sourceRetriesDeferred\+\+;continue;\}/);
+ assert.match(admission,/official_source_retries_deferred:sourceRetriesDeferred/);
+ assert.match(admission,/if\(!trustedManufacturerEvidence\(raw,\{decisionGrade:true\}\)\)/);
+ assert.match(admission,/if\(!quality\.publishable\)/);
+});
