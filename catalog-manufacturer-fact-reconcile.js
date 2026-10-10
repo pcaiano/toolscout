@@ -103,7 +103,7 @@ export function manufacturerFactProposals(tool,observations=[]){
       if(!symbol)continue;
       const pat=new RegExp(escRe(symbol)+'\\s*(\\d+(?:[,.]\\d{1,2})?)','g');
       for(const sentence of sentences){
-        if(!eligibleSentence(sentence,String(claim.plan),'month',null))continue;
+        if(!eligibleSentence(sentence,String(claim.plan),'month',null)||!verifiedQuoteScope(sentence,claim))continue;
         if(/\b(annual|annually|yearly|per year|promo|discount|introductory|starting at)\b/i.test(sentence))continue;
         const hits=[...sentence.matchAll(pat)];
         if(hits.length!==1)continue;
@@ -133,7 +133,7 @@ function retireExactCapabilitySentence(value,capability){
       [new RegExp('\\bwith\\s+'+escaped+'(?=\\s|[.!?;:]|$)','gi'),''],
     ];
     for(const [pattern,replacement] of patterns)rest=rest.replace(pattern,replacement);
-    rest=rest.replace(/\s{2,}/g,' ').replace(/,\s*,/g,',').replace(/,\s*([.!?])/g,'$1').trim();
+    rest=rest.replace(/\s{2,}/g,' ').replace(/,\s*,/g,',').replace(/\s+([.!?])/g,'$1').replace(/,\s*([.!?])/g,'$1').trim();
     // Complex assertions (e.g. "automations can queue work") cannot be
     // safely rewritten by string deletion. Do not mutate any catalog fields.
     if(mention.test(rest)||rest.length<14)return null;
