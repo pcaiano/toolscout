@@ -90,7 +90,7 @@ export function canonicalManufacturerDocumentIdentity(value){
 }
 // Fallbacks must be dated internal first-party manufacturer evidence and
 // must not include an arbitrary promotional homepage or outside review site.
-export function trustedCandidateOfficialFallbackUrls(candidate){
+export function trustedCandidateOfficialFallbackUrls(candidate,{limit=2}={}){
   if(!trustedManufacturerEvidence(candidate,{decisionGrade:true}))return [];
   const home=candidate.sourceUrl,review=candidate.editorialReview||{};
   const evidence=Array.isArray(candidate.evidence)?candidate.evidence:[];
@@ -103,7 +103,7 @@ export function trustedCandidateOfficialFallbackUrls(candidate){
     if(!evidence.some(row=>row?.claimScope==='toolscout_editorial_review'&&
       row?.sourceUrl===url&&/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(String(row.verifiedAt||''))))continue;
     if(!result.includes(url))result.push(url);
-    if(result.length>=2)break;
+    if(result.length>=Math.max(2,Math.min(8,Number(limit)||2)))break;
   }
   return result;
 }
@@ -237,7 +237,9 @@ async function upsertNewsCandidate(env,slug,sourceUrl,result){
   return {candidate_id:id,materiality_score:score};
 }
 async function logEvent(env,slug,type,status,detail,evidence=null){
-  await env.DB.prepare(`INSERT INTO catalog_runtime_events(event_id,tool_slug,event_type,status,detail,evidence_json,created_at) VALUES(?,?,?,?,?,?,datetime('now'))`)
+  // Millisecond timestamps distinguish a current hold from a corrected staged
+  // revision resubmitted within the same second; retain SQLite UTC text shape.
+  await env.DB.prepare(`INSERT INTO catalog_runtime_events(event_id,tool_slug,event_type,status,detail,evidence_json,created_at) VALUES(?,?,?,?,?,?,strftime('%Y-%m-%d %H:%M:%f','now'))`)
     .bind(`cat_${crypto.randomUUID()}`,slug||null,type,status,safeText(detail,2000),JSON.stringify(evidence||null).slice(0,8000)).run().catch(()=>{});
 }
 // Unlike best-effort lifecycle logs, the documentation-watch baseline is
@@ -824,7 +826,13 @@ export async function admitTrustedCandidates(env){
       // API-supplied research attestation alone cannot publish a product:
       // independently check two distinct private manufacturer document pages
       // before applying the same visual/source/editorial admission gates.
-      const documents=trustedCandidateOfficialFallbackUrls(raw).slice(0,3);
+      // Inspect enough distinct *canonical* vendor pages even if the first
+      // few evidence URLs are tracking aliases of the same document.
+      const documents=trustedCandidateOfficialFallbackUrls(raw,{limit:8})
+        .filter((url,index,urls)=>{
+          const identity=canonicalManufacturerDocumentIdentity(url);
+          return identity&&urls.findIndex(x=>canonicalManufacturerDocumentIdentity(x)===identity)===index;
+        }).slice(0,6);
       const evidenceChecks=await mapLimit(documents,2,url=>fetchOfficial(url,{deadlineAt:startedAt+MAX_ADMISSION_WALL_MS}));
       if(budgetStop())break;
       const accessible=new Set(evidenceChecks.filter((result,index)=>
@@ -1168,9 +1176,9 @@ export async function stageReviewedCatalogCandidate(env,raw){
   // record through research intake. An update is permitted only while staged.
   const write=await env.DB.prepare(`INSERT INTO catalog_runtime_candidates
     (tool_slug,profile_json,status,source_status,verified_at,updated_at)
-    VALUES(?,?,'research_ready','documented_research_unchecked',NULL,datetime('now'))
+    VALUES(?,?,'research_ready','documented_research_unchecked',NULL,strftime('%Y-%m-%d %H:%M:%f','now'))
     ON CONFLICT(tool_slug) DO UPDATE SET
-      profile_json=excluded.profile_json,updated_at=datetime('now')
+      profile_json=excluded.profile_json,updated_at=strftime('%Y-%m-%d %H:%M:%f','now')
     WHERE catalog_runtime_candidates.status='research_ready'`)
     .bind(slug,serialized).run();
   if(Number(write?.meta?.changes??write?.changes??0)<1)
