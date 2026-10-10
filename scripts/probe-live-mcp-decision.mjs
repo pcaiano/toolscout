@@ -285,3 +285,33 @@ console.log(JSON.stringify({catalogMigrationProductionVerified:true,liveInventor
   remaining:inventory.storage.baseline_remaining,phase:inventory.storage.migration_phase,source:inventory.storage.source,degraded:inventory.storage.degraded,
   publiclyVisibleProducts:inventory.total},null,2));
 console.log(JSON.stringify({ok:true,liveNetworkMcpPost:true,base:BASE,method:'tools/call',canaryAfterAttempts:current,positiveDecisions:3,blockedInvalidTier:1,currency:['USD','EUR'],manufacturerSourcesExposed:false,liveBusinessSectors:broadCases.map(x=>x.sector),businessCanaryAfterAttempts:industryAttempts,narrowBusinessJobVerified:true},null,2));
+
+
+// Live canary for the cost-driven alternatives contract. The public Worker
+// must not treat an editorial price score as evidence that a product is cheaper.
+let alternativeReady=false,alternativeReadyAttempts=0;
+for(let attempt=1;attempt<=15;attempt++){
+  alternativeReadyAttempts=attempt;
+  try{
+    const result=await rpc('tools/call',{name:'find_alternatives',arguments:{
+      tool:'hubspot',dislike:'too expensive',limit:2
+    }});
+    const data=result.structuredContent;
+    const prices=(data?.alternatives||[]).map(x=>x.price_comparison?.status);
+    const safe= result.isError===false&&
+      ['qualified_alternatives','no_verified_alternative'].includes(data?.decision_status)&&
+      data?.price_evidence_note?.includes('price score is not price evidence')&&
+      prices.every(s=>['documented_lower_unit_price','verified_free_plan_option'].includes(s))&&
+      (data.alternatives||[]).every(x=>(x.improvements_over_source||[]).every(d=>d.dimension!=='price'))&&
+      !JSON.stringify(data).includes('sourceUrl')&&
+      !JSON.stringify(data).includes('hubspot.com/pricing')&&
+      data?.source?.tool_url?.startsWith('https://trytoolscout.org/go/');
+    if(safe){alternativeReady=true;break}
+  }catch(error){
+    if(attempt===15)throw Error('Live price-evidence alternatives verification failed: '+String(error?.message||error));
+  }
+  if(attempt<15)await sleep(5000);
+}
+assert(alternativeReady,'Deployed MCP find_alternatives did not uphold the documented-price-only substitution contract');
+console.log(JSON.stringify({liveAlternativesPriceEvidence:true,alternativeReadyAttempts,
+  priceScoresNeverProofOfSavings:true,manufacturerSourceUrlsPrivate:true},null,2));
