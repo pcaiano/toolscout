@@ -124,8 +124,26 @@ async function failMissionCycleClaim(env,claim,runId){
     .bind(claim.engine,claim.mission,claim.cycle.key,runId).run().catch(()=>{});
 }
 
-function safeJson(value){
-  try{return JSON.stringify(value??null).slice(0,12000)}catch{return JSON.stringify({unserializable:true})}
+export function safeJson(value){
+  try{
+    const raw=JSON.stringify(value??null);
+    if(raw.length<=12000)return raw;
+    // Never slice serialized JSON directly: that corrupts the D1 evidence row.
+    // Keep bounded actionable failure fields and a text preview in valid JSON.
+    const failed=value&&typeof value==='object'&&value.failed_result&&typeof value.failed_result==='object'?value.failed_result:null;
+    const small=v=>String(v??'').slice(0,160);
+    const evidence={
+      truncated:true,original_length:raw.length,
+      ...(failed?{failed_result:{
+        reason:small(failed.reason),phase:small(failed.phase),
+        cycle_elapsed_ms:Number.isFinite(Number(failed.cycle_elapsed_ms))?Number(failed.cycle_elapsed_ms):null,
+        cycle_budget_exhausted:failed.cycle_budget_exhausted===true,
+        preparation_deferred:failed.preparation_deferred===true
+      }}:{}),
+      preview:raw.slice(0,4000)
+    };
+    return JSON.stringify(evidence);
+  }catch{return JSON.stringify({unserializable:true})}
 }
 
 export async function recordEngineRun(env,{runId,engine,mission,triggerName=null,status,detail=null,evidence=null,startedAt=null,completedAt=null}){
