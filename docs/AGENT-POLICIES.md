@@ -126,6 +126,8 @@ ToolScout software discovery pages must combine machine-readable structure with 
 5. Editorial conclusions must be grounded in catalog evidence, scoring dimensions, documented audiences and verified product facts. Do not invent feature depth, pricing, performance, market position or user sentiment.
 6. Generators and refresh scripts must preserve this contract so regenerated pages do not fall back to thin, badge-heavy or database-like presentation.
 7. ToolScout editorial copy is English only. Do not add translations. Do not use em dashes or en dashes in ToolScout content.
+8. Buyer-facing editorial analysis is not the manufacturer's documentation log, an SEO note or an internal analyst instruction. State the best fit, the supported practical benefits and one meaningful trade-off in approximately 60 to 100 words. Move detailed source-validation methods and jurisdiction/currency-conversion cautions into private evidence records. Keep commercially relevant pricing variables in the concise pricing section or a buyer-focused checklist, not as instructions to editors.
+9. Before publication, reject repetitive source-attribution prose (e.g. 'the vendor documentation describes'), internal imperatives about how to use manufacturer evidence, generic disclaimers, and country examples without a concrete buyer-decision reason. Preserve independent analysis, documented facts, limitations and private first-party evidence; editorial tightening must never erase source provenance or alter software capabilities.
 
 ## Vendor amplification sender contract
 
