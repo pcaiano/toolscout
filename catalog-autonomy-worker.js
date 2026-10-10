@@ -237,7 +237,9 @@ async function upsertNewsCandidate(env,slug,sourceUrl,result){
   return {candidate_id:id,materiality_score:score};
 }
 async function logEvent(env,slug,type,status,detail,evidence=null){
-  await env.DB.prepare(`INSERT INTO catalog_runtime_events(event_id,tool_slug,event_type,status,detail,evidence_json,created_at) VALUES(?,?,?,?,?,?,datetime('now'))`)
+  // Millisecond timestamps distinguish a current hold from a corrected staged
+  // revision resubmitted within the same second; retain SQLite UTC text shape.
+  await env.DB.prepare(`INSERT INTO catalog_runtime_events(event_id,tool_slug,event_type,status,detail,evidence_json,created_at) VALUES(?,?,?,?,?,?,strftime('%Y-%m-%d %H:%M:%f','now'))`)
     .bind(`cat_${crypto.randomUUID()}`,slug||null,type,status,safeText(detail,2000),JSON.stringify(evidence||null).slice(0,8000)).run().catch(()=>{});
 }
 // Unlike best-effort lifecycle logs, the documentation-watch baseline is
