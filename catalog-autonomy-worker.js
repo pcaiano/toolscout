@@ -704,6 +704,80 @@ export function classifyMarketGapEvidence(gap){
     :{status:'discovery_only',reason:'insufficient_product_identity_signals',independent_product_hosts:independent,taxonomy_hosts:taxonomyHosts.size};
 }
 
+// First-party documentary discovery is an extension of the existing catalog
+// quality mission, not a new engine or public profile generator. Dossiers
+// never become research_ready until a full original editorial analysis and
+// supported structured decision claims exist.
+export async function researchCatalogManufacturerDossiers(env,{deadlineAt=Infinity,limit=MAX_MANUFACTURER_DOSSIERS_PER_CYCLE}={}){
+  if(Date.now()+8000>=deadlineAt)
+    return{ok:true,checked:0,documented:0,deferred:true,reason:'quality_cycle_budget_reserved'};
+  const asset=await assetJson(env,'/data/catalog-research-seeds-scale.json',null);
+  if(asset?.schemaVersion!==1||asset?.status!=='research_only_not_catalog'||!Array.isArray(asset.candidates))
+    return{ok:false,reason:'research_source_unavailable',checked:0};
+  const vendorBySlug=new Map(asset.candidates.map(x=>[String(x.slug||'').toLowerCase(),x]));
+  const rows=await env.DB.prepare("SELECT g.tool_slug FROM catalog_market_gaps g "+
+    "WHERE g.status='discovery_only' AND g.sources_json LIKE '%awesome-selfhosted-directory%' "+
+    "AND NOT EXISTS(SELECT 1 FROM catalog_runtime_events e WHERE e.tool_slug=g.tool_slug "+
+    "AND e.event_type IN ('catalog_manufacturer_dossier_documented','catalog_manufacturer_dossier_deferred') "+
+    "AND e.created_at>=datetime('now','-12 hours')) "+
+    "ORDER BY g.updated_at ASC,g.tool_slug ASC LIMIT ?")
+    .bind(Math.max(1,Math.min(8,Number(limit)||2))).all();
+  let checked=0,documented=0,deferred=false;
+  for(const row of rows.results||[]){
+    if(Date.now()+8000>=deadlineAt){deferred=true;break}
+    const slug=String(row.tool_slug||'').toLowerCase(),lead=vendorBySlug.get(slug);
+    const home=publicHttps(lead?.candidateUrl);
+    const host=String(home?.hostname||'').toLowerCase().replace(/^www\./,'');
+    if(!home||!lead?.name||!host||/(?:^|\.)(?:localhost|local)$/.test(host)||
+       /^(?:github\.com|gitlab\.com|sourceforge\.net|g2\.com|capterra\.com|npmjs\.com)$/.test(host)){
+      await persistManufacturerWatchEvent(env,slug,'catalog_manufacturer_dossier_deferred','deferred',
+        'Directory lead is not a verified manufacturer product website. Research only.',
+        {reason:'publisher_or_ambiguous_homepage'});
+      checked++;continue;
+    }
+    const source=await fetchOfficial(home.href,{deadlineAt});
+    if(source.error==='quality_cycle_budget_deferred'){deferred=true;break}
+    checked++;
+    if(source.status!=='ok'||!sameManufacturerHost(source.finalUrl,home.href)){
+      await persistManufacturerWatchEvent(env,slug,'catalog_manufacturer_dossier_deferred','deferred',
+        'Manufacturer home could not be verified. No public facts or catalog admission.',
+        {reason:'official_home_unverified',http_status:source.httpStatus||null});
+      continue;
+    }
+    const urls=(source.manufacturerLinks||[]).slice(0,4);
+    const pages=await mapLimit(urls,2,url=>fetchOfficial(url,{deadlineAt}));
+    if(pages.some(x=>x.error==='quality_cycle_budget_deferred')){deferred=true;break}
+    const seen=new Set(),proof=[];
+    for(let i=0;i<pages.length;i++){
+      const page=pages[i],identity=canonicalManufacturerDocumentIdentity(page?.finalUrl);
+      if(page?.status!=='ok'||!identity||seen.has(identity)||!sameManufacturerHost(page.finalUrl,home.href)||
+         String(page.documentText||'').length<120)continue;
+      seen.add(identity);
+      proof.push({url:page.finalUrl,fingerprint:page.fingerprint,title:safeText(page.title,160),
+        summary:safeText(page.description,280),verified_at:new Date().toISOString().slice(0,10)});
+      if(proof.length>=2)break;
+    }
+    if(proof.length<2){
+      await persistManufacturerWatchEvent(env,slug,'catalog_manufacturer_dossier_deferred','deferred',
+        'Two distinct reachable first-party product documents not established. Research only.',
+        {reason:'insufficient_distinct_first_party_docs',checked:pages.length,valid_docs:proof.length});
+      continue;
+    }
+    await persistManufacturerWatchEvent(env,slug,'catalog_manufacturer_dossier_documented','completed',
+      'Two first-party manufacturer pages recorded privately; editorial analysis and claims still required.',
+      {source:'manufacturer_first_party',home_url:source.finalUrl,home_fingerprint:source.fingerprint,
+       product_name:lead.name,discovery_category:lead.discoveryCategory||null,documents:proof,
+       editorial_complete:false,decision_claims_complete:false,admission_ready:false});
+    const result=await env.DB.prepare("UPDATE catalog_market_gaps SET status='source_researched',"+
+      "updated_at=datetime('now') WHERE tool_slug=? AND status='discovery_only' "+
+      "AND sources_json LIKE '%awesome-selfhosted-directory%'").bind(slug).run();
+    documented+=Number(result?.meta?.changes??result?.changes??0);
+  }
+  return{ok:true,checked,documented,deferred,
+    publication:'research_only_no_editorial_or_claim_promotion',
+    max_per_cycle:MAX_MANUFACTURER_DOSSIERS_PER_CYCLE};
+}
+
 async function syncMarketGaps(env,{deadlineAt=Infinity}={}){
   const report=await assetJson(env,'/reports/competitive-gap-signals.json',{gaps:[]});
   let synced=0,deferred=false,productReady=0,discoveryOnly=0;
