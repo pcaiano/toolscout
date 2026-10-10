@@ -172,7 +172,7 @@ async function persistManufacturerWatchEvent(env,slug,eventType,status,detail,ev
 
 async function correctManufacturerCatalogFacts(env,tool,observations){
   const proposed=manufacturerFactProposals(tool,observations);
-  if(!proposed.length)return{status:'no_verified_numeric_difference'};
+  if(!proposed.length)return{status:'no_machine_verifiable_fact_change'};
   const slug=String(tool.slug||'').toLowerCase();
   const prior=await env.DB.prepare("SELECT event_type,evidence_json FROM catalog_runtime_events WHERE tool_slug=? AND event_type IN ('catalog_fact_proposal','catalog_fact_corrected') ORDER BY created_at DESC,event_id DESC LIMIT 1")
     .bind(slug).first();
@@ -192,7 +192,7 @@ async function correctManufacturerCatalogFacts(env,tool,observations){
   const result=await env.DB.prepare("UPDATE catalog_runtime_candidates SET profile_json=?,source_status='ok',updated_at=datetime('now') WHERE tool_slug=? AND profile_json=?")
     .bind(JSON.stringify(updated),slug,row.profile_json).run();
   if(Number(result?.meta?.changes||result?.changes||0)!==1)return{status:'concurrent_revision_or_missing'};
-  await persistManufacturerWatchEvent(env,slug,'catalog_fact_corrected','completed','Specific vendor-stated price or plan capacity corrected after two identical independent document observations.',
+  await persistManufacturerWatchEvent(env,slug,'catalog_fact_corrected','completed','Specific vendor-stated plan, price or retired capability corrected after two identical documentary observations.',
     {corrected_count:verdict.count,claims:proposed.map(x=>({type:x.type,claimKey:x.claimKey,oldValue:x.oldValue,newValue:x.newValue,sourceUrl:x.sourceUrl}))});
   runtimeCache.at=0;
   return{status:'corrected',count:verdict.count};
@@ -738,7 +738,7 @@ async function status(env){
   const baselinePresent=[...originalSlugs].filter(slug=>snapshot.candidateMap?.has(slug)).length;
   return{ok:true,version:'1.3',storage:{mode:'d1_primary_static_fallback',baseline_total:baselineTotal,baseline_seeded:baselineSeeded,
     baseline_present:baselinePresent,baseline_revised:Math.max(0,baselinePresent-baselineSeeded),
-    baseline_remaining:Math.max(0,baselineTotal-baselinePresent),migration_phase:snapshot.degraded?'runtime_degraded':baselinePresent>=baselineTotal&&baselineTotal>0?'all_baseline_records_in_d1':'baseline_seeding',legacy_html_preserved:true},state:{total:Number(states?.total||0),healthy:Number(states?.healthy||0),changed:Number(states?.changed||0),suppressed:Number(states?.suppressed||0),warnings:Number(states?.warnings||0),last_checked_at:states?.last_checked_at||null},runtime_candidates:Math.max(0,Number(candidates?.total||0)-baselineSeeded),last_admitted_at:candidates?.last_admitted_at||null,document_watch:{product_coverage:watchable,two_source_coverage:multiSource,products_baselined:Number(documents?.baselined||0),confirmed_changes_7d:Number(documents?.changes_7d||0),last_baseline_at:documents?.last_baseline_at||null,rule:'Document fingerprint checks detect source changes, not verified factual corrections. No automatic price or capability claims.'},market_gaps:Number(gaps?.total||0),events_7d:Number(events?.n||0),whats_new:{official_sources:Number(newsSources?.total||0),last_source_check:newsSources?.last_checked_at||null,candidates:Number(newsCandidates?.total||0),last_candidate_at:newsCandidates?.last_candidate_at||null},rule:'Once admitted, runtime tools remain full catalog peers during recoverable quality holds, matching static-tool behavior. Only confirmed broken sources are suppressed. Official-source verification is required, and affiliate economics never affect catalog admission or ranking.'};
+    baseline_remaining:Math.max(0,baselineTotal-baselinePresent),migration_phase:snapshot.degraded?'runtime_degraded':baselinePresent>=baselineTotal&&baselineTotal>0?'all_baseline_records_in_d1':'baseline_seeding',legacy_html_preserved:true},state:{total:Number(states?.total||0),healthy:Number(states?.healthy||0),changed:Number(states?.changed||0),suppressed:Number(states?.suppressed||0),warnings:Number(states?.warnings||0),last_checked_at:states?.last_checked_at||null},runtime_candidates:Math.max(0,Number(candidates?.total||0)-baselineSeeded),last_admitted_at:candidates?.last_admitted_at||null,document_watch:{product_coverage:watchable,two_source_coverage:multiSource,products_baselined:Number(documents?.baselined||0),confirmed_changes_7d:Number(documents?.changes_7d||0),last_baseline_at:documents?.last_baseline_at||null,rule:'First-party documentation is monitored; conservative prices, explicit plan limits and documented global capability retirements can update D1 after two identical observations. Other changes are not asserted.'},market_gaps:Number(gaps?.total||0),events_7d:Number(events?.n||0),whats_new:{official_sources:Number(newsSources?.total||0),last_source_check:newsSources?.last_checked_at||null,candidates:Number(newsCandidates?.total||0),last_candidate_at:newsCandidates?.last_candidate_at||null},rule:'Once admitted, runtime tools remain full catalog peers during recoverable quality holds, matching static-tool behavior. Only confirmed broken sources are suppressed. Official-source verification is required, and affiliate economics never affect catalog admission or ranking.'};
 }
 
 export async function handleCatalogAutonomyRoute(request,env){

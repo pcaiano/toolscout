@@ -35,6 +35,7 @@ A conflict between these layers is drift. Reconcile it instead of choosing the c
 - Cloudflare Worker: `toolscout`, entrypoint `compute-router-worker.js`.
 - D1 binding: `DB`, database `toolscout`.
 - Catalog Autonomy now stores all 127 original profiles in canonical D1 while retaining the original read-only static fallback and audited public HTML templates. Its existing hourly runtime_quality mission checks up to six vendors each cycle for documented changes. Explicit first-party numeric plan limits and nonpromotional monthly list prices can be corrected in D1 automatically after two identical observations. Other factual changes remain internal evidence until source-proven; never fabricate product facts or surface public pending-review banners.
+- Catalog Autonomy additionally recognizes explicit globally discontinued features in internal manufacturer documentation. The existing hourly verifier updates D1 feature and claim records only after two matching vendor observations, while preserving the original SEO/profile shell and sufficient independent verified claims. There are no public pending-confirmation banners; uncertain vendor statements never produce fabricated updates.
 - Cloudflare is the control and canonical state plane.
 - Render `toolscout-overflow` is bounded external research and machine-safe execution capacity. It does not own canonical business state.
 - Make remains the reputation-sensitive email delivery plane where configured.

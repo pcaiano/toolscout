@@ -184,6 +184,12 @@ Grow the existing catalog rather than create a second catalog or add a parallel 
 
 To unlock specialist sectors not represented in the existing allowed category registry, expand the current catalog taxonomy only with a fully verified candidate cohort and tests. Avoid speculative indexable buying guides from thin coverage.
 
+## Automatic confirmed global capability retirements (10 October 2026)
+
+Catalog Autonomy's existing hourly first-party source verification now checks an exact global manufacturer discontinuation statement against an existing manufacturer-verified capability claim. A feature is removed from decision claims, feature lists and stale editorial sentences only after the same exact change has been observed twice; the D1 source record, claim verification date and internal evidence ledger are updated atomically under an unchanged-row guard. Plan-specific restrictions, loose contextual descriptions, third-party documents, blocked sites and single observations do not prove global discontinuation. Preserve at least three remaining features and another manufacturer-verified buying claim; otherwise no mutation is made.
+
+Do not promise instantaneous or universal automatic coverage. New features, plan-specific entitlement changes and ambiguous vendor updates still require sufficiently structured first-party evidence. Never fabricate facts or display generic pending-confirmation banners on product profiles.
+
 ## Mandatory verified decision claim on every new admission (9 October 2026)
 
 The Catalog Autonomy trusted admission and the market-gap growth admission now both reject proposed new profiles without **at least one first-party manufacturer-supported decision claim** carrying a concrete type/value, `status: verified`, a real verification date, and a non-homepage manufacturer URL owned by the vendor. This supplements, rather than replaces, two distinct dated first-party evidence pages, structured original review, verified pricing/free status, logo, strengths, limitations and trade-offs. Synthetic product summaries and research-only seeds remain unpublished. Existing catalog records are not silently downgraded; the extra check applies to new admission eligibility.
