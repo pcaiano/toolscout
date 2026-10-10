@@ -122,3 +122,17 @@ test('Codex #611: large mission failure evidence stays valid JSON and retains ti
  assert.deepEqual(JSON.parse(safeJson({small:'ok'})),{small:'ok'});
  assert.deepEqual(JSON.parse(safeJson({cyclic:null})),{cyclic:null});
 });
+
+test('Quality verification is budgeted and research intake cannot outlive the mission',()=>{
+ const verify=catalog.slice(catalog.indexOf('export async function verifyBatch(env)'),catalog.indexOf('function validCandidate(',catalog.indexOf('export async function verifyBatch(env)')));
+ const intake=catalog.slice(catalog.indexOf('export async function syncCatalogResearchSupply(env'),catalog.indexOf('async function syncMarketGaps(',catalog.indexOf('export async function syncCatalogResearchSupply(env')));
+ assert.match(catalog,/MAX_VERIFY_CYCLE_WALL_MS=180000/);
+ assert.match(verify,/const startedAt=Date\.now\(\),deadlineAt=startedAt\+MAX_VERIFY_CYCLE_WALL_MS/);
+ assert.match(verify,/if\(Date\.now\(\)>=deadlineAt\)\{cycleBudgetExhausted=true;return;\}/);
+ assert.match(verify,/staged:0,deferred:true,reason:'catalog_quality_cycle_budget_exhausted'/);
+ assert.match(verify,/syncCatalogResearchSupply\(env,\{knownTools:all,deadlineAt\}\)/);
+ assert.match(intake,/deadlineAt=Infinity/,'independent research callers keep default behavior');
+ assert.match(intake,/if\(Date\.now\(\)>=deadlineAt\)\{deferred=true;break;\}/);
+ assert.match(verify,/cycle_budget_exhausted:cycleBudgetExhausted/);
+ assert.match(verify,/verifyManufacturerDocuments\(env,tool/,'first-party document checks still required');
+});
