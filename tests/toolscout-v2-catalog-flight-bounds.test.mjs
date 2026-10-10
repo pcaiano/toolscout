@@ -28,3 +28,17 @@ test('catalog can admit 24 documented tools but never runs unbounded research wi
  assert.match(catalog,/if\(!quality\.publishable\)/);
  assert.match(catalog,/source\.status!=='ok'/);
 });
+
+
+test('Codex P2: deadline is rechecked after awaited supplier phases and bounds trailing sync',()=>{
+ const admission=catalog.slice(catalog.indexOf('export async function admitTrustedCandidates(env)'),catalog.indexOf('export async function auditCatalogQualityBatch(env'));
+ assert.match(admission,/const startedAt=Date\\.now\\(\\);\\s*await ensureSchema\\(env\\)/,'setup must count against wall time');
+ assert.match(admission,/const source=await fetchTrustedCandidateOfficialSource\\(raw\\);\\s*if\\(budgetStop\\(\\)\\)break/,'slow source fallback cannot continue into quality gate');
+ assert.match(admission,/const quality=await auditCatalogTool\\(env,profile\\);\\s*if\\(budgetStop\\(\\)\\)break/,'slow quality/logo probe cannot continue to D1 admission');
+ assert.match(admission,/existing\\.add\\(slug\\);admitted\\+\\+;\\s*if\\(budgetStop\\(\\)\\)break/,'committed admissions must report elapsed deadline');
+ assert.match(admission,/if\\(budgetStop\\(\\)\\)market_gaps_deferred=true/,'deadline must fence trailing market gap writes');
+ assert.match(admission,/syncMarketGaps\\(env,\\{deadlineAt:startedAt\\+MAX_ADMISSION_WALL_MS\\}\\)/,'market gap loop must respect remaining wall time');
+ assert.match(admission,/if\\(budgetStop\\(\\)\\)snapshot_deferred=true/,'do not start an overdue forced snapshot');
+ assert.match(catalog,/if\\(Date\\.now\\(\\)>deadlineAt\\)\\{deferred=true;break;\\}/,'market gap writes stop at deadline');
+ assert.match(admission,/cycle_elapsed_ms:Date\\.now\\(\\)-startedAt,market_gaps_deferred,snapshot_deferred/,'ledger must expose bounded and deferred work');
+});
