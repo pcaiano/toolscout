@@ -168,6 +168,35 @@ async function persistManufacturerWatchEvent(env,slug,eventType,status,detail,ev
   if(result?.success===false)throw new Error('manufacturer_documentation_event_not_persisted');
 }
 
+
+async function correctManufacturerCatalogFacts(env,tool,observations){
+  const proposed=manufacturerFactProposals(tool,observations);
+  if(!proposed.length)return{status:'no_verified_numeric_difference'};
+  const slug=String(tool.slug||'').toLowerCase();
+  const prior=await env.DB.prepare("SELECT event_type,evidence_json FROM catalog_runtime_events WHERE tool_slug=? AND event_type IN ('catalog_fact_proposal','catalog_fact_corrected') ORDER BY created_at DESC,event_id DESC LIMIT 1")
+    .bind(slug).first();
+  let previous=null;
+  if(prior?.event_type==='catalog_fact_proposal')try{previous=JSON.parse(prior.evidence_json||'{}')}catch{}
+  const verdict=reconcileManufacturerFacts(tool,proposed,previous);
+  if(verdict.status==='needs_second_observation'){
+    await persistManufacturerWatchEvent(env,slug,'catalog_fact_proposal','deferred','Manufacturer-stated plan fact differs from canonical catalog. Awaiting a second independent observation.',verdict.proposal);
+    return{status:verdict.status};
+  }
+  if(verdict.status!=='corrected')return{status:verdict.status};
+  // Only replace the exact unchanged row that was evaluated; never clobber a
+  // concurrently reviewed profile, quality hold, logo or affiliate status.
+  const row=await env.DB.prepare('SELECT profile_json FROM catalog_runtime_candidates WHERE tool_slug=? LIMIT 1').bind(slug).first();
+  if(!row||row.profile_json!==JSON.stringify(tool))return{status:'concurrent_revision_or_missing'};
+  const updated=verdict.updatedTool;
+  const result=await env.DB.prepare("UPDATE catalog_runtime_candidates SET profile_json=?,source_status='ok',updated_at=datetime('now') WHERE tool_slug=? AND profile_json=?")
+    .bind(JSON.stringify(updated),slug,row.profile_json).run();
+  if(Number(result?.meta?.changes||result?.changes||0)!==1)return{status:'concurrent_revision_or_missing'};
+  await persistManufacturerWatchEvent(env,slug,'catalog_fact_corrected','completed','Specific vendor-stated price or plan capacity corrected after two identical independent document observations.',
+    {corrected_count:verdict.count,claims:proposed.map(x=>({type:x.type,claimKey:x.claimKey,oldValue:x.oldValue,newValue:x.newValue,sourceUrl:x.sourceUrl}))});
+  runtimeCache.at=0;
+  return{status:'corrected',count:verdict.count};
+}
+
 function compileRuntimeSnapshot(stateRows=[],candidateRows=[],meta={}){
   const stateMap=new Map((stateRows||[]).map(row=>[String(row.tool_slug),row])),parsed=[];
   const baselineMirrors=new Set((candidateRows||[]).filter(row=>row.source_status==='baseline_snapshot').map(row=>String(row.tool_slug||'').toLowerCase()));
@@ -331,7 +360,7 @@ export async function verifyBatch(env){
     ...retryWarning.slice(0,MAX_WARNING_RETRIES_PER_CYCLE).map(x=>x.tool),
     ...regular.map(x=>x.tool)
   ].slice(0,MAX_VERIFY_PER_CYCLE);
-  let checked=0,healthy=0,changed=0,suppressed=0,warnings=0,documentationChecked=0,documentationChanged=0,documentationWarnings=0,documentationBaselined=0;
+  let checked=0,healthy=0,changed=0,suppressed=0,warnings=0,documentationChecked=0,documentationChanged=0,documentationWarnings=0,documentationBaselined=0,factsCorrected=0,factsProposed=0;
   await mapLimit(chosen,2,async tool=>{
     const slug=String(tool.slug).toLowerCase(),prior=smap.get(slug)||{},verifyUrl=verificationUrl(tool),verificationSourceChanged=Boolean(prior.source_url&&prior.source_url!==verifyUrl),result=await fetchOfficial(verifyUrl),staticVerified=String(tool.lastVerified||tool.sourceCheckedOn||'');
     const staticVerifiedMs=staticVerified?Date.parse(/T/.test(staticVerified)?staticVerified:`${staticVerified}T00:00:00Z`):NaN;
@@ -347,6 +376,12 @@ export async function verifyBatch(env){
     if(documentation.status==='baselined')documentationBaselined++;
     if(documentation.status==='documentation_warning')documentationWarnings++;
     if(documentation.changed)documentationChanged++;
+    if(Array.isArray(documentation.observations)&&documentation.observations.length){
+      const correction=await correctManufacturerCatalogFacts(env,tool,documentation.observations).catch(error=>({status:'correction_error',error:safeText(error?.message||error,160)}));
+      if(correction.status==='corrected')factsCorrected+=Number(correction.count||0);
+      else if(correction.status==='needs_second_observation')factsProposed++;
+      else if(correction.status==='correction_error')await logEvent(env,slug,'catalog_fact_reconciliation_failed','failed','Manufacturer fact reconciliation error, original catalog facts left unchanged.',{error:correction.error});
+    }
     let quality=String(prior.quality_status||'unverified'),contentChanged=Number(prior.content_changed||0),lastChange=prior.last_change_at||null;
     let canonicalFingerprint=prior.fingerprint||result.fingerprint||null,pendingFingerprint=prior.pending_fingerprint||null,confirmations=Number(prior.change_confirmations||0);
     if(reviewedSinceChange){quality='healthy';contentChanged=0;lastChange=null;canonicalFingerprint=result.fingerprint||canonicalFingerprint;pendingFingerprint=null;confirmations=0}
@@ -382,7 +417,7 @@ export async function verifyBatch(env){
       .bind(slug,verifyUrl,result.status,result.httpStatus,result.finalUrl,canonicalFingerprint,pendingFingerprint,confirmations,contentChanged,broken,quality,staticVerified,lastChange).run();
   });
   runtimeCache.at=0;
-  return{ok:true,checked,healthy,changed,suppressed,warnings,documentation_checked:documentationChecked,documentation_baselined:documentationBaselined,documentation_changed:documentationChanged,documentation_warnings:documentationWarnings,batch_limit:MAX_VERIFY_PER_CYCLE,warning_retry_hours:WARNING_RETRY_HOURS,max_warning_retries_per_cycle:MAX_WARNING_RETRIES_PER_CYCLE,evidence:'official_homepage_and_first_party_documentation',write_policy:'due_check_only'};
+  return{ok:true,checked,healthy,changed,suppressed,warnings,documentation_checked:documentationChecked,documentation_baselined:documentationBaselined,documentation_changed:documentationChanged,documentation_warnings:documentationWarnings,verified_facts_corrected:factsCorrected,verified_fact_proposals:factsProposed,batch_limit:MAX_VERIFY_PER_CYCLE,warning_retry_hours:WARNING_RETRY_HOURS,max_warning_retries_per_cycle:MAX_WARNING_RETRIES_PER_CYCLE,evidence:'official_homepage_and_first_party_documentation',write_policy:'due_check_only'};
 }
 function validCandidate(candidate,config){
   const allowed=new Set(config?.admission?.allowedCatalogCategories||[]);
