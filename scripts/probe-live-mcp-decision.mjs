@@ -104,6 +104,41 @@ const narrow=await liveGuidance('CRM for my marketing agency');
 assert(narrow.recommendation_type!=='workflow_guidance'&&narrow.recommendations?.length>0&&narrow.recommendations.every(x=>x.category==='crm'),
   'Specific CRM need was hijacked by marketing-agency industry detection');
 
+// Production proof for the exact Finder/MCP decision parity rollout. A
+// passing build and an in-memory test do not prove the new public route is live.
+async function liveQualifiedFinder(path){
+  const response=await request('/api/recommend?'+path+'&decision_live_probe='+Date.now());
+  const payload=await response.json().catch(()=>null);
+  return {status:response.status,data:payload};
+}
+let finderDecisionReady=false,decisionReadyAttempts=0;
+for(let i=1;i<=15;i++){
+  decisionReadyAttempts=i;
+  try{
+    const sample=await liveQualifiedFinder('q=CRM&mode=decision&limit=3');
+    if(sample.status===200&&sample.data?.recommendation_type==='decision_shortlist'){
+      finderDecisionReady=true;break;
+    }
+  }catch{}
+  if(i<15)await sleep(5000);
+}
+assert(finderDecisionReady,'New Finder decision mode not observed after Cloudflare deployment readiness retries');
+const finderQualified=await liveQualifiedFinder('q=CRM&mode=decision&limit=3');
+assert(finderQualified.status===200&&finderQualified.data?.decision_status==='qualified_shortlist','Live Finder cannot return qualified buyer decisions');
+assert(finderQualified.data?.recommendations?.length>0,'Live decision mode returned an empty qualified CRM list');
+const aiQualified=await rpc('tools/call',{name:'decide_software',arguments:{job:'CRM',limit:3}});
+assert(aiQualified.isError===false,'MCP cannot return a CRM shortlist for parity comparison');
+const finderCandidates=finderQualified.data.recommendations.map(x=>({slug:x.slug,fit:x.match}));
+const mcpCandidates=aiQualified.structuredContent.shortlist.map(x=>({slug:x.slug,fit:x.fit_score}));
+assert(JSON.stringify(finderCandidates)===JSON.stringify(mcpCandidates),'Live Finder and MCP return different candidates/scores for the identical CRM decision');
+assert(finderQualified.data.recommendations.every(x=>x.qualified_for_use_case===true&&x.tool_url?.startsWith('https://trytoolscout.org/go/')),
+  'Live Finder decision failed qualifying gate or first-party monetizable CTA');
+assert(!JSON.stringify(finderQualified.data).includes('sourceUrl'),'Live Finder leaked manufacturer evidence URLs');
+const impossibleFinder=await liveQualifiedFinder('q=CRM&mode=decision&must_have=ToolScoutUnobtainableProofToken');
+assert(impossibleFinder.status===422&&impossibleFinder.data?.decision_status==='no_qualified_candidate'&&
+  impossibleFinder.data?.recommendations?.length===0,'Live Finder fabricated a match for an impossible mandatory requirement');
+console.log(JSON.stringify({finderDecisionLive:true,decisionReadyAttempts,parityWithMcp:true,matched:finderCandidates.length,hardConstraintFailClosed:true},null,2));
+
 // Read-only live D1 migration truth. An incomplete cycle remains visible as
 // incomplete; never infer the imported count from the build or static JSON.
 // Cloudflare Workers Build and the separate GitHub Integrity job can race.
