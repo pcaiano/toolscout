@@ -29,7 +29,9 @@ export function editorialContact(raw,publisher){
   const r="(Editor(?:\\s+in\\s+Chief|-in-Chief)?|Managing Editor|Reporter|Journalist|Staff Writer|Directora?\\s+editorial|Jornalista|Rédacteur\\s+en\\s+chef)";
   const after=segment.slice(segment.toLowerCase().indexOf(email)+email.length),before=segment.slice(0,segment.toLowerCase().indexOf(email));
   const a=after.match(new RegExp("^\\s*"+n+"\\s+"+r+"\\b","iu")),b=before.match(new RegExp(n+"\\s+"+r+"\\s*(?:[,;:]\\s*)?$","iu"));
-  const match=a||b;
+  const priorRole=before.match(new RegExp("(?:^|\\s)(Directora?|Jornalistas?|Editor(?:a)?|Rédacteur|Reporter|Journalist)\\s*[:|-]?\\s*"+n+"\\s*[:,-]?\\s*$","iu"));
+  const candidate=a||b||(priorRole?[null,priorRole[2],priorRole[1]]:null);
+  const match=candidate&&!/(editorial|PUBLICIDAD|comercial|commercial|advertising|marketing|newsroom|redação|redacção)/i.test(candidate[1])?candidate:null;
   if(!match&&!INBOX.test(email))return null;
   return {name:match?.[1]||publisher.name+" Editorial Desk",role:match?.[2]||"Editorial inbox",email,source,domain};
 }
@@ -39,7 +41,8 @@ export function selectQueued(queue,limit=12){
   for(let i=1;i<queue.length;i++){
     const x=queue[i]||[],domain=lower(x[1]),category=String(x[4]||"");
     if(x[8]!=="Queued"||!domain||seen.has(domain)||COMPETITORS.test(domain))continue;
-    if(!/(tech|software|saas|cloud|cyber|startup|enterprise|digital|business|media|journal|news|publishing|artificial intelligence)/i.test(category))continue;
+    if(/(software development|marketing services|public relations|advertising agencies|holding companies|broadcast media production|design services)/i.test(category))continue;
+    if(!/(tech|software|saas|cloud|cyber|startup|enterprise|digital transformation|journal|internet news|artificial intelligence|IT news)/i.test(category))continue;
     if(!/^[a-z0-9.-]+\.[a-z]{2,}$/.test(domain))continue;
     seen.add(domain);out.push({i,name:x[0]||domain,domain,country:x[2]||"",language:x[3]||"",category});
     if(out.length===limit)break;
