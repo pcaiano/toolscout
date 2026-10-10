@@ -40,7 +40,7 @@ need(/href=["']\/["'][^>]*aria-label=["']ToolScout home["']|aria-label=["']ToolS
 need(/src=["']\/favicon\.svg["']/.test(home.text),'home_real_mark_missing');
 need(/Independent\. No sponsored rankings\./.test(home.text),'home_independence_proof_missing');
 need(/data\/software-updates\.json/.test(home.text),'home_live_updates_feed_missing');
-need(/\.hero\{min-height:520px;/.test(home.text),'home_desktop_hero_too_tall');
+need(/\.hero\{min-height:410px;/.test(home.text)&&!/\.hero\{min-height:(?:5[0-9]{2}|[6-9][0-9]{2})px;/.test(home.text),'home_desktop_hero_height_regressed');
 need(/content:"Explore ↓"/.test(home.text),'home_scroll_cue_missing');
 
 const sitemap=await get('/sitemap.xml');
