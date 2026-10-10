@@ -645,7 +645,9 @@ export function classifyMarketGapEvidence(gap){
       if(parts.length&&terminal===slug)productHosts.add(host);
     }catch{}
   }
-  const independent=productHosts.size;
+  const independentSources=new Set((Array.isArray(gap?.sources)?gap.sources:[])
+    .map(v=>String(v||'').toLowerCase().trim()).filter(Boolean));
+  const independent=Math.min(productHosts.size,independentSources.size);
   return independent>=2
     ?{status:'research_required',reason:'independent_product_page_signals',independent_product_hosts:independent,taxonomy_hosts:taxonomyHosts.size}
     :{status:'discovery_only',reason:'insufficient_product_identity_signals',independent_product_hosts:independent,taxonomy_hosts:taxonomyHosts.size};
