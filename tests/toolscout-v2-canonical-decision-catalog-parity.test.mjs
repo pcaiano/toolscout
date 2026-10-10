@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {publicMergedTools,publicRuntimeToolResponse} from '../catalog-autonomy-worker.js';
+import {publicMergedTools,publicDecisionCatalogTools,publicRuntimeToolResponse} from '../catalog-autonomy-worker.js';
 import {handleDistributionEmbedRoute} from '../distribution-embed-worker.js';
 import {handleAgentProtocolRoute} from '../agent-protocol-core-worker.js';
 
@@ -19,6 +19,7 @@ function fullEnvironment({withDb=true}={}){
  const env={ASSETS:{async fetch(req){const p=new URL(req.url).pathname;
    if(p==='/data/tools.json')return Response.json(original);
    if(p==='/data/intents.json')return Response.json([]);
+   if(p==='/data/affiliate.json')return Response.json({[admitted.slug]:{enabled:true,url:'https://merchant.example/approved-referral'},[paused.slug]:{enabled:false,url:'https://merchant.example/disabled'},hubspot:{enabled:true,url:'http://insecure.example/affiliate'},airtable:{enabled:false,url:'https://approved.example/affiliate'}});
    return new Response('missing',{status:404});
  }}};
  if(withDb)env.DB={prepare(sql){
@@ -45,6 +46,21 @@ test('canonical catalog merges documented runtime admissions without retaining c
  assert.equal(all.some(t=>t.slug===paused.slug),true,'ineligible records still exist for transparent lookup');
  assert.equal(all.some(t=>t.slug===broken.slug),false,'confirmed broken vendor must remain suppressed');
  assert.equal(all.length,original.length+2);
+});
+test('decision catalog preserves canonical rank order while refusing disabled, missing and insecure product URLs',async()=>{
+ const env=fullEnvironment();
+ const [canonical,projected]=await Promise.all([publicMergedTools(env),publicDecisionCatalogTools(env)]);
+ assert.deepEqual(projected.map(t=>t.slug),canonical.map(t=>t.slug),'affiliate presence never reorders catalog');
+ assert.equal(projected.find(t=>t.slug===admitted.slug).toolscoutApprovedVisit,'https://trytoolscout.org/go/'+admitted.slug);
+ for(const slug of ['hubspot','airtable',paused.slug]){
+   assert.equal(projected.find(t=>t.slug===slug).toolscoutApprovedVisit,null,slug+' must not advertise broken commerce');
+ }
+ const noAffiliate=await mcp('get_tool',{tool:'hubspot'},env);
+ assert.equal(noAffiliate.structuredContent.tool.tool_url,null);
+ assert.equal(noAffiliate.structuredContent.tool.profile_url,'https://trytoolscout.org/tools/hubspot');
+ const approved=await mcp('get_tool',{tool:admitted.slug},env);
+ assert.equal(approved.structuredContent.tool.tool_url,'https://trytoolscout.org/go/'+admitted.slug+'?source=ai-agent');
+ assert.equal(approved.structuredContent.tool.profile_url,'https://trytoolscout.org/tools/'+admitted.slug);
 });
 test('Finder recommends a new runtime-admitted vendor without requiring a static JSON rebuild',async()=>{
  const env=fullEnvironment();

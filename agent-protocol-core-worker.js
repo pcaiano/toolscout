@@ -1,5 +1,5 @@
 import {businessWorkflowGuidance,verifiedPmsCandidates} from './business-workflow-intent.js';
-import {publicMergedTools} from './catalog-autonomy-worker.js';
+import {publicDecisionCatalogTools} from './catalog-autonomy-worker.js';
 import base from './content-engine-intelligence-worker.js';
 
 const PROTOCOL_VERSION='2026-07-28';
@@ -296,7 +296,7 @@ async function loadCatalog(request,env){
   // Reuse the public canonical catalog: static documents plus manufacturer-
   // qualified runtime admissions, with confirmed-broken slugs suppressed.
   // Reading ASSETS directly silently hid future admitted tools from MCP/A2A.
-  const tools=await publicMergedTools(env);
+  const tools=await publicDecisionCatalogTools(env);
   if(!Array.isArray(tools)||!tools.length)throw new Error('catalog_unavailable');
   return tools;
 }
@@ -350,7 +350,7 @@ function publicTool(tool){
       hands_on_tested:tool.editorialReview.handsOnTested===true
     }:null,
     profile_url:`https://trytoolscout.org/tools/${encodeURIComponent(tool.slug)}`,
-    tool_url:`https://trytoolscout.org/go/${encodeURIComponent(tool.slug)}?source=ai-agent`
+    tool_url:tool.toolscoutApprovedVisit?tool.toolscoutApprovedVisit+'?source=ai-agent':null
   };
 }
 function catalogSearchScore(tool,args){
@@ -1160,7 +1160,7 @@ async function callCatalogTool(name,args,request,env){
     const tool=findCatalogTool(tools,args.tool);
     if(!tool)return {error:'Tool not found in the ToolScout catalog.',status:404,data:{tool:null,query:args.tool}};
     const ai=aiIntegration(tool);
-    return {data:{tool:{slug:tool.slug,name:tool.name,profile_url:`https://trytoolscout.org/tools/${encodeURIComponent(tool.slug)}`,tool_url:`https://trytoolscout.org/go/${encodeURIComponent(tool.slug)}?source=ai-agent`},ai_integration:ai,evidence_status:ai.status==='verified'?'verified':'unverified'}};
+    return {data:{tool:{slug:tool.slug,name:tool.name,profile_url:`https://trytoolscout.org/tools/${encodeURIComponent(tool.slug)}`,tool_url:tool.toolscoutApprovedVisit?tool.toolscoutApprovedVisit+'?source=ai-agent':null},ai_integration:ai,evidence_status:ai.status==='verified'?'verified':'unverified'}};
   }
   return {error:'Unknown tool.',status:400};
 }

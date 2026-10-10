@@ -155,19 +155,27 @@
         :esc(item.match_label||`${Number(item.match||0)}/100 fit score`);
       const reasons=(item.reasons||[]).slice(0,mode==='mini'?2:3).map(reason=>`<span class="reason">${esc(reason)}</span>`).join('');
       const profile=trackedUrl(item.profile_url||`/tools/${encodeURIComponent(item.slug)}`,item.slug);
-      const vendor=new URL(`/go/${encodeURIComponent(item.slug)}`,HOME);
-      vendor.searchParams.set('source',`embed:${publisher}`);
-      vendor.searchParams.set('utm_source',publisher);
-      vendor.searchParams.set('utm_medium','distribution');
-      vendor.searchParams.set('utm_campaign','embed_finder');
-      vendor.searchParams.set('utm_content',item.slug);
+      // The canonical API only provides an outbound link if the software's
+      // affiliate route is actually approved. Never fabricate /go/ URLs here.
+      let vendor=null;
+      try{
+        const target=item.tool_url?new URL(item.tool_url):null;
+        if(target&&target.origin===new URL(HOME).origin&&target.pathname===`/go/${encodeURIComponent(item.slug)}`){
+          target.searchParams.set('source',`embed:${publisher}`);
+          target.searchParams.set('utm_source',publisher);
+          target.searchParams.set('utm_medium','distribution');
+          target.searchParams.set('utm_campaign','embed_finder');
+          target.searchParams.set('utm_content',item.slug);
+          vendor=target;
+        }
+      }catch{}
       return `<article class="result" style="animation-delay:${index*45}ms">
         <div class="result-top"><div><div class="category">${esc(item.category||'Software')}</div><div class="name">${esc(item.name)}</div></div><div class="match">${match}</div></div>
         ${mode==='mini'?'':`<div class="description">${esc(item.description||'')}</div>`}
         <div class="reasons">${reasons}</div>
         <div class="actions">
           <a class="profile" data-action="profile" data-slug="${esc(item.slug)}" href="${esc(profile)}" target="_blank" rel="noopener">See ToolScout analysis</a>
-          <a class="vendor" data-action="vendor" data-slug="${esc(item.slug)}" href="${esc(vendor.toString())}" target="_blank" rel="nofollow sponsored noopener">Visit vendor</a>
+          ${vendor?`<a class="vendor" data-action="vendor" data-slug="${esc(item.slug)}" href="${esc(vendor.toString())}" target="_blank" rel="nofollow sponsored noopener">Visit vendor</a>`:''}
         </div>
       </article>`;
     }).join('');

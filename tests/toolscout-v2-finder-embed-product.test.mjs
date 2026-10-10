@@ -7,6 +7,7 @@ import {handleDistributionLearningRoute} from '../distribution-learning-worker.j
 const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const tools=read('data/tools.json');
 const intents=read('data/intents.json');
+const affiliates=JSON.parse(read('data/affiliate.json'));
 const publisherKit=read('distribution/publisher-kit.html');
 
 function assetEnv(){
@@ -16,6 +17,7 @@ function assetEnv(){
         const path=new URL(request.url).pathname;
         if(path==='/data/tools.json')return new Response(tools,{status:200,headers:{'content-type':'application/json'}});
         if(path==='/data/intents.json')return new Response(intents,{status:200,headers:{'content-type':'application/json'}});
+        if(path==='/data/affiliate.json')return Response.json(affiliates);
         if(path==='/distribution/publisher-kit.html')return new Response(publisherKit,{status:200,headers:{'content-type':'text/html; charset=UTF-8'}});
         return new Response('not found',{status:404});
       }
@@ -31,6 +33,10 @@ test('Finder embed is an inline discovery product rather than a link-only launch
   assert.match(src,/dataset\.publisher/);
   assert.match(src,/profile_click/);
   assert.match(src,/vendor_click/);
+  assert.match(src,/const target=item\.tool_url\?new URL\(item\.tool_url\):null/);
+  assert.match(src,/target\.pathname===/);
+  assert.match(src,/\$\{vendor\?/);
+  assert.doesNotMatch(src,/const vendor=new URL\(`\/go\//,'widget must not mint unsolicited product visits');
   assert.match(src,/data-toolscout-embed','finder/);
   assert.doesNotMatch(src,/window\.open\('https:\/\/trytoolscout\.org\/\?'/);
 });
@@ -192,7 +198,7 @@ test('Finder scores are evidence-weighted, differentiated and restricted to rele
     assert.ok(data.recommendations.every(t=>Number.isFinite(t.match)&&t.match>66),row.q);
     assert.ok(data.recommendations.every(t=>/\/100 fit score/.test(t.match_label)),row.q);
     assert.ok(new Set(data.recommendations.map(t=>t.match)).size>1,row.q+' has an unexplained score tie');
-    assert.ok(data.recommendations.every(t=>t.tool_url==='https://trytoolscout.org/go/'+t.slug));
+    assert.ok(data.recommendations.every(t=>t.tool_url===(affiliates[t.slug]?.enabled===true&&/^https:\/\//.test(affiliates[t.slug]?.url||'')?'https://trytoolscout.org/go/'+t.slug:null)));
   }
 });
 

@@ -3,8 +3,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {handleAgentProtocolRoute} from '../agent-protocol-core-worker.js';
 const catalog=JSON.parse(fs.readFileSync(new URL('../data/tools.json',import.meta.url),'utf8'));
+const affiliate=JSON.parse(fs.readFileSync(new URL('../data/affiliate.json',import.meta.url),'utf8'));
 async function invoke(name,args){
- const env={ASSETS:{fetch:async request=>new URL(request.url).pathname==='/data/tools.json'
+ const env={ASSETS:{fetch:async request=>new URL(request.url).pathname==='/data/affiliate.json'?Response.json(affiliate):new URL(request.url).pathname==='/data/tools.json'
  ?Response.json(catalog):new Response('',{status:404})}};
  const body={jsonrpc:'2.0',id:602,method:'tools/call',params:{name,arguments:args,_meta:{
  'io.modelcontextprotocol/protocolVersion':'2026-07-28',
