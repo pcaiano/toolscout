@@ -562,6 +562,12 @@ export async function syncCatalogResearchSupply(env,{knownTools=null,limit=MAX_R
   const directory=await assetJson(env,'/data/catalog-research-seeds-scale.json',null);
   if(directory?.schemaVersion!==1||directory?.status!=='research_only_not_catalog'||!Array.isArray(directory.candidates))
     return{ok:false,reason:'research_supply_asset_unavailable_or_invalid',staged:0};
+  // An early rollout may have staged directory-only rows as executable gaps.
+  // Repair only that identifiable cohort before the planner can retry it.
+  const recovered=await env.DB.prepare(`UPDATE catalog_market_gaps
+    SET status='discovery_only',updated_at=datetime('now')
+    WHERE status='research_required' AND signals<2
+      AND sources_json LIKE '%awesome-selfhosted-directory%'`).run();
   const gaps=await env.DB.prepare('SELECT tool_slug FROM catalog_market_gaps').all();
   const known=Array.isArray(knownTools)?knownTools:await mergedTools(env);
   const existing=(gaps.results||[]).map(x=>x.tool_slug);
@@ -570,7 +576,7 @@ export async function syncCatalogResearchSupply(env,{knownTools=null,limit=MAX_R
   for(const lead of selected){
     const result=await env.DB.prepare(`INSERT OR IGNORE INTO catalog_market_gaps
       (tool_slug,signals,sources_json,examples_json,status,updated_at)
-      VALUES(?,1,?,?,'research_required',datetime('now'))`)
+      VALUES(?,1,?,?,'discovery_only',datetime('now'))`)
       .bind(lead.slug,JSON.stringify(['awesome-selfhosted-directory']),JSON.stringify([lead.candidateUrl])).run();
     staged+=Number(result?.meta?.changes||result?.changes||0);
   }
@@ -578,9 +584,9 @@ export async function syncCatalogResearchSupply(env,{knownTools=null,limit=MAX_R
     'Research-only directory leads were queued without manufacturer proof, editorial admission, public profiles or monetized links.',
     {staged,source:'awesome-selfhosted-directory',directory_leads:directory.candidates.length,
       existing_before:existing.length,max_per_cycle:MAX_RESEARCH_SEEDS_PER_CYCLE});
-  return{ok:true,staged,source:'awesome-selfhosted-directory',
-    directory_leads:directory.candidates.length,queued_before:existing.length,
-    admission:'blocked_until_decision_grade_first_party_evidence',max_per_cycle:MAX_RESEARCH_SEEDS_PER_CYCLE};
+  return{ok:true,staged,converted_from_executable:Number(recovered?.meta?.changes||recovered?.changes||0),
+    source:'awesome-selfhosted-directory',directory_leads:directory.candidates.length,queued_before:existing.length,
+    admission:'discovery_only_until_independent_signal_and_decision_grade_first_party_evidence',max_per_cycle:MAX_RESEARCH_SEEDS_PER_CYCLE};
 }
 async function syncMarketGaps(env){
   const report=await assetJson(env,'/reports/competitive-gap-signals.json',{gaps:[]});
@@ -812,7 +818,7 @@ export function candidatePage(tool,{monetized=false}={}){
     /^https:\/\/(?:www\.)?fresha\.com\/?$/i.test(String(tool.sourceUrl||''));
   const outbound=monetized
     ?'<a class="cta" href="/go/'+encodeURIComponent(tool.slug)+'" target="_blank" rel="nofollow sponsored noopener">Visit '+esc(tool.name)+'</a>'
-    :freshaDirect?'<a class="cta" data-commercial-status="non-affiliate" href="https://www.fresha.com/" target="_blank" rel="nofollow noopener noreferrer">Visit Fresha website</a>':'';
+    :freshaDirect?'<a class="cta" data-commercial-status="non-affiliate" href="/go/fresha" target="_blank" rel="nofollow noopener">Visit Fresha website</a>':'';
   const review=runtimeEditorialView(tool);
   const buyerCheck=String(tool?.editorialReview?.buyerCheck||'').trim();
   const editorialBuyerCheck=buyerCheck
