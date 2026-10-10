@@ -20,7 +20,10 @@ test('tool directory renders the catalog and AI signals',async({page})=>{
   await page.goto(base+'/tools.html',{waitUntil:'domcontentloaded'});
   await page.waitForSelector('.tool');
   const count=await page.locator('.tool').count();
-  expect(count).toBeGreaterThan(80);
+  expect(count).toBe(60,'directory stages the initial results to keep thousands of tools responsive');
+  await expect(page.locator('#loadMore')).toBeVisible();
+  await page.locator('#loadMore').click();
+  expect(await page.locator('.tool').count()).toBeGreaterThan(80);
   await page.locator('#q').fill('ChatGPT');
   await expect(page.locator('.tool').filter({hasText:'ChatGPT'}).first()).toBeVisible();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2)).toBeTruthy();
