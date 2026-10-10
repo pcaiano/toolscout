@@ -19,6 +19,9 @@ test('OpenAPI 3.1 describes the real nullable commercial URL without losing cano
  assert.match(commercial.description,/approved.*https.*affiliate route/i);
  assert.match(commercial.description,/null/i);
  assert.match(commercial.description,/profile_url/);
+ assert.deepEqual(recommend.properties.match_type.enum,['personalized','category_fit','decision_qualified']);
+ assert.ok(openapi.paths['/api/recommend'].get.responses['200'].content['application/json'].schema.properties.recommendation_type.enum.includes('decision_shortlist'));
+
 });
 
 test('public agent instructions never tell AI to invent visits for unapproved vendors',()=>{
