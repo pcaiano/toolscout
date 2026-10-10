@@ -50,7 +50,9 @@ test('runtime ranking is creation-only and carries primary evidence',async()=>{
 
 test('runtime-admitted tool profile generator retains manufacturer sources internally',()=>{
   const src=fs.readFileSync(new URL('../catalog-autonomy-worker.js',import.meta.url),'utf8');
-  assert.match(src,/Editorial evidence:/);
+  assert.match(src,/profile\.editorialReview=\{\.\.\.raw\.editorialReview\}/);
+  assert.match(src,/profile\.editorialEvidence=\{/);
+  assert.doesNotMatch(src,/Editorial evidence:.*manufacturer documentation retained/i);
   assert.doesNotMatch(src,/Official product source/);
   assert.match(src,/tool\.sourceUrl/);
 });
