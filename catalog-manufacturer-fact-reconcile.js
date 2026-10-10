@@ -38,17 +38,18 @@ function verifiedQuoteScope(sentence,claim){
   if(!symbol)return false;
   const amounts=[...sentence.matchAll(new RegExp(escRe(symbol)+'\\s*\\d+(?:[,.]\\d{1,2})?','g'))];
   if(amounts.length!==1)return false;
+  // Only the price phrase determines the billed unit. Later plan facts may
+  // describe accounts or workspaces without changing the meaning of the quote.
   // Bind the billing unit directly to the quoted amount. A separate mention
   // of "per channel" in the same sentence is not proof of channel pricing.
   const pricedTail=sentence.slice(amounts[0].index+amounts[0][0].length);
   const seat=/^\s*per\s+(?:(?:paid|core|billable)\s+)?(?:seat|user|collaborator)\b/i;
   const channel=/^\s*per\s+channel\b/i;
   if(unit==='seat'){
-    if(!seat.test(pricedTail)||/\bper\s+(?:channel|subscription|account)\b/i.test(sentence))return false;
+    if(!seat.test(pricedTail))return false;
   }else if(unit==='channel'){
-    if(!channel.test(pricedTail)||/\bper\s+(?:(?:paid|core|billable)\s+)?(?:seat|user|collaborator|subscription|account)\b/i.test(sentence))return false;
+    if(!channel.test(pricedTail))return false;
   }else if(unit==='subscription'){
-    if(/\bper\s+(?:(?:paid|core|billable)\s+)?(?:seat|user|collaborator|channel|account)\b/i.test(sentence))return false;
     if(!/^\s*(?:per\s+month|monthly\b)/i.test(pricedTail))return false;
   }else return false; // Unknown quote units need editorial proof, not auto edits.
   if(claim.unitQuantity!==undefined&&claim.unitQuantity!==1)return false;
