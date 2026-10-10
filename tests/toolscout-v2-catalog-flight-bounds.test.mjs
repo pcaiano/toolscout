@@ -10,7 +10,7 @@ const ledger=read('engine-run-ledger.js');
 test('every scheduled catalog admission and verification has an expiring mission lease',()=>{
  for(const mission of ['runtime_coverage','runtime_quality']){
   const scheduled=scheduler.split('\n').filter(line=>line.includes("mission:'"+mission+"'")&&line.includes('runWithLedger('));
-  assert.equal(scheduled.length,2,mission+' needs normal and recovery entrypoints');
+  assert.equal(scheduled.length,mission==='runtime_coverage'?3:2,mission+' needs normal, hourly recovery and (for coverage) incident recovery entrypoints');
   for(const line of scheduled)assert.match(line,/singleFlightMinutes:8/,mission+' must not leave unbounded running rows');
   const manual=catalog.split('\n').filter(line=>line.includes("mission:'"+mission+"'")&&line.includes("triggerName:'manual_api'"));
   assert.equal(manual.length,2,mission+' needs a lease for both authorized APIs');
