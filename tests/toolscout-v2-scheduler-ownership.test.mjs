@@ -106,10 +106,13 @@ test('compute router dispatches growth scheduling while growth scheduler owns th
   const drain=read('growth-runtime-authority-drain-worker.js');
   assert.match(drain,/export async function runAuthorityDrainScheduled/);
   assert.match(drain,/authority_drain_scheduler/);
-  const hourlyCore=compute.indexOf('await Promise.allSettled([growth,authority,primary,seo,newsletterSync,linkableResearch])');
+  const authorityPrep=compute.indexOf("Promise.allSettled([authority,primary]).then(()=> 'settled')");
   const closedLoopCall=compute.indexOf('await runGrowthClosedLoopScheduled(scheduledEvent,env,ctx)');
-  const drainCall=compute.indexOf('await runAuthorityDrainScheduled(scheduledEvent,env,ctx)');
-  assert.ok(hourlyCore>=0&&drainCall>hourlyCore,'authority sender drain must execute after hourly core scheduling, including newsletter sync, settles');
+  const drainCall=compute.indexOf('const drain=runAuthorityDrainScheduled(scheduledEvent,env,ctx)');
+  assert.ok(authorityPrep>=0&&drainCall>authorityPrep,
+    'sender drain must follow bounded preparation by the actual authority and execution owners, not wait on unrelated newsletter or SEO work');
+  assert.match(compute,/preparationTimer=setTimeout\(\(\)=>resolve\('deadline'\),30000\)/,
+    'slow upstream work cannot indefinitely prevent the authority sender drain');
   assert.doesNotMatch(compute,/runGrowthRuntimeIntegrityScheduled/,'observer layer must not own a second authority recovery execution');
   assert.ok(closedLoopCall>drainCall,'canonical authority closed loop must observe handoff only after the named sender drain owner has dispatched runnable work');
   assert.match(compute,/trigger===TOOLSCOUT_CRONS\.hourly\|\|trigger===TOOLSCOUT_CRONS\.daily/);
@@ -156,4 +159,30 @@ test('quality recovery uses existing quarter-hour cron and the one growth schedu
  assert.deepEqual(entry.cron,[TOOLSCOUT_CRONS.hourly,TOOLSCOUT_CRONS.primaryGrowth]);
  for(const cron of entry.cron)assert.equal(cronMatches('catalog_runtime_quality',cron),true);
  assert.match(entry.subcadence,/15m_failed_incident_only/);
+});
+
+
+test('authority hourly chain is not starved by unrelated newsletter, SEO, or linkable work',()=>{
+  const compute=read('compute-router-worker.js');
+  const chain=compute.slice(compute.indexOf('const authorityChain=(async()=>{'),compute.indexOf('const combined=Promise.allSettled([growth,authority,primary,seo,newsletterSync,linkableResearch,authorityChain])'));
+  assert.ok(chain.startsWith('const authorityChain=(async()=>{'));
+  assert.doesNotMatch(chain,/await Promise\.allSettled\(\[growth,authority,primary,seo,newsletterSync,linkableResearch\]\)/);
+  assert.match(chain,/Promise\.allSettled\(\[authority,primary\]\)\.then/);
+  assert.match(chain,/preparationTimer=setTimeout\(\(\)=>resolve\('deadline'\),30000\)/);
+  assert.match(compute,/const combined=Promise\.allSettled\(\[growth,authority,primary,seo,newsletterSync,linkableResearch,authorityChain\]\)/);
+});
+
+test('authority sender work precedes the closed-loop check and has a bounded observation window',()=>{
+  const compute=read('compute-router-worker.js');
+  const chain=compute.slice(compute.indexOf('const authorityChain=(async()=>{'),compute.indexOf('const combined=Promise.allSettled([growth,authority,primary,seo,newsletterSync,linkableResearch,authorityChain])'));
+  const drain=chain.indexOf('const drain=runAuthorityDrainScheduled(');
+  const closedLoop=chain.indexOf('await runGrowthClosedLoopScheduled(');
+  assert.ok(drain>0&&closedLoop>drain);
+  assert.match(chain,/if\(ctx\?\.waitUntil\)ctx\.waitUntil\(drain\)/);
+  assert.match(chain,/drainTimer=setTimeout\(\(\)=>resolve\('deadline'\),45000\)/);
+  assert.match(chain,/authority_hourly_preparation_deferred/);
+  assert.match(chain,/authority_drain_window_exhausted/);
+  assert.match(chain,/authority_closed_loop_scheduler_failed/);
+  assert.equal(SCHEDULED_MISSIONS.authority_closed_loop.owner,'growth_runtime_closed_loop');
+  assert.equal(SCHEDULED_MISSIONS.authority_closed_loop.cron,TOOLSCOUT_CRONS.hourly);
 });

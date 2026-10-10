@@ -2548,21 +2548,37 @@ export default{
         await event(env,'linkable_research_sync_failed','failed',safe(error?.message||error,800)).catch(()=>{});
         return null;
       });
-      const combined=(async()=>{
-        await Promise.allSettled([growth,authority,primary,seo,newsletterSync,linkableResearch]);
-        // The named sender-drain owner must claim/dispatch executable make_sender
-        // work before the closed loop observes handoff state. Otherwise a pending,
-        // ready task can appear runnable while public-candidates correctly sees no
-        // claimed task and the authority recovery reports a false failure.
-        await runAuthorityDrainScheduled(scheduledEvent,env,ctx).catch(async error=>{
+      // Authority must not be starved by an unrelated SEO, newsletter or
+      // distribution subtask that never settles. Give its own prerequisites a
+      // short runway, then reconcile the sender before the closed-loop audit.
+      const authorityChain=(async()=>{
+        let preparationTimer;
+        const preparation=await Promise.race([
+          Promise.allSettled([authority,primary]).then(()=> 'settled'),
+          new Promise(resolve=>{preparationTimer=setTimeout(()=>resolve('deadline'),30000)})
+        ]).finally(()=>clearTimeout(preparationTimer));
+        if(preparation==='deadline')await event(env,'authority_hourly_preparation_deferred','deferred',
+          'Authority sender and recovery continue after the bounded prerequisite window; unfinished upstream work remains independently observable.').catch(()=>{});
+        // Sender drain remains the named owner of Make handoff. It must run
+        // before closed-loop observation, but it cannot starve that observation.
+        const drain=runAuthorityDrainScheduled(scheduledEvent,env,ctx).catch(async error=>{
           await event(env,'authority_drain_scheduler_failed','failed',safe(error?.message||error,800)).catch(()=>{});
           return null;
         });
+        if(ctx?.waitUntil)ctx.waitUntil(drain); // preserve in-flight sender work if the bounded observation window expires
+        let drainTimer;
+        const drainState=await Promise.race([
+          drain.then(()=> 'settled'),
+          new Promise(resolve=>{drainTimer=setTimeout(()=>resolve('deadline'),45000)})
+        ]).finally(()=>clearTimeout(drainTimer));
+        if(drainState==='deadline')await event(env,'authority_drain_window_exhausted','deferred',
+          'Sender drain exceeded the bounded window; closed-loop evaluation proceeds without claiming an external attempt.').catch(()=>{});
         await runGrowthClosedLoopScheduled(scheduledEvent,env,ctx).catch(async error=>{
           await event(env,'authority_closed_loop_scheduler_failed','failed',safe(error?.message||error,800)).catch(()=>{});
           return null;
         });
       })();
+      const combined=Promise.allSettled([growth,authority,primary,seo,newsletterSync,linkableResearch,authorityChain]);
       if(ctx?.waitUntil){ctx.waitUntil(combined);return;}
       await combined;return;
     }
