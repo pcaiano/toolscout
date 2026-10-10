@@ -622,19 +622,50 @@ export async function syncCatalogResearchSupply(env,{knownTools=null,limit=MAX_R
     source:'awesome-selfhosted-directory',directory_leads:directory.candidates.length,queued_before:existing.length,
     admission:'discovery_only_until_independent_signal_and_decision_grade_first_party_evidence',max_per_cycle:MAX_RESEARCH_SEEDS_PER_CYCLE};
 }
+// Independent directory mentions are only *product* market demand when the
+// source URLs identify this specific product. Taxonomy, search and FAQ pages
+// cannot turn a generic workflow label into a software profile.
+export function classifyMarketGapEvidence(gap){
+  const slug=String(gap?.slug||'').toLowerCase();
+  if(!/^[a-z0-9][a-z0-9-]*$/.test(slug))
+    return{status:'discovery_only',reason:'invalid_product_identity',independent_product_hosts:0};
+  const productHosts=new Set(),taxonomyHosts=new Set();
+  for(const raw of Array.isArray(gap?.exampleUrls)?gap.exampleUrls:[]){
+    try{
+      const u=new URL(String(raw));
+      if(u.protocol!=='https:'||u.username||u.password)continue;
+      const parts=decodeURIComponent(u.pathname).toLowerCase().split('/').filter(Boolean);
+      const terminal=parts.at(-1)||'';
+      const host=u.hostname.toLowerCase().replace(/^www\./,'');
+      const taxonomy=parts.some(part=>['category','categories','feature','features','faq','tag','tags','topics','search','browse','filter','pricing'].includes(part))
+        ||/(?:-software|-tools)$/.test(terminal)&&terminal!==slug;
+      if(taxonomy){taxonomyHosts.add(host);continue;}
+      // An exact named product URL on two independent directories is a
+      // research signal, never evidence of product functionality or pricing.
+      if(parts.length&&terminal===slug)productHosts.add(host);
+    }catch{}
+  }
+  const independent=productHosts.size;
+  return independent>=2
+    ?{status:'research_required',reason:'independent_product_page_signals',independent_product_hosts:independent,taxonomy_hosts:taxonomyHosts.size}
+    :{status:'discovery_only',reason:'insufficient_product_identity_signals',independent_product_hosts:independent,taxonomy_hosts:taxonomyHosts.size};
+}
+
 async function syncMarketGaps(env,{deadlineAt=Infinity}={}){
   const report=await assetJson(env,'/reports/competitive-gap-signals.json',{gaps:[]});
-  let synced=0,deferred=false;
+  let synced=0,deferred=false,productReady=0,discoveryOnly=0;
   const gaps=Array.isArray(report?.gaps)?report.gaps:[];
   for(const gap of gaps){
     if(Date.now()>deadlineAt){deferred=true;break;}
     const slug=String(gap?.slug||'').toLowerCase().replace(/[^a-z0-9-]/g,'');if(!slug)continue;
-    await env.DB.prepare(`INSERT INTO catalog_market_gaps(tool_slug,signals,sources_json,examples_json,status,updated_at) VALUES(?,?,?,?,'research_required',datetime('now'))
-      ON CONFLICT(tool_slug) DO UPDATE SET signals=excluded.signals,sources_json=excluded.sources_json,examples_json=excluded.examples_json,status=CASE WHEN catalog_market_gaps.status IN ('published','admitted_coverage','covered','covered_existing') THEN catalog_market_gaps.status ELSE 'research_required' END,updated_at=datetime('now')`)
-      .bind(slug,Number(gap?.mentions||gap?.sources?.length||0),JSON.stringify(gap?.sources||[]),JSON.stringify(gap?.exampleUrls||[])).run();
+    const signal=classifyMarketGapEvidence(gap);
+    await env.DB.prepare(`INSERT INTO catalog_market_gaps(tool_slug,signals,sources_json,examples_json,status,updated_at) VALUES(?,?,?,?,?,datetime('now'))
+      ON CONFLICT(tool_slug) DO UPDATE SET signals=excluded.signals,sources_json=excluded.sources_json,examples_json=excluded.examples_json,status=CASE WHEN catalog_market_gaps.status IN ('published','admitted_coverage','covered','covered_existing') THEN catalog_market_gaps.status ELSE excluded.status END,updated_at=datetime('now')`)
+      .bind(slug,Number(gap?.mentions||gap?.sources?.length||0),JSON.stringify(gap?.sources||[]),JSON.stringify(gap?.exampleUrls||[]),signal.status).run();
+    if(signal.status==='research_required')productReady++;else discoveryOnly++;
     synced++;
   }
-  return {synced,deferred};
+  return {synced,deferred,product_identity_qualified:productReady,discovery_only:discoveryOnly};
 }
 // Signal existing Growth Brain scheduler when a reviewed cohort becomes
 // admission-ready. This is discovery only; the existing documented-source,
