@@ -127,7 +127,7 @@ test('User-selected Finder goal is a hard category gate, not a textual suggestio
 });
 
 test('Legacy Finder priority changes decision ranking and matches explicit MCP priority',async()=>{
-  for(const priority of ['automation','ease','integrations','features']){
+  for(const priority of ['automation','ease','integrations']){
     const [web,ai]=await Promise.all([
       finder({q:'CRM',mode:'decision',priority}),
       mcp({job:'CRM',priorities:[priority],limit:3})
@@ -141,16 +141,14 @@ test('Legacy Finder priority changes decision ranking and matches explicit MCP p
   }
   const automation=await finder({q:'CRM',mode:'decision',priority:'automation'});
   const easy=await finder({q:'CRM',mode:'decision',priority:'ease'});
-  const features=await finder({q:'CRM',mode:'decision',priority:'features'});
   assert.equal(automation.data.recommendations[0].slug,'automation-first-crm');
   assert.equal(easy.data.recommendations[0].slug,'ease-first-crm');
-  assert.equal(features.data.recommendations[0].slug,'ease-first-crm');
 });
 
 test('Explicit multi-priorities override the legacy single priority selector',async()=>{
   const [web,ai]=await Promise.all([
-    finder({q:'CRM',mode:'decision',priority:'automation',priorities:['ease','features']}),
-    mcp({job:'CRM',priorities:['ease','features'],limit:3})
+    finder({q:'CRM',mode:'decision',priority:'automation',priorities:['ease','price']}),
+    mcp({job:'CRM',priorities:['ease','price'],limit:3})
   ]);
   assert.equal(web.status,200);
   assert.equal(ai.isError,false);
@@ -163,4 +161,19 @@ test('Non-decision Finder goal and priority still use the original recommendatio
   assert.equal(web.status,200);
   assert.notEqual(web.data.recommendation_type,'decision_shortlist');
   assert.ok(web.data.recommendations.every(t=>t.category==='crm'));
+});
+
+test('Features priority never fabricates unpopulated feature-depth scores',async()=>{
+  // None of the real original catalog records had a validated scores.features.
+  // Requesting it must be actionable, not a neutral-score alphabetical winner.
+  const web=await finder({q:'CRM',mode:'decision',priority:'features'});
+  assert.equal(web.status,422);
+  assert.equal(web.data.decision_status,'needs_specific_features');
+  assert.deepEqual(web.data.recommendations,[]);
+  assert.match(web.data.message,/must-have capabilities/i);
+  const ai=await mcp({job:'CRM',priorities:['features'],limit:3});
+  assert.equal(ai.isError,true);
+  assert.equal(ai.structuredContent.decision_status,'needs_specific_features');
+  const mixed=await finder({q:'CRM',mode:'decision',priorities:['price','features']});
+  assert.equal(mixed.status,422,'do not silently discard an explicitly requested unsupported dimension');
 });

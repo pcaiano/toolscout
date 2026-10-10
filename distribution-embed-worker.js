@@ -223,6 +223,11 @@ async function recommend(request,env){
       guidance,count:0,recommendations:[],ranking:'Workflow decomposition before vendor ranking',
       affiliate_disclosure:'ToolScout may earn a commission from some outbound links. Affiliate relationships do not influence recommendations.'},{headers:JSON_H});
     if(buyerDecision.requested){
+      if((buyerDecision.args.priorities||[]).includes('features'))
+        return Response.json({error:'recommendation_unresolved',
+          decision_status:'needs_specific_features',count:0,recommendations:[],
+          message:'ToolScout cannot verify a general feature-depth ranking. Specify the actual must-have capabilities so each can be checked against manufacturer evidence.'},
+        {status:422,headers:{...JSON_H,'Cache-Control':'no-store'}});
       const shortlist=qualifiedSoftwareDecisionShortlist(tools,buyerDecision.args);
       if(!shortlist.length)return Response.json({
         error:'recommendation_unresolved',decision_status:'no_qualified_candidate',

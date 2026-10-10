@@ -160,14 +160,21 @@ assert(legacyAutomation.status===200&&aiAutomation.isError===false,'Automation p
 assert(JSON.stringify(legacyAutomation.data.recommendations.map(x=>[x.slug,x.match]))===
   JSON.stringify(aiAutomation.structuredContent.shortlist.map(x=>[x.slug,x.fit_score])),
   'Legacy Finder priority=automation was not applied using the MCP priority');
-const multiPriority=await liveQualifiedFinder('q=CRM&mode=decision&priority=automation&priorities=ease&priorities=features');
-const aiMulti=await rpc('tools/call',{name:'decide_software',arguments:{job:'CRM',priorities:['ease','features'],limit:3}});
+const multiPriority=await liveQualifiedFinder('q=CRM&mode=decision&priority=automation&priorities=ease&priorities=price');
+const aiMulti=await rpc('tools/call',{name:'decide_software',arguments:{job:'CRM',priorities:['ease','price'],limit:3}});
 assert(multiPriority.status===200&&aiMulti.isError===false,'Multi-priority decision unavailable');
 assert(JSON.stringify(multiPriority.data.recommendations.map(x=>[x.slug,x.match]))===
   JSON.stringify(aiMulti.structuredContent.shortlist.map(x=>[x.slug,x.fit_score])),
   'Explicit multi-dimensional priorities did not override the legacy single priority');
+const unsupportedFeatures=await liveQualifiedFinder('q=CRM&mode=decision&priority=features');
+assert(unsupportedFeatures.status===422&&unsupportedFeatures.data?.decision_status==='needs_specific_features'&&
+  unsupportedFeatures.data?.recommendations?.length===0,
+  'Live Finder must reject an unscored feature-breadth priority without inventing winners');
+const aiUnsupportedFeatures=await rpc('tools/call',{name:'decide_software',arguments:{job:'CRM',priorities:['features'],limit:3}});
+assert(aiUnsupportedFeatures.isError===true&&aiUnsupportedFeatures.structuredContent?.decision_status==='needs_specific_features',
+  'Live MCP must not silently rank on a nonexistent features score');
 console.log(JSON.stringify({finderContextPreservedLive:true,goalReadyAttempts,selectedGoal:'crm',legacyPriority:'automation',
-  explicitPriorities:['ease','features'],mcpParity:true},null,2));
+  explicitPriorities:['ease','price'],mcpParity:true},null,2));
 
 
 // Read-only live D1 migration truth. An incomplete cycle remains visible as
