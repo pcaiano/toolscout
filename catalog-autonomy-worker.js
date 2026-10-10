@@ -764,7 +764,7 @@ export async function admitTrustedCandidates(env){
     if(!raw||raw.slug!==slug||existing.has(slug)||seen.has(slug))continue;
     seen.add(slug);
     const priority=catalogCandidateResearchPriority(raw,affiliateRegistry.get(slug)||null,config);
-    pool.push({raw,slug,priority,ready:trustedManufacturerEvidence(raw,{decisionGrade:true}),sequence:sequence++});
+    pool.push({raw,slug,priority,ready:trustedManufacturerEvidence(raw,{decisionGrade:true}),origin:'d1_research_ready',sequence:sequence++});
   }
   const categoryCounts=new Map();
   for(const t of staticTools||[]){const key=String(t.category||'');categoryCounts.set(key,(categoryCounts.get(key)||0)+1)}
@@ -783,6 +783,25 @@ export async function admitTrustedCandidates(env){
     // Pure preflight before any network fetch. Undocumented research seeds
     // cannot become published software merely through a reachable homepage.
     if(!trustedManufacturerEvidence(raw,{decisionGrade:true})){held++;missingManufacturerEvidence++;await logEvent(env,slug,'catalog_candidate_manufacturer_evidence_hold','completed','Vendor documentation or claim-level decision evidence is insufficient for publication.',{required:'decision_grade_manufacturer_evidence'});continue}
+    if(item.origin==='d1_research_ready'){
+      // API-supplied research attestation alone cannot publish a product:
+      // independently check two distinct private manufacturer document pages
+      // before applying the same visual/source/editorial admission gates.
+      const documents=trustedCandidateOfficialFallbackUrls(raw).slice(0,3);
+      const evidenceChecks=await mapLimit(documents,2,url=>fetchOfficial(url,{deadlineAt:startedAt+MAX_ADMISSION_WALL_MS}));
+      if(budgetStop())break;
+      const accessible=new Set(evidenceChecks.filter((result,index)=>
+        result?.status==='ok'&&sameManufacturerHost(result.finalUrl,raw.sourceUrl)&&
+        documents[index]&&publicHttps(result.finalUrl)?.pathname!=='/'
+      ).map(result=>result.finalUrl));
+      if(accessible.size<2){
+        held++;
+        await logEvent(env,slug,'catalog_candidate_manufacturer_docs_hold','completed',
+          'Two independently fetched first-party manufacturer documents were not reachable. Research remains private.',
+          {document_checks:evidenceChecks.length,reachable_distinct:accessible.size});
+        continue;
+      }
+    }
     const source=await fetchTrustedCandidateOfficialSource(raw);
     if(budgetStop())break; // homepage and documentation fallbacks may consume several timeouts
     if(config?.admission?.requireReachableOfficialSource!==false&&source.status!=='ok'){
