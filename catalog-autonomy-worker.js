@@ -782,7 +782,7 @@ function runtimeLogo(tool){
 function runtimeInitials(name){return String(name||'T').split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase()}
 function aiProfile(tool){return tool?.aiIntegration&&typeof tool.aiIntegration==='object'?tool.aiIntegration:{status:'unverified',tier:'unknown',mcp:'unknown',publicApi:null,assistants:[],summary:'ToolScout has not yet verified this tool\'s current ChatGPT, Claude, Gemini, MCP or agent integration options.',verifiedAt:null,sources:[]};}
 function aiInteroperabilitySection(tool){
-  const p=aiProfile(tool),verified=p.status==='verified',assistants=(p.assistants||[]).filter(Boolean),mcp=p.mcp==='official'?'Official':p.mcp==='community'?'Community':'Not verified',api=p.publicApi===true?'Verified':p.publicApi===false?'No':'Not verified';
+  const p=aiProfile(tool),verified=p.status==='verified',assistants=(p.assistants||[]).filter(Boolean),mcp=p.mcp==='official'?'Official':p.mcp==='community'?'Community':verified?'Not recorded':'Not verified',api=p.publicApi===true?'Verified':p.publicApi===false?'No':verified?'Not recorded':'Not verified';
   const tier=verified?(p.tier==='strong'?'Strong':p.tier==='moderate'?'Moderate':p.tier==='limited'?'Limited':'Verified'):'Not yet verified';
   const summary=p.summary||'ToolScout has not yet verified this tool\'s current AI assistant, MCP or agent integration options.';
   // Manufacturer documentation is private editorial evidence, never a
@@ -806,11 +806,15 @@ function aiInteroperabilitySection(tool){
     verifiedDateMs<=Date.now();
   const datedManufacturerProof=hasManufacturerProof&&validVerificationDate;
   const evidenceNote=datedManufacturerProof?'<p class="small" data-ai-evidence-date="1"><strong>AI compatibility:</strong> Manufacturer-confirmed, verified '+esc(p.verifiedAt)+'.</p>':'';
-  return '<section class="section" data-ai-interoperability="1"><div class="eyebrow">AI interoperability</div><h2>How '+esc(tool.name)+' works with AI assistants and agents</h2><p style="color:#667085;line-height:1.65">'+esc(summary)+'</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0"><span style="font-size:12px;border:1px solid #e4e7ec;border-radius:10px;padding:8px 10px"><strong>AI fit:</strong> '+esc(tier)+'</span><span style="font-size:12px;border:1px solid #e4e7ec;border-radius:10px;padding:8px 10px"><strong>Assistants:</strong> '+esc(assistants.length?assistants.join(', '):'Not verified')+'</span><span style="font-size:12px;border:1px solid #e4e7ec;border-radius:10px;padding:8px 10px"><strong>MCP:</strong> '+esc(mcp)+'</span><span style="font-size:12px;border:1px solid #e4e7ec;border-radius:10px;padding:8px 10px"><strong>Public API:</strong> '+esc(api)+'</span></div>'+evidenceNote+'</section>';
+  return '<section class="section aiInterop" data-ai-interoperability="1"><div class="eyebrow">AI interoperability</div><h2>How '+esc(tool.name)+' works with AI assistants and agents</h2><p style="color:#667085;line-height:1.65">'+esc(summary)+'</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0"><span style="font-size:12px;border:1px solid #e4e7ec;border-radius:10px;padding:8px 10px"><strong>AI fit:</strong> '+esc(tier)+'</span><span style="font-size:12px;border:1px solid #e4e7ec;border-radius:10px;padding:8px 10px"><strong>Assistants:</strong> '+esc(assistants.length?assistants.join(', '):verified?'No named assistants recorded':'Not verified')+'</span><span style="font-size:12px;border:1px solid #e4e7ec;border-radius:10px;padding:8px 10px"><strong>MCP:</strong> '+esc(mcp)+'</span><span style="font-size:12px;border:1px solid #e4e7ec;border-radius:10px;padding:8px 10px"><strong>Public API:</strong> '+esc(api)+'</span></div>'+evidenceNote+'</section>';
 }
 function injectAiInteroperability(html,tool){
-  if(!tool||String(html).includes('data-ai-interoperability="1"'))return html;
+  if(!tool)return html;
   const section=aiInteroperabilitySection(tool);
+  // Refresh indexed static profiles from the catalog instead of skipping an
+  // existing AI section. Do not expose private documentation URLs.
+  const existing=/<section\b[^>]*data-ai-interoperability="1"[^>]*>[\s\S]*?<\/section>/i;
+  if(existing.test(String(html)))return String(html).replace(existing,()=>section);
   const faq='<section class="section"><h2>Frequently asked questions</h2>';
   if(String(html).includes(faq))return String(html).replace(faq,section+faq);
   return String(html).includes('</main>')?String(html).replace('</main>','</main>'+section):String(html).replace('</body>',section+'</body>');

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {trustedManufacturerEvidence,candidatePage,unpublishedReadyCatalogSlugs} from '../catalog-autonomy-worker.js';
+import {trustedManufacturerEvidence,candidatePage,publicQualityEnhancedToolResponse,unpublishedReadyCatalogSlugs} from '../catalog-autonomy-worker.js';
 import {hasManufacturerDecisionClaim,structuralCatalogIssues} from '../catalog-quality-runtime.js';
 import {transformPublicRedesignResponse} from '../public-redesign-runtime.js';
 const tools=JSON.parse(fs.readFileSync(new URL('../data/catalog-wave4-decision-ready.json',import.meta.url),'utf8'));
@@ -104,6 +104,33 @@ test('verified AI integrations never disclose private manufacturer verification 
  const impossible={...tool,aiIntegration:{...tool.aiIntegration,verifiedAt:'2026-99-99'}};
  assert.doesNotMatch(candidatePage(impossible),/Manufacturer-confirmed/,'impossible date cannot be verified');
 
+});
+test('indexed static n8n profile receives documented AI evidence through the production enhancement path',async()=>{
+  const originalHtml=fs.readFileSync(new URL('../tools/n8n.html',import.meta.url),'utf8');
+  const vendor=original.find(tool=>tool.slug==='n8n');
+  assert.ok(vendor?.aiIntegration?.sources?.length);
+  const env={
+    DB:{prepare(sql){return {bind(){return this},async first(){return sql.includes('sqlite_master')?{n:7}:null},async all(){return {results:[]}}}}},
+    ASSETS:{async fetch(request){const path=new URL(request.url).pathname;
+      return new Response(JSON.stringify(path==='/data/tools.json'?original:{}),{headers:{'Content-Type':'application/json'}});
+    }}
+  };
+  const enhance=html=>publicQualityEnhancedToolResponse(new Response(html,{headers:{'Content-Type':'text/html; charset=UTF-8'}}),env,'n8n');
+  const response=await enhance(originalHtml);
+  const html=await response.text();
+  assert.equal((html.match(/data-ai-interoperability="1"/g)||[]).length,1);
+  assert.match(html,/AI compatibility:<\\/strong> Manufacturer-confirmed, verified 2026-10-05\\./);
+  assert.match(html,/No named assistants recorded/);
+  assert.match(html,/href="\\/go\\/n8n"/);
+  assert.match(html,/rel="canonical" href="https:\\/\\/trytoolscout\\.org\\/tools\\/n8n"/);
+  assert.doesNotMatch(html,/https:\\/\\/docs\\.n8n\\.io\\//);
+  const repeated=await (await enhance(html)).text();
+  assert.equal((repeated.match(/data-ai-interoperability="1"/g)||[]).length,1,'enhancement must be idempotent');
+  assert.equal((repeated.match(/Manufacturer-confirmed/g)||[]).length,1,'no duplicate manufacturer badge');
+  const undocumented=original.map(tool=>tool.slug==='n8n'?{...tool,aiIntegration:{...tool.aiIntegration,sources:[],verifiedAt:null}}:tool);
+  env.ASSETS.fetch=async request=>new Response(JSON.stringify(new URL(request.url).pathname==='/data/tools.json'?undocumented:{}),{headers:{'Content-Type':'application/json'}});
+  const unverified=await (await enhance(originalHtml)).text();
+  assert.doesNotMatch(unverified,/Manufacturer-confirmed/,'static badge requires current dated manufacturer evidence');
 });
 test('hourly supply signal wakes only for first-party complete new vendor cohorts',()=>{
  const existing=original.map(t=>t.slug);
