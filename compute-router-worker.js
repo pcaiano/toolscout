@@ -2573,10 +2573,10 @@ export default{
         if(ctx?.waitUntil)ctx.waitUntil(drain); // preserve in-flight sender work if the bounded observation window expires
         let drainTimer;
         const drainState=await Promise.race([
-          drain.then(()=> 'settled'),
+          drain.then(result=>result?.status==='deferred'?'deferred':'settled'),
           new Promise(resolve=>{drainTimer=setTimeout(()=>resolve('deadline'),45000)})
         ]).finally(()=>clearTimeout(drainTimer));
-        if(drainState==='deadline'){
+        if(drainState==='deadline'||drainState==='deferred'){
           // The sender remains registered with ctx.waitUntil. Never run the
           // closed-loop observer concurrently with its candidate/lease writes.
           await event(env,'authority_drain_window_exhausted','deferred',
