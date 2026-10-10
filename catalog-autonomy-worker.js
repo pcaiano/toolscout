@@ -26,7 +26,7 @@ const ACTIVE_RESEARCH_READY_WHERE=`c.status='research_ready' AND NOT EXISTS(
   SELECT 1 FROM catalog_runtime_events h WHERE h.tool_slug=c.tool_slug
     AND h.event_type IN ('catalog_candidate_manufacturer_docs_hold','catalog_candidate_official_source_hold',
       'catalog_candidate_quality_hold','catalog_candidate_structure_hold','catalog_candidate_manufacturer_evidence_hold')
-    AND h.created_at>=datetime('now','-6 hours') AND h.created_at>=c.updated_at
+    AND h.created_at>=datetime('now','-${RESEARCH_HOLD_RETRY_HOURS} hours') AND h.created_at>=c.updated_at
 )`;
 const WARNING_RETRY_HOURS=6;
 const MAX_WARNING_RETRIES_PER_CYCLE=2;
