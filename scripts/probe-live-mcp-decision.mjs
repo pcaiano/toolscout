@@ -139,11 +139,21 @@ assert(impossibleFinder.status===422&&impossibleFinder.data?.decision_status==='
   impossibleFinder.data?.recommendations?.length===0,'Live Finder fabricated a match for an impossible mandatory requirement');
 console.log(JSON.stringify({finderDecisionLive:true,decisionReadyAttempts,parityWithMcp:true,matched:finderCandidates.length,hardConstraintFailClosed:true},null,2));
 
-const explicitCrm=await liveQualifiedFinder('q='+encodeURIComponent('software for our team')+'&goal=crm&mode=decision');
-assert(explicitCrm.status===200&&explicitCrm.data?.recommendation_type==='decision_shortlist',
-  'Explicit Finder goal dropped when the natural-language job was broad');
-assert(explicitCrm.data.recommendations?.length>0&&explicitCrm.data.recommendations.every(x=>x.category==='crm'),
-  'Explicit CRM goal did not constrain the live decision shortlist');
+// The Integrity Audit and Cloudflare Workers Build start concurrently. Wait
+// for the newly deployed *goal-aware* endpoint, not just the older decision API.
+let explicitCrm=null,goalReadyAttempts=0;
+for(let i=1;i<=15;i++){
+  goalReadyAttempts=i;
+  try{
+    const sample=await liveQualifiedFinder('q='+encodeURIComponent('software for our team')+'&goal=crm&mode=decision');
+    if(sample.status===200&&sample.data?.recommendation_type==='decision_shortlist'&&
+      sample.data.recommendations?.length>0&&sample.data.recommendations.every(x=>x.category==='crm')){
+      explicitCrm=sample;break;
+    }
+  }catch{}
+  if(i<15)await sleep(5000);
+}
+assert(explicitCrm,'Explicit Finder CRM goal not live after bounded Cloudflare rollout checks');
 const legacyAutomation=await liveQualifiedFinder('q=CRM&mode=decision&priority=automation');
 const aiAutomation=await rpc('tools/call',{name:'decide_software',arguments:{job:'CRM',priorities:['automation'],limit:3}});
 assert(legacyAutomation.status===200&&aiAutomation.isError===false,'Automation priority decision unavailable');
@@ -156,7 +166,7 @@ assert(multiPriority.status===200&&aiMulti.isError===false,'Multi-priority decis
 assert(JSON.stringify(multiPriority.data.recommendations.map(x=>[x.slug,x.match]))===
   JSON.stringify(aiMulti.structuredContent.shortlist.map(x=>[x.slug,x.fit_score])),
   'Explicit multi-dimensional priorities did not override the legacy single priority');
-console.log(JSON.stringify({finderContextPreservedLive:true,selectedGoal:'crm',legacyPriority:'automation',
+console.log(JSON.stringify({finderContextPreservedLive:true,goalReadyAttempts,selectedGoal:'crm',legacyPriority:'automation',
   explicitPriorities:['ease','features'],mcpParity:true},null,2));
 
 
